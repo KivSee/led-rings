@@ -1,6 +1,5 @@
 import axios from "axios";
-import { numberOfRings } from "./config";
-import { LEDS_OBJECT_SERVICE_IP, LEDS_OBJECT_SERVICE_PORT } from "../sys-config/sys-config";
+import { LEDS_OBJECT_SERVICE_IP, LEDS_OBJECT_SERVICE_PORT, NUMBER_OF_RINGS } from "../sys-config/sys-config";
 
 const syncOneRing = async (ringIndex: number) => {
 
@@ -17,8 +16,8 @@ const syncOneRing = async (ringIndex: number) => {
 };
 
 (async () => {
-    for (let i = 0; i < numberOfRings; i++) {
+    for (let i = 0; i < NUMBER_OF_RINGS; i++) {
         await syncOneRing(i);
     }
-    console.log(`Synced all ${numberOfRings} rings`);
+    console.log(`Synced all ${NUMBER_OF_RINGS} rings`);
 })();
