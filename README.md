@@ -17,3 +17,10 @@ yarn
 yarn sync-segments
 ```
 
+## Running Triggers
+
+### Stop Playing
+
+```sh
+yarn stop
+```
