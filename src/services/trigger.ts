@@ -18,7 +18,7 @@ export const stop = async () => {
     }
 };
 
-export const startTrigger = async (triggerName: string) => {
+export const trigger = async (triggerName: string) => {
     try {
         const res = await axios.post(`${triggerUrlBase}/trigger/${triggerName}`, {
             timeout: 1000

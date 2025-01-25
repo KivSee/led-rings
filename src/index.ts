@@ -1,6 +1,6 @@
 import { Effect } from "./effects/types"
 import { sendSequence, SequencePerThing } from "./services/sequence";
-import { startTrigger } from "./services/trigger";
+import { trigger } from "./services/trigger";
 import { NUMBER_OF_RINGS } from "./sys-config/sys-config";
 
 const testSequence = async () => {
@@ -30,7 +30,7 @@ const testSequence = async () => {
         seqPerThing[`ring${i}`] = sequence;
     }
     await sendSequence('test', seqPerThing);
-    await startTrigger('test');
+    await trigger('test');
 }
 
 (async () => {
