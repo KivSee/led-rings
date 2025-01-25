@@ -1,11 +1,12 @@
 import axios from "axios";
 import { numberOfRings } from "./config";
+import { LEDS_OBJECT_SERVICE_IP, LEDS_OBJECT_SERVICE_PORT } from "../sys-config/sys-config";
 
 const syncOneRing = async (ringIndex: number) => {
 
     try {
         const segments = require('./segments.json');
-        const res = await axios.put(`http://10.0.0.49:8081/thing/ring${ringIndex}`, segments, {
+        const res = await axios.put(`http://${LEDS_OBJECT_SERVICE_IP}:${LEDS_OBJECT_SERVICE_PORT}/thing/ring${ringIndex}`, segments, {
             timeout: 1000
         });
         console.log(`Ring ${ringIndex} synced, http status: ${res.status}`);
