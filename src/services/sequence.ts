@@ -1,6 +1,7 @@
 import axios from "axios";
 import { SEQUENCE_SERVICE_IP, SEQUENCE_SERVICE_PORT } from "../sys-config/sys-config";
-import { Sequence, ThingName } from "../effects/types";
+import { Sequence } from "../effects/types";
+import { ThingName } from "../objects/types";
 
 export type SequencePerThing = Record<ThingName, Sequence>;
 

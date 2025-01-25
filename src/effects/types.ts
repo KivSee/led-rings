@@ -1,6 +1,4 @@
-
-export type ThingName = string;
-export type SegmentName = string;
+import { SegmentName } from "../objects/types";
 
 export type EffectConfig = {
     start_time: number;
