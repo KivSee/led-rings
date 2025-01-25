@@ -7,7 +7,7 @@ const testSequence = async () => {
     const constColorEffect: Effect = {
         effect_config: {
             start_time: 0,
-            end_time: 200,
+            end_time: 900,
             segments: "all"
         },
         const_color: {
@@ -19,8 +19,24 @@ const testSequence = async () => {
         }
     };
 
+    const brightnessIncreaseEffect: Effect = {
+        effect_config: {
+            start_time: 0,
+            end_time: 900,
+            segments: "all"
+        },
+        brightness: {
+            mult_factor: {
+                linear: {
+                    start: 0.5,
+                    end: 1.0
+                },
+            },
+        },
+    };
+
     const sequence = {
-        effects: [constColorEffect],
+        effects: [constColorEffect, brightnessIncreaseEffect],
         duration_ms: 1000,
         num_repeats: 0
     };
