@@ -62,7 +62,7 @@ export const fadeInOut = (opts?: { min: number; max: number }) => {
   });
 };
 
-export const fadeOutIn = (opts?: { min: number; max: number }) => {
+export const fadeOutIn = (opts?: { min?: number; max?: number }) => {
   const min = opts?.min ?? 0.0;
   const max = opts?.max ?? 1.0;
   addEffect({
