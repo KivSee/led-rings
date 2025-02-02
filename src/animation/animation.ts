@@ -1,9 +1,15 @@
 import { als } from "../async-local-storage";
 import { Effect, EffectConfig, Sequence } from "../effects/types";
+import { SequencePerThing } from "../services/sequence";
+
+interface EffectWithElements {
+    effect: Effect;
+    elements: number[];
+}
 
 export class Animation {
 
-    private effects: Effect[] = [];
+    private effects: EffectWithElements[] = [];
 
     constructor(
         public name: string,
@@ -20,15 +26,29 @@ export class Animation {
     }
 
     public addEffect(effect: Effect) {
-        this.effects.push(effect);
+        const store = als.getStore();
+        this.effects.push({
+            effect,
+            elements: store.elements,
+        });
     }
 
-    public getSequence(): Sequence {
-        return {
-            effects: this.effects,
-            duration_ms: this.totalTimeSeconds * 1000,
-            num_repeats: 0,
-        }
+    public getSequence(): SequencePerThing {
+        const seqPerThing: SequencePerThing = {};
+        this.effects.forEach(effectWithElements => {
+            effectWithElements.elements.forEach((element: number) => {
+                const thingName = `ring${element}`;
+                if(!seqPerThing[thingName]) {
+                    seqPerThing[thingName] = {
+                        effects: [],
+                        duration_ms: this.totalTimeSeconds * 1000,
+                        num_repeats: 0,
+                    };
+                }
+                seqPerThing[thingName].effects.push(effectWithElements.effect);
+            });
+        });
+        return seqPerThing;
     }
 
 }
