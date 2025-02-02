@@ -27,7 +27,7 @@ export class Animation {
         return {
             effects: this.effects,
             duration_ms: this.totalTimeSeconds * 1000,
-            num_repeats: 1,
+            num_repeats: 0,
         }
     }
 
