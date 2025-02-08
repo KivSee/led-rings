@@ -18,3 +18,26 @@ export const constColor = (hue: number, sat: number, val: number) => {
     return constColorEffect;
   });
 };
+
+export const rainbow = () => {
+  const store = als.getStore();
+
+  store.animation.addEffect((phase: number) => {
+    const rainbowEffect: Effect = {
+      effect_config: store.effectConfig,
+      rainbow: {
+        hue_start: {
+          const_value: {
+            value: 0.0 + phase,
+          },
+        },
+        hue_end: {
+          const_value: {
+            value: 1.0 + phase,
+          },
+        },
+      },
+    };
+    return rainbowEffect;
+  });
+};

@@ -4,7 +4,7 @@ import { startSong, trigger } from "./services/trigger";
 import { Animation } from "./animation/animation";
 import { NUMBER_OF_RINGS } from "./sys-config/sys-config";
 import { beats, cycleBeats } from "./time/time";
-import { constColor } from "./effects/coloring";
+import { constColor, rainbow } from "./effects/coloring";
 import { blink, fadeIn, fadeInOut, fadeOutIn } from "./effects/brightness";
 import { elements, segment } from "./objects/elements";
 import {
@@ -24,7 +24,7 @@ const testSequence = async () => {
     beats(0, 120, () => {
       phase(3, () => {
         elements(all, () => {
-          constColor(0.0, 1.0, 0.5);
+          rainbow();
           segment(segment_b1, () => {
             cycleBeats(4, 0, 4, () => {
               fadeOutIn({ min: 0.5 });
