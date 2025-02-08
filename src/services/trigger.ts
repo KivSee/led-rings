@@ -19,6 +19,18 @@ export const stop = async () => {
     }
 };
 
+export const startSong = async (songName: string) => {
+    try {
+        const res = await axios.post(`${triggerUrlBase}/song/${songName}/play`, {
+            timeout: 1000
+        });
+        console.log(`Song ${songName} started, http status: ${res.status}`);
+    } catch (err) {
+        console.log('Error while starting song', { songName });
+        console.error(err);
+    }
+}
+
 export const trigger = async (triggerName: string) => {
     try {
         const res = await axios.post(`${triggerUrlBase}/trigger/${triggerName}`, {
