@@ -11,7 +11,7 @@ export const snake = () => {
       },
       tailLength: {
         constValue: {
-          value: 0.1,
+          value: 1.5,
         },
       },
       cyclic: true,

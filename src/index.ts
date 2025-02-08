@@ -6,8 +6,8 @@ import { NUMBER_OF_RINGS } from "./sys-config/sys-config";
 import { beats, cycleBeats } from "./time/time";
 import { constColor } from "./effects/coloring";
 import { blink, fadeIn, fadeInOut, fadeOutIn } from "./effects/brightness";
-import { elements } from "./objects/elements";
-import { all } from "./objects/ring-elements";
+import { elements, segment } from "./objects/elements";
+import { all, segment_arc, segment_b1, segment_b2, segment_centric, segment_ind } from "./objects/ring-elements";
 import { snake, snakeInOut } from "./effects/motion";
 
 const testSequence = async () => {
@@ -15,12 +15,22 @@ const testSequence = async () => {
   testAnimation.sync(() => {
     beats(0, 120, () => {
       elements(all, () => {
-        constColor(0.0, 1.0, 0.3);
-        cycleBeats(4, 0, 2, () => {
-          fadeOutIn({ min: 0.5 });
+        constColor(0.0, 0.7, 0.5);
+        segment(segment_b1, () => {
+          cycleBeats(4, 0, 4, () => {
+            fadeOutIn({ min: 0.5 });
+          });
         });
-        cycleBeats(1, 0, 1, () => {
-          snake();
+        segment(segment_b2, () => {
+          cycleBeats(8, 0, 8, () => {
+            constColor(0.6, 0.7, 0.3);
+            fadeInOut({ min: 0.5, max: 0.9 });
+          });
+        });
+        segment(segment_centric, () => {
+          cycleBeats(1, 0, 1.0, () => {
+            snake();
+          });
         });
       });
     });
@@ -33,3 +43,6 @@ const testSequence = async () => {
 (async () => {
   await testSequence();
 })();
+function segments(arg0: string, arg1: () => void) {
+  throw new Error("Function not implemented.");
+}
