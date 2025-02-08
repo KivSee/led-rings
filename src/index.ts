@@ -43,6 +43,3 @@ const testSequence = async () => {
 (async () => {
   await testSequence();
 })();
-function segments(arg0: string, arg1: () => void) {
-  throw new Error("Function not implemented.");
-}
