@@ -10,7 +10,7 @@ import { elements } from "./objects/elements";
 import { all } from "./objects/ring-elements";
 
 const testSequence = async () => {
-  const testAnimation = new Animation("req", 120, 50);
+  const testAnimation = new Animation("req", 126, 50);
   testAnimation.sync(() => {
     beats(0, 120, () => {
       elements(all, () => {
