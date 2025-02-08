@@ -1,15 +1,4 @@
-import { als } from "../async-local-storage";
-import { Effect } from "./types";
-
-const addEffect = (specificEffectConfig: any) => {
-  const store = als.getStore();
-  const { animation } = store;
-  const effect = {
-    effect_config: store.effectConfig,
-    ...specificEffectConfig,
-  };
-  animation.addEffect(effect);
-};
+import { addEffect } from "./effect";
 
 export const fadeIn = (opt?: { start: number; end: number }) => {
   addEffect({

@@ -8,6 +8,7 @@ import { constColor } from "./effects/coloring";
 import { blink, fadeIn, fadeInOut, fadeOutIn } from "./effects/brightness";
 import { elements } from "./objects/elements";
 import { all } from "./objects/ring-elements";
+import { snake, snakeInOut } from "./effects/motion";
 
 const testSequence = async () => {
   const testAnimation = new Animation("req", 126, 50);
@@ -18,12 +19,9 @@ const testSequence = async () => {
         cycleBeats(4, 0, 2, () => {
           fadeOutIn({ min: 0.5 });
         });
-        cycleBeats(4, 2, 4, () => {
-          constColor(0.3, 0.8, 0.3);
+        cycleBeats(1, 0, 1, () => {
+          snake();
         });
-      });
-      elements([2], () => {
-        constColor(0.0, 0.5, 0.3);
       });
     });
   });
