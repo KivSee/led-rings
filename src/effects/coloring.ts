@@ -2,19 +2,19 @@ import { als } from "../async-local-storage";
 import { Effect } from "./types";
 
 export const constColor = (hue: number, sat: number, val: number) => {
-    const store = als.getStore();
-    
-    const constColorEffect: Effect = {
-        effect_config: store.effectConfig,
-        const_color: {
-            color: {
-                hue: hue,
-                sat: sat,
-                val: val
-            }
-        }
-    };
+  const store = als.getStore();
 
-    const { animation } = store;
-    animation.addEffect(constColorEffect);
-}
+  store.animation.addEffect((phase: number) => {
+    const constColorEffect: Effect = {
+      effect_config: store.effectConfig,
+      const_color: {
+        color: {
+          hue: hue + phase,
+          sat: sat,
+          val: val,
+        },
+      },
+    };
+    return constColorEffect;
+  });
+};

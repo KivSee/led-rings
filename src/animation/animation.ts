@@ -25,8 +25,19 @@ export class Animation {
         als.run({animation: this, effectConfig: emptyEffectConfig}, cb);
     }
 
-    public addEffect(effect: Effect) {
+    public addEffect(effect: Effect | Function) {
         const store = als.getStore();
+        if (typeof effect === "function") {
+            for (let i = 0; i < store.elements.length; i++) {
+                const phase = i / store.elements.length * store.phase;
+                const e = effect(phase);
+                this.effects.push({
+                    effect: e,
+                    elements: [store.elements[i]],
+                });
+            }
+            return;
+        }
         this.effects.push({
             effect,
             elements: store.elements,
