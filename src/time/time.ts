@@ -6,9 +6,9 @@ const beatToMs = (beat: number, bpm: number) => {
 
 export const beats = (startBeat: number, endBeat: number, cb: Function) => {
     const store = als.getStore();
-    const { bpm } = store.animation;
-    const startTime = Math.round(beatToMs(startBeat, bpm));
-    const endTime = Math.round(beatToMs(endBeat, bpm));
+    const { bpm, startOffsetMs } = store.animation;
+    const startTime = Math.round(beatToMs(startBeat, bpm)) + startOffsetMs;
+    const endTime = Math.round(beatToMs(endBeat, bpm)) + startOffsetMs;
     const newStore = {
         ...store,
         effectConfig: {

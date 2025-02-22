@@ -1,7 +1,13 @@
 import { phase } from "../phase/phase";
 import { addEffect } from "./effect";
 
-export const snake = () => {
+export const snake = (
+  {
+    tailLength,
+  }: {
+    tailLength: number;
+  } = { tailLength: 0.5 }
+) => {
   addEffect((phase: number) => {
     return {
       snake: {
@@ -13,12 +19,50 @@ export const snake = () => {
         },
         tailLength: {
           constValue: {
-            value: 1.5,
+            value: tailLength,
           },
         },
-        cyclic: true,
+        cyclic: false,
       },
     };
+  });
+};
+
+export const snakeFillGrow = () => {
+  addEffect({
+    snake: {
+      head: {
+        half: {
+          f1: {
+            linear: {
+              start: 0,
+              end: 1.0,
+            },
+          },
+          f2: {
+            const_value: {
+              value: 1.0,
+            },
+          },
+        },
+      },
+      tailLength: {
+        half: {
+          f1: {
+            const_value: {
+              value: 0.5,
+            },
+          },
+          f2: {
+            linear: {
+              start: 0.5,
+              end: 3.0,
+            },
+          },
+        },
+      },
+      cyclic: false,
+    },
   });
 };
 
@@ -29,14 +73,14 @@ export const snakeInOut = (opt?: { start: number; end: number }) => {
         head: {
           sin: {
             min: 0,
-            max: 1.5,
-            phase: phase,
+            max: 1.0,
+            phase: 0.75,
             repeats: 1.0,
           },
         },
         tailLength: {
           constValue: {
-            value: 1.5,
+            value: 0.5,
           },
         },
       },

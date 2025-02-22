@@ -9,7 +9,7 @@ export const constColor = (hue: number, sat: number, val: number) => {
       effect_config: store.effectConfig,
       const_color: {
         color: {
-          hue: hue + phase,
+          hue: hue,
           sat: sat,
           val: val,
         },
@@ -19,7 +19,10 @@ export const constColor = (hue: number, sat: number, val: number) => {
   });
 };
 
-export const rainbow = () => {
+export const rainbow = ({ startHue = 0.0, endHue = 1.0}: {
+    startHue: number,
+    endHue: number,
+}) => {
   const store = als.getStore();
 
   store.animation.addEffect((phase: number) => {
@@ -28,12 +31,12 @@ export const rainbow = () => {
       rainbow: {
         hue_start: {
           const_value: {
-            value: 0.0 + phase,
+            value: startHue + phase,
           },
         },
         hue_end: {
           const_value: {
-            value: 1.0 + phase,
+            value: endHue + phase,
           },
         },
       },

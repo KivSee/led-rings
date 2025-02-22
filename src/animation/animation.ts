@@ -15,7 +15,7 @@ export class Animation {
         public name: string,
         public bpm: number,
         public totalTimeSeconds: number,
-        public startOffsetSeconds: number = 0
+        public startOffsetMs: number = 0
     ) { }
 
     public sync(cb: Function) {
@@ -29,7 +29,7 @@ export class Animation {
         const store = als.getStore();
         if (typeof effect === "function") {
             for (let i = 0; i < store.elements.length; i++) {
-                const phase = i / store.elements.length * store.phase;
+                const phase = i / store.elements.length * (store.phase ?? 0);
                 const e = effect(phase);
                 this.effects.push({
                     effect: e,

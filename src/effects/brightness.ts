@@ -1,5 +1,17 @@
 import { addEffect } from "./effect";
 
+export const brightness = (opts: { value: number }) => {
+  addEffect({
+    brightness: {
+      mult_factor: {
+        const_value: {
+          value: opts.value,
+        },
+      },
+    },
+  });
+};
+
 export const fadeIn = (opt?: { start: number; end: number }) => {
   addEffect({
     brightness: {
