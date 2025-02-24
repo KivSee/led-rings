@@ -22,7 +22,7 @@ export const snake = (
             value: tailLength,
           },
         },
-        cyclic: false,
+        cyclic: true,
       },
     };
   });
@@ -74,14 +74,17 @@ export const snakeInOut = (opt?: { start: number; end: number }) => {
           sin: {
             min: 0,
             max: 1.0,
-            phase: 0.75,
-            repeats: 1.0,
+            phase: phase,
+            repeats: 1,
           },
         },
         tailLength: {
-          constValue: {
-            value: 0.5,
-          },
+          sin: {
+            min: 0.5,
+            max: 1.0,
+            phase: 0.0,
+            repeats: 1,
+          }
         },
       },
     };

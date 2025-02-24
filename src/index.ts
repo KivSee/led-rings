@@ -24,6 +24,7 @@ import {
   segment_b2,
   segment_centric,
   segment_ind,
+  segment_updown,
 } from "./objects/ring-elements";
 import { snake, snakeFillGrow, snakeInOut } from "./effects/motion";
 import { phase } from "./phase/phase";
@@ -35,8 +36,15 @@ const testSequence = async () => {
       elements(all, () => {
         rainbow({ startHue: 0.05, endHue: 0.15 });
         brightness({ value: 0.3 });
-        cycleBeats(12, 0, 12, () => {
-          snake({ tailLength: 0.125 });
+        segment(segment_updown, () => {
+          cycleBeats(2, 0, 2, () => {
+            phase(0, () => {
+              snakeInOut();
+            });
+          });
+        });
+        cycleBeats(1, 0, 1, () => {
+          fadeOut({ start: 1.0, end: 0.75 });
         });
       });
     });
