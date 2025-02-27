@@ -19,11 +19,11 @@ export const stop = async () => {
     }
 };
 
-export const startSong = async (songName: string, start_offset_ms: number) => {
+export const startSong = async (songName: string, startOffsetSeconds?: number) => {
     try {
         const res = await axios.post(`${triggerUrlBase}/song/${songName}/play`, {
             timeout: 1000,
-            start_offset_ms: start_offset_ms ?? 0,
+            start_offset_ms: startOffsetSeconds ? startOffsetSeconds * 1000 : 0,
         });
         console.log(`Song ${songName} started, http status: ${res.status}`);
     } catch (err) {
