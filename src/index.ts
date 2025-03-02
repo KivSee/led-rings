@@ -288,11 +288,29 @@ const testSequence = async () => {
         });
       });
     });
+
+    elements(all, () => {
+      // boom
+      beats(64, 66, () => {
+        segment(segment_arc, () => {
+          rainbow({ startHue: 0.0, endHue: 1 });
+          brightness({ value: 0.3 });
+        });
+      });
+      // boom fade out and psychedelic
+      beats(64.5, 66, () => {
+        fadeOut();
+        cycleBeats(0.25, 0, 0.25, () => {
+          hueShiftStartToEnd({start: 0.0, end: 1.0});
+        });
+      });
+    });
+
   });
 
   console.log("sending sequence");
   await sendSequence("aladdin", testAnimation.getSequence());
-  await startSong("aladdin", 0);
+  await startSong("aladdin", 45);
 };
 
 (async () => {
