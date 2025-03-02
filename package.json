@@ -6,6 +6,7 @@
   "scripts": {
     "sync-segments": "ts-node src/ring-segments/index.ts",
     "start": "ts-node-dev --respawn src/index.ts",
+    "playground": "ts-node-dev --respawn src/playground.ts",
     "stop": "ts-node-dev --respawn src/stop.ts"
   },
   "dependencies": {

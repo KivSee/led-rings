@@ -20,6 +20,10 @@ export const beats = (startBeat: number, endBeat: number, cb: Function) => {
     als.run(newStore, cb);
 }
 
+export const cycle = (beatsInCycle: number, cb: Function) => {
+    return cycleBeats(beatsInCycle, 0, beatsInCycle, cb);
+}
+
 export const cycleBeats = (beatsInCycle: number, startBeat: number, endBeat: number, cb: Function) => {
     const store = als.getStore();
     const { bpm } = store.animation;

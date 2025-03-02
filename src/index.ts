@@ -3,11 +3,12 @@ import { sendSequence, SequencePerThing } from "./services/sequence";
 import { startSong, trigger } from "./services/trigger";
 import { Animation } from "./animation/animation";
 import { NUMBER_OF_RINGS } from "./sys-config/sys-config";
-import { beats, cycleBeats } from "./time/time";
-import { constColor, rainbow } from "./effects/coloring";
+import { beats, cycle, cycleBeats } from "./time/time";
+import { constColor, noColor, rainbow, vivid } from "./effects/coloring";
 import {
   blink,
   brightness,
+  fade,
   fadeIn,
   fadeInOut,
   fadeOut,
@@ -49,7 +50,7 @@ function getRandomSubset(numberRingsOn: number): number[] {
 
 const turnOffRand = (numberRingsOn: number) => {
   elements(getRandomSubset(numberRingsOn), () => {
-    constColor(0, 0, 0);
+    noColor();
   });
 };
 
@@ -59,8 +60,7 @@ const testSequence = async () => {
     beats(0, 16, () => {
       elements(all, () => {
         rainbow({ startHue: 0.05, endHue: 0.1 });
-        brightness({ value: 0.3 });
-        cycleBeats(12, 0, 12, () => {
+        cycle(12, () => {
           snake({ tailLength: 0.125, cyclic: true });
         });
       });
@@ -70,8 +70,7 @@ const testSequence = async () => {
       elements(center, () => {
         segment(segment_arc, () => {
           rainbow({ startHue: 0.75, endHue: 0.98 });
-          brightness({ value: 0.3 });
-          cycleBeats(8, 0, 8, () => {
+          cycle(8, () => {
             snakeInOut();
           });
         });
@@ -80,7 +79,7 @@ const testSequence = async () => {
 
     beats(7, 9, () => {
       elements(center, () => {
-        fadeOutIn({ min: 0.0 });
+        fadeOutIn();
       });
     });
 
@@ -92,14 +91,14 @@ const testSequence = async () => {
 
     beats(16, 24, () => {
       elements(left, () => {
-        constColor(0.68, 0.9, 0.2);
+        constColor({ hue: 0.68, sat: 0.9, val: 0.2 });
       });
     });
 
     for (let i = 0; i < 6; i++) {
       elements([i + 1], () => {
         beats(16, 16 + i, () => {
-          constColor(0, 0, 0);
+          noColor();
         });
         segment(segment_arc, () => {
           beats(16 + i, 16 + i + 2, () => {
@@ -111,14 +110,14 @@ const testSequence = async () => {
 
     beats(24, 32, () => {
       elements(right, () => {
-        constColor(0.68, 0.9, 0.2);
+        constColor({ hue: 0.68, sat: 0.9, val: 0.2 });
       });
     });
 
     for (let i = 0; i < 6; i++) {
       elements([12 - i], () => {
         beats(24, 24 + i, () => {
-          constColor(0, 0, 0);
+          noColor();
         });
         segment(segment_arc, () => {
           beats(24 + i, 24 + i + 2, () => {
@@ -134,8 +133,8 @@ const testSequence = async () => {
       const rel = i / 12;
       beats(31.5 + rel * 1.5, 31.5 + rel * 1.5 + 0.5, () => {
         elements([i + 1], () => {
-          constColor(0.68, 0.9, 0.2);
-          fadeInOut({ min: 0.0, max: 1.0 });
+          constColor({hue: 0.68, sat: 0.9, val: 0.2});
+          fadeInOut();
         });
       });
     }
@@ -146,7 +145,7 @@ const testSequence = async () => {
       const rel = i / 12;
       beats(33.5 + rel * 1.5, 33.5 + rel * 1.5 + 0.5, () => {
         elements([12 - i], () => {
-          constColor(0.05, 0.95, 0.3);
+          constColor({hue: 0.05, sat: 0.95});
           fadeOut();
         });
       });
@@ -157,7 +156,7 @@ const testSequence = async () => {
     // first beat fade in even rings in orange
     elements(even, () => {
       beats(35.5, 38.5, () => {
-        constColor(0.05, 1.0, 0.3);
+        vivid({ hue: 0.05 });
       });
       beats(35.5, 36.5, () => {
         fadeIn();
@@ -166,7 +165,7 @@ const testSequence = async () => {
     // glass
     elements(odd, () => {
       beats(36.5, 38.5, () => {
-        constColor(0.66, 0.5, 0.2);
+        constColor({hue: 0.66, sat: 0.5, val: 0.2});
       });
       beats(36.5, 37.5, () => {
         fadeIn();
@@ -174,7 +173,7 @@ const testSequence = async () => {
     });
     elements(all, () => {
       beats(37.5, 38.0, () => {
-        fadeOut({ start: 1.0, end: 0.3 });
+        fade({ start: 1.0, end: 0.3 });
       });
       beats(38.0, 38.5, () => {
         brightness({ value: 0.5 });
@@ -192,15 +191,15 @@ const testSequence = async () => {
       // color for all
       beats(38.5, 48, () => {
         segment(segment_b1, () => {
-          constColor(1.0, 1.0, 0.2);
+          constColor({hue: 0, val: 0.2});
         });
         segment(segment_b2, () => {
-          constColor(0.8, 0.8, 0.2);
+          constColor({hue: 0.8, sat: 0.8, val: 0.2});
         });
       });
       beats(38.5, 39.5, () => {
         segment(segment_b2, () => {
-          constColor(0, 0, 0);
+          noColor();
         });
         segment(segment_b1, () => {
           fadeIn();
@@ -222,12 +221,12 @@ const testSequence = async () => {
           fadeOut();
         });
         segment(segment_b1, () => {
-          constColor(0, 0, 0);
+          noColor();
         });
       });
       beats(42.5, 48, () => {
         segment(segment_updown, () => {
-          cycleBeats(0.25, 0, 0.25, () => {
+          cycle(0.25, () => {
             snake({ tailLength: 1.0, cyclic: true });
           });
         });
@@ -246,20 +245,19 @@ const testSequence = async () => {
       // boom
       beats(48.5, 50, () => {
         segment(segment_arc, () => {
-          rainbow({ startHue: 0.0, endHue: 1 });
-          brightness({ value: 0.3 });
+          rainbow();
         });
       });
       // boom fade out and psychedelic
       beats(49, 50, () => {
         fadeOut();
-        cycleBeats(0.25, 0, 0.25, () => {
+        cycle(0.25, () => {
           hueShiftStartToEnd({start: 0.0, end: 1.0});
         });
       });
       
       beats(50, 57, () => {
-        constColor(0.66, 0.7, 0.3);
+        constColor({hue: 0.66, sat: 0.7, val: 0.3});
       });
 
       beats(50, 53, () => {
@@ -283,8 +281,8 @@ const testSequence = async () => {
         fadeOut();
       });
       beats(49, 57, () => {
-        cycleBeats(0.05, 0, 0.05, () => {
-          blink({ low: 0.8, high: 1.0 });
+        cycle(0.05, () => {
+          blink({ low: 0.8 });
         });
       });
     });
@@ -293,14 +291,13 @@ const testSequence = async () => {
       // boom
       beats(64, 66, () => {
         segment(segment_arc, () => {
-          rainbow({ startHue: 0.0, endHue: 1 });
-          brightness({ value: 0.3 });
+          rainbow();
         });
       });
       // boom fade out and psychedelic
       beats(64.5, 66, () => {
         fadeOut();
-        cycleBeats(0.25, 0, 0.25, () => {
+        cycle(0.25, () => {
           hueShiftStartToEnd({start: 0.0, end: 1.0});
         });
       });
@@ -310,7 +307,7 @@ const testSequence = async () => {
 
   console.log("sending sequence");
   await sendSequence("aladdin", testAnimation.getSequence());
-  await startSong("aladdin", 45);
+  await startSong("aladdin", 0);
 };
 
 (async () => {
