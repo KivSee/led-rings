@@ -39,12 +39,13 @@ export const vivid = (opts: { hue: number }) => {
 // create a pastel coloring effect with a given hue
 // pastel color is 80% saturation
 // if phase is set, it will offset the hue
-export const pastel = (opts: { hue: number }) => {
+export const pastel = (opts?: { hue?: number }) => {
+  const hue = opts?.hue ?? defaultHue;
   addEffect((phase: number) => {
     return {
       const_color: {
         color: {
-          hue: opts.hue + phase,
+          hue: hue + phase,
           sat: 0.8,
           val: maxBrightness,
         },
@@ -109,6 +110,15 @@ export const rainbow = (opts?: {
     };
   });
 };
+
+export const fullRainbow = () => {
+  rainbow({ startHue: 0.0, endHue: 1.0 });
+}
+
+export const randomRangeColor = () => {
+  const randHue = Math.random();
+  rainbow({ startHue: randHue - 0.1, endHue: randHue + 0.1 });
+}
 
 // Dotted effect is static coloring in format of 2 pixels with lesser brightness and 1 pixel with higher brightness.
 // don't use segments in this effect.

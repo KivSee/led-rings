@@ -35,7 +35,7 @@ export const startSong = async (songName: string, startOffsetSeconds?: number) =
 export const trigger = async (triggerName: string) => {
     try {
         const res = await axios.post(`${triggerUrlBase}/trigger/${triggerName}`, {
-            timeout: 1000
+            timeout: 1000,
         });
         console.log(`Trigger ${triggerName} started, http status: ${res.status}`);
     } catch (err) {
