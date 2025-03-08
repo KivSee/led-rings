@@ -15,29 +15,18 @@ export class Animation {
         public name: string,
         public bpm: number,
         public totalTimeSeconds: number,
-        public startOffsetMs: number = 0
+        public startOffsetSeconds: number = 0
     ) { }
 
     public sync(cb: Function) {
         const emptyEffectConfig: Partial<EffectConfig> = {
             segments: "all",
         };
-        als.run({animation: this, effectConfig: emptyEffectConfig}, cb);
+        als.run({ animation: this, effectConfig: emptyEffectConfig }, cb);
     }
 
-    public addEffect(effect: Effect | Function) {
+    public addEffect(effect: Effect) {
         const store = als.getStore();
-        if (typeof effect === "function") {
-            for (let i = 0; i < store.elements.length; i++) {
-                const phase = i / store.elements.length * (store.phase ?? 0);
-                const e = effect(phase);
-                this.effects.push({
-                    effect: e,
-                    elements: [store.elements[i]],
-                });
-            }
-            return;
-        }
         this.effects.push({
             effect,
             elements: store.elements,
@@ -49,7 +38,7 @@ export class Animation {
         this.effects.forEach(effectWithElements => {
             effectWithElements.elements.forEach((element: number) => {
                 const thingName = `ring${element}`;
-                if(!seqPerThing[thingName]) {
+                if (!seqPerThing[thingName]) {
                     seqPerThing[thingName] = {
                         effects: [],
                         duration_ms: this.totalTimeSeconds * 1000,
