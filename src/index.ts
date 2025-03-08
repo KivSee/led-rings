@@ -91,7 +91,7 @@ const testSequence = async () => {
 
     beats(16, 24, () => {
       elements(left, () => {
-        constColor({ hue: 0.68, sat: 0.9, val: 0.2 });
+        constColor({ hue: 0.68, sat: 0.9, val: 1.0 });
       });
     });
 
@@ -110,7 +110,7 @@ const testSequence = async () => {
 
     beats(24, 32, () => {
       elements(right, () => {
-        constColor({ hue: 0.68, sat: 0.9, val: 0.2 });
+        constColor({ hue: 0.68, sat: 0.9, val: 1.0 });
       });
     });
 
@@ -133,7 +133,7 @@ const testSequence = async () => {
       const rel = i / 12;
       beats(31.5 + rel * 1.5, 31.5 + rel * 1.5 + 0.5, () => {
         elements([i + 1], () => {
-          constColor({hue: 0.68, sat: 0.9, val: 0.2});
+          constColor({hue: 0.68, sat: 0.9, val: 1.0});
           fadeInOut();
         });
       });
@@ -165,7 +165,7 @@ const testSequence = async () => {
     // glass
     elements(odd, () => {
       beats(36.5, 38.5, () => {
-        constColor({hue: 0.66, sat: 0.5, val: 0.2});
+        constColor({hue: 0.66, sat: 0.5, val: 1.0});
       });
       beats(36.5, 37.5, () => {
         fadeIn();
@@ -191,10 +191,10 @@ const testSequence = async () => {
       // color for all
       beats(38.5, 48, () => {
         segment(segment_b1, () => {
-          constColor({hue: 0, val: 0.2});
+          constColor({hue: 0, val: 1.0});
         });
         segment(segment_b2, () => {
-          constColor({hue: 0.8, sat: 0.8, val: 0.2});
+          constColor({hue: 0.8, sat: 0.8, val: 1.0});
         });
       });
       beats(38.5, 39.5, () => {
@@ -246,6 +246,7 @@ const testSequence = async () => {
       beats(48.5, 50, () => {
         segment(segment_arc, () => {
           rainbow();
+          brightness({ value: 0.6 });
         });
       });
       // boom fade out and psychedelic
@@ -257,7 +258,7 @@ const testSequence = async () => {
       });
       
       beats(50, 57, () => {
-        constColor({hue: 0.66, sat: 0.7, val: 0.3});
+        constColor({hue: 0.66, sat: 0.7, val: 1.0});
       });
 
       beats(50, 53, () => {
@@ -292,6 +293,7 @@ const testSequence = async () => {
       beats(64, 66, () => {
         segment(segment_arc, () => {
           rainbow();
+          brightness({ value: 0.6 });
         });
       });
       // boom fade out and psychedelic

@@ -108,7 +108,6 @@ export const rainbow = (opts?: {
       },
     };
   });
-  brightness({ value: maxBrightness });
 };
 
 // Dotted effect is static coloring in format of 2 pixels with lesser brightness and 1 pixel with higher brightness.
