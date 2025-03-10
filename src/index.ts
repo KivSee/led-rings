@@ -13,6 +13,7 @@ import {
   fadeInOut,
   fadeOut,
   fadeOutIn,
+  pulse,
 } from "./effects/brightness";
 import { elements, segment } from "./objects/elements";
 import {
@@ -133,7 +134,7 @@ const testSequence = async () => {
       const rel = i / 12;
       beats(31.5 + rel * 1.5, 31.5 + rel * 1.5 + 0.5, () => {
         elements([i + 1], () => {
-          constColor({hue: 0.68, sat: 0.9, val: 1.0});
+          constColor({ hue: 0.68, sat: 0.9, val: 1.0 });
           fadeInOut();
         });
       });
@@ -145,7 +146,7 @@ const testSequence = async () => {
       const rel = i / 12;
       beats(33.5 + rel * 1.5, 33.5 + rel * 1.5 + 0.5, () => {
         elements([12 - i], () => {
-          constColor({hue: 0.05, sat: 0.95});
+          constColor({ hue: 0.05, sat: 0.95 });
           fadeOut();
         });
       });
@@ -165,7 +166,7 @@ const testSequence = async () => {
     // glass
     elements(odd, () => {
       beats(36.5, 38.5, () => {
-        constColor({hue: 0.66, sat: 0.5, val: 1.0});
+        constColor({ hue: 0.66, sat: 0.5, val: 1.0 });
       });
       beats(36.5, 37.5, () => {
         fadeIn();
@@ -191,10 +192,10 @@ const testSequence = async () => {
       // color for all
       beats(38.5, 48, () => {
         segment(segment_b1, () => {
-          constColor({hue: 0, val: 1.0});
+          constColor({ hue: 0, val: 1.0 });
         });
         segment(segment_b2, () => {
-          constColor({hue: 0.8, sat: 0.8, val: 1.0});
+          constColor({ hue: 0.8, sat: 0.8, val: 1.0 });
         });
       });
       beats(38.5, 39.5, () => {
@@ -253,12 +254,12 @@ const testSequence = async () => {
       beats(49, 50, () => {
         fadeOut();
         cycle(0.25, () => {
-          hueShiftStartToEnd({start: 0.0, end: 1.0});
+          hueShiftStartToEnd({ start: 0.0, end: 1.0 });
         });
       });
-      
+
       beats(50, 57, () => {
-        constColor({hue: 0.66, sat: 0.7, val: 1.0});
+        constColor({ hue: 0.66, sat: 0.7, val: 1.0 });
       });
 
       beats(50, 53, () => {
@@ -266,8 +267,8 @@ const testSequence = async () => {
           staticSnake({ start: 0.98, end: 0.4 });
         });
       });
-      beats(53, 54, () => { 
-        hueShiftStartToEnd({start: 0.0, end: 0.4});
+      beats(53, 54, () => {
+        hueShiftStartToEnd({ start: 0.0, end: 0.4 });
         segment(segment_ind, () => {
           snakeHeadMove({ start: 0.98, end: 0.4, tail: 0.5 });
         });
@@ -282,9 +283,40 @@ const testSequence = async () => {
         fadeOut();
       });
       beats(49, 57, () => {
-        cycle(0.05, () => {
+        cycle(0.6, () => {
           blink({ low: 0.8 });
         });
+      });
+    });
+
+    elements(all, () => {
+      // more often than not
+      beats(57, 59, () => {
+        segment(segment_arc, () => {
+          // rainbow({ startHue: 0.7, endHue: 1.0 });
+          constColor({ hue: 0.1, sat: 0.7, val: 1.0 });
+          snakeInOut();
+        });
+      });
+      // are hotter than hot
+      beats(59, 64, () => {
+        segment(segment_arc, () => {
+          rainbow({ startHue: 0.0, endHue: 0.02 });
+          // constColor({ hue: 0.0, sat: 1.0, val: 1.0 });
+          snakeInOut();
+        });
+      });
+      // in a lot of good ways
+      beats(60, 62, () => {
+        snake({ tailLength: 0.4 });
+        fadeInOut();
+      });
+      beats(62, 64, () => {
+        cycle(0.25, () => {
+          constColor({ hue: 0.05, sat: 1.0, val: 0.5 });
+          snake({ tailLength: 0.3 });
+          fadeOutIn();
+        })
       });
     });
 
@@ -300,16 +332,60 @@ const testSequence = async () => {
       beats(64.5, 66, () => {
         fadeOut();
         cycle(0.25, () => {
-          hueShiftStartToEnd({start: 0.0, end: 1.0});
+          hueShiftStartToEnd({ start: 0.0, end: 1.0 });
         });
       });
     });
+
+    // beats(66, 68, () => {
+    //   // snakeHeadMove({ start: 0.98, end: 0.4, tail: 0.5 });
+    // });
+
+
+    elements(all, () => {
+      beats(66, 73, () => {
+        constColor({ hue: 0.66, sat: 0.7, val: 0.8 });
+        // segment(segment_b1, () => {
+        // });
+      });
+
+      beats(66, 69, () => {
+        segment(segment_ind, () => {
+          staticSnake({ start: 0.98, end: 0.4 });
+        });
+      });
+      beats(69, 70, () => {
+        hueShiftStartToEnd({ start: 0.0, end: 0.3 });
+        segment(segment_ind, () => {
+          snakeHeadMove({ start: 0.98, end: 0.4, tail: 0.5 });
+        });
+      });
+      // like arabian moons
+      beats(70, 73, () => {
+        constColor({ hue: 0.66, sat: 0.0, val: 0.8 });
+        // staticHueShift({ value: 0.3 });
+        segment(segment_ind, () => {
+          staticSnake({ start: 0.4, end: -0.2 });
+        });
+      });
+      beats(72, 73, () => {
+        fadeOut();
+      });
+      beats(65, 73, () => {
+        cycle(0.6, () => {
+          blink({ low: 0.8 });
+        });
+      });
+
+    });
+
+
 
   });
 
   console.log("sending sequence");
   await sendSequence("aladdin", testAnimation.getSequence());
-  await startSong("aladdin", 0);
+  await startSong("aladdin", 60);
 };
 
 (async () => {
