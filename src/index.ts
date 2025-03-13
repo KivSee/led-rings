@@ -390,7 +390,7 @@ const testSequence = async () => {
 
   console.log("sending sequence");
   await sendSequence("aladdin", testAnimation.getSequence());
-  await startSong("aladdin", 35);
+  await startSong("aladdin", 0);
 };
 
 (async () => {

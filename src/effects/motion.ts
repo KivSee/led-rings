@@ -1,5 +1,8 @@
+import { getLineAndCharacterOfPosition } from "typescript";
 import { phase } from "../phase/phase";
 import { addEffect } from "./effect";
+import { reverse } from "dns";
+import { cycle } from "../time/time";
 
 export const snakeHeadMove = ({
   start,
@@ -77,6 +80,34 @@ export const snake = ({
     };
   });
 };
+
+export const snakeHeadSin = ({
+  tailLength,
+  cyclic,
+}: {
+  tailLength: number;
+  cyclic?: boolean;
+}) => {
+  addEffect((phase: number) => {
+    return {
+      snake: {
+        head: {
+          sin: {
+            min: 0.1,
+            max: 1.0,
+            phase: phase,
+            repeats: 1.0,
+          },
+        },
+        tailLength: {
+          constValue: {
+            value: tailLength,
+          },
+        },
+      },
+    };
+  });
+}
 
 export const snakeFillGrow = () => {
   addEffect({

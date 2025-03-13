@@ -8,7 +8,7 @@ export type SequencePerThing = Record<ThingName, Sequence>;
 export const sendSequence = async (triggerName: string, sequencePerThing: SequencePerThing) => {
     try {
         const res = await axios.put(`http://${SEQUENCE_SERVICE_IP}:${SEQUENCE_SERVICE_PORT}/triggers/${triggerName}`, sequencePerThing, {
-            timeout: 1000
+            timeout: 10000
         });
         console.log(`Effects for trigger ${triggerName} sent, http status: ${res.status}`);
     } catch (err) {
