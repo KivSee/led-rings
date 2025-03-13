@@ -128,9 +128,10 @@ export const blink = (opts?: { low?: number }) => {
 // pulse is a sin wave on the brightness.
 // the "low" option controls how low the brightness goes (default 0.5)
 // this effect honors phase
-export const pulse = (opts?: { low?: number }) => {
+export const pulse = (opts?: { low?: number, staticPhase?: number }) => {
   const min = opts?.low ?? 0.5;
   const max = 1.0;
+  const staticPhase = opts?.staticPhase ?? 0;
   addEffect((phase: number) => {
     return {
       brightness: {
@@ -138,7 +139,7 @@ export const pulse = (opts?: { low?: number }) => {
           sin: {
             min: min,
             max: max,
-            phase,
+            phase: phase + staticPhase,
             repeats: 1,
           },
         },

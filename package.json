@@ -8,7 +8,8 @@
     "start": "ts-node-dev --respawn src/index.ts",
     "playground": "ts-node-dev --respawn src/playground.ts",
     "idle": "ts-node-dev --respawn src/idle.ts",
-    "stop": "ts-node-dev --respawn src/stop.ts"
+    "stop": "ts-node-dev --respawn src/stop.ts",
+    "random": "ts-node-dev --respawn src/random.ts"
   },
   "dependencies": {
     "@types/node": "^22.10.10",
