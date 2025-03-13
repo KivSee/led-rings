@@ -103,8 +103,12 @@ const testSequence = async () => {
         });
         segment(segment_arc, () => {
           beats(16 + i, 16 + i + 2, () => {
+            hueShiftStartToEnd({ start: 0.2 * i, end: 0.2 * (i + 1) });
             snakeFillGrow();
           });
+        });
+        beats(16 + i + 2, 24, () => {
+          staticHueShift({ value: 0.2 * (i + 1) });
         });
       });
     }
@@ -122,14 +126,24 @@ const testSequence = async () => {
         });
         segment(segment_arc, () => {
           beats(24 + i, 24 + i + 2, () => {
+            hueShiftStartToEnd({ start: 0.2 * i, end: 0.2 * (i + 1) });
             snakeFillGrow();
           });
+        });
+        beats(24 + i + 2, 32, () => {
+          staticHueShift({ value: 0.2 * (i + 1) });
         });
       });
     }
 
+    beats(31, 32, () => {
+      elements(all, () => {
+        fadeOut();
+      });
+    });
+
     // 31.5 - 33.5
-    // wind from the east
+    // when the wind's from the east
     for (let i = 0; i < 12; i++) {
       const rel = i / 12;
       beats(31.5 + rel * 1.5, 31.5 + rel * 1.5 + 0.5, () => {
@@ -141,7 +155,7 @@ const testSequence = async () => {
     }
 
     // 33.5 - 35.5
-    // and the sun from the west
+    // and the sun's from the west
     for (let i = 0; i < 12; i++) {
       const rel = i / 12;
       beats(33.5 + rel * 1.5, 33.5 + rel * 1.5 + 0.5, () => {
@@ -172,6 +186,7 @@ const testSequence = async () => {
         fadeIn();
       });
     });
+    // is right
     elements(all, () => {
       beats(37.5, 38.0, () => {
         fade({ start: 1.0, end: 0.3 });
@@ -217,7 +232,7 @@ const testSequence = async () => {
           fadeOut();
         });
       });
-      beats(41.5, 42.75, () => {
+      beats(41.5, 42.5, () => {
         segment(segment_b2, () => {
           fadeOut();
         });
@@ -226,6 +241,7 @@ const testSequence = async () => {
         });
       });
       beats(42.5, 48, () => {
+        staticHueShift({ value: 0.8 });
         segment(segment_updown, () => {
           cycle(0.25, () => {
             snake({ tailLength: 1.0, cyclic: true });
@@ -258,10 +274,11 @@ const testSequence = async () => {
         });
       });
 
+      // 50 - 53 - Arabian nights
+      // 53 - 57 - like Arabian days
       beats(50, 57, () => {
         constColor({ hue: 0.66, sat: 0.7, val: 1.0 });
       });
-
       beats(50, 53, () => {
         segment(segment_ind, () => {
           staticSnake({ start: 0.98, end: 0.4 });
@@ -282,7 +299,7 @@ const testSequence = async () => {
       beats(56, 57, () => {
         fadeOut();
       });
-      beats(49, 57, () => {
+      beats(50, 57, () => {
         cycle(0.6, () => {
           blink({ low: 0.8 });
         });
@@ -301,7 +318,7 @@ const testSequence = async () => {
       // are hotter than hot
       beats(59, 64, () => {
         segment(segment_arc, () => {
-          rainbow({ startHue: 0.0, endHue: 0.02 });
+          rainbow({ startHue: 0.0, endHue: 0.05 });
           // constColor({ hue: 0.0, sat: 1.0, val: 1.0 });
           snakeInOut();
         });
@@ -316,7 +333,7 @@ const testSequence = async () => {
           constColor({ hue: 0.05, sat: 1.0, val: 0.5 });
           snake({ tailLength: 0.3 });
           fadeOutIn();
-        })
+        });
       });
     });
 
@@ -337,16 +354,9 @@ const testSequence = async () => {
       });
     });
 
-    // beats(66, 68, () => {
-    //   // snakeHeadMove({ start: 0.98, end: 0.4, tail: 0.5 });
-    // });
-
-
     elements(all, () => {
       beats(66, 73, () => {
         constColor({ hue: 0.66, sat: 0.7, val: 0.8 });
-        // segment(segment_b1, () => {
-        // });
       });
 
       beats(66, 69, () => {
@@ -363,7 +373,6 @@ const testSequence = async () => {
       // like arabian moons
       beats(70, 73, () => {
         constColor({ hue: 0.66, sat: 0.0, val: 0.8 });
-        // staticHueShift({ value: 0.3 });
         segment(segment_ind, () => {
           staticSnake({ start: 0.4, end: -0.2 });
         });
@@ -372,20 +381,16 @@ const testSequence = async () => {
         fadeOut();
       });
       beats(65, 73, () => {
-        cycle(0.6, () => {
+        cycle(0.3, () => {
           blink({ low: 0.8 });
         });
       });
-
     });
-
-
-
   });
 
   console.log("sending sequence");
   await sendSequence("aladdin", testAnimation.getSequence());
-  await startSong("aladdin", 60);
+  await startSong("aladdin", 35);
 };
 
 (async () => {
