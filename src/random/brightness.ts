@@ -45,8 +45,7 @@ const randomAlternate = () => {
 };
 
 export const addRandomBrightness = () => {
-  //   const options = [noRandBrightness, randomPulse];
-  const options = [randomAlternate];
+  const options = [noRandBrightness, randomPulse, randomAlternate];
   const randomIndex = Math.floor(Math.random() * options.length);
   const optionFunc = options[randomIndex];
   optionFunc();
