@@ -358,7 +358,7 @@ const testSequence = async () => {
       beats(66, 73, () => {
         constColor({ hue: 0.66, sat: 0.7, val: 0.8 });
       });
-
+      // Arabian nights
       beats(66, 69, () => {
         segment(segment_ind, () => {
           staticSnake({ start: 0.98, end: 0.4 });
@@ -370,7 +370,7 @@ const testSequence = async () => {
           snakeHeadMove({ start: 0.98, end: 0.4, tail: 0.5 });
         });
       });
-      // like arabian moons
+      // 'neath Arabian moons
       beats(70, 73, () => {
         constColor({ hue: 0.66, sat: 0.0, val: 0.8 });
         segment(segment_ind, () => {
@@ -385,12 +385,32 @@ const testSequence = async () => {
           blink({ low: 0.8 });
         });
       });
+      // A fool off his guard
+      beats(73, 75, () => {
+        segment(segment_arc, () => {
+          cycle(2, () => {
+            rainbow();
+            snakeInOut();
+          });
+        });
+      });
+      // could fall and fall hard
+      beats(75, 87, () => {
+        segment(segment_arc, () => {
+          rainbow();
+          snakeInOut();
+        });
+      });
+      // out there on the dunes
+      beats(81, 85, () => {
+        fadeOut();
+      });
     });
   });
 
   console.log("sending sequence");
   await sendSequence("aladdin", testAnimation.getSequence());
-  await startSong("aladdin", 0);
+  await startSong("aladdin", 67);
 };
 
 (async () => {
