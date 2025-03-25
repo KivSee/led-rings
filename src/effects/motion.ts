@@ -107,7 +107,7 @@ export const snakeHeadSin = ({
       },
     };
   });
-}
+};
 
 export const snakeFillGrow = () => {
   addEffect({
@@ -164,6 +164,43 @@ export const snakeInOut = (opt?: { start: number; end: number }) => {
             value: 0.5,
           },
         },
+      },
+    };
+  });
+};
+
+export const snakeSlowFast = ({ tailLength }: {
+  tailLength?: number;
+}) => {
+  addEffect((phase: number) => {
+    return {
+      snake: {
+        head: {
+          comb2: {
+            f1: {
+              sin: {
+                min: 0,
+                max: 1.0,
+                phase: phase,
+                repeats: 1.0,
+              },
+            },
+            amount1: 1.0,
+            f2: {
+              linear: {
+                start: 0,
+                end: 1.0,
+              },
+            },
+            amount2: 1.0,
+          },
+        },
+        tailLength: {
+          constValue: {
+            value: tailLength ?? 0.5,
+          },
+        },
+        cyclic: true,
       },
     };
   });

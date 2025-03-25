@@ -25,10 +25,11 @@ import { snake, snakeInOut } from "./effects/motion";
 import { addRandomColoring } from "./random/coloring";
 import { addRandomBrightness } from "./random/brightness";
 import { addRandomMotion } from "./random/motion";
+import { addRandomDynamicHue } from "./random/dynamichue";
 
 const animationName = "random";
 const SECONDS_PER_PATTERN = 5;
-const NUM_PATTERNS = 40;
+const NUM_PATTERNS = 30;
 const TOTAL_SECONDS = SECONDS_PER_PATTERN * NUM_PATTERNS;
 const BPM = 60;
 const TOTAL_BEATS = (TOTAL_SECONDS * BPM) / 60;
@@ -44,6 +45,7 @@ const random = async () => {
     for (let i = 0; i < NUM_PATTERNS; i++) {
       pattern(i, () => {
         addRandomColoring();
+        addRandomDynamicHue();
         addRandomBrightness();
         addRandomMotion();
         addRandomMotion();

@@ -1,4 +1,4 @@
-import { snake, snakeHeadSin } from "../effects/motion";
+import { snake, snakeHeadSin, snakeSlowFast } from "../effects/motion";
 import { elements, segment } from "../objects/elements";
 import {
   all,
@@ -76,8 +76,30 @@ export const randomSinSnakeHead = () => {
   });
 };
 
+export const randomSnakeSlowFast = () => {
+  const goodSpeed = [1.0, 2.0];
+  const speed = goodSpeed[Math.floor(Math.random() * goodSpeed.length)];
+
+  const goodPhases = [0.0, 0.5];
+  const phaseAmount = goodPhases[Math.floor(Math.random() * goodPhases.length)];
+
+  const goodSegments = [segment_centric, segment_ind];
+  const randSegmentIndex = Math.floor(Math.random() * goodSegments.length);
+  const selectedSegment = goodSegments[randSegmentIndex];
+
+  elements(all, () => {
+    cycle(speed, () => {
+      phase(phaseAmount, () => {
+        segment(selectedSegment, () => {
+          snakeSlowFast({ tailLength: 1.0});
+        });
+      });
+    });
+  });
+};
+
 export const addRandomMotion = () => {
-  const options = [noMotion, cyclicSnake, cyclicSnake, randomSinSnakeHead, randomSinSnakeHead];
+  const options = [noMotion, cyclicSnake, cyclicSnake, randomSinSnakeHead, randomSinSnakeHead, randomSnakeSlowFast];
   const randomIndex = Math.floor(Math.random() * options.length);
   const optionFunc = options[randomIndex];
   optionFunc();

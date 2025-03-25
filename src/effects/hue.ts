@@ -1,3 +1,4 @@
+import { cycle } from "../time/time";
 import { addEffect } from "./effect";
 
 export const staticHueShift = (opts: { value: number }) => {
@@ -12,9 +13,12 @@ export const staticHueShift = (opts: { value: number }) => {
   });
 };
 
-export const hueShiftStartToEnd = ({ start, end }: {
-    start: number;
-    end: number;
+export const hueShiftStartToEnd = ({
+  start,
+  end,
+}: {
+  start: number;
+  end: number;
 }) => {
   addEffect({
     hue: {
@@ -26,4 +30,19 @@ export const hueShiftStartToEnd = ({ start, end }: {
       },
     },
   });
+};
+
+export const hueShiftSin = ({ amount }: { amount: number }) => {
+  addEffect((phase: number) => ({
+    hue: {
+      offset_factor: {
+        sin: {
+          min: 0,
+          max: amount,
+          phase,
+          repeats: 1,
+        },
+      },
+    },
+  }));
 };
