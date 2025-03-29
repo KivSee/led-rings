@@ -13,3 +13,4 @@ export const segment_arc = "arc";
 export const segment_ind = "ind";
 export const segment_b1 = "b1";
 export const segment_b2 = "b2";
+export const segment_rand = "rand";

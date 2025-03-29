@@ -16,7 +16,7 @@ const syncOneRing = async (ringIndex: number) => {
 };
 
 (async () => {
-    for (let i = 0; i < NUMBER_OF_RINGS; i++) {
+    for (let i = 1; i <= NUMBER_OF_RINGS; i++) {
         await syncOneRing(i);
     }
     console.log(`Synced all ${NUMBER_OF_RINGS} rings`);

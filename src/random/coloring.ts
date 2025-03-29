@@ -1,6 +1,6 @@
 import { dotted, pastel, rainbow, vivid } from "../effects/coloring";
 import { elements, segment } from "../objects/elements";
-import { all, segment_arc, segment_centric, segment_ind, segment_updown } from "../objects/ring-elements";
+import { all, segment_all, segment_arc, segment_centric, segment_ind, segment_rand, segment_updown } from "../objects/ring-elements";
 import { phase } from "../phase/phase";
 
 const goodPhases = [0.0, 0.25, 0.5, 1.0, 2, 3, 4, 6, 8.8];
@@ -33,13 +33,13 @@ const randRainbow = () => {
   const randRoundIndex = Math.floor(Math.random() * rounds.length);
   const round = rounds[randRoundIndex];
 
-  const possibleSegments = [segment_centric, segment_arc, segment_arc, segment_ind];
+  const possibleSegments = [segment_centric, segment_arc, segment_arc, segment_ind, segment_rand];
   const randSegmentIndex = Math.floor(Math.random() * possibleSegments.length);
   const selectedSegment = possibleSegments[randSegmentIndex];
 
   elements(all, () => {
     phase(getRandomPhase(), () => {
-      segment(selectedSegment, () => {
+      segment(selectedSegment, () => {  
         rainbow({
           startHue,
           endHue: startHue + round,

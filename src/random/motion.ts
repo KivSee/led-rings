@@ -5,6 +5,7 @@ import {
   segment_arc,
   segment_centric,
   segment_ind,
+  segment_rand,
   segment_updown,
 } from "../objects/ring-elements";
 import { phase } from "../phase/phase";
@@ -26,6 +27,7 @@ const cyclicSnake = () => {
     segment_arc,
     segment_ind,
     segment_updown,
+    segment_rand,
   ];
   const randSegmentIndex = Math.floor(Math.random() * possibleSegments.length);
   const selectedSegment = possibleSegments[randSegmentIndex];
@@ -58,6 +60,7 @@ export const randomSinSnakeHead = () => {
     segment_arc,
     segment_ind,
     segment_updown,
+    segment_rand,
   ];
   const randSegmentIndex = Math.floor(Math.random() * possibleSegments.length);
   const selectedSegment = possibleSegments[randSegmentIndex];
@@ -83,7 +86,7 @@ export const randomSnakeSlowFast = () => {
   const goodPhases = [0.0, 0.5];
   const phaseAmount = goodPhases[Math.floor(Math.random() * goodPhases.length)];
 
-  const goodSegments = [segment_centric, segment_ind];
+  const goodSegments = [segment_centric, segment_ind, segment_rand];
   const randSegmentIndex = Math.floor(Math.random() * goodSegments.length);
   const selectedSegment = goodSegments[randSegmentIndex];
 
