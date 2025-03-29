@@ -1,4 +1,4 @@
-import { snake, snakeHeadSin, snakeSlowFast } from "../effects/motion";
+import { snake, snakeHeadSin, snakeHeadSteps, snakeSlowFast } from "../effects/motion";
 import { elements, segment } from "../objects/elements";
 import {
   all,
@@ -79,6 +79,41 @@ export const randomSinSnakeHead = () => {
   });
 };
 
+const randomSnakesSteps = () => {
+  const goodTailLengths = [0.1, 0.3, 0.5];
+  const randomIndex = Math.floor(Math.random() * goodTailLengths.length);
+  const tailLength = goodTailLengths[randomIndex];
+
+  const goodPhases = [0.0, 0.25, 0.5, 1.0, 2, 3, 4, 6, 8.8];
+  const phaseAmount = goodPhases[Math.floor(Math.random() * goodPhases.length)];
+
+  const possibleSegments = [
+    segment_centric,
+    segment_arc,
+    segment_ind,
+    segment_updown,
+    segment_rand,
+  ];
+  const randSegmentIndex = Math.floor(Math.random() * possibleSegments.length);
+  const selectedSegment = possibleSegments[randSegmentIndex];
+
+  const goodSpeed = [1.0];
+  const speed = goodSpeed[Math.floor(Math.random() * goodSpeed.length)];
+
+  const stepsPerSecond = [2, 4];
+  const steps = stepsPerSecond[Math.floor(Math.random() * stepsPerSecond.length)];
+
+  elements(all, () => {
+    phase(phaseAmount, () => {
+      segment(selectedSegment, () => {
+        cycle(speed, () => {
+          snakeHeadSteps({ steps, tailLength });
+        });
+      });
+    });
+  });
+}
+
 export const randomSnakeSlowFast = () => {
   const goodSpeed = [1.0, 2.0];
   const speed = goodSpeed[Math.floor(Math.random() * goodSpeed.length)];
@@ -102,7 +137,7 @@ export const randomSnakeSlowFast = () => {
 };
 
 export const addRandomMotion = () => {
-  const options = [noMotion, cyclicSnake, cyclicSnake, randomSinSnakeHead, randomSinSnakeHead, randomSnakeSlowFast];
+  const options = [noMotion, cyclicSnake, cyclicSnake, randomSinSnakeHead, randomSinSnakeHead, randomSnakeSlowFast, randomSnakesSteps];
   const randomIndex = Math.floor(Math.random() * options.length);
   const optionFunc = options[randomIndex];
   optionFunc();

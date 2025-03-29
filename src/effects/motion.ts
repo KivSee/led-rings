@@ -239,3 +239,28 @@ export const snakeTailShrinkGrow = () => {
     };
   });
 };
+
+export const snakeHeadSteps = ({ steps, tailLength }: {
+  steps: number;
+  tailLength?: number;
+}) => {
+  addEffect((phase: number) => {
+    return {
+      snake: {
+        head: {
+          steps: {
+            num_steps: steps,
+            diff_per_step: 1.0 / steps,
+            first_step_value: phase,
+          },
+        },
+        tailLength: {
+          constValue: {
+            value: tailLength ?? 0.5,
+          },
+        },
+        cyclic: true,
+      },
+    };
+  });
+}
