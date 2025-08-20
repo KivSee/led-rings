@@ -120,7 +120,7 @@ const testSequence = async () => {
     });
 
     for (let i = 0; i < 6; i++) {
-      elements([12 - i], () => {
+      elements([6 - i], () => {
         beats(24, 24 + i, () => {
           noColor();
         });
@@ -144,8 +144,8 @@ const testSequence = async () => {
 
     // 31.5 - 33.5
     // when the wind's from the east
-    for (let i = 0; i < 12; i++) {
-      const rel = i / 12;
+    for (let i = 0; i < 6; i++) {
+      const rel = i / 6;
       beats(31.5 + rel * 1.5, 31.5 + rel * 1.5 + 0.5, () => {
         elements([i + 1], () => {
           constColor({ hue: 0.68, sat: 0.9, val: 1.0 });
@@ -156,10 +156,10 @@ const testSequence = async () => {
 
     // 33.5 - 35.5
     // and the sun's from the west
-    for (let i = 0; i < 12; i++) {
-      const rel = i / 12;
+    for (let i = 0; i < 6; i++) {
+      const rel = i / 6;
       beats(33.5 + rel * 1.5, 33.5 + rel * 1.5 + 0.5, () => {
-        elements([12 - i], () => {
+        elements([6 - i], () => {
           constColor({ hue: 0.05, sat: 0.95 });
           fadeOut();
         });
