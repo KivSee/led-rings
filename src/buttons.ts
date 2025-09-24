@@ -28,6 +28,7 @@ import {
   segment_b2,
   segment_centric,
   segment_ind,
+  segment_rand,
   segment_updown,
 } from "./objects/ring-elements";
 import {
@@ -55,19 +56,97 @@ const turnOffRand = (numberRingsOn: number) => {
   });
 };
 
+const ringParty = (i: number) => {
+  switch (i % 4) {
+    case 0:
+      segment(segment_arc, () => {
+        rainbow();
+        hueShiftStartToEnd({ start: 0.0, end: 1.0 });
+      });
+      break;
+    case 1:
+      segment(segment_ind, () => {
+        rainbow();
+        hueShiftStartToEnd({ start: 0.0, end: 3.0 });
+      });
+      break;
+    case 2:
+      segment(segment_rand, () => {
+        rainbow();
+        hueShiftStartToEnd({ start: 0.0, end: 1.0 });
+      });
+      break;
+    case 3:
+      segment(segment_centric, () => {
+        rainbow();
+        hueShiftStartToEnd({ start: 0.0, end: 3.0 });
+      });
+      break;
+  }
+}
+
 const testSequence = async () => {
   const testAnimation = new Animation("buttons", 95, 316, 81);
   testAnimation.sync(() => {
+
+    beats(0, 96, () => {
+      for (let i = 0; i < 12; i++) {
+        beats(i * 4, 96 - i * 4, () => {
+          elements([i + 1], () => {
+            const hue = i / 1984 * 2347;
+            rainbow({ startHue: hue, endHue: hue + 0.1 });
+            segment(segment_ind, () => {
+              snakeFillGrow();
+              // snake({ tailLength: 0.5, cyclic: true });
+            });
+            cycle(4, () => {
+              cycleBeats(4, 0, 2, () => {
+                pulse({
+                  low: 0.4,
+                  staticPhase: 0.25,
+                });
+              });
+            });
+          });
+        });
+        beats(i * 4, i * 4 + 1, () => {
+          elements([i + 1], () => {
+            fadeIn();
+          });
+        });
+        beats(96 - i * 4 - 1, 96 - i * 4, () => {
+          elements([i + 1], () => {
+            fadeOut();
+          });
+        });
+        if (i < 6) {
+          beats(96 - i * 4, 96, () => {
+            elements([i*2 + 1, i*2 + 2], () => {
+              segment(segment_rand, () => {
+                cycle(1, () => {
+                  constColor({ hue: 0.5, sat: 1, val: 1 });
+                  snake({ tailLength: 0.5, cyclic: true });
+                });
+              });
+              beats(96 - i * 4, 96, () => {
+                fadeIn();
+              });
+            });
+          });
+        }
+      }
+    });
+
     // 0-11 Episodes - fade in a ring each episode with constColor and then pulsate it with every ring adding
     // 12-23 Episodes - fade out a ring each episode, the ones that are on are pulsating
-    beats(0, 202, () => {
-      elements(all, () => {
-        rainbow({ startHue: 0.05, endHue: 0.1 });
-        cycle(12, () => {
-          snake({ tailLength: 0.125, cyclic: true });
-        });
-      });
-    });
+    // beats(0, 202, () => {
+    //   elements(all, () => {
+    //     rainbow({ startHue: 0.05, endHue: 0.1 });
+    //     cycle(12, () => {
+    //       snake({ tailLength: 0.125, cyclic: true });
+    //     });
+    //   });
+    // });
 
     // episodes 16-24 - start fading in a ring each episode with confetti animation, but very low brightness from 16-20
     // episodes 24-32 - something more is added there, think what to do with it
@@ -80,23 +159,49 @@ const testSequence = async () => {
         noColor();
       });
     });
+
+    for (let e = 0; e < 32; e++) {
+      beats(204.5 + e * 4, 204.5 + (e + 1) * 4, () => {
+        cycle(1, () => {
+          for (let i = 0; i < 12; i++) {
+            elements([i + 1], () => {
+              ringParty(e + i % 2);
+              brightness({ value: 0.5 });
+            });
+          };
+        });
+      });
+    }
+
+    for (let e = 0; e < 8; e++) {
+      beats(235, 235.5, () => {
+        for (let i = 0; i < 12; i++) {
+          elements([i + 1, 12 - i], () => {
+            cycleBeats(0.5, i / 24, 0.5, () => {
+              fadeOut();
+            });
+          });
+        }
+      });
+    }
+
     // beat 204 - big entrance
-    elements(all, () => {
-      // boom
-      beats(204.3, 207, () => {
-        segment(segment_arc, () => {
-          rainbow();
-          brightness({ value: 0.6 });
-        });
-      });
-      // boom fade out and psychedelic
-      beats(204, 207, () => {
-        fadeOut();
-        cycle(0.25, () => {
-          hueShiftStartToEnd({ start: 0.0, end: 1.0 });
-        });
-      });
-    });
+    // elements(all, () => {
+    //   // boom
+    //   beats(204.3, 207, () => {
+    //     segment(segment_arc, () => {
+    //       rainbow();
+    //       brightness({ value: 0.6 });
+    //     });
+    //   });
+    //   // boom fade out and psychedelic
+    //   beats(204, 207, () => {
+    //     fadeOut();
+    //     cycle(0.25, () => {
+    //       hueShiftStartToEnd({ start: 0.0, end: 1.0 });
+    //     });
+    //   });
+    // });
     // episodes 51-59 - play beat, every episode change colors a little
     // beat 235 (last beat of episode 58) - special sound
     // episodes 59-67 - play beat
@@ -119,7 +224,7 @@ const testSequence = async () => {
 
   console.log("sending sequence");
   await sendSequence("buttons", testAnimation.getSequence());
-  await startSong("buttons", 120);
+  await startSong("buttons", 25);
 };
 
 (async () => {
