@@ -201,15 +201,6 @@ const testSequence = async () => {
 
     // 0-11 Episodes - fade in a ring each episode with constColor and then pulsate it with every ring adding
     // 12-23 Episodes - fade out a ring each episode, the ones that are on are pulsating
-    // beats(0, 202, () => {
-    //   elements(all, () => {
-    //     rainbow({ startHue: 0.05, endHue: 0.1 });
-    //     cycle(12, () => {
-    //       snake({ tailLength: 0.125, cyclic: true });
-    //     });
-    //   });
-    // });
-
     // episodes 16-24 - start fading in a ring each episode with confetti animation, but very low brightness from 16-20
     // episodes 24-32 - something more is added there, think what to do with it
     // episodes 32-40 - another sound starts to emerge and increase in the background, 32-36 very low, 36-40 very noticeable
@@ -281,7 +272,7 @@ const testSequence = async () => {
       });
     }
 
-    beats(236, 268, () => {
+    beats(236, 268.5, () => {
       elements(all, () => {
         cycleBeats(2, 1.5, 1.65, () => {
           segment(segment_b1, () => {
@@ -291,7 +282,7 @@ const testSequence = async () => {
       });
     });
 
-    beats(268, 331, () => {
+    beats(268.5, 331, () => {
       elements(all, () => {
         cycle(4, () => {
           segment(segment_rand, () => {
@@ -435,7 +426,7 @@ const testSequence = async () => {
     elements([11, 2], () => {
       beats(464, 468, () => {
         fadeOut();
-      }); 
+      });
       beats(468, 484, () => {
         noColor();
       });
@@ -497,7 +488,7 @@ const testSequence = async () => {
 
   console.log("sending sequence");
   await sendSequence("buttons", testAnimation.getSequence());
-  await startSong("buttons", 250);
+  await startSong("buttons", 0);
 };
 
 (async () => {

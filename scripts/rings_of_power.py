@@ -20,6 +20,7 @@ TRIGGER_LIST = ["random", "chill", "party", "psychedelic", "mystery", "backgroun
 SONG_LIST = ["aladdin", "buttons"]  # Known songs that should not be interrupted
 TRIGGER_CYCLE_INTERVAL = 600  # 10 minutes in seconds
 current_trigger_index = 0
+current_song_index = 0  # Track which song to play next (alternates between 0 and 1)
 last_trigger_change = time.time()
 
 # Global variable to store MQTT message
@@ -30,7 +31,9 @@ motion_sensors = {}  # Store motion sensor data {sensor_name: {"value": value, "
 motion_detected = False  # True if majority of motion sensors are on
 brightness = None  # Current brightness value
 last_published_brightness = None  # Track last brightness we published
-baseline_brightness = None  # Brightness baseline when no motion detected
+baseline_brightness = None  # Brightness baseline when no motion detected (from MQTT/external for songs)
+trigger_baseline_brightness = 0.05  # Baseline brightness for triggers (not songs)
+is_playing_trigger = True  # Track if currently playing a trigger (vs song)
 stdscr = None  # Global reference to curses screen
 
 def get_current_trigger():
@@ -194,8 +197,17 @@ def stop(stdscr):
 
 def start_song(stdscr, song_name: str, start_offset_seconds: float = 0):
     """Start a song with an optional start offset in seconds."""
-    global requested_song
+    global requested_song, is_playing_trigger, brightness, baseline_brightness
     requested_song = song_name  # Set the requested song global so we can check if it's playing
+    is_playing_trigger = False  # Mark that we're playing a song, not a trigger
+
+    # When starting a song, restore brightness to baseline (from MQTT/external)
+    if baseline_brightness is not None:
+        brightness = baseline_brightness
+        publish_brightness()
+        stdscr.addstr(f"\nRestoring brightness to baseline {baseline_brightness} for song")
+        stdscr.refresh()
+
     try:
         res = requests.post(
             f"{TRIGGER_URL_BASE}/song/{song_name}/play",
@@ -210,6 +222,15 @@ def start_song(stdscr, song_name: str, start_offset_seconds: float = 0):
 
 def trigger(stdscr, trigger_name: str):
     """Send a trigger request."""
+    global is_playing_trigger, brightness, trigger_baseline_brightness
+    is_playing_trigger = True  # Mark that we're playing a trigger
+
+    # When starting a trigger, set brightness to trigger baseline (0.05)
+    brightness = trigger_baseline_brightness
+    publish_brightness()
+    stdscr.addstr(f"\nSetting brightness to trigger baseline {trigger_baseline_brightness}")
+    stdscr.refresh()
+
     try:
         res = requests.post(
             f"{TRIGGER_URL_BASE}/trigger/{trigger_name}",
@@ -232,7 +253,7 @@ while not is_mqtt_available():
 print("MQTT broker is up! Starting script...")
 
 def main(screen):
-    global trigger_active, stdscr, brightness, current_trigger_index, last_trigger_change, baseline_brightness
+    global trigger_active, stdscr, brightness, current_trigger_index, current_song_index, last_trigger_change, baseline_brightness
     stdscr = screen  # Make stdscr available globally
     last_brightness_update = time.time()
     last_trigger_change = time.time()  # Track when we last changed the trigger
@@ -277,52 +298,74 @@ def main(screen):
                 # Reset timer to check again in the next interval
                 last_trigger_change = current_time
             else:
+                # Change to next trigger
                 current_trigger_index = (current_trigger_index + 1) % len(TRIGGER_LIST)
                 current_trigger = get_current_trigger()
                 stdscr.addstr(f"\n--- Cycling to trigger: {current_trigger} ---")
                 stdscr.refresh()
                 trigger(stdscr, current_trigger)
+
+                # Wait for trigger to complete, then play alternating song
+                time.sleep(2)
+                song_to_play = SONG_LIST[current_song_index]
+                stdscr.addstr(f"\n--- Playing song: {song_to_play} ---")
+                stdscr.refresh()
+                start_song(stdscr, song_to_play)
+
+                # Alternate to next song for next cycle
+                current_song_index = (current_song_index + 1) % len(SONG_LIST)
                 last_trigger_change = current_time
 
         # Handle brightness based on motion detection
-        if current_time - last_brightness_update >= 0.25:  # Adjust every 0.5 seconds
-            # Detect motion state change (only if not currently decreasing brightness)
-            if not is_decreasing_brightness and motion_detected and not previous_motion_state:
-                # Motion just started - save current brightness as baseline
-                get_latest_brightness()
-                baseline_brightness = brightness
-                stdscr.addstr(f"\nMotion started - baseline brightness: {baseline_brightness}")
-                stdscr.refresh()
-
-            if not is_decreasing_brightness and motion_detected:
-                # Increase brightness gradually to 1.0
-                target_brightness = 1.0
-                if brightness < target_brightness:
-                    brightness = min(target_brightness, round(brightness + 0.1, 1))
+        # - For songs: brightness stays at baseline (from MQTT/external)
+        # - For triggers: motion controls brightness (0.05 baseline -> 1.0 with motion)
+        if current_time - last_brightness_update >= 0.25:  # Adjust every 0.25 seconds
+            if is_song_playing():
+                # During songs, keep brightness at baseline (from MQTT/external)
+                if baseline_brightness is not None and brightness != baseline_brightness:
+                    brightness = baseline_brightness
                     publish_brightness()
-                    stdscr.addstr(f"\nMotion detected - brightness: {brightness}")
+                    stdscr.addstr(f"\nSong playing - maintaining baseline brightness: {brightness}")
                     stdscr.refresh()
-                previous_motion_state = motion_detected
-            elif not motion_detected or is_decreasing_brightness:
-                # Return brightness to baseline
-                if baseline_brightness is not None and brightness > baseline_brightness:
-                    if not is_decreasing_brightness:
-                        stdscr.addstr(f"\nStarting brightness decrease (motion detection disabled)")
-                        stdscr.refresh()
-                    is_decreasing_brightness = True
-                    brightness = max(baseline_brightness, round(brightness - 0.1, 1))
-                    publish_brightness()
-                    stdscr.addstr(f"\nNo motion - brightness: {brightness}")
+            elif is_playing_trigger:
+                # For triggers, motion controls brightness
+                current_baseline = trigger_baseline_brightness
+
+                # Detect motion state change (only if not currently decreasing brightness)
+                if not is_decreasing_brightness and motion_detected and not previous_motion_state:
+                    # Motion just started
+                    stdscr.addstr(f"\nMotion started - will increase from {current_baseline} to 1.0")
                     stdscr.refresh()
 
-                    # Check if we've reached baseline
-                    if brightness <= baseline_brightness:
-                        is_decreasing_brightness = False
-                        stdscr.addstr(f"\nBrightness decrease complete (motion detection enabled)")
+                if not is_decreasing_brightness and motion_detected:
+                    # Increase brightness gradually to 1.0
+                    target_brightness = 1.0
+                    if brightness < target_brightness:
+                        brightness = min(target_brightness, round(brightness + 0.1, 1))
+                        publish_brightness()
+                        stdscr.addstr(f"\nMotion detected - brightness: {brightness}")
                         stdscr.refresh()
-                else:
-                    # Not decreasing, just update state
                     previous_motion_state = motion_detected
+                elif not motion_detected or is_decreasing_brightness:
+                    # Return brightness to trigger baseline (0.05)
+                    if brightness > current_baseline:
+                        if not is_decreasing_brightness:
+                            stdscr.addstr(f"\nStarting brightness decrease to {current_baseline} (motion detection disabled)")
+                            stdscr.refresh()
+                        is_decreasing_brightness = True
+                        brightness = max(current_baseline, round(brightness - 0.1, 1))
+                        publish_brightness()
+                        stdscr.addstr(f"\nNo motion - brightness: {brightness}")
+                        stdscr.refresh()
+
+                        # Check if we've reached baseline
+                        if brightness <= current_baseline:
+                            is_decreasing_brightness = False
+                            stdscr.addstr(f"\nBrightness decrease complete (motion detection enabled)")
+                            stdscr.refresh()
+                    else:
+                        # Not decreasing, just update state
+                        previous_motion_state = motion_detected
 
             last_brightness_update = current_time
 
