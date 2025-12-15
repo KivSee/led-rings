@@ -104,27 +104,30 @@ export const snakeHeadSin = ({
             value: tailLength,
           },
         },
+        cyclic: cyclic ?? false,
       },
     };
   });
 };
 
-export const snakeFillGrow = () => {
+export const snakeFillGrow = (reverse?: boolean) => {
+  const f1 = {
+    linear: {
+      start: 0,
+      end: 1.0,
+    },
+  }
+  const f2 = {
+    const_value: {
+      value: 1.0,
+    },
+  }
   addEffect({
     snake: {
       head: {
         half: {
-          f1: {
-            linear: {
-              start: 0,
-              end: 1.0,
-            },
-          },
-          f2: {
-            const_value: {
-              value: 1.0,
-            },
-          },
+          f1: reverse ? f2 : f1,
+          f2: reverse ? f1 : f2,
         },
       },
       tailLength: {

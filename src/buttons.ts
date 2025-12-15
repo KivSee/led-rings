@@ -35,11 +35,13 @@ import {
   snake,
   snakeFillGrow,
   snakeHeadMove,
+  snakeHeadSin,
   snakeInOut,
   staticSnake,
 } from "./effects/motion";
 import { phase } from "./phase/phase";
-import { hueShiftStartToEnd, staticHueShift } from "./effects/hue";
+import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "./effects/hue";
+import { addEffect } from "./effects/effect";
 
 function getRandomSubset(numberRingsOn: number): number[] {
   const numbers = Array.from({ length: 12 }, (_, i) => i + 1); // [1, 2, ..., 12]
@@ -49,12 +51,6 @@ function getRandomSubset(numberRingsOn: number): number[] {
   }
   return numbers.filter((_, index) => !indicesToRemove.has(index));
 }
-
-const turnOffRand = (numberRingsOn: number) => {
-  elements(getRandomSubset(numberRingsOn), () => {
-    noColor();
-  });
-};
 
 const ringParty = (i: number) => {
   switch (i % 4) {
@@ -120,8 +116,8 @@ const testSequence = async () => {
           });
         });
         if (i < 6) {
-          beats(96 - i * 4, 96, () => {
-            elements([i*2 + 1, i*2 + 2], () => {
+          beats(96 - i * 4, 100, () => {
+            elements([i * 2 + 1, i * 2 + 2], () => {
               segment(segment_rand, () => {
                 cycle(1, () => {
                   constColor({ hue: 0.5, sat: 1, val: 1 });
@@ -135,6 +131,72 @@ const testSequence = async () => {
           });
         }
       }
+    });
+
+    beats(100, 160, () => {
+      elements(all, () => {
+        cycle(2, () => {
+          segment(segment_rand, () => {
+            constColor({ hue: 0.5, sat: 1, val: 0.7 });
+            snake({ tailLength: 0.5, cyclic: true });
+          });
+        });
+        cycle(8, () => {
+          elements(even, () => {
+            segment(segment_b2, () => {
+              addEffect({
+                hue: {
+                  offset_factor: {
+                    sin: {
+                      min: 0,
+                      max: 0.25,
+                      phase: -0.25,
+                      repeats: 1,
+                    },
+                  },
+                },
+              });
+            });
+          });
+        });
+      });
+      cycle(1, () => {
+        cycleBeats(1, 0, 0.1, () => {
+          elements([1, 9], () => {
+            segment(segment_b1, () => {
+              constColor({ hue: 0.67, sat: 1.0, val: 0.8 });
+            });
+          });
+        });
+        cycleBeats(1, 0.2, 0.3, () => {
+          elements([12, 8], () => {
+            segment(segment_b1, () => {
+              constColor({ hue: 0.67, sat: 1.0, val: 0.8 });
+            });
+          });
+        });
+        cycleBeats(1, 0.4, 0.5, () => {
+          elements([3, 5], () => {
+            segment(segment_b1, () => {
+              constColor({ hue: 0.67, sat: 1.0, val: 0.8 });
+            });
+          });
+        });
+        cycleBeats(1, 0.6, 0.7, () => {
+          elements([4, 11], () => {
+            segment(segment_b1, () => {
+              constColor({ hue: 0.67, sat: 1.0, val: 0.8 });
+            });
+          });
+        });
+        cycleBeats(1, 0.8, 0.9, () => {
+          elements([1, 6], () => {
+            segment(segment_b1, () => {
+              constColor({ hue: 0.67, sat: 1.0, val: 0.8 });
+            });
+          });
+        });
+      });
     });
 
     // 0-11 Episodes - fade in a ring each episode with constColor and then pulsate it with every ring adding
@@ -153,6 +215,40 @@ const testSequence = async () => {
     // episodes 32-40 - another sound starts to emerge and increase in the background, 32-36 very low, 36-40 very noticeable
     // episodes 40-48 - confetti drops, background sound takes over
     // episodes 48-50.5 - hold tension
+
+    beats(160, 192, () => {
+      for (let i = 0; i < 8; i++) {
+        beats(160 + i * 4, 192, () => {
+          const startIndex = Math.floor(i / 2) * 3 + (i % 2 === 0 ? 1 : 2);
+          const elementIndices = i % 2 === 0
+            ? [startIndex]
+            : [startIndex, startIndex + 1];
+          elements(elementIndices, () => {
+            constColor({ hue: 0.78, sat: 1.0, val: 1.0 });
+            segment(segment_arc, () => {
+              snakeFillGrow();
+            });
+          });
+        });
+      }
+    });
+
+    beats(192, 196, () => {
+      elements(all, () => {
+        constColor({ hue: 0.78, sat: 1.0, val: 1.0 });
+        fade({ start: 1.0, end: 0.3 });
+      });
+    });
+    beats(196, 202, () => {
+      elements(all, () => {
+        constColor({ hue: 0.78, sat: 1.0, val: 1.0 });
+        fade({ start: 0.3, end: 1.0 });
+        cycle(0.25, () => {
+          pulse({ low: 0.8 });
+        });
+      });
+    });
+
     // beat 202 - shut everything off for drop
     beats(202, 204, () => {
       elements(all, () => {
@@ -185,23 +281,200 @@ const testSequence = async () => {
       });
     }
 
-    // beat 204 - big entrance
-    // elements(all, () => {
-    //   // boom
-    //   beats(204.3, 207, () => {
-    //     segment(segment_arc, () => {
-    //       rainbow();
-    //       brightness({ value: 0.6 });
-    //     });
-    //   });
-    //   // boom fade out and psychedelic
-    //   beats(204, 207, () => {
-    //     fadeOut();
-    //     cycle(0.25, () => {
-    //       hueShiftStartToEnd({ start: 0.0, end: 1.0 });
-    //     });
-    //   });
-    // });
+    beats(236, 268, () => {
+      elements(all, () => {
+        cycleBeats(2, 1.5, 1.65, () => {
+          segment(segment_b1, () => {
+            constColor({ hue: 0.2, sat: 0.7, val: 0.8 });
+          });
+        });
+      });
+    });
+
+    beats(268, 331, () => {
+      elements(all, () => {
+        cycle(4, () => {
+          segment(segment_rand, () => {
+            snakeHeadSin({ tailLength: 1.0, cyclic: true });
+          });
+        });
+      });
+    });
+
+    beats(300, 331, () => {
+      elements(all, () => {
+        cycleBeats(2, 1.5, 1.75, () => {
+          segment(segment_b1, () => {
+            constColor({ hue: 0.5, sat: 0.8, val: 0.5 });
+          });
+        });
+      });
+    });
+
+    beats(331, 332, () => {
+      for (let e = 0; e < 8; e++) {
+        for (let i = 0; i < 12; i++) {
+          elements([i + 1, 12 - i], () => {
+            cycleBeats(1, i / 24, 1, () => {
+              fadeOut();
+            });
+          });
+        }
+      };
+    });
+
+    beats(332, 364, () => {
+      elements(even, () => {
+        cycle(2, () => {
+          segment(segment_b1, () => {
+            constColor({ hue: 0.33, sat: 0.8, val: 0.6 });
+            fadeInOut({ high: 1.0 });
+          });
+        });
+      });
+      elements(odd, () => {
+        cycle(0.1, () => {
+          segment(segment_b2, () => {
+            constColor({ hue: 0.25, sat: 0.8, val: 0.2 });
+            blink({ low: 0.8 });
+          });
+        });
+        cycleBeats(4, 0.5, 1.5, () => {
+          segment(segment_b1, () => {
+            constColor({ hue: 0.35, sat: 0.7, val: 0.8 });
+            fadeOut();
+          });
+        });
+      });
+    });
+
+    beats(364, 396, () => {
+      elements(all, () => {
+        constColor({ hue: 0.0, sat: 0.95, val: 0.8 });
+        cycleBeats(4, 0, 1.5, () => {
+          segment(segment_arc, () => {
+            snake({ tailLength: 0.5, cyclic: true });
+          });
+        });
+        cycleBeats(4, 1.5, 2, () => {
+          segment(segment_arc, () => {
+            staticSnake({ start: 0.5, end: 1.0 });
+          });
+        });
+        cycleBeats(4, 2, 3.5, () => {
+          segment(segment_arc, () => {
+            snake({ tailLength: 0.5, cyclic: true, reverse: true });
+          });
+        });
+        cycleBeats(4, 3.5, 4, () => {
+          segment(segment_arc, () => {
+            staticSnake({ start: 0.25, end: 0.75 });
+          });
+        });
+      });
+    });
+
+    beats(380, 396, () => {
+      elements(all, () => {
+        hueShiftStartToEnd({ start: 0.0, end: 3.0 });
+      });
+    });
+
+    beats(396, 500, () => {
+      elements(odd, () => {
+        segment(segment_updown, () => {
+          rainbow({ startHue: 0.3, endHue: 0.8 });
+        });
+      });
+      elements(even, () => {
+        segment(segment_updown, () => {
+          rainbow({ startHue: 0.5, endHue: 0.8 });
+        });
+      });
+    });
+
+    beats(396, 428, () => {
+      cycle(2, () => {
+        segment(segment_centric, () => {
+          elements(even, () => {
+            snakeFillGrow();
+          });
+          elements(odd, () => {
+            snakeFillGrow(true);
+          });
+        });
+      });
+    });
+
+    beats(428, 500, () => {
+      elements(all, () => {
+        segment(segment_rand, () => {
+          cycle(2, () => {
+            snake({ tailLength: 0.5, cyclic: true });
+          });
+        });
+      });
+    });
+
+    beats(428.5, 460.5, () => {
+      elements(all, () => {
+        cycle(4, () => {
+          hueShiftStartToEnd({ start: 0.0, end: 0.35 });
+        });
+      });
+    });
+
+    elements([12, 1], () => {
+      beats(460, 464, () => {
+        fadeOut();
+      });
+      beats(464, 484, () => {
+        noColor();
+      });
+    });
+    elements([11, 2], () => {
+      beats(464, 468, () => {
+        fadeOut();
+      }); 
+      beats(468, 484, () => {
+        noColor();
+      });
+    });
+    elements([10, 3], () => {
+      beats(468, 472, () => {
+        fadeOut();
+      });
+      beats(472, 484, () => {
+        noColor();
+      });
+    });
+    elements([9, 4], () => {
+      beats(472, 476, () => {
+        fadeOut();
+      });
+      beats(476, 484, () => {
+        noColor();
+      });
+    });
+    elements([8, 5], () => {
+      beats(476, 480, () => {
+        fadeOut();
+      });
+      beats(480, 484, () => {
+        noColor();
+      });
+    });
+    elements([7, 6], () => {
+      beats(480, 484, () => {
+        fadeOut();
+      });
+    });
+    elements(all, () => {
+      beats(484, 500, () => {
+        fadeInOut({ high: 0.5 });
+      });
+    });
+
     // episodes 51-59 - play beat, every episode change colors a little
     // beat 235 (last beat of episode 58) - special sound
     // episodes 59-67 - play beat
@@ -215,7 +488,7 @@ const testSequence = async () => {
     // episodes 115-123 - melody is still there, bass is removed
     // episode 123 - fade out totally
     elements(all, () => {
-      beats(492, 496, () => {
+      beats(492, 500, () => {
         fadeOut();
       });
     });
@@ -224,7 +497,7 @@ const testSequence = async () => {
 
   console.log("sending sequence");
   await sendSequence("buttons", testAnimation.getSequence());
-  await startSong("buttons", 25);
+  await startSong("buttons", 250);
 };
 
 (async () => {
