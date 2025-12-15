@@ -5,18 +5,19 @@ import json
 import paho.mqtt.client as mqtt
 
 # Replace with actual values
-TRIGGER_SERVICE_IP = "10.0.1.200"
+TRIGGER_SERVICE_IP = "localhost"
 TRIGGER_SERVICE_PORT = 8083
-MQTT_BROKER = "10.0.1.200"
+MQTT_BROKER = "localhost"
 MQTT_TRIGGER_TOPIC = "trigger"
 MQTT_SENSORS_TOPIC = "sensors"
+MQTT_RFID_TOPIC = "sensors/rfid"
 MQTT_BRIGHTNESS_TOPIC = "brightness"
 MQTT_BRIGHTNESS_FIELD = "global_brightness"
 
 TRIGGER_URL_BASE = f"http://{TRIGGER_SERVICE_IP}:{TRIGGER_SERVICE_PORT}"
 
 # Trigger cycling configuration
-TRIGGER_LIST = ["random", "chill", "party", "psychedelic", "mystery", "background"]
+TRIGGER_LIST = ["psychedelic", "mystery", "random", "chill", "party", "background"]
 SONG_LIST = ["aladdin", "buttons"]  # Known songs that should not be interrupted
 TRIGGER_CYCLE_INTERVAL = 600  # 10 minutes in seconds
 current_trigger_index = 0
@@ -120,6 +121,43 @@ def on_sensors_message(client, userdata, msg):
             stdscr.addstr(f"\nError processing sensor: {e}")
             stdscr.refresh()
 
+def on_rfid_message(client, userdata, msg):
+    """Handle RFID sensor messages and play songs when chip is detected."""
+    global current_song_index, stdscr
+    try:
+        # Check if this is a chip topic (sensors/rfid/box#/chip)
+        topic = msg.topic
+        if "/chip" in topic:
+            data = json.loads(msg.payload.decode("utf-8"))
+            if stdscr:
+                stdscr.addstr(f"\nRFID chip detected on {topic}: {data}")
+                stdscr.refresh()
+
+            # Don't interrupt if a song is already playing
+            if is_song_playing():
+                if stdscr:
+                    stdscr.addstr(f"\nSong already playing, ignoring RFID trigger")
+                    stdscr.refresh()
+                return
+
+            # Play the current song from the list
+            song_to_play = SONG_LIST[current_song_index]
+            if stdscr:
+                stdscr.addstr(f"\n--- RFID triggered song: {song_to_play} ---")
+                stdscr.refresh()
+            start_song(stdscr, song_to_play)
+
+            # Advance to next song for next RFID trigger
+            current_song_index = (current_song_index + 1) % len(SONG_LIST)
+    except json.JSONDecodeError as e:
+        if stdscr:
+            stdscr.addstr(f"\nFailed to parse RFID JSON: {e}")
+            stdscr.refresh()
+    except Exception as e:
+        if stdscr:
+            stdscr.addstr(f"\nError processing RFID: {e}")
+            stdscr.refresh()
+
 def on_brightness_message(client, userdata, msg):
     """Handle incoming brightness MQTT messages."""
     global brightness, last_published_brightness, baseline_brightness, stdscr
@@ -180,6 +218,9 @@ def setup_mqtt():
     # Subscribe to sensors topic with dedicated callback (using wildcard for all thing names)
     client.message_callback_add("sensors/#", on_sensors_message)
     client.subscribe("sensors/#")
+    # Subscribe to RFID topic with dedicated callback
+    client.message_callback_add(f"{MQTT_RFID_TOPIC}/#", on_rfid_message)
+    client.subscribe(f"{MQTT_RFID_TOPIC}/#")
     # Subscribe to brightness topic with dedicated callback
     client.message_callback_add(MQTT_BRIGHTNESS_TOPIC, on_brightness_message)
     client.subscribe(MQTT_BRIGHTNESS_TOPIC)
