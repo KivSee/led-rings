@@ -259,9 +259,9 @@ def get_latest_manual_brightness():
 
     if manual_brightness is None:
         manual_brightness = 0.25
-        if stdscr:
-            stdscr.addstr(f"\nNo manual_brightness received after {max_retries} retries, defaulting to 0.25")
-            stdscr.refresh()
+        # Publish the default value to MQTT
+        client.publish(MQTT_MANUAL_BRIGHTNESS_TOPIC, json.dumps({MQTT_MANUAL_BRIGHTNESS_FIELD: manual_brightness}), retain=True)
+        stdscr.addstr(f"Manual brightness not found, set to default 0.25 and published\n")
     else:
         if stdscr:
             stdscr.addstr(f"\nGot manual_brightness from MQTT: {manual_brightness}")
@@ -416,8 +416,6 @@ def main(screen):
 
     # Initialize manual brightness
     get_latest_manual_brightness()
-    stdscr.addstr(f"Manual brightness set to {manual_brightness}\n")
-    stdscr.refresh()
     stdscr.refresh()
 
     current_trigger = get_current_trigger()
