@@ -302,7 +302,7 @@ def stop(stdscr):
         stdscr.addstr(f"\nError while stopping trigger: {err}")
         stdscr.refresh()
 
-def start_song(stdscr, song_name: str, start_offset_seconds: float = 0, color: str = "", box_id: str = "box1"):
+def start_song(stdscr, song_name: str, start_offset_seconds: float = 0, color: str = "1", box_id: str = "box1"):
     """Start a song with an optional start offset in seconds."""
     global requested_song, is_playing_trigger, brightness, manual_brightness, current_song_index
     requested_song = song_name  # Set the requested song global so we can check if it's playing
@@ -324,23 +324,24 @@ def start_song(stdscr, song_name: str, start_offset_seconds: float = 0, color: s
         )
         stdscr.addstr(f"\nSong {song_name} started, HTTP status: {res.status_code}")
         stdscr.refresh()
-
-        time.sleep(2)  # wait before shutting down boxes
-        # Send MQTT message with color and master_state
-        color_value = color
-        response_payload = json.dumps({
-            "color": color_value,
-            "master_state": 0
-        })
-        # Publish to all box leds topics (box1 through box5)
-        for box_num in range(1, 6):
-            leds_topic = f"{MQTT_RFID_TOPIC}/box{box_num}/leds"
-            client.publish(leds_topic, response_payload, retain=True)
-        if stdscr:
-            stdscr.addstr(f"\nPublished song status to all boxes: color={color_value}, master_state=0")
-            stdscr.refresh()
     except requests.RequestException as err:
         stdscr.addstr(f"\nError while starting song '{song_name}': {err}")
+        stdscr.refresh()
+
+    # Always send box messages, even if HTTP request failed (song might still play)
+    time.sleep(2)  # wait before shutting down boxes
+    # Send MQTT message with color and master_state
+    color_value = color
+    response_payload = json.dumps({
+        "color": color_value,
+        "master_state": 0
+    })
+    # Publish to all box leds topics (box1 through box5)
+    for box_num in range(1, 6):
+        leds_topic = f"{MQTT_RFID_TOPIC}/box{box_num}/leds"
+        client.publish(leds_topic, response_payload, retain=True)
+    if stdscr:
+        stdscr.addstr(f"\nPublished song status to all boxes: color={color_value}, master_state=0")
         stdscr.refresh()
 
 def trigger(stdscr, trigger_name: str):
