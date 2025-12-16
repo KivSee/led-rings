@@ -3,16 +3,19 @@ import time
 import curses
 import json
 import paho.mqtt.client as mqtt
+import subprocess
 
 # Replace with actual values
-TRIGGER_SERVICE_IP = "localhost"
+TRIGGER_SERVICE_IP = "10.0.1.200"
 TRIGGER_SERVICE_PORT = 8083
-MQTT_BROKER = "localhost"
+MQTT_BROKER = "10.0.1.200"
 MQTT_TRIGGER_TOPIC = "trigger"
 MQTT_SENSORS_TOPIC = "sensors"
 MQTT_RFID_TOPIC = "sensors/rfid"
 MQTT_BRIGHTNESS_TOPIC = "brightness"
 MQTT_BRIGHTNESS_FIELD = "global_brightness"
+MQTT_MANUAL_BRIGHTNESS_TOPIC = "manual_brightness"
+MQTT_MANUAL_BRIGHTNESS_FIELD = "global_brightness"
 
 TRIGGER_URL_BASE = f"http://{TRIGGER_SERVICE_IP}:{TRIGGER_SERVICE_PORT}"
 
@@ -32,7 +35,8 @@ motion_sensors = {}  # Store motion sensor data {sensor_name: {"value": value, "
 motion_detected = False  # True if majority of motion sensors are on
 brightness = None  # Current brightness value
 last_published_brightness = None  # Track last brightness we published
-baseline_brightness = None  # Brightness baseline when no motion detected (from MQTT/external for songs)
+baseline_brightness = None  # Brightness baseline when no motion detected (from MQTT/external)
+manual_brightness = None  # Manual brightness for songs (from manual_brightness topic)
 trigger_baseline_brightness = 0.05  # Baseline brightness for triggers (not songs)
 is_playing_trigger = True  # Track if currently playing a trigger (vs song)
 stdscr = None  # Global reference to curses screen
@@ -140,12 +144,30 @@ def on_rfid_message(client, userdata, msg):
                     stdscr.refresh()
                 return
 
+            # Play agent.wav audio file
+            try:
+                subprocess.run(["aplay", "/home/pi/Music/agent.wav"], check=False)
+                if stdscr:
+                    stdscr.addstr(f"\nPlayed agent.wav audio")
+                    stdscr.refresh()
+            except Exception as e:
+                if stdscr:
+                    stdscr.addstr(f"\nFailed to play audio: {e}")
+                    stdscr.refresh()
+
             # Play the current song from the list
             song_to_play = SONG_LIST[current_song_index]
             if stdscr:
                 stdscr.addstr(f"\n--- RFID triggered song: {song_to_play} ---")
                 stdscr.refresh()
-            start_song(stdscr, song_to_play)
+
+            # Get color from RFID data
+            color_value = data.get("color", "")
+
+            # Extract box number from topic (e.g., sensors/rfid/box1/chip -> box1)
+            box_id = topic.split("/")[-2] if "/" in topic else "box1"
+
+            start_song(stdscr, song_to_play, color=color_value, box_id=box_id)
 
             # Advance to next song for next RFID trigger
             current_song_index = (current_song_index + 1) % len(SONG_LIST)
@@ -177,6 +199,19 @@ def on_brightness_message(client, userdata, msg):
     except (json.JSONDecodeError, ValueError):
         brightness = 0.0
 
+def on_manual_brightness_message(client, userdata, msg):
+    """Handle incoming manual brightness MQTT messages for songs."""
+    global manual_brightness, stdscr
+    try:
+        payload = json.loads(msg.payload.decode("utf-8"))
+        new_manual_brightness = float(payload.get(MQTT_MANUAL_BRIGHTNESS_FIELD, 0.0))
+        manual_brightness = new_manual_brightness
+        if stdscr:
+            stdscr.addstr(f"\nManual brightness updated: {manual_brightness}")
+            stdscr.refresh()
+    except (json.JSONDecodeError, ValueError):
+        manual_brightness = 0.5
+
 client = mqtt.Client()
 
 def is_mqtt_available():
@@ -204,6 +239,22 @@ def get_latest_brightness():
     if brightness is None:
         brightness = 0.5
 
+def get_latest_manual_brightness():
+    """Get the latest retained manual brightness from MQTT."""
+    global manual_brightness
+    manual_brightness = None
+
+    client.unsubscribe(MQTT_MANUAL_BRIGHTNESS_TOPIC)
+    client.subscribe(MQTT_MANUAL_BRIGHTNESS_TOPIC)
+
+    for _ in range(10):
+        if manual_brightness is not None:
+            return
+        time.sleep(0.1)
+
+    if manual_brightness is None:
+        manual_brightness = 0.5
+
 def publish_brightness():
     """Publish current brightness to MQTT."""
     global last_published_brightness
@@ -224,6 +275,9 @@ def setup_mqtt():
     # Subscribe to brightness topic with dedicated callback
     client.message_callback_add(MQTT_BRIGHTNESS_TOPIC, on_brightness_message)
     client.subscribe(MQTT_BRIGHTNESS_TOPIC)
+    # Subscribe to manual_brightness topic with dedicated callback
+    client.message_callback_add(MQTT_MANUAL_BRIGHTNESS_TOPIC, on_manual_brightness_message)
+    client.subscribe(MQTT_MANUAL_BRIGHTNESS_TOPIC)
     client.loop_start()
 
 def stop(stdscr):
@@ -236,17 +290,17 @@ def stop(stdscr):
         stdscr.addstr(f"\nError while stopping trigger: {err}")
         stdscr.refresh()
 
-def start_song(stdscr, song_name: str, start_offset_seconds: float = 0):
+def start_song(stdscr, song_name: str, start_offset_seconds: float = 0, color: str = "", box_id: str = "box1"):
     """Start a song with an optional start offset in seconds."""
-    global requested_song, is_playing_trigger, brightness, baseline_brightness
+    global requested_song, is_playing_trigger, brightness, manual_brightness, current_song_index
     requested_song = song_name  # Set the requested song global so we can check if it's playing
     is_playing_trigger = False  # Mark that we're playing a song, not a trigger
 
-    # When starting a song, restore brightness to baseline (from MQTT/external)
-    if baseline_brightness is not None:
-        brightness = baseline_brightness
+    # When starting a song, restore brightness to manual_brightness (from manual_brightness topic)
+    if manual_brightness is not None:
+        brightness = manual_brightness
         publish_brightness()
-        stdscr.addstr(f"\nRestoring brightness to baseline {baseline_brightness} for song")
+        stdscr.addstr(f"\nRestoring brightness to manual brightness {manual_brightness} for song")
         stdscr.refresh()
 
     try:
@@ -257,16 +311,31 @@ def start_song(stdscr, song_name: str, start_offset_seconds: float = 0):
         )
         stdscr.addstr(f"\nSong {song_name} started, HTTP status: {res.status_code}")
         stdscr.refresh()
+
+        # After 2 seconds, send MQTT message with color and master_state
+        time.sleep(2)
+        # Use provided color or default to song index
+        color_value = color
+        response_payload = json.dumps({
+            "color": color_value,
+            "master_state": 0
+        })
+        # Publish to the box's leds topic
+        leds_topic = f"{MQTT_RFID_TOPIC}/{box_id}/leds"
+        client.publish(leds_topic, response_payload, retain=True)
+        if stdscr:
+            stdscr.addstr(f"\nPublished to {leds_topic}: color={color_value}, master_state=0")
+            stdscr.refresh()
     except requests.RequestException as err:
         stdscr.addstr(f"\nError while starting song '{song_name}': {err}")
         stdscr.refresh()
 
 def trigger(stdscr, trigger_name: str):
     """Send a trigger request."""
-    global is_playing_trigger, brightness, trigger_baseline_brightness
+    global is_playing_trigger, brightness, trigger_baseline_brightness, current_trigger_index
     is_playing_trigger = True  # Mark that we're playing a trigger
 
-    # When starting a trigger, set brightness to trigger baseline (0.05)
+    # When starting a trigger, set brightness to trigger baseline (0.1)
     brightness = trigger_baseline_brightness
     publish_brightness()
     stdscr.addstr(f"\nSetting brightness to trigger baseline {trigger_baseline_brightness}")
@@ -279,6 +348,21 @@ def trigger(stdscr, trigger_name: str):
         )
         stdscr.addstr(f"\nTrigger {trigger_name} started, HTTP status: {res.status_code}")
         stdscr.refresh()
+
+        # Send MQTT message with color based on trigger index and master_state=2
+        color_value = (current_trigger_index % 5) + 1  # Cycle colors 1-5
+        response_payload = json.dumps({
+            "color": color_value,
+            "master_state": 2
+        })
+        # Publish to all box leds topics (box1 through box5)
+        for box_num in range(1, 6):
+            leds_topic = f"{MQTT_RFID_TOPIC}/box{box_num}/leds"
+            client.publish(leds_topic, response_payload, retain=True)
+        if stdscr:
+            stdscr.addstr(f"\nPublished trigger status to all boxes: color={color_value}, master_state=2")
+            stdscr.refresh()
+
         return True
     except requests.RequestException as err:
         stdscr.addstr(f"\nError while starting trigger '{trigger_name}': {err}")
@@ -294,12 +378,12 @@ while not is_mqtt_available():
 print("MQTT broker is up! Starting script...")
 
 def main(screen):
-    global trigger_active, stdscr, brightness, current_trigger_index, current_song_index, last_trigger_change, baseline_brightness
+    global trigger_active, stdscr, brightness, current_trigger_index, current_song_index, last_trigger_change, baseline_brightness, manual_brightness
     stdscr = screen  # Make stdscr available globally
     last_brightness_update = time.time()
     last_trigger_change = time.time()  # Track when we last changed the trigger
     previous_motion_state = False  # Track motion state changes
-    is_decreasing_brightness = False  # Flag to disable motion detection during brightness decrease
+    was_song_playing = False  # Track previous song state to detect when songs end
 
     # Setup the screen
     stdscr.nodelay(True)
@@ -315,6 +399,13 @@ def main(screen):
     baseline_brightness = brightness  # Set initial baseline
     publish_brightness()
     stdscr.addstr(f"Initial brightness set to {brightness}\n")
+
+    # Initialize manual brightness
+    get_latest_manual_brightness()
+    if manual_brightness is None:
+        manual_brightness = 0.5
+    stdscr.addstr(f"Manual brightness set to {manual_brightness}\n")
+    stdscr.refresh()
     stdscr.refresh()
 
     current_trigger = get_current_trigger()
@@ -330,83 +421,72 @@ def main(screen):
         key = stdscr.getch()
         current_time = time.time()
 
-        # Check if it's time to cycle to the next trigger
-        if current_time - last_trigger_change >= TRIGGER_CYCLE_INTERVAL:
-            # Don't interrupt if a song is currently playing
-            if is_song_playing():
-                stdscr.addstr(f"\nSong is playing, skipping trigger cycle")
-                stdscr.refresh()
-                # Reset timer to check again in the next interval
-                last_trigger_change = current_time
-            else:
-                # Change to next trigger
-                current_trigger_index = (current_trigger_index + 1) % len(TRIGGER_LIST)
-                current_trigger = get_current_trigger()
-                stdscr.addstr(f"\n--- Cycling to trigger: {current_trigger} ---")
-                stdscr.refresh()
-                trigger(stdscr, current_trigger)
+        # Detect when a song finishes and reset the timer
+        song_currently_playing = is_song_playing()
+        if was_song_playing and not song_currently_playing:
+            # Song just finished, reset the timer to start counting now
+            last_trigger_change = current_time
+            stdscr.addstr(f"\nSong finished, resetting trigger cycle timer")
+            stdscr.refresh()
+        was_song_playing = song_currently_playing
 
-                # Wait for trigger to complete, then play alternating song
-                time.sleep(2)
-                song_to_play = SONG_LIST[current_song_index]
-                stdscr.addstr(f"\n--- Playing song: {song_to_play} ---")
-                stdscr.refresh()
-                start_song(stdscr, song_to_play)
+        # Check if it's time to cycle to the next trigger (but only if no song is playing)
+        if not song_currently_playing and current_time - last_trigger_change >= TRIGGER_CYCLE_INTERVAL:
+            # Change to next trigger
+            current_trigger_index = (current_trigger_index + 1) % len(TRIGGER_LIST)
+            current_trigger = get_current_trigger()
+            stdscr.addstr(f"\n--- Cycling to trigger: {current_trigger} ---")
+            stdscr.refresh()
+            trigger(stdscr, current_trigger)
 
-                # Alternate to next song for next cycle
-                current_song_index = (current_song_index + 1) % len(SONG_LIST)
-                last_trigger_change = current_time
+            # Wait for trigger to complete, then play alternating song
+            time.sleep(2)
+            song_to_play = SONG_LIST[current_song_index]
+            stdscr.addstr(f"\n--- Playing song: {song_to_play} ---")
+            stdscr.refresh()
+            start_song(stdscr, song_to_play)
+
+            # Alternate to next song for next cycle
+            current_song_index = (current_song_index + 1) % len(SONG_LIST)
+            last_trigger_change = current_time
 
         # Handle brightness based on motion detection
-        # - For songs: brightness stays at baseline (from MQTT/external)
-        # - For triggers: motion controls brightness (0.05 baseline -> 1.0 with motion)
+        # - For songs: brightness stays at manual_brightness (from manual_brightness topic)
+        # - For triggers: motion controls brightness (0.05 baseline -> manual_brightness with motion)
+        # - Increase rate: 0.1 per 0.25s (fast)
+        # - Decrease rate: spread over 30 seconds (slow)
         if current_time - last_brightness_update >= 0.25:  # Adjust every 0.25 seconds
             if is_song_playing():
-                # During songs, keep brightness at baseline (from MQTT/external)
-                if baseline_brightness is not None and brightness != baseline_brightness:
-                    brightness = baseline_brightness
+                # During songs, keep brightness at manual_brightness (from manual_brightness topic)
+                if manual_brightness is not None and brightness != manual_brightness:
+                    brightness = manual_brightness
                     publish_brightness()
-                    stdscr.addstr(f"\nSong playing - maintaining baseline brightness: {brightness}")
+                    stdscr.addstr(f"\nSong playing - maintaining manual brightness: {brightness}")
                     stdscr.refresh()
             elif is_playing_trigger:
                 # For triggers, motion controls brightness
                 current_baseline = trigger_baseline_brightness
 
-                # Detect motion state change (only if not currently decreasing brightness)
-                if not is_decreasing_brightness and motion_detected and not previous_motion_state:
-                    # Motion just started
-                    stdscr.addstr(f"\nMotion started - will increase from {current_baseline} to 1.0")
-                    stdscr.refresh()
-
-                if not is_decreasing_brightness and motion_detected:
-                    # Increase brightness gradually to 1.0
-                    target_brightness = 1.0
+                if motion_detected:
+                    # Motion detected - increase brightness quickly to manual_brightness
+                    target_brightness = manual_brightness if manual_brightness is not None else 1.0
                     if brightness < target_brightness:
                         brightness = min(target_brightness, round(brightness + 0.1, 1))
                         publish_brightness()
                         stdscr.addstr(f"\nMotion detected - brightness: {brightness}")
                         stdscr.refresh()
-                    previous_motion_state = motion_detected
-                elif not motion_detected or is_decreasing_brightness:
-                    # Return brightness to trigger baseline (0.05)
+                    previous_motion_state = True
+                else:
+                    # No motion - decrease brightness slowly to baseline over 30 seconds
+                    # Decrease rate: (1.0 - 0.05) / 30 seconds = 0.0317 per second
+                    # Per 0.25s interval: 0.0317 / 4 ≈ 0.008 per update
                     if brightness > current_baseline:
-                        if not is_decreasing_brightness:
-                            stdscr.addstr(f"\nStarting brightness decrease to {current_baseline} (motion detection disabled)")
-                            stdscr.refresh()
-                        is_decreasing_brightness = True
-                        brightness = max(current_baseline, round(brightness - 0.1, 1))
+                        decrease_amount = 0.008
+                        brightness = max(current_baseline, brightness - decrease_amount)
                         publish_brightness()
-                        stdscr.addstr(f"\nNo motion - brightness: {brightness}")
+                        stdscr.addstr(f"\nNo motion - brightness: {brightness:.3f}")
                         stdscr.refresh()
-
-                        # Check if we've reached baseline
-                        if brightness <= current_baseline:
-                            is_decreasing_brightness = False
-                            stdscr.addstr(f"\nBrightness decrease complete (motion detection enabled)")
-                            stdscr.refresh()
-                    else:
-                        # Not decreasing, just update state
-                        previous_motion_state = motion_detected
+                    previous_motion_state = False
 
             last_brightness_update = current_time
 
