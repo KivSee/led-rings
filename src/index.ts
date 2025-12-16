@@ -56,7 +56,7 @@ const turnOffRand = (numberRingsOn: number) => {
 };
 
 const testSequence = async () => {
-  const testAnimation = new Animation("aladdin", 64.725, 79, 575);
+  const testAnimation = new Animation("aladdin", 64.725, 79, 3575);
   testAnimation.sync(() => {
     beats(0, 16, () => {
       elements(all, () => {
@@ -64,6 +64,12 @@ const testSequence = async () => {
         cycle(12, () => {
           snake({ tailLength: 0.125, cyclic: true });
         });
+      });
+    });
+
+    beats(0, 1, () => {
+      elements(all, () => {
+        fadeIn();
       });
     });
 
