@@ -3,12 +3,11 @@ import time
 import curses
 import json
 import paho.mqtt.client as mqtt
-import subprocess
 
 # Replace with actual values
-TRIGGER_SERVICE_IP = "10.0.1.200"
+TRIGGER_SERVICE_IP = "localhost"
 TRIGGER_SERVICE_PORT = 8083
-MQTT_BROKER = "10.0.1.200"
+MQTT_BROKER = "localhost"
 MQTT_TRIGGER_TOPIC = "trigger"
 MQTT_SENSORS_TOPIC = "sensors"
 MQTT_RFID_TOPIC = "sensors/rfid"
@@ -22,7 +21,7 @@ TRIGGER_URL_BASE = f"http://{TRIGGER_SERVICE_IP}:{TRIGGER_SERVICE_PORT}"
 # Trigger cycling configuration
 TRIGGER_LIST = ["psychedelic", "mystery", "random", "chill", "party", "background"]
 SONG_LIST = ["aladdin", "buttons"]  # Known songs that should not be interrupted
-TRIGGER_CYCLE_INTERVAL = 600  # 10 minutes in seconds
+TRIGGER_CYCLE_INTERVAL = 450  # 7.5 minutes in seconds
 current_trigger_index = 0
 current_song_index = 0  # Track which song to play next (alternates between 0 and 1)
 last_trigger_change = time.time()
@@ -31,6 +30,8 @@ last_trigger_change = time.time()
 global_trigger_status = ""
 trigger_active = False  # Track if the trigger is active
 requested_song = ""  # Store the requested song name
+last_rfid_color = ""  # Store last RFID color for agent->song transition
+last_rfid_box_id = "box1"  # Store last RFID box_id for agent->song transition
 motion_sensors = {}  # Store motion sensor data {sensor_name: {"value": value, "alive": bool}}
 motion_detected = False  # True if majority of motion sensors are on
 brightness = None  # Current brightness value
@@ -61,16 +62,32 @@ def is_song_playing():
     return False
 
 def on_message(client, userdata, msg):
-    global global_trigger_status, requested_song, trigger_active, stdscr
+    global global_trigger_status, requested_song, trigger_active, stdscr, current_song_index, last_rfid_color, last_rfid_box_id
     previous_status = global_trigger_status
     global_trigger_status = msg.payload.decode("utf-8").strip()
-    # Check if trigger became empty ({}) - if so, send current trigger
+
+    # Check if trigger became empty ({}) after agent song
     if previous_status != "{}" and global_trigger_status == "{}":
-        current_trigger = get_current_trigger()
-        if stdscr:
-            stdscr.addstr(f"\nTrigger became empty, sending '{current_trigger}' trigger")
-            stdscr.refresh()
-        trigger(stdscr, current_trigger)
+        # Check if the previous trigger was the agent song
+        if "agent" in previous_status.lower():
+            # Agent song just finished, play the current song from the list
+            song_to_play = SONG_LIST[current_song_index]
+            if stdscr:
+                stdscr.addstr(f"\n--- Agent finished, playing song: {song_to_play} ---")
+                stdscr.refresh()
+
+            # Use stored color and box_id from RFID trigger
+            start_song(stdscr, song_to_play, color=last_rfid_color, box_id=last_rfid_box_id)
+
+            # Advance to next song for next RFID trigger
+            current_song_index = (current_song_index + 1) % len(SONG_LIST)
+        else:
+            # Normal trigger end, send current trigger
+            current_trigger = get_current_trigger()
+            if stdscr:
+                stdscr.addstr(f"\nTrigger became empty, sending '{current_trigger}' trigger")
+                stdscr.refresh()
+            trigger(stdscr, current_trigger)
 
     if (requested_song in global_trigger_status):  # True if the song name is in the payload
         trigger_active = True
@@ -127,7 +144,7 @@ def on_sensors_message(client, userdata, msg):
 
 def on_rfid_message(client, userdata, msg):
     """Handle RFID sensor messages and play songs when chip is detected."""
-    global current_song_index, stdscr
+    global current_song_index, stdscr, is_playing_audio, last_rfid_color, last_rfid_box_id
     try:
         # Check if this is a chip topic (sensors/rfid/box#/chip)
         topic = msg.topic
@@ -137,28 +154,16 @@ def on_rfid_message(client, userdata, msg):
                 stdscr.addstr(f"\nRFID chip detected on {topic}: {data}")
                 stdscr.refresh()
 
-            # Don't interrupt if a song is already playing
-            if is_song_playing():
+            # Don't interrupt if a song is already playing (including agent)
+            if is_song_playing() or "agent" in global_trigger_status.lower():
                 if stdscr:
                     stdscr.addstr(f"\nSong already playing, ignoring RFID trigger")
                     stdscr.refresh()
                 return
 
-            # Play agent.wav audio file
-            try:
-                subprocess.run(["aplay", "/home/pi/Music/agent.wav"], check=False)
-                if stdscr:
-                    stdscr.addstr(f"\nPlayed agent.wav audio")
-                    stdscr.refresh()
-            except Exception as e:
-                if stdscr:
-                    stdscr.addstr(f"\nFailed to play audio: {e}")
-                    stdscr.refresh()
-
-            # Play the current song from the list
-            song_to_play = SONG_LIST[current_song_index]
+            # Trigger the agent song
             if stdscr:
-                stdscr.addstr(f"\n--- RFID triggered song: {song_to_play} ---")
+                stdscr.addstr(f"\n--- RFID triggered agent song ---")
                 stdscr.refresh()
 
             # Get color from RFID data
@@ -167,10 +172,14 @@ def on_rfid_message(client, userdata, msg):
             # Extract box number from topic (e.g., sensors/rfid/box1/chip -> box1)
             box_id = topic.split("/")[-2] if "/" in topic else "box1"
 
-            start_song(stdscr, song_to_play, color=color_value, box_id=box_id)
+            # Store for later use when agent finishes
+            last_rfid_color = color_value
+            last_rfid_box_id = box_id
 
-            # Advance to next song for next RFID trigger
-            current_song_index = (current_song_index + 1) % len(SONG_LIST)
+            start_song(stdscr, "agent", color=color_value, box_id=box_id)
+
+            # Note: The next song will be triggered automatically when agent finishes
+            # (handled in on_message when trigger becomes empty)
     except json.JSONDecodeError as e:
         if stdscr:
             stdscr.addstr(f"\nFailed to parse RFID JSON: {e}")
@@ -182,19 +191,10 @@ def on_rfid_message(client, userdata, msg):
 
 def on_brightness_message(client, userdata, msg):
     """Handle incoming brightness MQTT messages."""
-    global brightness, last_published_brightness, baseline_brightness, stdscr
+    global brightness, last_published_brightness, stdscr
     try:
         payload = json.loads(msg.payload.decode("utf-8"))
         new_brightness = float(payload.get(MQTT_BRIGHTNESS_FIELD, 0.0))
-
-        # Check if this is an external change (not from us)
-        if last_published_brightness is not None and abs(new_brightness - last_published_brightness) > 0.01:
-            # External change detected - update baseline to respect this change
-            baseline_brightness = new_brightness
-            if stdscr:
-                stdscr.addstr(f"\nExternal brightness change detected: {new_brightness}, updating baseline")
-                stdscr.refresh()
-
         brightness = new_brightness
     except (json.JSONDecodeError, ValueError):
         brightness = 0.0
@@ -209,8 +209,10 @@ def on_manual_brightness_message(client, userdata, msg):
         if stdscr:
             stdscr.addstr(f"\nManual brightness updated: {manual_brightness}")
             stdscr.refresh()
-    except (json.JSONDecodeError, ValueError):
-        manual_brightness = 0.5
+    except (json.JSONDecodeError, ValueError) as e:
+        if stdscr:
+            stdscr.addstr(f"\nFailed to parse manual brightness: {e}")
+            stdscr.refresh()
 
 client = mqtt.Client()
 
@@ -241,19 +243,29 @@ def get_latest_brightness():
 
 def get_latest_manual_brightness():
     """Get the latest retained manual brightness from MQTT."""
-    global manual_brightness
-    manual_brightness = None
+    global manual_brightness, stdscr
 
-    client.unsubscribe(MQTT_MANUAL_BRIGHTNESS_TOPIC)
-    client.subscribe(MQTT_MANUAL_BRIGHTNESS_TOPIC)
+    # Wait for MQTT to deliver retained message - max 30 retries, then default to 0.25
+    if stdscr:
+        stdscr.addstr(f"\nWaiting for manual_brightness from MQTT (current: {manual_brightness})...")
+        stdscr.refresh()
 
-    for _ in range(10):
-        if manual_brightness is not None:
-            return
+    # Poll up to 30 times (3 seconds), then default to 0.25
+    retry_count = 0
+    max_retries = 30
+    while manual_brightness is None and retry_count < max_retries:
         time.sleep(0.1)
+        retry_count += 1
 
     if manual_brightness is None:
-        manual_brightness = 0.5
+        manual_brightness = 0.25
+        if stdscr:
+            stdscr.addstr(f"\nNo manual_brightness received after {max_retries} retries, defaulting to 0.25")
+            stdscr.refresh()
+    else:
+        if stdscr:
+            stdscr.addstr(f"\nGot manual_brightness from MQTT: {manual_brightness}")
+            stdscr.refresh()
 
 def publish_brightness():
     """Publish current brightness to MQTT."""
@@ -296,7 +308,8 @@ def start_song(stdscr, song_name: str, start_offset_seconds: float = 0, color: s
     requested_song = song_name  # Set the requested song global so we can check if it's playing
     is_playing_trigger = False  # Mark that we're playing a song, not a trigger
 
-    # When starting a song, restore brightness to manual_brightness (from manual_brightness topic)
+    # manual_brightness should already be up-to-date from the MQTT callback
+    # Just use the current value
     if manual_brightness is not None:
         brightness = manual_brightness
         publish_brightness()
@@ -312,19 +325,19 @@ def start_song(stdscr, song_name: str, start_offset_seconds: float = 0, color: s
         stdscr.addstr(f"\nSong {song_name} started, HTTP status: {res.status_code}")
         stdscr.refresh()
 
-        # After 2 seconds, send MQTT message with color and master_state
-        time.sleep(2)
-        # Use provided color or default to song index
+        time.sleep(2)  # wait before shutting down boxes
+        # Send MQTT message with color and master_state
         color_value = color
         response_payload = json.dumps({
             "color": color_value,
             "master_state": 0
         })
-        # Publish to the box's leds topic
-        leds_topic = f"{MQTT_RFID_TOPIC}/{box_id}/leds"
-        client.publish(leds_topic, response_payload, retain=True)
+        # Publish to all box leds topics (box1 through box5)
+        for box_num in range(1, 6):
+            leds_topic = f"{MQTT_RFID_TOPIC}/box{box_num}/leds"
+            client.publish(leds_topic, response_payload, retain=True)
         if stdscr:
-            stdscr.addstr(f"\nPublished to {leds_topic}: color={color_value}, master_state=0")
+            stdscr.addstr(f"\nPublished song status to all boxes: color={color_value}, master_state=0")
             stdscr.refresh()
     except requests.RequestException as err:
         stdscr.addstr(f"\nError while starting song '{song_name}': {err}")
@@ -402,8 +415,6 @@ def main(screen):
 
     # Initialize manual brightness
     get_latest_manual_brightness()
-    if manual_brightness is None:
-        manual_brightness = 0.5
     stdscr.addstr(f"Manual brightness set to {manual_brightness}\n")
     stdscr.refresh()
     stdscr.refresh()
