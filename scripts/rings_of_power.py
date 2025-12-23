@@ -217,10 +217,15 @@ def on_manual_brightness_message(client, userdata, msg):
 client = mqtt.Client()
 
 def is_mqtt_available():
-    """Check if the MQTT broker inside Docker is running."""
+    """Check if the MQTT broker inside Docker is running.
+
+    Use a temporary client to avoid changing the state of the global
+    `client` instance used later for subscriptions and the loop.
+    """
     try:
-        client.connect(MQTT_BROKER, 1883, 3)  # Timeout after 3 seconds
-        client.disconnect()
+        temp_client = mqtt.Client()
+        temp_client.connect(MQTT_BROKER, 1883, 3)
+        temp_client.disconnect()
         return True
     except:
         return False
@@ -275,22 +280,43 @@ def publish_brightness():
     last_published_brightness = brightness  # Track what we published
 
 def setup_mqtt():
+    # Use on_connect to perform subscriptions so they occur after a successful
+    # connection. Keep a fallback on_message as well.
+    client.on_connect = on_connect
     client.on_message = on_message
     client.connect(MQTT_BROKER)
+    client.loop_start()
+
+
+def on_connect(client, userdata, flags, rc):
+    """Called when the MQTT client connects. Subscribe and register
+    per-topic callbacks here to ensure subscriptions are active after
+    reconnects as well.
+    """
+    try:
+        if stdscr:
+            stdscr.addstr(f"\nConnected to MQTT broker (rc={rc})")
+            stdscr.refresh()
+    except Exception:
+        pass
+
+    # Trigger topic: use dedicated callback (also keep default handler)
+    client.message_callback_add(MQTT_TRIGGER_TOPIC, on_message)
     client.subscribe(MQTT_TRIGGER_TOPIC)
-    # Subscribe to sensors topic with dedicated callback (using wildcard for all thing names)
+
+    # Sensors
     client.message_callback_add("sensors/#", on_sensors_message)
     client.subscribe("sensors/#")
-    # Subscribe to RFID topic with dedicated callback
+
+    # RFID
     client.message_callback_add(f"{MQTT_RFID_TOPIC}/#", on_rfid_message)
     client.subscribe(f"{MQTT_RFID_TOPIC}/#")
-    # Subscribe to brightness topic with dedicated callback
+
+    # Brightness topics
     client.message_callback_add(MQTT_BRIGHTNESS_TOPIC, on_brightness_message)
     client.subscribe(MQTT_BRIGHTNESS_TOPIC)
-    # Subscribe to manual_brightness topic with dedicated callback
     client.message_callback_add(MQTT_MANUAL_BRIGHTNESS_TOPIC, on_manual_brightness_message)
     client.subscribe(MQTT_MANUAL_BRIGHTNESS_TOPIC)
-    client.loop_start()
 
 def stop(stdscr):
     """Send a request to stop the trigger."""
