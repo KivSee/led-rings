@@ -1,0 +1,257 @@
+.timeline-container {
+  padding: 40px;
+  min-height: 600px;
+  position: relative;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-wrapper {
+  position: relative;
+  height: 600px;
+  margin-left: 80px;
+  user-select: none;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(to bottom, #667eea, #764ba2);
+  border-radius: 2px;
+}
+
+.timeframes {
+  position: relative;
+  height: 100%;
+  margin-left: 40px;
+  overflow: visible;
+}
+
+.timeframe {
+  position: absolute;
+  left: 0;
+  right: 0;
+  min-height: 60px;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.resize-handle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  cursor: ns-resize;
+  z-index: 30;
+  background: transparent;
+  transition: background 0.2s;
+}
+
+.resize-handle-top {
+  top: 0;
+  border-radius: 8px 8px 0 0;
+}
+
+.resize-handle-bottom {
+  bottom: 0;
+  border-radius: 0 0 8px 8px;
+}
+
+.resize-handle:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.timeframe:hover .resize-handle {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.timeframe:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.timeframe-focused {
+  z-index: 10000 !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+.timeframe.ring-selector-open {
+  z-index: 1000 !important;
+}
+
+.timeframe-dragging {
+  pointer-events: none;
+  z-index: 100;
+  transition: none !important;
+}
+
+.timeframe-dragging:hover {
+  transform: none;
+}
+
+.timeframe-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: white;
+  height: 100%;
+  pointer-events: auto;
+  position: relative;
+  z-index: 10;
+  overflow: visible;
+}
+
+.timeframe-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.timeframe-label {
+  font-weight: 600;
+  font-size: 16px;
+  cursor: text;
+  flex: 1;
+}
+
+.timeframe-label:hover {
+  text-decoration: underline;
+}
+
+.timeframe-times {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.timeframe-time {
+  cursor: text;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.timeframe-time:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.timeframe-separator {
+  opacity: 0.7;
+}
+
+.timeframe-input {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  width: 100%;
+  outline: none;
+}
+
+.timeframe-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.timeframe-input-small {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  padding: 2px 6px;
+  color: white;
+  font-size: 14px;
+  width: 60px;
+  outline: none;
+}
+
+.delete-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  opacity: 0.7;
+}
+
+.delete-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.time-marks {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+}
+
+.time-mark {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  left: 0;
+  right: 20px;
+}
+
+.time-mark-line {
+  width: 12px;
+  height: 2px;
+  background: #667eea;
+  border-radius: 1px;
+  flex-shrink: 0;
+  order: 2;
+}
+
+.time-mark-label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  text-align: right;
+  min-width: 35px;
+  order: 1;
+  padding-right: 4px;
+}
+
+.time-mark-large {
+  font-weight: 600;
+}
+
+.time-mark-line-large {
+  width: 16px;
+  height: 3px;
+  background: #764ba2;
+}
+
+.time-mark-label-large {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+}
