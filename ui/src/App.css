@@ -19,6 +19,13 @@
   min-height: 0;
 }
 
+.app-main {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
 .app-header {
   display: flex;
   justify-content: space-between;

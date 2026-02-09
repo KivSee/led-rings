@@ -7,9 +7,11 @@ interface RingVisualizationProps {
   rainbow?: boolean
   rainbowRange?: number
   startColor?: string
+  /** Ring numbers (1-12) that are active; rings not in this list are dimmed. Omit to show all. */
+  activeRings?: number[]
 }
 
-const RingVisualization = ({ mapping, rainbow, rainbowRange = 1, startColor }: RingVisualizationProps) => {
+const RingVisualization = ({ mapping, rainbow, rainbowRange = 1, startColor, activeRings }: RingVisualizationProps) => {
   // Convert hex color to HSL to get hue
   const hexToHue = (hex: string): number => {
     const r = parseInt(hex.slice(1, 3), 16) / 255
@@ -157,10 +159,13 @@ const RingVisualization = ({ mapping, rainbow, rainbowRange = 1, startColor }: R
   return (
     <div className="ring-visualization">
       <div className="rings-container">
-        {ringsWithPositions.map((ringPixels, ringIndex) => (
+        {ringsWithPositions.map((ringPixels, ringIndex) => {
+          const ringNumber = ringIndex + 1
+          const isActive = !activeRings || activeRings.length === 0 || activeRings.includes(ringNumber)
+          return (
           <div
             key={ringIndex}
-            className="small-ring"
+            className={`small-ring ${!isActive ? 'small-ring-inactive' : ''}`}
             style={{
               '--ring-index': ringIndex,
             } as React.CSSProperties}
@@ -183,7 +188,8 @@ const RingVisualization = ({ mapping, rainbow, rainbowRange = 1, startColor }: R
               )
             })}
           </div>
-        ))}
+        )
+        })}
       </div>
     </div>
   )

@@ -28,6 +28,12 @@
   transform-origin: 200px 200px;
   /* Position 12 rings in a circle, 30 degrees apart, closer together */
   transform: rotate(calc(var(--ring-index) * 30deg)) translateX(100px) rotate(calc(var(--ring-index) * -30deg));
+  transition: opacity 0.2s;
+}
+
+.small-ring-inactive {
+  opacity: 0.25;
+  pointer-events: none;
 }
 
 .ring-pixel {

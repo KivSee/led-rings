@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import Timeline from './components/Timeline'
 import TimeframePanel from './components/TimeframePanel'
+import PlaybackRingsPanel from './components/PlaybackRingsPanel'
 import './App.css'
 
 export interface Timeframe {
@@ -365,17 +366,20 @@ function App() {
         </div>
       </div>
       <div className="app-content">
-        <Timeline
-          timeframes={timeframes}
-          songLengthBeats={songLengthBeats}
-          onUpdate={updateTimeframe}
-          onDelete={deleteTimeframe}
-          onAdd={addTimeframeFromDrag}
-          focusedTimeframeId={focusedTimeframeId}
-          onFocusedTimeframeChange={setFocusedTimeframeId}
-          currentTime={currentTime}
-          onCurrentTimeChange={setCurrentTime}
-        />
+        <div className="app-main">
+          <PlaybackRingsPanel currentTime={currentTime} timeframes={timeframes} />
+          <Timeline
+            timeframes={timeframes}
+            songLengthBeats={songLengthBeats}
+            onUpdate={updateTimeframe}
+            onDelete={deleteTimeframe}
+            onAdd={addTimeframeFromDrag}
+            focusedTimeframeId={focusedTimeframeId}
+            onFocusedTimeframeChange={setFocusedTimeframeId}
+            currentTime={currentTime}
+            onCurrentTimeChange={setCurrentTime}
+          />
+        </div>
         <TimeframePanel
           timeframe={focusedTimeframe}
           onUpdate={handlePanelUpdate}
