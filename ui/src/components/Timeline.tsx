@@ -1,10 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Timeframe } from '../App'
 import RingSelector from './RingSelector'
 import './Timeline.css'
 
 interface TimelineProps {
   timeframes: Timeframe[]
+  songLengthBeats: number
   onUpdate: (id: string, updates: Partial<Timeframe>) => void
   onDelete: (id: string) => void
   onAdd: (startTime: number, endTime: number) => void
@@ -14,7 +15,7 @@ interface TimelineProps {
   onCurrentTimeChange: (time: number) => void
 }
 
-const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange }: TimelineProps) => {
+const Timeline = ({ timeframes, songLengthBeats, onUpdate, onDelete, onAdd, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange }: TimelineProps) => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -23,12 +24,30 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
   const [resizingTimeframeId, setResizingTimeframeId] = useState<string | null>(null)
   const [resizingEdge, setResizingEdge] = useState<'start' | 'end' | null>(null)
   const [isDraggingTimeIndicator, setIsDraggingTimeIndicator] = useState(false)
+  const timelineScrollViewRef = React.useRef<HTMLDivElement>(null)
   const timelineWrapperRef = React.useRef<HTMLDivElement>(null)
+  const [visibleHeightPx, setVisibleHeightPx] = useState<number>(600)
 
-  const maxTime = Math.max(
-    ...timeframes.map(tf => tf.endTime),
-    30
-  )
+  const maxTime = Math.max(songLengthBeats, 4)
+  const BEATS_PER_SCREEN = 64
+
+  // Fixed scale: 64 beats = one screen height. Measure the scroll viewport.
+  useEffect(() => {
+    const scrollEl = timelineScrollViewRef.current
+    if (!scrollEl) return
+    const update = () => {
+      const h = scrollEl.clientHeight
+      if (Number.isFinite(h) && h > 0) setVisibleHeightPx(h)
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(scrollEl)
+    window.addEventListener('resize', update)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', update)
+    }
+  }, [])
 
   const handleTimeframeClick = (id: string, field: 'label' | 'startTime' | 'endTime') => {
     setEditingId(id)
@@ -40,7 +59,7 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
     setEditingField(null)
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent, id: string) => {
+  const handleKeyDown = (e: React.KeyboardEvent, _id: string) => {
     if (e.key === 'Enter') {
       handleBlur()
     }
@@ -62,11 +81,41 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
     }
   }
 
+  // Fixed scale: 64 beats fill the visible screen; 1 beat = pxPerBeat pixels
+  const pxPerBeat = visibleHeightPx / BEATS_PER_SCREEN
+  const wrapperHeightPx = pxPerBeat * Math.max(maxTime, BEATS_PER_SCREEN)
+
   const getTimeframePosition = (timeframe: Timeframe) => {
-    const startPercent = (timeframe.startTime / maxTime) * 100
-    const endPercent = (timeframe.endTime / maxTime) * 100
-    const heightPercent = endPercent - startPercent
-    return { top: startPercent, height: heightPercent }
+    const topPx = timeframe.startTime * pxPerBeat
+    const heightPx = (timeframe.endTime - timeframe.startTime) * pxPerBeat
+    return { topPx, heightPx }
+  }
+
+  const getTimeframeTypographyVars = (heightPx: number): React.CSSProperties => {
+    const safeHeightPx = Math.max(0, heightPx)
+    const targetPx = 110
+    const scale = Math.max(0.5, Math.min(1, safeHeightPx / targetPx))
+    const compactBoost = safeHeightPx < 70 ? 0.9 : 1
+    const s = scale * compactBoost
+
+    const padY = 8 * s
+    const padX = 12 * s
+    const gap = 1.5 * s
+    const headerGap = 1 * s
+
+    const labelSize = 14 * s
+    const timesSize = 12 * s
+    const ringsSize = 12 * s
+
+    return {
+      ['--tf-pad-y' as any]: `${Math.max(1, padY)}px`,
+      ['--tf-pad-x' as any]: `${Math.max(4, padX)}px`,
+      ['--tf-gap' as any]: `${Math.max(0, gap)}px`,
+      ['--tf-header-gap' as any]: `${Math.max(0, headerGap)}px`,
+      ['--tf-label-size' as any]: `${Math.max(10, labelSize)}px`,
+      ['--tf-times-size' as any]: `${Math.max(9, timesSize)}px`,
+      ['--tf-rings-size' as any]: `${Math.max(9, ringsSize)}px`,
+    }
   }
 
   const checkOverlap = (tf1: Timeframe, tf2: Timeframe): boolean => {
@@ -100,11 +149,10 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
   }
 
   const yToBeat = (y: number): number => {
-    if (!timelineWrapperRef.current) return 0
+    if (!timelineWrapperRef.current || pxPerBeat <= 0) return 0
     const rect = timelineWrapperRef.current.getBoundingClientRect()
     const relativeY = y - rect.top
-    const percent = Math.max(0, Math.min(100, (relativeY / rect.height) * 100))
-    const beat = (percent / 100) * maxTime
+    const beat = Math.max(0, Math.min(maxTime, relativeY / pxPerBeat))
     return snapToBeat(beat)
   }
 
@@ -228,12 +276,11 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
       if (isDraggingTimeIndicator) {
-        if (!timelineWrapperRef.current) return
+        if (!timelineWrapperRef.current || pxPerBeat <= 0) return
         const rect = timelineWrapperRef.current.getBoundingClientRect()
         const relativeY = e.clientY - rect.top
-        const percent = Math.max(0, Math.min(100, (relativeY / rect.height) * 100))
-        const beat = (percent / 100) * maxTime
-        onCurrentTimeChange(Math.max(0, Math.min(beat, maxTime)))
+        const beat = Math.max(0, Math.min(maxTime, relativeY / pxPerBeat))
+        onCurrentTimeChange(beat)
         return
       }
       if (!isDragging) return
@@ -319,21 +366,26 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
 
   return (
     <div className="timeline-container">
-      <div 
-        className="timeline-wrapper"
-        ref={timelineWrapperRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
-      >
+      <div className="timeline-scroll-view" ref={timelineScrollViewRef}>
+        <div 
+          className="timeline-wrapper"
+          ref={timelineWrapperRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          style={{ 
+            cursor: isDragging ? 'grabbing' : 'grab',
+            height: `${wrapperHeightPx}px`,
+          }}
+        >
         <div className="timeline-line"></div>
         <div className="timeframes">
           {timeframes.map((timeframe, index) => {
-            const { top, height } = getTimeframePosition(timeframe)
+            const { topPx, heightPx } = getTimeframePosition(timeframe)
             const isEditing = editingId === timeframe.id
             const offset = getTimeframeOffset(timeframe, index)
             const isFocused = focusedTimeframeId === timeframe.id
+            const typographyVars = getTimeframeTypographyVars(heightPx)
 
             return (
               <div
@@ -342,11 +394,12 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
                 data-timeframe-id={timeframe.id}
                 onClick={(e) => handleTimeframeFocus(timeframe.id, e)}
                 style={{
-                  top: `${top}%`,
-                  height: `${height}%`,
+                  top: `${topPx}px`,
+                  height: `${heightPx}px`,
                   backgroundColor: timeframe.color,
                   transform: offset !== 0 ? `translateX(${offset}px)` : undefined,
                   zIndex: isFocused ? 10000 : 1 + index,
+                  ...typographyVars,
                 }}
               >
                 <div className="resize-handle resize-handle-top" title="Drag to resize start"></div>
@@ -433,8 +486,8 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
           <div
             className="timeframe timeframe-dragging"
             style={{
-              top: `${(dragStartPos / maxTime) * 100}%`,
-              height: `${((dragEndPos - dragStartPos) / maxTime) * 100}%`,
+              top: `${dragStartPos * pxPerBeat}px`,
+              height: `${(dragEndPos - dragStartPos) * pxPerBeat}px`,
               backgroundColor: 'rgba(102, 126, 234, 0.3)',
               border: '2px dashed #667eea',
             }}
@@ -458,7 +511,7 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
               <div
                 key={beat}
                 className={`time-mark ${isLarge ? 'time-mark-large' : ''}`}
-                style={{ top: `${(beat / maxTime) * 100}%` }}
+                style={{ top: `${beat * pxPerBeat}px` }}
               >
                 <div className={`time-mark-line ${isLarge ? 'time-mark-line-large' : ''}`}></div>
                 <span className={`time-mark-label ${isLarge ? 'time-mark-label-large' : ''}`}>{beat}b</span>
@@ -469,7 +522,7 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
         {/* Current time indicator */}
         <div
           className="current-time-indicator"
-          style={{ top: `${(currentTime / maxTime) * 100}%` }}
+          style={{ top: `${currentTime * pxPerBeat}px` }}
         >
           <div className="current-time-indicator-line"></div>
           <div 
@@ -480,6 +533,7 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
               setIsDraggingTimeIndicator(true)
             }}
           ></div>
+        </div>
         </div>
       </div>
     </div>

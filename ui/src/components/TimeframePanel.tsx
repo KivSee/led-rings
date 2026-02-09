@@ -45,10 +45,10 @@ const generateRainbowGradient = (startColor: string, range: number): string => {
 interface TimeframePanelProps {
   timeframe: Timeframe | null
   onUpdate: (updates: Partial<Timeframe>) => void
-  onDelete: () => void
+  onClose: () => void
 }
 
-const TimeframePanel = ({ timeframe, onUpdate, onDelete }: TimeframePanelProps) => {
+const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) => {
   const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | 'color' | 'rainbowRange' | null>(null)
   const [tempStartTime, setTempStartTime] = useState<string>('')
   const [tempEndTime, setTempEndTime] = useState<string>('')
@@ -133,11 +133,6 @@ const TimeframePanel = ({ timeframe, onUpdate, onDelete }: TimeframePanelProps) 
     setTempEndTime(timeframe.endTime.toString())
   }
 
-  const handleRainbowRangeFocus = () => {
-    setEditingField('rainbowRange')
-    setTempRainbowRange((timeframe.rainbowRange || 1).toString())
-  }
-
   const duration = timeframe.endTime - timeframe.startTime
 
   return (
@@ -146,8 +141,8 @@ const TimeframePanel = ({ timeframe, onUpdate, onDelete }: TimeframePanelProps) 
         <h2>Timeframe Details</h2>
         <button
           className="timeframe-panel-delete"
-          onClick={onDelete}
-          title="Delete timeframe"
+          onClick={onClose}
+          title="Close details"
         >
           ×
         </button>

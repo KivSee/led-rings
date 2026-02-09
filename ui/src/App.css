@@ -16,6 +16,7 @@
   display: flex;
   flex: 1;
   overflow: hidden;
+  min-height: 0;
 }
 
 .app-header {
@@ -27,10 +28,22 @@
   color: white;
 }
 
+.app-header-title {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .app-header-controls {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+.app-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .playback-controls {
@@ -82,6 +95,67 @@
   font-weight: 600;
 }
 
+.song-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.song-name-input {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 4px 12px;
+  color: #f9fafb;
+  font-size: 14px;
+  outline: none;
+  min-width: 220px;
+}
+
+.song-name-input::placeholder {
+  color: rgba(249, 250, 251, 0.7);
+}
+
+.song-meta-fields {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.song-meta-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #e5e7eb;
+}
+
+.song-meta-input {
+  width: 70px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(15, 23, 42, 0.18);
+  color: #f9fafb;
+  font-size: 13px;
+  outline: none;
+}
+
+.song-meta-input::-webkit-inner-spin-button,
+.song-meta-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.song-meta-input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.song-meta-suffix {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
 .add-button {
   background: white;
   color: #667eea;
@@ -93,6 +167,30 @@
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.secondary-button {
+  background: rgba(255, 255, 255, 0.15);
+  color: #f9fafb;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.secondary-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+}
+
+.secondary-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .add-button:hover {
