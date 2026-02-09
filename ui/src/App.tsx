@@ -14,6 +14,12 @@ export interface Timeframe {
   mapping?: string // Segment mapping name from segments.json
   rainbow?: boolean // Whether to use rainbow coloring
   rainbowRange?: number // Rainbow cycle range (1 = full cycle, 2 = 2 cycles, 0.5 = half cycle)
+  brightnessEffect?: string
+  brightnessEffectParams?: Record<string, number | boolean>
+  hueEffect?: string
+  hueEffectParams?: Record<string, number | boolean>
+  motionEffect?: string
+  motionEffectParams?: Record<string, number | boolean>
 }
 
 export interface Song {
@@ -165,6 +171,12 @@ function App() {
             mapping: item.mapping,
             rainbow: item.rainbow,
             rainbowRange: item.rainbowRange,
+            brightnessEffect: item.brightnessEffect,
+            brightnessEffectParams: item.brightnessEffectParams && typeof item.brightnessEffectParams === 'object' ? item.brightnessEffectParams as Record<string, number | boolean> : undefined,
+            hueEffect: item.hueEffect,
+            hueEffectParams: item.hueEffectParams && typeof item.hueEffectParams === 'object' ? item.hueEffectParams as Record<string, number | boolean> : undefined,
+            motionEffect: item.motionEffect,
+            motionEffectParams: item.motionEffectParams && typeof item.motionEffectParams === 'object' ? item.motionEffectParams as Record<string, number | boolean> : undefined,
           }))
 
         if (mapped.length === 0) {

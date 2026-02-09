@@ -545,6 +545,9 @@ const Timeline = ({ timeframes, songLengthBeats, onUpdate, onDelete, onAdd, focu
                     <span className="timeframe-mapping-inline">
                       , Mapping: {timeframe.mapping ?? 'all'}
                     </span>
+                    <span className="timeframe-effects-inline">
+                      , Effects: {[timeframe.brightnessEffect, timeframe.hueEffect, timeframe.motionEffect].filter(Boolean).join(', ') || '—'}
+                    </span>
                   </div>
                 </div>
               </div>

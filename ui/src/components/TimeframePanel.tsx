@@ -4,6 +4,99 @@ import segmentsData from '../segments.json'
 import RingVisualization from './RingVisualization'
 import './TimeframePanel.css'
 
+// Effect options by category (brightness.ts, hue.ts, motion.ts — coloring removed)
+const BRIGHTNESS_EFFECT_OPTIONS: { value: string; label: string }[] = [
+  { value: '', label: '(none)' },
+  { value: 'brightness', label: 'Brightness' },
+  { value: 'fadeIn', label: 'Fade In' },
+  { value: 'fadeOut', label: 'Fade Out' },
+  { value: 'fadeInOut', label: 'Fade In Out' },
+  { value: 'fadeOutIn', label: 'Fade Out In' },
+  { value: 'blink', label: 'Blink' },
+  { value: 'pulse', label: 'Pulse' },
+  { value: 'fade', label: 'Fade' },
+]
+
+const HUE_EFFECT_OPTIONS: { value: string; label: string }[] = [
+  { value: '', label: '(none)' },
+  { value: 'staticHueShift', label: 'Static Hue Shift' },
+  { value: 'hueShiftStartToEnd', label: 'Hue Shift Start To End' },
+  { value: 'hueShiftSin', label: 'Hue Shift Sin' },
+]
+
+const MOTION_EFFECT_OPTIONS: { value: string; label: string }[] = [
+  { value: '', label: '(none)' },
+  { value: 'snakeHeadMove', label: 'Snake Head Move' },
+  { value: 'staticSnake', label: 'Static Snake' },
+  { value: 'snake', label: 'Snake' },
+  { value: 'snakeHeadSin', label: 'Snake Head Sin' },
+  { value: 'snakeFillGrow', label: 'Snake Fill Grow' },
+  { value: 'snakeInOut', label: 'Snake In Out' },
+  { value: 'snakeSlowFast', label: 'Snake Slow Fast' },
+  { value: 'snakeTailShrinkGrow', label: 'Snake Tail Shrink Grow' },
+  { value: 'snakeHeadSteps', label: 'Snake Head Steps' },
+]
+
+// Parameter definitions per effect (brightness, hue, motion only)
+type EffectParamDef = {
+  key: string
+  label: string
+  type: 'number' | 'boolean'
+  default?: number | boolean
+  min?: number
+  max?: number
+  step?: number
+}
+
+const EFFECT_PARAM_SCHEMAS: Record<string, EffectParamDef[]> = {
+  brightness: [{ key: 'value', label: 'Value', type: 'number', default: 1, min: 0, max: 1, step: 0.01 }],
+  fadeInOut: [{ key: 'high', label: 'High', type: 'number', default: 1, min: 0, max: 1, step: 0.01 }],
+  fadeOutIn: [{ key: 'low', label: 'Low', type: 'number', default: 0, min: 0, max: 1, step: 0.01 }],
+  blink: [{ key: 'low', label: 'Low', type: 'number', default: 0.5, min: 0, max: 1, step: 0.01 }],
+  pulse: [
+    { key: 'low', label: 'Low', type: 'number', default: 0.5, min: 0, max: 1, step: 0.01 },
+    { key: 'staticPhase', label: 'Static phase', type: 'number', default: 0, min: 0, max: 1, step: 0.01 },
+  ],
+  fade: [
+    { key: 'start', label: 'Start', type: 'number', default: 0, min: 0, max: 1, step: 0.01 },
+    { key: 'end', label: 'End', type: 'number', default: 1, min: 0, max: 1, step: 0.01 },
+  ],
+  staticHueShift: [{ key: 'value', label: 'Value', type: 'number', default: 0, min: 0, max: 1, step: 0.01 }],
+  hueShiftStartToEnd: [
+    { key: 'start', label: 'Start', type: 'number', default: 0, min: 0, max: 1, step: 0.01 },
+    { key: 'end', label: 'End', type: 'number', default: 1, min: 0, max: 1, step: 0.01 },
+  ],
+  hueShiftSin: [{ key: 'amount', label: 'Amount', type: 'number', default: 0.5, min: 0, max: 1, step: 0.01 }],
+  snakeHeadMove: [
+    { key: 'start', label: 'Start', type: 'number', default: 0, min: 0, max: 1, step: 0.01 },
+    { key: 'end', label: 'End', type: 'number', default: 1, min: 0, max: 1, step: 0.01 },
+    { key: 'tail', label: 'Tail', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01 },
+  ],
+  staticSnake: [
+    { key: 'start', label: 'Start', type: 'number', default: 0, min: 0, max: 1, step: 0.01 },
+    { key: 'end', label: 'End', type: 'number', default: 1, min: 0, max: 1, step: 0.01 },
+  ],
+  snake: [
+    { key: 'tailLength', label: 'Tail length', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01 },
+    { key: 'cyclic', label: 'Cyclic', type: 'boolean', default: false },
+    { key: 'reverse', label: 'Reverse', type: 'boolean', default: false },
+  ],
+  snakeHeadSin: [
+    { key: 'tailLength', label: 'Tail length', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01 },
+    { key: 'cyclic', label: 'Cyclic', type: 'boolean', default: false },
+  ],
+  snakeFillGrow: [{ key: 'reverse', label: 'Reverse', type: 'boolean', default: false }],
+  snakeInOut: [
+    { key: 'start', label: 'Start', type: 'number', default: 0, min: 0, max: 1, step: 0.01 },
+    { key: 'end', label: 'End', type: 'number', default: 1, min: 0, max: 1, step: 0.01 },
+  ],
+  snakeSlowFast: [{ key: 'tailLength', label: 'Tail length', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01 }],
+  snakeHeadSteps: [
+    { key: 'steps', label: 'Steps', type: 'number', default: 4, min: 1, max: 32, step: 1 },
+    { key: 'tailLength', label: 'Tail length', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01 },
+  ],
+}
+
 // Helper function to convert hex to hue
 const hexToHue = (hex: string): number => {
   const r = parseInt(hex.slice(1, 3), 16) / 255
@@ -315,6 +408,144 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
               <button onClick={() => onUpdate({ rings: [4, 5, 6, 7, 8, 9] })}>Center</button>
             </div>
           </div>
+        </div>
+
+        <div className="timeframe-panel-section">
+          <label className="timeframe-panel-label">Brightness effect</label>
+          <select
+            value={timeframe.brightnessEffect ?? ''}
+            onChange={(e) => {
+              const next = e.target.value || undefined
+              onUpdate({
+                brightnessEffect: next,
+                brightnessEffectParams: next ? (EFFECT_PARAM_SCHEMAS[next]?.reduce((acc, def) => {
+                  if (def.default !== undefined) acc[def.key] = def.default
+                  return acc
+                }, {} as Record<string, number | boolean>) ?? undefined) : undefined,
+              })
+            }}
+            className="timeframe-panel-select"
+          >
+            {BRIGHTNESS_EFFECT_OPTIONS.map(opt => (
+              <option key={opt.value || 'none'} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          {timeframe.brightnessEffect && EFFECT_PARAM_SCHEMAS[timeframe.brightnessEffect] && (
+            <div className="timeframe-panel-effect-params">
+              {EFFECT_PARAM_SCHEMAS[timeframe.brightnessEffect].map(def => {
+                const current = timeframe.brightnessEffectParams?.[def.key]
+                const value = current !== undefined ? current : def.default
+                return (
+                  <div key={def.key} className="timeframe-panel-effect-param-row">
+                    <label className="timeframe-panel-effect-param-label">{def.label}</label>
+                    {def.type === 'boolean' ? (
+                      <input type="checkbox" checked={value === true}
+                        onChange={(e) => onUpdate({ brightnessEffectParams: { ...timeframe.brightnessEffectParams, [def.key]: e.target.checked } })}
+                        className="timeframe-panel-effect-param-checkbox" />
+                    ) : (
+                      <input type="number"
+                        value={typeof value === 'number' ? value : (typeof def.default === 'number' ? def.default : 0)}
+                        min={def.min} max={def.max} step={def.step}
+                        onChange={(e) => { const num = parseFloat(e.target.value); if (!isNaN(num)) onUpdate({ brightnessEffectParams: { ...timeframe.brightnessEffectParams, [def.key]: num } }) }}
+                        className="timeframe-panel-effect-param-input" />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="timeframe-panel-section">
+          <label className="timeframe-panel-label">Hue effect</label>
+          <select
+            value={timeframe.hueEffect ?? ''}
+            onChange={(e) => {
+              const next = e.target.value || undefined
+              onUpdate({
+                hueEffect: next,
+                hueEffectParams: next ? (EFFECT_PARAM_SCHEMAS[next]?.reduce((acc, def) => {
+                  if (def.default !== undefined) acc[def.key] = def.default
+                  return acc
+                }, {} as Record<string, number | boolean>) ?? undefined) : undefined,
+              })
+            }}
+            className="timeframe-panel-select"
+          >
+            {HUE_EFFECT_OPTIONS.map(opt => (
+              <option key={opt.value || 'none'} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          {timeframe.hueEffect && EFFECT_PARAM_SCHEMAS[timeframe.hueEffect] && (
+            <div className="timeframe-panel-effect-params">
+              {EFFECT_PARAM_SCHEMAS[timeframe.hueEffect].map(def => {
+                const current = timeframe.hueEffectParams?.[def.key]
+                const value = current !== undefined ? current : def.default
+                return (
+                  <div key={def.key} className="timeframe-panel-effect-param-row">
+                    <label className="timeframe-panel-effect-param-label">{def.label}</label>
+                    {def.type === 'boolean' ? (
+                      <input type="checkbox" checked={value === true}
+                        onChange={(e) => onUpdate({ hueEffectParams: { ...timeframe.hueEffectParams, [def.key]: e.target.checked } })}
+                        className="timeframe-panel-effect-param-checkbox" />
+                    ) : (
+                      <input type="number"
+                        value={typeof value === 'number' ? value : (typeof def.default === 'number' ? def.default : 0)}
+                        min={def.min} max={def.max} step={def.step}
+                        onChange={(e) => { const num = parseFloat(e.target.value); if (!isNaN(num)) onUpdate({ hueEffectParams: { ...timeframe.hueEffectParams, [def.key]: num } }) }}
+                        className="timeframe-panel-effect-param-input" />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="timeframe-panel-section">
+          <label className="timeframe-panel-label">Motion effect</label>
+          <select
+            value={timeframe.motionEffect ?? ''}
+            onChange={(e) => {
+              const next = e.target.value || undefined
+              onUpdate({
+                motionEffect: next,
+                motionEffectParams: next ? (EFFECT_PARAM_SCHEMAS[next]?.reduce((acc, def) => {
+                  if (def.default !== undefined) acc[def.key] = def.default
+                  return acc
+                }, {} as Record<string, number | boolean>) ?? undefined) : undefined,
+              })
+            }}
+            className="timeframe-panel-select"
+          >
+            {MOTION_EFFECT_OPTIONS.map(opt => (
+              <option key={opt.value || 'none'} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          {timeframe.motionEffect && EFFECT_PARAM_SCHEMAS[timeframe.motionEffect] && (
+            <div className="timeframe-panel-effect-params">
+              {EFFECT_PARAM_SCHEMAS[timeframe.motionEffect].map(def => {
+                const current = timeframe.motionEffectParams?.[def.key]
+                const value = current !== undefined ? current : def.default
+                return (
+                  <div key={def.key} className="timeframe-panel-effect-param-row">
+                    <label className="timeframe-panel-effect-param-label">{def.label}</label>
+                    {def.type === 'boolean' ? (
+                      <input type="checkbox" checked={value === true}
+                        onChange={(e) => onUpdate({ motionEffectParams: { ...timeframe.motionEffectParams, [def.key]: e.target.checked } })}
+                        className="timeframe-panel-effect-param-checkbox" />
+                    ) : (
+                      <input type="number"
+                        value={typeof value === 'number' ? value : (typeof def.default === 'number' ? def.default : 0)}
+                        min={def.min} max={def.max} step={def.step}
+                        onChange={(e) => { const num = parseFloat(e.target.value); if (!isNaN(num)) onUpdate({ motionEffectParams: { ...timeframe.motionEffectParams, [def.key]: num } }) }}
+                        className="timeframe-panel-effect-param-input" />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         <div className="timeframe-panel-section">

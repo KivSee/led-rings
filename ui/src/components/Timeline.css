@@ -178,7 +178,8 @@
 }
 
 .timeframe-rings-inline,
-.timeframe-mapping-inline {
+.timeframe-mapping-inline,
+.timeframe-effects-inline {
   opacity: 0.9;
   min-width: 0;
   white-space: nowrap;

@@ -284,6 +284,56 @@
   padding: 7px 11px;
 }
 
+.timeframe-panel-effect-params {
+  margin-top: 10px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.timeframe-panel-effect-param-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.timeframe-panel-effect-param-row:last-child {
+  margin-bottom: 0;
+}
+
+.timeframe-panel-effect-param-label {
+  font-size: 13px;
+  color: #4b5563;
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+.timeframe-panel-effect-param-input {
+  font-size: 14px;
+  color: #111827;
+  background: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  outline: none;
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.timeframe-panel-effect-param-input:focus {
+  border-color: #667eea;
+}
+
+.timeframe-panel-effect-param-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #667eea;
+  cursor: pointer;
+}
+
 .timeframe-panel-mapping-visualization {
   margin-top: 4px;
 }
