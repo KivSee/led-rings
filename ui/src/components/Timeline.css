@@ -53,11 +53,15 @@
   margin-bottom: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: all 0.2s;
-  cursor: pointer;
+  cursor: grab;
   border: 2px solid rgba(255, 255, 255, 0.3);
   margin-left: 0;
   margin-right: 0;
   overflow: hidden;
+}
+
+.timeframe:active {
+  cursor: grabbing;
 }
 
 .resize-handle {
@@ -171,6 +175,15 @@
 
 .timeframe-separator {
   opacity: 0.7;
+}
+
+.timeframe-rings-inline,
+.timeframe-mapping-inline {
+  opacity: 0.9;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .timeframe-input {

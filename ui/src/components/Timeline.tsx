@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { Timeframe } from '../App'
-import RingSelector from './RingSelector'
 import './Timeline.css'
 
 interface TimelineProps {
@@ -23,6 +22,10 @@ const Timeline = ({ timeframes, songLengthBeats, onUpdate, onDelete, onAdd, focu
   const [dragCurrent, setDragCurrent] = useState<number | null>(null)
   const [resizingTimeframeId, setResizingTimeframeId] = useState<string | null>(null)
   const [resizingEdge, setResizingEdge] = useState<'start' | 'end' | null>(null)
+  const [movingTimeframeId, setMovingTimeframeId] = useState<string | null>(null)
+  const [moveStartBeat, setMoveStartBeat] = useState<number | null>(null)
+  const [moveOriginalStart, setMoveOriginalStart] = useState<number | null>(null)
+  const [moveOriginalEnd, setMoveOriginalEnd] = useState<number | null>(null)
   const [isDraggingTimeIndicator, setIsDraggingTimeIndicator] = useState(false)
   const timelineScrollViewRef = React.useRef<HTMLDivElement>(null)
   const timelineWrapperRef = React.useRef<HTMLDivElement>(null)
@@ -161,8 +164,7 @@ const Timeline = ({ timeframes, songLengthBeats, onUpdate, onDelete, onAdd, focu
     const target = e.target as HTMLElement
     if (target.closest('.resize-handle') || 
         target.closest('input') || 
-        target.closest('button') ||
-        target.closest('.ring-selector')) {
+        target.closest('button')) {
       return
     }
     onFocusedTimeframeChange(timeframeId)
@@ -202,8 +204,33 @@ const Timeline = ({ timeframes, songLengthBeats, onUpdate, onDelete, onAdd, focu
       }
     }
 
-    // Don't start drag if clicking on a timeframe content or time marks
-    if (target.closest('.timeframe-content') || target.closest('.time-mark')) {
+    // Check if clicking on a timeframe body (not resize handle, input, button) -> start move
+    const timeframeElement = target.closest('.timeframe') as HTMLElement
+    if (
+      timeframeElement &&
+      !target.closest('.resize-handle') &&
+      !target.closest('input') &&
+      !target.closest('button')
+    ) {
+      const timeframeId = timeframeElement.dataset.timeframeId
+      const timeframe = timeframeId ? timeframes.find(tf => tf.id === timeframeId) : null
+      if (timeframeId && timeframe) {
+        e.preventDefault()
+        e.stopPropagation()
+        const beat = yToBeat(e.clientY)
+        setIsDragging(true)
+        setMovingTimeframeId(timeframeId)
+        setMoveStartBeat(beat)
+        setMoveOriginalStart(timeframe.startTime)
+        setMoveOriginalEnd(timeframe.endTime)
+        setDragCurrent(beat)
+        onFocusedTimeframeChange(timeframeId)
+        return
+      }
+    }
+
+    // Don't start drag if clicking on time marks
+    if (target.closest('.time-mark')) {
       return
     }
 
@@ -238,10 +265,21 @@ const Timeline = ({ timeframes, songLengthBeats, onUpdate, onDelete, onAdd, focu
       setDragCurrent(null)
       setResizingTimeframeId(null)
       setResizingEdge(null)
+      setMovingTimeframeId(null)
+      setMoveStartBeat(null)
+      setMoveOriginalStart(null)
+      setMoveOriginalEnd(null)
       return
     }
 
-    if (resizingTimeframeId && resizingEdge && dragCurrent !== null) {
+    if (movingTimeframeId && moveStartBeat !== null && moveOriginalStart !== null && moveOriginalEnd !== null && dragCurrent !== null) {
+      const duration = moveOriginalEnd - moveOriginalStart
+      const deltaBeat = dragCurrent - moveStartBeat
+      let newStart = snapToBeat(moveOriginalStart + deltaBeat)
+      newStart = Math.max(0, Math.min(maxTime - duration, newStart))
+      const newEnd = newStart + duration
+      onUpdate(movingTimeframeId, { startTime: newStart, endTime: newEnd })
+    } else if (resizingTimeframeId && resizingEdge && dragCurrent !== null) {
       const timeframe = timeframes.find(tf => tf.id === resizingTimeframeId)
       if (timeframe) {
         const newBeat = dragCurrent
@@ -271,6 +309,10 @@ const Timeline = ({ timeframes, songLengthBeats, onUpdate, onDelete, onAdd, focu
     setDragCurrent(null)
     setResizingTimeframeId(null)
     setResizingEdge(null)
+    setMovingTimeframeId(null)
+    setMoveStartBeat(null)
+    setMoveOriginalStart(null)
+    setMoveOriginalEnd(null)
   }
 
   useEffect(() => {
@@ -302,6 +344,16 @@ const Timeline = ({ timeframes, songLengthBeats, onUpdate, onDelete, onAdd, focu
           }
         }
       }
+
+      // Update timeframe position in real-time while moving
+      if (movingTimeframeId && moveStartBeat !== null && moveOriginalStart !== null && moveOriginalEnd !== null) {
+        const duration = moveOriginalEnd - moveOriginalStart
+        const deltaBeat = beat - moveStartBeat
+        let newStart = snapToBeat(moveOriginalStart + deltaBeat)
+        newStart = Math.max(0, Math.min(maxTime - duration, newStart))
+        const newEnd = newStart + duration
+        onUpdate(movingTimeframeId, { startTime: newStart, endTime: newEnd })
+      }
     }
 
     const handleGlobalMouseUp = () => {
@@ -315,10 +367,21 @@ const Timeline = ({ timeframes, songLengthBeats, onUpdate, onDelete, onAdd, focu
         setDragCurrent(null)
         setResizingTimeframeId(null)
         setResizingEdge(null)
+        setMovingTimeframeId(null)
+        setMoveStartBeat(null)
+        setMoveOriginalStart(null)
+        setMoveOriginalEnd(null)
         return
       }
 
-      if (resizingTimeframeId && resizingEdge && dragCurrent !== null) {
+      if (movingTimeframeId && moveStartBeat !== null && moveOriginalStart !== null && moveOriginalEnd !== null && dragCurrent !== null) {
+        const duration = moveOriginalEnd - moveOriginalStart
+        const deltaBeat = dragCurrent - moveStartBeat
+        let newStart = snapToBeat(moveOriginalStart + deltaBeat)
+        newStart = Math.max(0, Math.min(maxTime - duration, newStart))
+        const newEnd = newStart + duration
+        onUpdate(movingTimeframeId, { startTime: newStart, endTime: newEnd })
+      } else if (resizingTimeframeId && resizingEdge && dragCurrent !== null) {
         const timeframe = timeframes.find(tf => tf.id === resizingTimeframeId)
         if (timeframe) {
           const newBeat = dragCurrent
@@ -347,6 +410,10 @@ const Timeline = ({ timeframes, songLengthBeats, onUpdate, onDelete, onAdd, focu
       setDragCurrent(null)
       setResizingTimeframeId(null)
       setResizingEdge(null)
+      setMovingTimeframeId(null)
+      setMoveStartBeat(null)
+      setMoveOriginalStart(null)
+      setMoveOriginalEnd(null)
     }
 
     if (isDragging || isDraggingTimeIndicator) {
@@ -357,7 +424,7 @@ const Timeline = ({ timeframes, songLengthBeats, onUpdate, onDelete, onAdd, focu
         document.removeEventListener('mouseup', handleGlobalMouseUp)
       }
     }
-  }, [isDragging, isDraggingTimeIndicator, dragStart, dragCurrent, resizingTimeframeId, resizingEdge, timeframes, onAdd, onUpdate, maxTime, onCurrentTimeChange])
+  }, [isDragging, isDraggingTimeIndicator, dragStart, dragCurrent, resizingTimeframeId, resizingEdge, movingTimeframeId, moveStartBeat, moveOriginalStart, moveOriginalEnd, timeframes, onAdd, onUpdate, maxTime, onCurrentTimeChange])
 
   const dragStartBeat = dragStart !== null ? dragStart : 0
   const dragEndBeat = dragCurrent !== null ? dragCurrent : dragStartBeat
@@ -472,17 +539,19 @@ const Timeline = ({ timeframes, songLengthBeats, onUpdate, onDelete, onAdd, focu
                         {timeframe.endTime}b
                       </span>
                     )}
+                    <span className="timeframe-rings-inline">
+                      , Rings: {timeframe.rings.length === 12 ? 'All' : timeframe.rings.join(', ')}
+                    </span>
+                    <span className="timeframe-mapping-inline">
+                      , Mapping: {timeframe.mapping ?? 'all'}
+                    </span>
                   </div>
-                  <RingSelector
-                    rings={timeframe.rings}
-                    onChange={(rings) => onUpdate(timeframe.id, { rings })}
-                  />
                 </div>
               </div>
             )
           })}
         </div>
-        {isDragging && dragStart !== null && dragCurrent !== null && (
+        {isDragging && dragStart !== null && dragCurrent !== null && !movingTimeframeId && (
           <div
             className="timeframe timeframe-dragging"
             style={{
