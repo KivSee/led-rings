@@ -1,5 +1,7 @@
 import React from 'react'
 import segmentsData from '../segments.json'
+import { getPixelColor, hsvToRgbString } from '../effectPreview'
+import type { Timeframe } from '../App'
 import './RingVisualization.css'
 
 interface RingVisualizationProps {
@@ -9,9 +11,30 @@ interface RingVisualizationProps {
   startColor?: string
   /** Ring numbers (1-12) that are active; rings not in this list are dimmed. Omit to show all. */
   activeRings?: number[]
+  /** When set with currentTime, playback effect preview is shown (brightness/hue/motion over time). */
+  timeframe?: Timeframe | null
+  /** Current time in beats; with timeframe, used to compute effect phase t in [0,1]. */
+  currentTime?: number
 }
 
-const RingVisualization = ({ mapping, rainbow, rainbowRange = 1, startColor, activeRings }: RingVisualizationProps) => {
+const RingVisualization = ({
+  mapping,
+  rainbow,
+  rainbowRange = 1,
+  startColor,
+  activeRings,
+  timeframe,
+  currentTime,
+}: RingVisualizationProps) => {
+  const useEffectPreview = Boolean(
+    timeframe &&
+    currentTime !== undefined &&
+    (timeframe.brightnessEffect || timeframe.hueEffect || timeframe.motionEffect)
+  )
+  const duration = timeframe ? timeframe.endTime - timeframe.startTime : 0
+  const t = duration > 0 && currentTime !== undefined && timeframe
+    ? Math.max(0, Math.min(1, (currentTime - timeframe.startTime) / duration))
+    : 0
   // Convert hex color to HSL to get hue
   const hexToHue = (hex: string): number => {
     const r = parseInt(hex.slice(1, 3), 16) / 255
@@ -172,7 +195,12 @@ const RingVisualization = ({ mapping, rainbow, rainbowRange = 1, startColor, act
           >
             {ringPixels.map((pixel, positionInRing) => {
               if (!pixel) return null
-              const pixelColor = relPosToColor(pixel.relPos)
+              const pixelColor = useEffectPreview && timeframe
+                ? (() => {
+                    const { h, s, v } = getPixelColor(pixel.relPos, t, timeframe)
+                    return hsvToRgbString(h, s, v)
+                  })()
+                : relPosToColor(pixel.relPos)
               return (
                 <div
                   key={pixel.index}
