@@ -255,3 +255,44 @@
   font-weight: 700;
   color: #333;
 }
+
+.current-time-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.current-time-indicator-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ef4444;
+  box-shadow: 0 0 4px rgba(239, 68, 68, 0.6);
+  pointer-events: none;
+}
+
+.current-time-indicator-handle {
+  position: absolute;
+  left: -8px;
+  top: -8px;
+  width: 18px;
+  height: 18px;
+  background: #ef4444;
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  cursor: grab;
+  pointer-events: all;
+}
+
+.current-time-indicator-handle:active {
+  cursor: grabbing;
+}
+
+.current-time-indicator:hover .current-time-indicator-line {
+  height: 3px;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);
+}

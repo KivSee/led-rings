@@ -10,9 +10,11 @@ interface TimelineProps {
   onAdd: (startTime: number, endTime: number) => void
   focusedTimeframeId: string | null
   onFocusedTimeframeChange: (id: string | null) => void
+  currentTime: number
+  onCurrentTimeChange: (time: number) => void
 }
 
-const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, onFocusedTimeframeChange }: TimelineProps) => {
+const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange }: TimelineProps) => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -20,6 +22,7 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
   const [dragCurrent, setDragCurrent] = useState<number | null>(null)
   const [resizingTimeframeId, setResizingTimeframeId] = useState<string | null>(null)
   const [resizingEdge, setResizingEdge] = useState<'start' | 'end' | null>(null)
+  const [isDraggingTimeIndicator, setIsDraggingTimeIndicator] = useState(false)
   const timelineWrapperRef = React.useRef<HTMLDivElement>(null)
 
   const maxTime = Math.max(
@@ -120,6 +123,16 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
   const handleMouseDown = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement
     
+    // Don't start drag if clicking on time indicator - handle this first
+    if (target.closest('.current-time-indicator') || target.closest('.current-time-indicator-handle')) {
+      e.preventDefault()
+      e.stopPropagation()
+      setIsDraggingTimeIndicator(true)
+      const beat = yToBeat(e.clientY)
+      onCurrentTimeChange(Math.max(0, Math.min(beat, maxTime)))
+      return
+    }
+    
     // Check if clicking on a resize handle
     const resizeHandle = target.closest('.resize-handle')
     if (resizeHandle) {
@@ -167,6 +180,10 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
   }
 
   const handleMouseUp = () => {
+    if (isDraggingTimeIndicator) {
+      setIsDraggingTimeIndicator(false)
+      return
+    }
     if (!isDragging) {
       setIsDragging(false)
       setDragStart(null)
@@ -210,6 +227,15 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
 
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (isDraggingTimeIndicator) {
+        if (!timelineWrapperRef.current) return
+        const rect = timelineWrapperRef.current.getBoundingClientRect()
+        const relativeY = e.clientY - rect.top
+        const percent = Math.max(0, Math.min(100, (relativeY / rect.height) * 100))
+        const beat = (percent / 100) * maxTime
+        onCurrentTimeChange(Math.max(0, Math.min(beat, maxTime)))
+        return
+      }
       if (!isDragging) return
       const beat = yToBeat(e.clientY)
       setDragCurrent(beat)
@@ -232,6 +258,10 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
     }
 
     const handleGlobalMouseUp = () => {
+      if (isDraggingTimeIndicator) {
+        setIsDraggingTimeIndicator(false)
+        return
+      }
       if (!isDragging) {
         setIsDragging(false)
         setDragStart(null)
@@ -272,7 +302,7 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
       setResizingEdge(null)
     }
 
-    if (isDragging) {
+    if (isDragging || isDraggingTimeIndicator) {
       document.addEventListener('mousemove', handleGlobalMouseMove)
       document.addEventListener('mouseup', handleGlobalMouseUp)
       return () => {
@@ -280,7 +310,7 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
         document.removeEventListener('mouseup', handleGlobalMouseUp)
       }
     }
-  }, [isDragging, dragStart, dragCurrent, resizingTimeframeId, resizingEdge, timeframes, onAdd, onUpdate])
+  }, [isDragging, isDraggingTimeIndicator, dragStart, dragCurrent, resizingTimeframeId, resizingEdge, timeframes, onAdd, onUpdate, maxTime, onCurrentTimeChange])
 
   const dragStartBeat = dragStart !== null ? dragStart : 0
   const dragEndBeat = dragCurrent !== null ? dragCurrent : dragStartBeat
@@ -435,6 +465,21 @@ const Timeline = ({ timeframes, onUpdate, onDelete, onAdd, focusedTimeframeId, o
               </div>
             )
           })}
+        </div>
+        {/* Current time indicator */}
+        <div
+          className="current-time-indicator"
+          style={{ top: `${(currentTime / maxTime) * 100}%` }}
+        >
+          <div className="current-time-indicator-line"></div>
+          <div 
+            className="current-time-indicator-handle"
+            onMouseDown={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              setIsDraggingTimeIndicator(true)
+            }}
+          ></div>
         </div>
       </div>
     </div>

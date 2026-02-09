@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import Timeline from './components/Timeline'
 import TimeframePanel from './components/TimeframePanel'
 import './App.css'
@@ -51,6 +51,9 @@ function App() {
   ])
 
   const [focusedTimeframeId, setFocusedTimeframeId] = useState<string | null>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0) // Current time in beats
+  const playbackIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
 
   const addTimeframe = () => {
     const lastEndTime = timeframes.length > 0 
@@ -108,13 +111,66 @@ function App() {
     }
   }
 
+  // Playback controls
+  const handlePlayPause = () => {
+    setIsPlaying(!isPlaying)
+  }
+
+  const handleStop = () => {
+    setIsPlaying(false)
+    setCurrentTime(0)
+  }
+
+  // Playback animation
+  useEffect(() => {
+    if (isPlaying) {
+      playbackIntervalRef.current = setInterval(() => {
+        setCurrentTime(prev => {
+          const maxTime = Math.max(...timeframes.map(t => t.endTime), 30)
+          const next = prev + 0.1 // Increment by 0.1 beats per frame (adjust for speed)
+          return next >= maxTime ? 0 : next // Loop back to start
+        })
+      }, 50) // Update every 50ms
+    } else {
+      if (playbackIntervalRef.current) {
+        clearInterval(playbackIntervalRef.current)
+        playbackIntervalRef.current = null
+      }
+    }
+
+    return () => {
+      if (playbackIntervalRef.current) {
+        clearInterval(playbackIntervalRef.current)
+      }
+    }
+  }, [isPlaying, timeframes])
+
   return (
     <div className="app">
       <div className="app-header">
         <h1>Timeline Manager</h1>
-        <button className="add-button" onClick={addTimeframe}>
-          + Add Timeframe
-        </button>
+        <div className="app-header-controls">
+          <div className="playback-controls">
+            <button 
+              className={`playback-button ${isPlaying ? 'playing' : ''}`}
+              onClick={handlePlayPause}
+            >
+              {isPlaying ? '⏸ Stop' : '▶ Run'}
+            </button>
+            <button 
+              className="playback-button stop-button"
+              onClick={handleStop}
+            >
+              ⏹ Stop
+            </button>
+            <div className="current-time-display">
+              <span>Time: {currentTime.toFixed(1)}b</span>
+            </div>
+          </div>
+          <button className="add-button" onClick={addTimeframe}>
+            + Add Timeframe
+          </button>
+        </div>
       </div>
       <div className="app-content">
         <Timeline
@@ -124,6 +180,8 @@ function App() {
           onAdd={addTimeframeFromDrag}
           focusedTimeframeId={focusedTimeframeId}
           onFocusedTimeframeChange={setFocusedTimeframeId}
+          currentTime={currentTime}
+          onCurrentTimeChange={setCurrentTime}
         />
         <TimeframePanel
           timeframe={focusedTimeframe}
