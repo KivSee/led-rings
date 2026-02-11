@@ -10,6 +10,10 @@ export interface Song {
   startOffsetMs?: number
 }
 
+export type TimeframeCycleEntry =
+  | { type: 'cycle'; beatsInCycle: number }
+  | { type: 'cycleBeats'; beatsInCycle: number; startBeat: number; endBeat: number }
+
 export interface Timeframe {
   id: string
   startTime: number
@@ -20,6 +24,7 @@ export interface Timeframe {
   mapping?: string
   rainbow?: boolean
   rainbowRange?: number
+  cycles?: TimeframeCycleEntry[]
   brightnessEffect?: string
   brightnessEffectParams?: Record<string, number | boolean>
   hueEffect?: string
@@ -50,6 +55,17 @@ function ringsToElementsArg(rings: number[]): string {
   if (sameRings(rings, RINGS_RIGHT)) return 'right'
   if (sameRings(rings, RINGS_CENTER)) return 'center'
   return `[${rings.sort((a, b) => a - b).join(', ')}]`
+}
+
+/** Returns a display label for the rings selection (e.g. "All", "Center") or comma-separated numbers. */
+export function ringsToDisplayLabel(rings: number[]): string {
+  if (sameRings(rings, RINGS_ALL)) return 'All'
+  if (sameRings(rings, RINGS_EVEN)) return 'Even'
+  if (sameRings(rings, RINGS_ODD)) return 'Odd'
+  if (sameRings(rings, RINGS_LEFT)) return 'Left'
+  if (sameRings(rings, RINGS_RIGHT)) return 'Right'
+  if (sameRings(rings, RINGS_CENTER)) return 'Center'
+  return [...rings].sort((a, b) => a - b).join(', ')
 }
 
 const UI_MAPPING_TO_SEGMENT: Record<string, string> = {
@@ -171,6 +187,11 @@ function emitMotionEffect(tf: Timeframe): string[] {
   return []
 }
 
+function indentBlock(block: string, spaces: number): string {
+  const prefix = ' '.repeat(spaces)
+  return block.split('\n').map((line) => prefix + line).join('\n')
+}
+
 function emitTimeframeBody(tf: Timeframe): string {
   const segmentId = mappingToSegment(tf.mapping)
   const elementsArg = ringsToElementsArg(tf.rings)
@@ -179,13 +200,27 @@ function emitTimeframeBody(tf: Timeframe): string {
   inner.push(...emitHueEffect(tf))
   inner.push(...emitBrightnessEffect(tf))
   inner.push(...emitMotionEffect(tf))
-  const innerLines = inner.length ? inner.map((l) => `            ${l}`).join('\n') : '            // no effects'
+  const cycles = tf.cycles ?? []
+  const effectLines = inner.length ? inner.join('\n') : '// no effects'
+  let core = `elements(${elementsArg}, () => {
+  segment(${segmentId}, () => {
+${indentBlock(effectLines, 4)}
+  });
+});`
+  for (let i = cycles.length - 1; i >= 0; i--) {
+    const c = cycles[i]
+    if (c.type === 'cycle') {
+      core = `cycle(${c.beatsInCycle}, () => {
+${indentBlock(core, 2)}
+});`
+    } else {
+      core = `cycleBeats(${c.beatsInCycle}, ${c.startBeat}, ${c.endBeat}, () => {
+${indentBlock(core, 2)}
+});`
+    }
+  }
   return `    beats(${tf.startTime}, ${tf.endTime}, () => {
-      elements(${elementsArg}, () => {
-        segment(${segmentId}, () => {
-${innerLines}
-        });
-      });
+${indentBlock(core, 6)}
     })`
 }
 
@@ -201,7 +236,7 @@ export function generateSequenceTs(song: Song, timeframes: Timeframe[]): string 
 import { sendSequence } from "./services/sequence";
 import { startSong } from "./services/trigger";
 import { Animation } from "./animation/animation";
-import { beats } from "./time/time";
+import { beats, cycle, cycleBeats } from "./time/time";
 import { constColor, noColor, rainbow } from "./effects/coloring";
 import {
   blink,

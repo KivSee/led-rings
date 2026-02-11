@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { Timeframe } from '../App'
+import { Timeframe, TimeframeCycleEntry, TimeframeCycleBeats } from '../App'
 import segmentsData from '../segments.json'
 import RingVisualization from './RingVisualization'
 import './TimeframePanel.css'
@@ -309,6 +309,130 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
               </div>
             )}
             <span className="timeframe-panel-duration">({duration}b)</span>
+          </div>
+
+          {/* Cycles: cycle(beatsInCycle) and cycleBeats(beatsInCycle, startBeat, endBeat) — outermost first */}
+          <div className="timeframe-panel-cycles">
+            <label className="timeframe-panel-label">Cycles</label>
+            <div className="timeframe-panel-cycles-list">
+              {(timeframe.cycles ?? []).map((entry, idx) => (
+                <div key={idx} className="timeframe-panel-cycle-row">
+                  <span className="timeframe-panel-cycle-type">{entry.type === 'cycle' ? 'cycle' : 'cycleBeats'}</span>
+                  {entry.type === 'cycle' ? (
+                    <>
+                      <label className="timeframe-panel-cycle-param">
+                        <span>beatsInCycle</span>
+                        <input
+                          type="number"
+                          min={0.01}
+                          step={0.25}
+                          value={entry.beatsInCycle}
+                          onChange={(e) => {
+                            const v = parseFloat(e.target.value)
+                            if (!isNaN(v) && v > 0) {
+                              const next = [...(timeframe.cycles ?? [])]
+                              next[idx] = { ...entry, beatsInCycle: v }
+                              onUpdate({ cycles: next })
+                            }
+                          }}
+                          className="timeframe-panel-input-small"
+                        />
+                      </label>
+                    </>
+                  ) : (
+                    <>
+                      <label className="timeframe-panel-cycle-param">
+                        <span>beatsInCycle</span>
+                        <input
+                          type="number"
+                          min={0.01}
+                          step={0.25}
+                          value={entry.beatsInCycle}
+                          onChange={(e) => {
+                            const v = parseFloat(e.target.value)
+                            if (!isNaN(v) && v > 0) {
+                              const next = [...(timeframe.cycles ?? [])]
+                              next[idx] = { ...entry, beatsInCycle: v }
+                              onUpdate({ cycles: next })
+                            }
+                          }}
+                          className="timeframe-panel-input-small"
+                        />
+                      </label>
+                      <label className="timeframe-panel-cycle-param">
+                        <span>startBeat</span>
+                        <input
+                          type="number"
+                          min={0}
+                          step={0.1}
+                          value={entry.startBeat}
+                          onChange={(e) => {
+                            const v = parseFloat(e.target.value)
+                            if (!isNaN(v)) {
+                              const next = [...(timeframe.cycles ?? [])]
+                              next[idx] = { ...entry, startBeat: v }
+                              onUpdate({ cycles: next })
+                            }
+                          }}
+                          className="timeframe-panel-input-small"
+                        />
+                      </label>
+                      <label className="timeframe-panel-cycle-param">
+                        <span>endBeat</span>
+                        <input
+                          type="number"
+                          min={0}
+                          step={0.1}
+                          value={entry.endBeat}
+                          onChange={(e) => {
+                            const v = parseFloat(e.target.value)
+                            if (!isNaN(v)) {
+                              const next = [...(timeframe.cycles ?? [])]
+                              next[idx] = { ...entry, endBeat: v }
+                              onUpdate({ cycles: next })
+                            }
+                          }}
+                          className="timeframe-panel-input-small"
+                        />
+                      </label>
+                    </>
+                  )}
+                  <button
+                    type="button"
+                    className="timeframe-panel-cycle-remove"
+                    onClick={() => {
+                      const next = (timeframe.cycles ?? []).filter((_, i) => i !== idx)
+                      onUpdate({ cycles: next.length ? next : undefined })
+                    }}
+                    title="Remove"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="timeframe-panel-cycles-actions">
+              <button
+                type="button"
+                className="timeframe-panel-cycle-add"
+                onClick={() => {
+                  const next = [...(timeframe.cycles ?? []), { type: 'cycle', beatsInCycle: 1 } as TimeframeCycleEntry]
+                  onUpdate({ cycles: next })
+                }}
+              >
+                + cycle
+              </button>
+              <button
+                type="button"
+                className="timeframe-panel-cycle-add"
+                onClick={() => {
+                  const next = [...(timeframe.cycles ?? []), { type: 'cycleBeats', beatsInCycle: 1, startBeat: 0, endBeat: 0.5 } as TimeframeCycleBeats]
+                  onUpdate({ cycles: next })
+                }}
+              >
+                + cycleBeats
+              </button>
+            </div>
           </div>
         </div>
 

@@ -12,11 +12,56 @@
   max-height: 100vh;
 }
 
+.app-resizing {
+  user-select: none;
+  cursor: col-resize;
+}
+
 .app-content {
   display: flex;
   flex: 1;
   overflow: hidden;
   min-height: 0;
+}
+
+/* Resizable panel wrappers */
+.app-playback-wrapper,
+.app-details-wrapper {
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+}
+
+.app-playback-wrapper .playback-rings-panel {
+  width: 100%;
+  min-width: 0;
+}
+
+.app-details-wrapper .timeframe-panel {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Resize handles between panels */
+.app-resize-handle {
+  width: 6px;
+  flex-shrink: 0;
+  background: #e5e7eb;
+  cursor: col-resize;
+  transition: background 0.15s;
+}
+
+.app-resize-handle:hover,
+.app-resize-handle:active {
+  background: #667eea;
+}
+
+.app-resize-handle-playback {
+  border-left: 1px solid #e5e7eb;
+}
+
+.app-resize-handle-details {
+  border-right: 1px solid #e5e7eb;
 }
 
 .app-main {

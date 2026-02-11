@@ -5,6 +5,22 @@ import PlaybackRingsPanel from './components/PlaybackRingsPanel'
 import { generateSequenceTs } from './generateSequenceTs'
 import './App.css'
 
+/** cycle(beatsInCycle, cb) — full cycle */
+export interface TimeframeCycle {
+  type: 'cycle'
+  beatsInCycle: number
+}
+
+/** cycleBeats(beatsInCycle, startBeat, endBeat, cb) — window within cycle */
+export interface TimeframeCycleBeats {
+  type: 'cycleBeats'
+  beatsInCycle: number
+  startBeat: number
+  endBeat: number
+}
+
+export type TimeframeCycleEntry = TimeframeCycle | TimeframeCycleBeats
+
 export interface Timeframe {
   id: string
   startTime: number
@@ -15,6 +31,8 @@ export interface Timeframe {
   mapping?: string // Segment mapping name from segments.json
   rainbow?: boolean // Whether to use rainbow coloring
   rainbowRange?: number // Rainbow cycle range (1 = full cycle, 2 = 2 cycles, 0.5 = half cycle)
+  /** Optional list of cycle/cycleBeats wrapping this timeframe's content (outermost first) */
+  cycles?: TimeframeCycleEntry[]
   brightnessEffect?: string
   brightnessEffectParams?: Record<string, number | boolean>
   hueEffect?: string
@@ -28,9 +46,35 @@ export interface Song {
   lengthBeats: number
   bpm: number
   startOffsetMs?: number
+  /** When pressing Run, start playback at this time (beats). */
+  runStartTimeBeats?: number
 }
 
 const LAST_SONG_STORAGE_KEY = 'timelineManager:lastSong'
+
+function normalizeCycles(cycles: unknown): TimeframeCycleEntry[] | undefined {
+  if (!Array.isArray(cycles) || cycles.length === 0) return undefined
+  const out: TimeframeCycleEntry[] = []
+  for (const c of cycles) {
+    if (!c || typeof c !== 'object') continue
+    if (c.type === 'cycle' && typeof c.beatsInCycle === 'number' && c.beatsInCycle > 0) {
+      out.push({ type: 'cycle', beatsInCycle: c.beatsInCycle })
+    } else if (
+      c.type === 'cycleBeats' &&
+      typeof c.beatsInCycle === 'number' && c.beatsInCycle > 0 &&
+      typeof c.startBeat === 'number' &&
+      typeof c.endBeat === 'number'
+    ) {
+      out.push({
+        type: 'cycleBeats',
+        beatsInCycle: c.beatsInCycle,
+        startBeat: c.startBeat,
+        endBeat: c.endBeat,
+      })
+    }
+  }
+  return out.length ? out : undefined
+}
 
 function App() {
   const snapToBeat = (beat: number): number => {
@@ -80,8 +124,45 @@ function App() {
   const [focusedTimeframeId, setFocusedTimeframeId] = useState<string | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0) // Current time in beats
+  /** When true, next Run starts from runStartTimeBeats; when false, next Run resumes from currentTime (after Pause). */
+  const [nextRunFromStart, setNextRunFromStart] = useState(true)
   const playbackIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
+  const appContentRef = React.useRef<HTMLDivElement>(null)
   const songLengthBeats = Math.max(1, song.lengthBeats || 0)
+
+  // Resizable panel widths (px)
+  const [playbackPanelWidth, setPlaybackPanelWidth] = useState(380)
+  const [detailsPanelWidth, setDetailsPanelWidth] = useState(350)
+  const [resizing, setResizing] = useState<'playback' | 'details' | null>(null)
+
+  useEffect(() => {
+    if (!resizing) return
+    const minPlayback = 240
+    const maxPlayback = 600
+    const minDetails = 240
+    const maxDetails = 600
+    const onMove = (e: MouseEvent) => {
+      const el = appContentRef.current
+      if (!el) return
+      const rect = el.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      if (resizing === 'playback') {
+        const w = Math.round(Math.min(maxPlayback, Math.max(minPlayback, x)))
+        setPlaybackPanelWidth(w)
+      } else {
+        const rightEdge = rect.width
+        const w = Math.round(Math.min(maxDetails, Math.max(minDetails, rightEdge - x)))
+        setDetailsPanelWidth(w)
+      }
+    }
+    const onUp = () => setResizing(null)
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+  }, [resizing])
 
   const addTimeframe = () => {
     const lastEndTime = timeframes.length > 0 
@@ -135,12 +216,28 @@ function App() {
 
   // Playback controls
   const handlePlayPause = () => {
-    setIsPlaying(!isPlaying)
+    if (isPlaying) {
+      // Pause: stop playback; next Run will resume from current position
+      setNextRunFromStart(false)
+      setIsPlaying(false)
+    } else {
+      // Run: if nextRunFromStart, jump to runStartTimeBeats; otherwise resume from currentTime
+      if (nextRunFromStart) {
+        const startBeats = song.runStartTimeBeats ?? 0
+        const clamped = Math.max(0, Math.min(songLengthBeats, startBeats))
+        setCurrentTime(clamped)
+        setNextRunFromStart(false)
+      }
+      setIsPlaying(true)
+    }
   }
 
   const handleStop = () => {
     setIsPlaying(false)
-    setCurrentTime(0)
+    setNextRunFromStart(true) // Next Run will start from runStartTimeBeats
+    const startBeats = song.runStartTimeBeats ?? 0
+    const clamped = Math.max(0, Math.min(songLengthBeats, startBeats))
+    setCurrentTime(clamped)
   }
 
   const handleLoadTimeframes = () => {
@@ -154,40 +251,47 @@ function App() {
         const text = await file.text()
         const parsed = JSON.parse(text)
 
-        // Support both "raw array" and "{ timeframes: [...] }" formats
+        // Support: raw array (timeframes only), { timeframes: [...] }, or { song, timeframes }
         const maybeArray = Array.isArray(parsed) ? parsed : parsed?.timeframes
-        if (!Array.isArray(maybeArray)) {
-          console.error('Invalid timeframes file format')
-          return
+
+        if (parsed?.song && typeof parsed.song === 'object') {
+          setSong({
+            name: typeof parsed.song.name === 'string' ? parsed.song.name : 'New Song',
+            lengthBeats: Math.max(1, Number(parsed.song.lengthBeats) || 64),
+            bpm: Math.max(1, Number(parsed.song.bpm) || 120),
+            startOffsetMs: Math.max(0, Number(parsed.song.startOffsetMs) || 0),
+            runStartTimeBeats: parsed.song.runStartTimeBeats != null ? Number(parsed.song.runStartTimeBeats) : undefined,
+          })
         }
 
-        // Basic shape validation
-        const mapped: Timeframe[] = maybeArray
-          .filter((item: any) => item && typeof item === 'object')
-          .map((item: any, idx: number) => ({
-            id: item.id?.toString() ?? `tf-${Date.now()}-${idx}`,
-            startTime: Number(item.startTime) || 0,
-            endTime: Number(item.endTime) || 0,
-            label: typeof item.label === 'string' ? item.label : `Timeframe ${idx + 1}`,
-            color: typeof item.color === 'string' ? item.color : '#3b82f6',
-            rings: Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n)) : [1,2,3,4,5,6,7,8,9,10,11,12],
-            mapping: item.mapping,
-            rainbow: item.rainbow,
-            rainbowRange: item.rainbowRange,
-            brightnessEffect: item.brightnessEffect,
-            brightnessEffectParams: item.brightnessEffectParams && typeof item.brightnessEffectParams === 'object' ? item.brightnessEffectParams as Record<string, number | boolean> : undefined,
-            hueEffect: item.hueEffect,
-            hueEffectParams: item.hueEffectParams && typeof item.hueEffectParams === 'object' ? item.hueEffectParams as Record<string, number | boolean> : undefined,
-            motionEffect: item.motionEffect,
-            motionEffectParams: item.motionEffectParams && typeof item.motionEffectParams === 'object' ? item.motionEffectParams as Record<string, number | boolean> : undefined,
-          }))
-
-        if (mapped.length === 0) {
-          console.error('No valid timeframes found in file')
+        if (Array.isArray(maybeArray)) {
+          const mapped: Timeframe[] = maybeArray
+            .filter((item: any) => item && typeof item === 'object')
+            .map((item: any, idx: number) => ({
+              id: item.id?.toString() ?? `tf-${Date.now()}-${idx}`,
+              startTime: Number(item.startTime) || 0,
+              endTime: Number(item.endTime) || 0,
+              label: typeof item.label === 'string' ? item.label : `Timeframe ${idx + 1}`,
+              color: typeof item.color === 'string' ? item.color : '#3b82f6',
+              rings: Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n)) : [1,2,3,4,5,6,7,8,9,10,11,12],
+              mapping: item.mapping,
+              rainbow: item.rainbow,
+              rainbowRange: item.rainbowRange,
+              cycles: normalizeCycles(item.cycles),
+              brightnessEffect: item.brightnessEffect,
+              brightnessEffectParams: item.brightnessEffectParams && typeof item.brightnessEffectParams === 'object' ? item.brightnessEffectParams as Record<string, number | boolean> : undefined,
+              hueEffect: item.hueEffect,
+              hueEffectParams: item.hueEffectParams && typeof item.hueEffectParams === 'object' ? item.hueEffectParams as Record<string, number | boolean> : undefined,
+              motionEffect: item.motionEffect,
+              motionEffectParams: item.motionEffectParams && typeof item.motionEffectParams === 'object' ? item.motionEffectParams as Record<string, number | boolean> : undefined,
+            }))
+          setTimeframes(mapped)
+        } else if (!parsed?.song) {
+          console.error('Invalid file format: expected array of timeframes or { song, timeframes }')
           return
         }
+        // If we have song but no timeframes array, leave timeframes unchanged
 
-        setTimeframes(mapped)
         setFocusedTimeframeId(null)
         setCurrentTime(0)
       } catch (err) {
@@ -197,7 +301,8 @@ function App() {
     input.click()
   }
   const handleSaveTimeframes = async () => {
-    const dataStr = JSON.stringify(timeframes, null, 2)
+    const payload = { song, timeframes }
+    const dataStr = JSON.stringify(payload, null, 2)
     const safeName = (song.name || 'song').trim() || 'song'
 
     // Generate TypeScript implementation from current song + timeframes
@@ -311,7 +416,7 @@ function App() {
   }
 
   return (
-    <div className="app">
+    <div className={`app${resizing ? ' app-resizing' : ''}`}>
       <div className="app-header">
         <div className="app-header-title">
           <h1>Timeline Manager</h1>
@@ -368,6 +473,21 @@ function App() {
                 />
                 <span className="song-meta-suffix">ms</span>
               </label>
+              <label className="song-meta-field" title="Timeline position when you press Run">
+                <span>Run from</span>
+                <input
+                  type="number"
+                  min={0}
+                  step={1}
+                  className="song-meta-input"
+                  value={song.runStartTimeBeats ?? 0}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value)
+                    handleSongChange({ runStartTimeBeats: isNaN(val) ? 0 : Math.max(0, val) })
+                  }}
+                />
+                <span className="song-meta-suffix">beats</span>
+              </label>
             </div>
           </div>
         </div>
@@ -377,7 +497,7 @@ function App() {
               className={`playback-button ${isPlaying ? 'playing' : ''}`}
               onClick={handlePlayPause}
             >
-              {isPlaying ? '⏸ Stop' : '▶ Run'}
+              {isPlaying ? '⏸ Pause' : '▶ Run'}
             </button>
             <button 
               className="playback-button stop-button"
@@ -402,9 +522,19 @@ function App() {
           </div>
         </div>
       </div>
-      <div className="app-content">
-        <div className="app-main">
+      <div className="app-content" ref={appContentRef}>
+        <div
+          className="app-playback-wrapper"
+          style={{ width: playbackPanelWidth, minWidth: playbackPanelWidth }}
+        >
           <PlaybackRingsPanel currentTime={currentTime} timeframes={timeframes} />
+        </div>
+        <div
+          className="app-resize-handle app-resize-handle-playback"
+          onMouseDown={() => setResizing('playback')}
+          title="Drag to resize Playback panel"
+        />
+        <div className="app-main">
           <Timeline
             timeframes={timeframes}
             songLengthBeats={songLengthBeats}
@@ -417,11 +547,21 @@ function App() {
             onCurrentTimeChange={setCurrentTime}
           />
         </div>
-        <TimeframePanel
-          timeframe={focusedTimeframe}
-          onUpdate={handlePanelUpdate}
-          onClose={() => setFocusedTimeframeId(null)}
+        <div
+          className="app-resize-handle app-resize-handle-details"
+          onMouseDown={() => setResizing('details')}
+          title="Drag to resize Details panel"
         />
+        <div
+          className="app-details-wrapper"
+          style={{ width: detailsPanelWidth, minWidth: detailsPanelWidth }}
+        >
+          <TimeframePanel
+            timeframe={focusedTimeframe}
+            onUpdate={handlePanelUpdate}
+            onClose={() => setFocusedTimeframeId(null)}
+          />
+        </div>
       </div>
     </div>
   )

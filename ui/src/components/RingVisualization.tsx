@@ -32,8 +32,26 @@ const RingVisualization = ({
     (timeframe.brightnessEffect || timeframe.hueEffect || timeframe.motionEffect)
   )
   const duration = timeframe ? timeframe.endTime - timeframe.startTime : 0
+  const beatOffset = timeframe && currentTime !== undefined ? currentTime - timeframe.startTime : 0
+  const cycles = timeframe?.cycles ?? []
+  const hasCycles = cycles.length > 0
+  // When cycle/cycleBeats are present, use the innermost cycle (index 0) to compute effective phase t
   const t = duration > 0 && currentTime !== undefined && timeframe
-    ? Math.max(0, Math.min(1, (currentTime - timeframe.startTime) / duration))
+    ? (() => {
+        if (!hasCycles) {
+          return Math.max(0, Math.min(1, beatOffset / duration))
+        }
+        const c = cycles[0]!
+        if (c.type === 'cycle') {
+          return (beatOffset % c.beatsInCycle) / c.beatsInCycle
+        }
+        const phase = (beatOffset % c.beatsInCycle) / c.beatsInCycle
+        const windowStart = c.startBeat / c.beatsInCycle
+        const windowEnd = c.endBeat / c.beatsInCycle
+        const windowLen = windowEnd - windowStart
+        if (windowLen <= 0) return 0
+        return Math.max(0, Math.min(1, (phase - windowStart) / windowLen))
+      })()
     : 0
   // Convert hex color to HSL to get hue
   const hexToHue = (hex: string): number => {

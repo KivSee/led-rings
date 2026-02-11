@@ -176,6 +176,119 @@
   padding: 0 4px;
 }
 
+.timeframe-panel-cycles {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.timeframe-panel-cycles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.timeframe-panel-cycle-row {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  padding: 10px 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.timeframe-panel-cycle-type {
+  font-size: 11px;
+  font-weight: 700;
+  color: #667eea;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 80px;
+  flex-shrink: 0;
+  padding-top: 6px;
+}
+
+.timeframe-panel-cycle-param {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 90px;
+  flex: 1 1 90px;
+}
+
+.timeframe-panel-cycle-param span {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeframe-panel-cycle-param input {
+  width: 100%;
+  min-width: 72px;
+  min-height: 32px;
+  box-sizing: border-box;
+}
+
+.timeframe-panel-cycle-row .timeframe-panel-input-small {
+  flex: none;
+  width: 100%;
+  min-width: 72px;
+}
+
+.timeframe-panel-cycle-remove {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.timeframe-panel-cycle-remove:hover {
+  background: #fecaca;
+}
+
+.timeframe-panel-cycles-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.timeframe-panel-cycle-add {
+  font-size: 13px;
+  padding: 6px 12px;
+  background: #ede9fe;
+  color: #5b21b6;
+  border: 1px solid #c4b5fd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.timeframe-panel-cycle-add:hover {
+  background: #ddd6fe;
+  border-color: #a78bfa;
+}
+
 .timeframe-panel-input-small {
   font-size: 14px;
   color: #111827;

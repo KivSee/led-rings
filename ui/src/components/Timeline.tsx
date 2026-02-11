@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import { Timeframe } from '../App'
+import { Timeframe, TimeframeCycleEntry } from '../App'
+import { ringsToDisplayLabel } from '../generateSequenceTs'
 import './Timeline.css'
+
+function formatCyclesLine(cycles: TimeframeCycleEntry[]): string {
+  return cycles
+    .map((c) =>
+      c.type === 'cycle'
+        ? `cycle(${c.beatsInCycle})`
+        : `cycleBeats(${c.beatsInCycle}, ${c.startBeat}, ${c.endBeat})`
+    )
+    .join(', ')
+}
 
 interface TimelineProps {
   timeframes: Timeframe[]
@@ -539,8 +550,13 @@ const Timeline = ({ timeframes, songLengthBeats, onUpdate, onDelete, onAdd, focu
                         {timeframe.endTime}b
                       </span>
                     )}
+                    {(timeframe.cycles?.length ?? 0) > 0 && (
+                      <span className="timeframe-cycles-inline">
+                        , {formatCyclesLine(timeframe.cycles!)}
+                      </span>
+                    )}
                     <span className="timeframe-rings-inline">
-                      , Rings: {timeframe.rings.length === 12 ? 'All' : timeframe.rings.join(', ')}
+                      , Rings: {ringsToDisplayLabel(timeframe.rings)}
                     </span>
                     <span className="timeframe-mapping-inline">
                       , Mapping: {timeframe.mapping ?? 'all'}
