@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import Timeline from './components/Timeline'
 import TimeframePanel from './components/TimeframePanel'
 import PlaybackRingsPanel from './components/PlaybackRingsPanel'
+import { generateSequenceTs } from './generateSequenceTs'
 import './App.css'
 
 export interface Timeframe {
@@ -26,6 +27,7 @@ export interface Song {
   name: string
   lengthBeats: number
   bpm: number
+  startOffsetMs?: number
 }
 
 const LAST_SONG_STORAGE_KEY = 'timelineManager:lastSong'
@@ -42,6 +44,7 @@ function App() {
     name: 'New Song',
     lengthBeats: 64,
     bpm: 120,
+    startOffsetMs: 0,
   })
 
   const [timeframes, setTimeframes] = useState<Timeframe[]>([
@@ -197,38 +200,45 @@ function App() {
     const dataStr = JSON.stringify(timeframes, null, 2)
     const safeName = (song.name || 'song').trim() || 'song'
 
-    // Prefer File System Access API when available so the user can overwrite
+    // Generate TypeScript implementation from current song + timeframes
+    const tsCode = generateSequenceTs(song, timeframes)
+
+    const downloadFile = (content: string, filename: string, mimeType: string) => {
+      const blob = new Blob([content], { type: mimeType })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    }
+
+    // Single save: pick folder (e.g. src/) and write both JSON and TS there
     const anyWindow = window as any
-    if (anyWindow.showSaveFilePicker) {
+    if (anyWindow.showDirectoryPicker) {
       try {
-        const handle = await anyWindow.showSaveFilePicker({
-          suggestedName: `${safeName}.json`,
-          types: [
-            {
-              description: 'JSON Files',
-              accept: { 'application/json': ['.json'] },
-            },
-          ],
+        const dirHandle = await anyWindow.showDirectoryPicker({
+          mode: 'readwrite',
         })
-        const writable = await handle.createWritable()
-        await writable.write(dataStr)
-        await writable.close()
+        const jsonFile = await dirHandle.getFileHandle(`${safeName}.json`, { create: true })
+        const tsFile = await dirHandle.getFileHandle(`${safeName}.ts`, { create: true })
+        const jsonWritable = await jsonFile.createWritable()
+        const tsWritable = await tsFile.createWritable()
+        await jsonWritable.write(dataStr)
+        await tsWritable.write(tsCode)
+        await jsonWritable.close()
+        await tsWritable.close()
         return
       } catch {
-        // If the user cancels or an error occurs, fall back to download method
+        // User cancelled or error – fall back to downloads
       }
     }
 
-    // Fallback: regular download (may create "file (1).json" depending on browser settings)
-    const blob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${safeName}.json`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+    // Fallback: download both files (same song name, correct types)
+    downloadFile(dataStr, `${safeName}.json`, 'application/json')
+    downloadFile(tsCode, `${safeName}.ts`, 'text/typescript')
   }
 
   // Autoload last song on startup
@@ -238,7 +248,7 @@ function App() {
       if (!raw) return
       const parsed = JSON.parse(raw) as { song?: Song; timeframes?: Timeframe[] }
       if (parsed.song) {
-        setSong(parsed.song)
+        setSong({ startOffsetMs: 0, ...parsed.song })
       }
       if (parsed.timeframes && Array.isArray(parsed.timeframes) && parsed.timeframes.length > 0) {
         setTimeframes(parsed.timeframes)
@@ -342,6 +352,21 @@ function App() {
                     handleSongChange({ bpm: isNaN(val) ? 1 : Math.max(1, val) })
                   }}
                 />
+              </label>
+              <label className="song-meta-field">
+                <span>Start offset</span>
+                <input
+                  type="number"
+                  min={0}
+                  step={1}
+                  className="song-meta-input"
+                  value={song.startOffsetMs ?? 0}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value, 10)
+                    handleSongChange({ startOffsetMs: isNaN(val) ? 0 : Math.max(0, val) })
+                  }}
+                />
+                <span className="song-meta-suffix">ms</span>
               </label>
             </div>
           </div>
