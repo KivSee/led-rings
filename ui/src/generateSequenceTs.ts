@@ -3,11 +3,16 @@
  * Output matches the pattern used in src/buttons.ts, src/index.ts, src/agent.ts.
  */
 
+export type AnimationType = 'song' | 'trigger'
+
 export interface Song {
   name: string
-  lengthBeats: number
+  /** Song length in seconds. Total beats = (lengthSeconds / 60) * bpm */
+  lengthSeconds: number
   bpm: number
   startOffsetMs?: number
+  /** When 'trigger', output uses Animation(bpm, totalTimeSeconds) and trigger(); when 'song', uses Animation(..., startOffsetMs) and startSong(). */
+  animationType?: AnimationType
 }
 
 export type TimeframeCycleEntry =
@@ -224,17 +229,36 @@ ${indentBlock(core, 6)}
     })`
 }
 
+function toIdentifier(name: string): string {
+  const safe = (name || 'sequence').trim() || 'sequence'
+  const camel = safe.replace(/[^a-zA-Z0-9]+(.)?/g, (_, c) => (c ? c.toUpperCase() : '')).replace(/^[^a-zA-Z]/, '')
+  const id = camel ? camel : 'sequence'
+  return id.charAt(0).toLowerCase() + id.slice(1)
+}
+
 export function generateSequenceTs(song: Song, timeframes: Timeframe[]): string {
   const safeName = (song.name || 'sequence').trim() || 'sequence'
-  const totalTimeSeconds = (song.lengthBeats / song.bpm) * 60
+  const totalTimeSeconds = song.lengthSeconds
   const startOffsetMs = song.startOffsetMs ?? 0
+  const animationType = song.animationType ?? 'song'
   const bodyBlocks = timeframes.length === 0
     ? '    // Empty: add beats() blocks and content here.'
     : timeframes.map(emitTimeframeBody).join('\n\n')
 
+  const escapedName = safeName.replace(/"/g, '\\"')
+  const isTrigger = animationType === 'trigger'
+
+  const animationCtor = isTrigger
+    ? `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)})`
+    : `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)}, ${startOffsetMs})`
+  const runCall = isTrigger
+    ? `await trigger("${escapedName}");`
+    : `await startSong("${escapedName}", 0);`
+  const fnName = toIdentifier(safeName)
+
   return `// Generated from Timeline Manager. Place this file in your project's src/ so imports resolve.
 import { sendSequence } from "./services/sequence";
-import { startSong } from "./services/trigger";
+import { startSong, trigger } from "./services/trigger";
 import { Animation } from "./animation/animation";
 import { beats, cycle, cycleBeats } from "./time/time";
 import { constColor, noColor, rainbow } from "./effects/coloring";
@@ -278,19 +302,19 @@ import {
 } from "./effects/motion";
 import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "./effects/hue";
 
-const testSequence = async () => {
-  const testAnimation = new Animation("${safeName.replace(/"/g, '\\"')}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)}, ${startOffsetMs});
-  testAnimation.sync(() => {
+const ${fnName} = async () => {
+  const anim = ${animationCtor};
+  anim.sync(() => {
 ${bodyBlocks}
   });
 
   console.log("sending sequence");
-  await sendSequence("${safeName.replace(/"/g, '\\"')}", testAnimation.getSequence());
-  await startSong("${safeName.replace(/"/g, '\\"')}", 0);
+  await sendSequence("${escapedName}", anim.getSequence());
+  ${runCall}
 };
 
 (async () => {
-  await testSequence();
+  await ${fnName}();
 })();
 `
 }

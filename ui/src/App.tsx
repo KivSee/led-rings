@@ -41,13 +41,18 @@ export interface Timeframe {
   motionEffectParams?: Record<string, number | boolean>
 }
 
+export type AnimationType = 'song' | 'trigger'
+
 export interface Song {
   name: string
-  lengthBeats: number
+  /** Song length in seconds. Total beats = (lengthSeconds / 60) * bpm */
+  lengthSeconds: number
   bpm: number
   startOffsetMs?: number
-  /** When pressing Run, start playback at this time (beats). */
-  runStartTimeBeats?: number
+  /** When pressing Run, start playback at this time (seconds). */
+  runStartTimeSeconds?: number
+  /** Song = startSong() with offset; Trigger = trigger() one-shot. Affects generated .ts output. */
+  animationType?: AnimationType
 }
 
 const LAST_SONG_STORAGE_KEY = 'timelineManager:lastSong'
@@ -86,9 +91,10 @@ function App() {
 
   const [song, setSong] = useState<Song>({
     name: 'New Song',
-    lengthBeats: 64,
+    lengthSeconds: 32,
     bpm: 120,
     startOffsetMs: 0,
+    animationType: 'song',
   })
 
   const [timeframes, setTimeframes] = useState<Timeframe[]>([
@@ -124,11 +130,11 @@ function App() {
   const [focusedTimeframeId, setFocusedTimeframeId] = useState<string | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0) // Current time in beats
-  /** When true, next Run starts from runStartTimeBeats; when false, next Run resumes from currentTime (after Pause). */
+  /** When true, next Run starts from runStartTimeSeconds; when false, next Run resumes from currentTime (after Pause). */
   const [nextRunFromStart, setNextRunFromStart] = useState(true)
   const playbackIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
   const appContentRef = React.useRef<HTMLDivElement>(null)
-  const songLengthBeats = Math.max(1, song.lengthBeats || 0)
+  const songLengthBeats = Math.max(1, (song.lengthSeconds * song.bpm) / 60)
 
   // Resizable panel widths (px)
   const [playbackPanelWidth, setPlaybackPanelWidth] = useState(380)
@@ -221,9 +227,9 @@ function App() {
       setNextRunFromStart(false)
       setIsPlaying(false)
     } else {
-      // Run: if nextRunFromStart, jump to runStartTimeBeats; otherwise resume from currentTime
+      // Run: if nextRunFromStart, jump to runStartTimeSeconds; otherwise resume from currentTime
       if (nextRunFromStart) {
-        const startBeats = song.runStartTimeBeats ?? 0
+        const startBeats = ((song.runStartTimeSeconds ?? 0) / 60) * song.bpm
         const clamped = Math.max(0, Math.min(songLengthBeats, startBeats))
         setCurrentTime(clamped)
         setNextRunFromStart(false)
@@ -234,8 +240,8 @@ function App() {
 
   const handleStop = () => {
     setIsPlaying(false)
-    setNextRunFromStart(true) // Next Run will start from runStartTimeBeats
-    const startBeats = song.runStartTimeBeats ?? 0
+    setNextRunFromStart(true) // Next Run will start from runStartTimeSeconds
+    const startBeats = ((song.runStartTimeSeconds ?? 0) / 60) * song.bpm
     const clamped = Math.max(0, Math.min(songLengthBeats, startBeats))
     setCurrentTime(clamped)
   }
@@ -255,13 +261,7 @@ function App() {
         const maybeArray = Array.isArray(parsed) ? parsed : parsed?.timeframes
 
         if (parsed?.song && typeof parsed.song === 'object') {
-          setSong({
-            name: typeof parsed.song.name === 'string' ? parsed.song.name : 'New Song',
-            lengthBeats: Math.max(1, Number(parsed.song.lengthBeats) || 64),
-            bpm: Math.max(1, Number(parsed.song.bpm) || 120),
-            startOffsetMs: Math.max(0, Number(parsed.song.startOffsetMs) || 0),
-            runStartTimeBeats: parsed.song.runStartTimeBeats != null ? Number(parsed.song.runStartTimeBeats) : undefined,
-          })
+          setSong(normalizeLoadedSong(parsed.song as Record<string, unknown>))
         }
 
         if (Array.isArray(maybeArray)) {
@@ -346,14 +346,37 @@ function App() {
     downloadFile(tsCode, `${safeName}.ts`, 'text/typescript')
   }
 
+  // Normalize loaded song to use lengthSeconds/runStartTimeSeconds (support old lengthBeats/runStartTimeBeats)
+  const normalizeLoadedSong = (s: Record<string, unknown>): Song => {
+    const bpm = Math.max(1, Number(s.bpm) || 120)
+    const lengthSeconds =
+      s.lengthSeconds != null
+        ? Math.max(0.1, Number(s.lengthSeconds))
+        : (Math.max(1, Number(s.lengthBeats) || 64) / bpm) * 60
+    const runStartTimeSeconds =
+      s.runStartTimeSeconds != null
+        ? Math.max(0, Number(s.runStartTimeSeconds))
+        : s.runStartTimeBeats != null
+          ? (Number(s.runStartTimeBeats) / bpm) * 60
+          : undefined
+    return {
+      name: typeof s.name === 'string' ? s.name : 'New Song',
+      lengthSeconds,
+      bpm,
+      startOffsetMs: Math.max(0, Number(s.startOffsetMs) || 0),
+      runStartTimeSeconds,
+      animationType: (s.animationType === 'trigger' ? 'trigger' : 'song') as AnimationType,
+    }
+  }
+
   // Autoload last song on startup
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(LAST_SONG_STORAGE_KEY)
       if (!raw) return
-      const parsed = JSON.parse(raw) as { song?: Song; timeframes?: Timeframe[] }
-      if (parsed.song) {
-        setSong({ startOffsetMs: 0, ...parsed.song })
+      const parsed = JSON.parse(raw) as { song?: Record<string, unknown>; timeframes?: Timeframe[] }
+      if (parsed.song && typeof parsed.song === 'object') {
+        setSong(normalizeLoadedSong(parsed.song))
       }
       if (parsed.timeframes && Array.isArray(parsed.timeframes) && parsed.timeframes.length > 0) {
         setTimeframes(parsed.timeframes)
@@ -429,20 +452,31 @@ function App() {
               placeholder="Song name"
             />
             <div className="song-meta-fields">
+              <label className="song-meta-field" title="Song = startSong() with offset; Trigger = one-shot trigger()">
+                <span>Type</span>
+                <select
+                  className="song-meta-input"
+                  value={song.animationType ?? 'song'}
+                  onChange={(e) => handleSongChange({ animationType: e.target.value === 'trigger' ? 'trigger' : 'song' })}
+                >
+                  <option value="song">Song</option>
+                  <option value="trigger">Trigger</option>
+                </select>
+              </label>
               <label className="song-meta-field">
                 <span>Length</span>
                 <input
                   type="number"
-                  min={1}
-                  step={1}
+                  min={0.1}
+                  step={0.1}
                   className="song-meta-input"
-                  value={song.lengthBeats}
+                  value={song.lengthSeconds}
                   onChange={(e) => {
-                    const val = parseInt(e.target.value, 10)
-                    handleSongChange({ lengthBeats: isNaN(val) ? 1 : Math.max(1, val) })
+                    const val = parseFloat(e.target.value)
+                    handleSongChange({ lengthSeconds: isNaN(val) ? 1 : Math.max(0.1, val) })
                   }}
                 />
-                <span className="song-meta-suffix">beats</span>
+                <span className="song-meta-suffix">sec</span>
               </label>
               <label className="song-meta-field">
                 <span>BPM</span>
@@ -478,15 +512,15 @@ function App() {
                 <input
                   type="number"
                   min={0}
-                  step={1}
+                  step={0.1}
                   className="song-meta-input"
-                  value={song.runStartTimeBeats ?? 0}
+                  value={song.runStartTimeSeconds ?? 0}
                   onChange={(e) => {
                     const val = parseFloat(e.target.value)
-                    handleSongChange({ runStartTimeBeats: isNaN(val) ? 0 : Math.max(0, val) })
+                    handleSongChange({ runStartTimeSeconds: isNaN(val) ? 0 : Math.max(0, val) })
                   }}
                 />
-                <span className="song-meta-suffix">beats</span>
+                <span className="song-meta-suffix">sec</span>
               </label>
             </div>
           </div>
@@ -538,6 +572,7 @@ function App() {
           <Timeline
             timeframes={timeframes}
             songLengthBeats={songLengthBeats}
+            bpm={song.bpm}
             onUpdate={updateTimeframe}
             onDelete={deleteTimeframe}
             onAdd={addTimeframeFromDrag}

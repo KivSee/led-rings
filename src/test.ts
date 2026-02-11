@@ -1,8 +1,8 @@
 // Generated from Timeline Manager. Place this file in your project's src/ so imports resolve.
 import { sendSequence } from "./services/sequence";
-import { startSong } from "./services/trigger";
+import { startSong, trigger } from "./services/trigger";
 import { Animation } from "./animation/animation";
-import { beats } from "./time/time";
+import { beats, cycle, cycleBeats } from "./time/time";
 import { constColor, noColor, rainbow } from "./effects/coloring";
 import {
   blink,
@@ -44,40 +44,44 @@ import {
 } from "./effects/motion";
 import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "./effects/hue";
 
-const testSequence = async () => {
-  const testAnimation = new Animation("test", 120, 32.00, 0);
-  testAnimation.sync(() => {
-    beats(0, 8, () => {
+const test = async () => {
+  const anim = new Animation("test", 120, 30.00);
+  anim.sync(() => {
+    beats(0, 20, () => {
       elements(all, () => {
         segment(segment_all, () => {
-            constColor({ hue: 0.6034, sat: 0.7602, val: 0.9647 })
-            snakeFillGrow()
+          constColor({ hue: 0.6034, sat: 0.7602, val: 0.9647 })
+          fadeIn()
         });
       });
     })
 
-    beats(8, 28, () => {
-      elements(all, () => {
-        segment(segment_all, () => {
+    beats(20, 40, () => {
+      cycle(4, () => {
+        elements(all, () => {
+          segment(segment_arc, () => {
             constColor({ hue: 0.4448, sat: 0.9135, val: 0.7255 })
+            snakeFillGrow()
+          });
         });
       });
     })
 
-    beats(28, 32, () => {
+    beats(40, 64, () => {
       elements(all, () => {
-        segment(segment_all, () => {
-            constColor({ hue: 0.1047, sat: 0.9551, val: 0.9608 })
+        segment(segment_centric, () => {
+          constColor({ hue: 0.1047, sat: 0.9551, val: 0.9608 })
+          snakeHeadSin({ tailLength: 0.5, cyclic: false })
         });
       });
     })
   });
 
   console.log("sending sequence");
-  await sendSequence("test", testAnimation.getSequence());
-  await startSong("test", 0);
+  await sendSequence("test", anim.getSequence());
+  await trigger("test");
 };
 
 (async () => {
-  await testSequence();
+  await test();
 })();

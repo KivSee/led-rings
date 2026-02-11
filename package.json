@@ -4,6 +4,7 @@
   "main": "index.js",
   "repository": "git@github.com:KivSee/led-rings.git",
   "scripts": {
+    "test": "ts-node-dev --respawn src/test.ts",
     "sync-segments": "ts-node src/ring-segments/index.ts",
     "start": "ts-node-dev --respawn src/index.ts",
     "playground": "ts-node-dev --respawn src/playground.ts",

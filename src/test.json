@@ -1,0 +1,93 @@
+{
+  "song": {
+    "name": "test",
+    "lengthSeconds": 30,
+    "bpm": 120,
+    "startOffsetMs": 0,
+    "animationType": "trigger"
+  },
+  "timeframes": [
+    {
+      "id": "1",
+      "startTime": 0,
+      "endTime": 20,
+      "label": "Introduction",
+      "color": "#3b82f6",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "brightnessEffect": "fadeIn"
+    },
+    {
+      "id": "2",
+      "startTime": 20,
+      "endTime": 40,
+      "label": "Main Content",
+      "color": "#10b981",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "motionEffect": "snakeFillGrow",
+      "motionEffectParams": {
+        "reverse": false
+      },
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 4
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "startTime": 40,
+      "endTime": 64,
+      "label": "Conclusion",
+      "color": "#f59e0b",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "centric",
+      "motionEffect": "snakeHeadSin",
+      "motionEffectParams": {
+        "tailLength": 0.5,
+        "cyclic": false
+      }
+    }
+  ]
+}

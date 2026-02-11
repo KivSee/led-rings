@@ -16,6 +16,7 @@ function formatCyclesLine(cycles: TimeframeCycleEntry[]): string {
 interface TimelineProps {
   timeframes: Timeframe[]
   songLengthBeats: number
+  bpm: number
   onUpdate: (id: string, updates: Partial<Timeframe>) => void
   onDelete: (id: string) => void
   onAdd: (startTime: number, endTime: number) => void
@@ -25,7 +26,9 @@ interface TimelineProps {
   onCurrentTimeChange: (time: number) => void
 }
 
-const Timeline = ({ timeframes, songLengthBeats, onUpdate, onDelete, onAdd, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange }: TimelineProps) => {
+const beatToSeconds = (beat: number, bpm: number): number => (beat / bpm) * 60
+
+const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange }: TimelineProps) => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -595,6 +598,8 @@ const Timeline = ({ timeframes, songLengthBeats, onUpdate, onDelete, onAdd, focu
         <div className="time-marks">
           {Array.from({ length: Math.ceil(maxTime / 4) + 1 }, (_, i) => i * 4).map((beat) => {
             const isLarge = beat % 16 === 0
+            const sec = beatToSeconds(beat, bpm)
+            const secLabel = sec % 1 === 0 ? `${sec}s` : `${sec.toFixed(1)}s`
             return (
               <div
                 key={beat}
@@ -602,7 +607,9 @@ const Timeline = ({ timeframes, songLengthBeats, onUpdate, onDelete, onAdd, focu
                 style={{ top: `${beat * pxPerBeat}px` }}
               >
                 <div className={`time-mark-line ${isLarge ? 'time-mark-line-large' : ''}`}></div>
-                <span className={`time-mark-label ${isLarge ? 'time-mark-label-large' : ''}`}>{beat}b</span>
+                <span className={`time-mark-label ${isLarge ? 'time-mark-label-large' : ''}`}>
+                  <span className="time-mark-sec">{secLabel}</span> {beat}b
+                </span>
               </div>
             )
           })}

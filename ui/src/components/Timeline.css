@@ -240,40 +240,45 @@
   transform: scale(1.1);
 }
 
+/* Axis column: extends left into margin so labels sit left of the vertical line; tick aligns at 20px */
 .time-marks {
   position: absolute;
-  left: 0;
+  left: -80px;
   top: 0;
   bottom: 0;
-  width: 80px;
+  width: 100px;
 }
 
 .time-mark {
   position: absolute;
   display: flex;
   align-items: center;
-  gap: 4px;
   left: 0;
-  right: 20px;
+  right: 0;
 }
 
 .time-mark-line {
+  position: absolute;
+  left: 88px;
   width: 12px;
   height: 2px;
   background: #667eea;
   border-radius: 1px;
-  flex-shrink: 0;
-  order: 2;
 }
 
 .time-mark-label {
   font-size: 12px;
   color: #666;
   font-weight: 500;
-  text-align: right;
-  min-width: 35px;
-  order: 1;
+  text-align: left;
+  max-width: 84px;
   padding-right: 4px;
+}
+
+.time-mark-sec {
+  font-size: 10px;
+  color: #999;
+  font-weight: 400;
 }
 
 .time-mark-large {
@@ -281,6 +286,7 @@
 }
 
 .time-mark-line-large {
+  left: 84px;
   width: 16px;
   height: 3px;
   background: #764ba2;
