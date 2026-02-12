@@ -45,7 +45,7 @@ import {
 import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "./effects/hue";
 
 const test = async () => {
-  const anim = new Animation("test", 120, 30.00);
+  const anim = new Animation("test", 120, 30.00, 0);
   anim.sync(() => {
     beats(0, 20, () => {
       elements(all, () => {
@@ -79,7 +79,7 @@ const test = async () => {
 
   console.log("sending sequence");
   await sendSequence("test", anim.getSequence());
-  await trigger("test");
+  await startSong("nocturne", 0);
 };
 
 (async () => {

@@ -53,6 +53,8 @@ export interface Song {
   runStartTimeSeconds?: number
   /** Song = startSong() with offset; Trigger = trigger() one-shot. Affects generated .ts output. */
   animationType?: AnimationType
+  /** Path or URL to the audio file for timeline playback (e.g. /audio/song.wav). Supported: .wav, .mp3, .ogg, etc. */
+  audioFilePath?: string
 }
 
 const LAST_SONG_STORAGE_KEY = 'timelineManager:lastSong'
@@ -134,6 +136,9 @@ function App() {
   const [nextRunFromStart, setNextRunFromStart] = useState(true)
   const playbackIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
   const appContentRef = React.useRef<HTMLDivElement>(null)
+  const audioRef = React.useRef<HTMLAudioElement | null>(null)
+  const audioBlobUrlRef = React.useRef<string | null>(null)
+  const audioFileInputRef = React.useRef<HTMLInputElement>(null)
   const songLengthBeats = Math.max(1, (song.lengthSeconds * song.bpm) / 60)
 
   // Resizable panel widths (px)
@@ -222,23 +227,44 @@ function App() {
 
   // Playback controls
   const handlePlayPause = () => {
+    const audio = audioRef.current
+    const isSongWithAudio = song.animationType === 'song' && song.audioFilePath && audio
+
     if (isPlaying) {
       // Pause: stop playback; next Run will resume from current position
+      if (isSongWithAudio) audio.pause()
       setNextRunFromStart(false)
       setIsPlaying(false)
     } else {
       // Run: if nextRunFromStart, jump to runStartTimeSeconds; otherwise resume from currentTime
       if (nextRunFromStart) {
-        const startBeats = ((song.runStartTimeSeconds ?? 0) / 60) * song.bpm
+        const startSec = song.runStartTimeSeconds ?? 0
+        const startBeats = (startSec / 60) * song.bpm
         const clamped = Math.max(0, Math.min(songLengthBeats, startBeats))
         setCurrentTime(clamped)
+        if (isSongWithAudio) {
+          audio.currentTime = Math.max(0, startSec)
+          audio.play().catch(() => {})
+        }
         setNextRunFromStart(false)
+      } else {
+        const startSec = (currentTime / song.bpm) * 60
+        if (isSongWithAudio) {
+          audio.currentTime = Math.max(0, startSec)
+          audio.play().catch(() => {})
+        }
       }
       setIsPlaying(true)
     }
   }
 
   const handleStop = () => {
+    const audio = audioRef.current
+    const isSongWithAudio = song.animationType === 'song' && song.audioFilePath && audio
+    if (isSongWithAudio) {
+      audio.pause()
+      audio.currentTime = Math.max(0, song.runStartTimeSeconds ?? 0)
+    }
     setIsPlaying(false)
     setNextRunFromStart(true) // Next Run will start from runStartTimeSeconds
     const startBeats = ((song.runStartTimeSeconds ?? 0) / 60) * song.bpm
@@ -366,6 +392,7 @@ function App() {
       startOffsetMs: Math.max(0, Number(s.startOffsetMs) || 0),
       runStartTimeSeconds,
       animationType: (s.animationType === 'trigger' ? 'trigger' : 'song') as AnimationType,
+      audioFilePath: typeof s.audioFilePath === 'string' ? s.audioFilePath : undefined,
     }
   }
 
@@ -400,16 +427,58 @@ function App() {
     }
   }, [song, timeframes])
 
-  // Playback animation
+  // Keep audio element src in sync with song (blob URL from Browse, or path/URL from field)
   useEffect(() => {
+    if (song.animationType !== 'song') {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.src = ''
+      }
+      if (audioBlobUrlRef.current) {
+        URL.revokeObjectURL(audioBlobUrlRef.current)
+        audioBlobUrlRef.current = null
+      }
+      return
+    }
+    const effectiveSrc = audioBlobUrlRef.current || song.audioFilePath?.trim()
+    if (!effectiveSrc) {
+      if (audioRef.current) audioRef.current.src = ''
+      return
+    }
+    if (!audioRef.current) audioRef.current = new Audio()
+    if (audioRef.current.src !== effectiveSrc) {
+      audioRef.current.src = effectiveSrc
+    }
+    audioRef.current.loop = true
+  }, [song.animationType, song.audioFilePath])
+
+  // Playback animation: use audio time when available (so Run from and timeline stay in sync), else use interval
+  useEffect(() => {
+    const audio = audioRef.current
+    const useAudio = isPlaying && song.animationType === 'song' && song.audioFilePath && audio
+
+    if (useAudio) {
+      let rafId: number
+      const syncFromAudio = () => {
+        if (!audioRef.current) return
+        const sec = audioRef.current.currentTime
+        const beats = (sec / 60) * song.bpm
+        const maxTime = songLengthBeats
+        setCurrentTime(beats >= maxTime ? 0 : beats)
+        rafId = requestAnimationFrame(syncFromAudio)
+      }
+      rafId = requestAnimationFrame(syncFromAudio)
+      return () => cancelAnimationFrame(rafId)
+    }
+
     if (isPlaying) {
       playbackIntervalRef.current = setInterval(() => {
         setCurrentTime(prev => {
           const maxTime = songLengthBeats
-          const next = prev + 0.1 // Increment by 0.1 beats per frame (adjust for speed)
-          return next >= maxTime ? 0 : next // Loop back to start
+          const next = prev + 0.1
+          return next >= maxTime ? 0 : next
         })
-      }, 50) // Update every 50ms
+      }, 50)
     } else {
       if (playbackIntervalRef.current) {
         clearInterval(playbackIntervalRef.current)
@@ -422,7 +491,7 @@ function App() {
         clearInterval(playbackIntervalRef.current)
       }
     }
-  }, [isPlaying, timeframes])
+  }, [isPlaying, song.animationType, song.audioFilePath, song.bpm, songLengthBeats])
 
   // Clamp current time if song length shrinks
   useEffect(() => {
@@ -438,19 +507,82 @@ function App() {
     }))
   }
 
+  const handleCurrentTimeChange = (time: number) => {
+    setCurrentTime(time)
+    setNextRunFromStart(false)
+    const audio = audioRef.current
+    const isSongWithAudio = song.animationType === 'song' && song.audioFilePath && audio
+    if (isSongWithAudio && isPlaying) {
+      const sec = (time / song.bpm) * 60
+      audio.currentTime = Math.max(0, sec)
+    }
+  }
+
+  const handleAudioFilePathChange = (value: string) => {
+    if (audioBlobUrlRef.current) {
+      URL.revokeObjectURL(audioBlobUrlRef.current)
+      audioBlobUrlRef.current = null
+    }
+    handleSongChange({ audioFilePath: value || undefined })
+  }
+
+  const handleBrowseAudio = () => {
+    audioFileInputRef.current?.click()
+  }
+
+  const handleAudioFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (audioBlobUrlRef.current) URL.revokeObjectURL(audioBlobUrlRef.current)
+    audioBlobUrlRef.current = URL.createObjectURL(file)
+    handleSongChange({ audioFilePath: file.name })
+    if (audioRef.current) audioRef.current.src = audioBlobUrlRef.current
+  }
+
   return (
     <div className={`app${resizing ? ' app-resizing' : ''}`}>
       <div className="app-header">
         <div className="app-header-title">
           <h1>Timeline Manager</h1>
           <div className="song-meta">
-            <input
-              type="text"
-              className="song-name-input"
-              value={song.name}
-              onChange={(e) => handleSongChange({ name: e.target.value })}
-              placeholder="Song name"
-            />
+            <div className="song-meta-row song-meta-row-name">
+              <input
+                type="text"
+                className="song-name-input"
+                value={song.name}
+                onChange={(e) => handleSongChange({ name: e.target.value })}
+                placeholder="Song name"
+              />
+              {song.animationType === 'song' && (
+                <>
+                  <label className="song-meta-field song-meta-field-audio" title="Browsers cannot read full disk paths (e.g. C:\...). Use a path relative to the app (e.g. /audio/song.wav with file in ui/public/audio/) or pick a file with Browse.">
+                    <span>Audio file</span>
+                    <input
+                      type="text"
+                      className="song-meta-input song-meta-input-audio"
+                      value={song.audioFilePath ?? ''}
+                      onChange={(e) => handleAudioFilePathChange(e.target.value)}
+                      placeholder="e.g. /audio/song.wav (file in public folder) or Browse"
+                    />
+                  </label>
+                  <input
+                    ref={audioFileInputRef}
+                    type="file"
+                    accept="audio/*,.wav,.mp3,.ogg,.m4a"
+                    className="song-audio-file-input"
+                    onChange={handleAudioFileSelected}
+                  />
+                  <button
+                    type="button"
+                    className="secondary-button song-browse-button"
+                    onClick={handleBrowseAudio}
+                  >
+                    Browse…
+                  </button>
+                </>
+              )}
+            </div>
             <div className="song-meta-fields">
               <label className="song-meta-field" title="Song = startSong() with offset; Trigger = one-shot trigger()">
                 <span>Type</span>
@@ -579,7 +711,7 @@ function App() {
             focusedTimeframeId={focusedTimeframeId}
             onFocusedTimeframeChange={setFocusedTimeframeId}
             currentTime={currentTime}
-            onCurrentTimeChange={setCurrentTime}
+            onCurrentTimeChange={handleCurrentTimeChange}
           />
         </div>
         <div

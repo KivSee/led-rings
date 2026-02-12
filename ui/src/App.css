@@ -153,6 +153,17 @@
   gap: 6px;
 }
 
+.song-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.song-meta-row-name {
+  gap: 10px;
+}
+
 .song-name-input {
   background: rgba(255, 255, 255, 0.16);
   border-radius: 999px;
@@ -162,6 +173,23 @@
   font-size: 14px;
   outline: none;
   min-width: 220px;
+}
+
+.song-meta-field-audio .song-meta-input-audio {
+  width: 200px;
+}
+
+.song-audio-file-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.song-browse-button {
+  padding: 6px 12px;
+  font-size: 12px;
 }
 
 .song-name-input::placeholder {

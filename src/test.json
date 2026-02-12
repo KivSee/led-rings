@@ -4,7 +4,9 @@
     "lengthSeconds": 30,
     "bpm": 120,
     "startOffsetMs": 0,
-    "animationType": "trigger"
+    "runStartTimeSeconds": 10,
+    "animationType": "song",
+    "audioFilePath": "nocturne.wav"
   },
   "timeframes": [
     {
@@ -51,16 +53,16 @@
         12
       ],
       "mapping": "arc",
-      "motionEffect": "snakeFillGrow",
-      "motionEffectParams": {
-        "reverse": false
-      },
       "cycles": [
         {
           "type": "cycle",
           "beatsInCycle": 4
         }
-      ]
+      ],
+      "motionEffect": "snakeFillGrow",
+      "motionEffectParams": {
+        "reverse": false
+      }
     },
     {
       "id": "3",

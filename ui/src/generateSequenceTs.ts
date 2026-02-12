@@ -13,6 +13,8 @@ export interface Song {
   startOffsetMs?: number
   /** When 'trigger', output uses Animation(bpm, totalTimeSeconds) and trigger(); when 'song', uses Animation(..., startOffsetMs) and startSong(). */
   animationType?: AnimationType
+  /** Path or URL to the audio file for timeline playback (e.g. /audio/song.wav). Supported: .wav, .mp3, .ogg, etc. */
+  audioFilePath?: string
 }
 
 export type TimeframeCycleEntry =
@@ -248,12 +250,20 @@ export function generateSequenceTs(song: Song, timeframes: Timeframe[]): string 
   const escapedName = safeName.replace(/"/g, '\\"')
   const isTrigger = animationType === 'trigger'
 
+  const startSongName = (() => {
+    const path = song.audioFilePath?.trim()
+    if (!path) return escapedName
+    const base = path.replace(/^.*[/\\]/, '')
+    const withoutExt = base.replace(/\.[^.]+$/, '') || base
+    return withoutExt.replace(/"/g, '\\"')
+  })()
+
   const animationCtor = isTrigger
     ? `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)})`
     : `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)}, ${startOffsetMs})`
   const runCall = isTrigger
     ? `await trigger("${escapedName}");`
-    : `await startSong("${escapedName}", 0);`
+    : `await startSong("${startSongName}", 0);`
   const fnName = toIdentifier(safeName)
 
   return `// Generated from Timeline Manager. Place this file in your project's src/ so imports resolve.
