@@ -328,3 +328,78 @@ ${bodyBlocks}
 })();
 `
 }
+
+/** Generates TS that only builds the animation and writes { triggerName, sequence } to process.env.TMP_SEQUENCE_OUT (for control-server send-sequence). */
+export function generateSequenceRunnerTs(song: Song, timeframes: Timeframe[]): string {
+  const safeName = (song.name || 'sequence').trim() || 'sequence'
+  const totalTimeSeconds = song.lengthSeconds
+  const startOffsetMs = song.startOffsetMs ?? 0
+  const animationType = song.animationType ?? 'song'
+  const bodyBlocks = timeframes.length === 0
+    ? '    // Empty: add beats() blocks and content here.'
+    : timeframes.map(emitTimeframeBody).join('\n\n')
+  const escapedName = safeName.replace(/"/g, '\\"')
+  const isTrigger = animationType === 'trigger'
+  const animationCtor = isTrigger
+    ? `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)})`
+    : `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)}, ${startOffsetMs})`
+  const fnName = toIdentifier(safeName)
+  return `// Runner: builds sequence and writes to TMP_SEQUENCE_OUT. Do not place in src/ permanently.
+import * as fs from "fs";
+import { Animation } from "./animation/animation";
+import { beats, cycle, cycleBeats } from "./time/time";
+import { constColor, noColor, rainbow } from "./effects/coloring";
+import {
+  blink,
+  brightness,
+  fade,
+  fadeIn,
+  fadeInOut,
+  fadeOut,
+  fadeOutIn,
+  pulse,
+} from "./effects/brightness";
+import { elements, segment } from "./objects/elements";
+import {
+  all,
+  center,
+  even,
+  left,
+  odd,
+  right,
+  segment_all,
+  segment_arc,
+  segment_b1,
+  segment_b2,
+  segment_centric,
+  segment_ind,
+  segment_rand,
+  segment_updown,
+} from "./objects/ring-elements";
+import {
+  snake,
+  snakeFillGrow,
+  snakeHeadMove,
+  snakeHeadSin,
+  snakeInOut,
+  snakeSlowFast,
+  snakeTailShrinkGrow,
+  snakeHeadSteps,
+  staticSnake,
+} from "./effects/motion";
+import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "./effects/hue";
+
+const ${fnName} = async () => {
+  const anim = ${animationCtor};
+  anim.sync(() => {
+${bodyBlocks}
+  });
+  const outPath = process.env.TMP_SEQUENCE_OUT || ".tmp-sequence-out.json";
+  fs.writeFileSync(outPath, JSON.stringify({ triggerName: "${escapedName}", sequence: anim.getSequence() }));
+};
+
+(async () => {
+  await ${fnName}();
+})();
+`
+}

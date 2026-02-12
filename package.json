@@ -14,7 +14,8 @@
     "index-trigger": "ts-node-dev --respawn src/index-trigger.ts",
     "preset": "ts-node src/preset-runner.ts",
     "buttons": "ts-node-dev --respawn src/buttons.ts",
-    "agent": "ts-node-dev --respawn src/agent.ts"
+    "agent": "ts-node-dev --respawn src/agent.ts",
+    "control-server": "ts-node-dev --respawn src/control-server.ts"
   },
   "dependencies": {
     "@types/node": "^22.10.10",

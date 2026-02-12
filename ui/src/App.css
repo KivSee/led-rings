@@ -132,6 +132,31 @@
   color: white;
 }
 
+.playback-button.send-sequence-button {
+  background: #8b5cf6;
+  color: white;
+}
+
+.playback-button.send-sequence-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.live-mode-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+.live-mode-checkbox input {
+  cursor: pointer;
+}
+
 .current-time-display {
   background: rgba(255, 255, 255, 0.2);
   padding: 8px 12px;

@@ -1,3 +1,7 @@
+# Control server temp files
+.tmp-sequence-out.json
+src/.tmp-sequence-runner.ts
+
 # Logs
 logs
 *.log

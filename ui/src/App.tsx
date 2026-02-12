@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect } from 'react'
 import Timeline from './components/Timeline'
 import TimeframePanel from './components/TimeframePanel'
 import PlaybackRingsPanel from './components/PlaybackRingsPanel'
-import { generateSequenceTs } from './generateSequenceTs'
+import { generateSequenceTs, generateSequenceRunnerTs } from './generateSequenceTs'
 import './App.css'
+
+const API_BASE = (import.meta as any).env?.VITE_API_URL ?? ''
 
 /** cycle(beatsInCycle, cb) — full cycle */
 export interface TimeframeCycle {
@@ -134,6 +136,8 @@ function App() {
   const [currentTime, setCurrentTime] = useState(0) // Current time in beats
   /** When true, next Run starts from runStartTimeSeconds; when false, next Run resumes from currentTime (after Pause). */
   const [nextRunFromStart, setNextRunFromStart] = useState(true)
+  const [liveMode, setLiveMode] = useState(false)
+  const [sendSequenceLoading, setSendSequenceLoading] = useState(false)
   const playbackIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
   const appContentRef = React.useRef<HTMLDivElement>(null)
   const audioRef = React.useRef<HTMLAudioElement | null>(null)
@@ -233,10 +237,18 @@ function App() {
     if (isPlaying) {
       // Pause: stop playback; next Run will resume from current position
       if (isSongWithAudio) audio.pause()
+      if (liveMode && API_BASE) {
+        fetch(`${API_BASE}/api/stop`, { method: 'POST' }).catch((err) =>
+          console.error('Live stop failed', err)
+        )
+      }
       setNextRunFromStart(false)
       setIsPlaying(false)
     } else {
       // Run: if nextRunFromStart, jump to runStartTimeSeconds; otherwise resume from currentTime
+      const startOffsetSeconds = nextRunFromStart
+        ? (song.runStartTimeSeconds ?? 0)
+        : (currentTime / song.bpm) * 60
       if (nextRunFromStart) {
         const startSec = song.runStartTimeSeconds ?? 0
         const startBeats = (startSec / 60) * song.bpm
@@ -254,6 +266,14 @@ function App() {
           audio.play().catch(() => {})
         }
       }
+      if (liveMode && API_BASE) {
+        const songName = (song.name || 'sequence').trim() || 'sequence'
+        fetch(`${API_BASE}/api/start-song`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ songName, startOffsetSeconds }),
+        }).catch((err) => console.error('Live start-song failed', err))
+      }
       setIsPlaying(true)
     }
   }
@@ -265,11 +285,38 @@ function App() {
       audio.pause()
       audio.currentTime = Math.max(0, song.runStartTimeSeconds ?? 0)
     }
+    if (liveMode && API_BASE) {
+      fetch(`${API_BASE}/api/stop`, { method: 'POST' }).catch((err) =>
+        console.error('Live stop failed', err)
+      )
+    }
     setIsPlaying(false)
     setNextRunFromStart(true) // Next Run will start from runStartTimeSeconds
     const startBeats = ((song.runStartTimeSeconds ?? 0) / 60) * song.bpm
     const clamped = Math.max(0, Math.min(songLengthBeats, startBeats))
     setCurrentTime(clamped)
+  }
+
+  const handleSendSequence = async () => {
+    if (!API_BASE) {
+      console.warn('VITE_API_URL not set; cannot send sequence')
+      return
+    }
+    setSendSequenceLoading(true)
+    try {
+      const runnerCode = generateSequenceRunnerTs(song, timeframes)
+      const res = await fetch(`${API_BASE}/api/send-sequence`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ runnerCode }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+    } catch (err) {
+      console.error('Send sequence failed', err)
+    } finally {
+      setSendSequenceLoading(false)
+    }
   }
 
   const handleLoadTimeframes = () => {
@@ -659,6 +706,14 @@ function App() {
         </div>
         <div className="app-header-controls">
           <div className="playback-controls">
+            <label className="live-mode-checkbox" title="When on, Run also starts the song on the device; Stop sends stop.">
+              <input
+                type="checkbox"
+                checked={liveMode}
+                onChange={(e) => setLiveMode(e.target.checked)}
+              />
+              <span>Live mode</span>
+            </label>
             <button
               className={`playback-button ${isPlaying ? 'playing' : ''}`}
               onClick={handlePlayPause}
@@ -670,6 +725,14 @@ function App() {
               onClick={handleStop}
             >
               ⏹ Stop
+            </button>
+            <button
+              className="playback-button send-sequence-button"
+              onClick={handleSendSequence}
+              disabled={sendSequenceLoading || !API_BASE}
+              title={!API_BASE ? 'Set VITE_API_URL and run control server' : 'Send current sequence to device'}
+            >
+              {sendSequenceLoading ? '…' : 'Send Sequence'}
             </button>
             <div className="current-time-display">
               <span>Time: {currentTime.toFixed(1)}b</span>
