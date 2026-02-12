@@ -176,8 +176,8 @@ function App() {
   }, [resizing])
 
   const addTimeframe = () => {
-    const lastEndTime = timeframes.length > 0 
-      ? Math.max(...timeframes.map(t => t.endTime)) 
+    const lastEndTime = timeframes.length > 0
+      ? Math.max(...timeframes.map(t => t.endTime))
       : 0
     const newTimeframe: Timeframe = {
       id: Date.now().toString(),
@@ -192,7 +192,7 @@ function App() {
   }
 
   const updateTimeframe = (id: string, updates: Partial<Timeframe>) => {
-    setTimeframes(timeframes.map(tf => 
+    setTimeframes(timeframes.map(tf =>
       tf.id === id ? { ...tf, ...updates } : tf
     ))
   }
@@ -544,7 +544,7 @@ function App() {
     <div className={`app${resizing ? ' app-resizing' : ''}`}>
       <div className="app-header">
         <div className="app-header-title">
-          <h1>Timeline Manager</h1>
+          <h1>KivSee Time Simulator</h1>
           <div className="song-meta">
             <div className="song-meta-row song-meta-row-name">
               <input
@@ -659,13 +659,13 @@ function App() {
         </div>
         <div className="app-header-controls">
           <div className="playback-controls">
-            <button 
+            <button
               className={`playback-button ${isPlaying ? 'playing' : ''}`}
               onClick={handlePlayPause}
             >
               {isPlaying ? '⏸ Pause' : '▶ Run'}
             </button>
-            <button 
+            <button
               className="playback-button stop-button"
               onClick={handleStop}
             >
