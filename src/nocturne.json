@@ -1,7 +1,7 @@
 {
   "song": {
     "name": "nocturne",
-    "lengthSeconds": 30,
+    "lengthSeconds": 60,
     "bpm": 120,
     "startOffsetMs": 0,
     "runStartTimeSeconds": 10,

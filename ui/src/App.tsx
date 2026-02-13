@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import Timeline from './components/Timeline'
 import TimeframePanel from './components/TimeframePanel'
 import PlaybackRingsPanel from './components/PlaybackRingsPanel'
+import Spectrogram from './components/Spectrogram'
 import { generateSequenceTs, generateSequenceRunnerTs } from './generateSequenceTs'
 import './App.css'
 
@@ -143,12 +144,20 @@ function App() {
   const audioRef = React.useRef<HTMLAudioElement | null>(null)
   const audioBlobUrlRef = React.useRef<string | null>(null)
   const audioFileInputRef = React.useRef<HTMLInputElement>(null)
+  /** Effective audio URL for spectrogram fetch (path or blob URL). */
+  const [effectiveAudioSrc, setEffectiveAudioSrc] = useState('')
+  /** Visible time range in beats from Timeline scroll (for spectrogram zoom). */
+  const [visibleRangeBeats, setVisibleRangeBeats] = useState<{ start: number; end: number } | null>(null)
+  const visibleStartBeat = visibleRangeBeats?.start ?? null
+  const visibleEndBeat = visibleRangeBeats?.end ?? null
   const songLengthBeats = Math.max(1, (song.lengthSeconds * song.bpm) / 60)
 
   // Resizable panel widths (px)
   const [playbackPanelWidth, setPlaybackPanelWidth] = useState(380)
   const [detailsPanelWidth, setDetailsPanelWidth] = useState(350)
-  const [resizing, setResizing] = useState<'playback' | 'details' | null>(null)
+  const [spectrogramHeight, setSpectrogramHeight] = useState(180)
+  const [resizing, setResizing] = useState<'playback' | 'details' | 'spectrogram' | null>(null)
+  const spectrogramContainerRef = React.useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!resizing) return
@@ -156,7 +165,17 @@ function App() {
     const maxPlayback = 600
     const minDetails = 240
     const maxDetails = 600
+    const minSpectrogram = 80
+    const maxSpectrogram = 500
     const onMove = (e: MouseEvent) => {
+      if (resizing === 'spectrogram') {
+        const el = spectrogramContainerRef.current
+        if (!el) return
+        const rect = el.getBoundingClientRect()
+        const h = e.clientY - rect.top
+        setSpectrogramHeight(Math.round(Math.min(maxSpectrogram, Math.max(minSpectrogram, h))))
+        return
+      }
       const el = appContentRef.current
       if (!el) return
       const rect = el.getBoundingClientRect()
@@ -334,7 +353,9 @@ function App() {
         const maybeArray = Array.isArray(parsed) ? parsed : parsed?.timeframes
 
         if (parsed?.song && typeof parsed.song === 'object') {
-          setSong(normalizeLoadedSong(parsed.song as Record<string, unknown>))
+          const s = normalizeLoadedSong(parsed.song as Record<string, unknown>)
+          setSong(s)
+          setEffectiveAudioSrc(s.audioFilePath ?? '')
         }
 
         if (Array.isArray(maybeArray)) {
@@ -450,7 +471,9 @@ function App() {
       if (!raw) return
       const parsed = JSON.parse(raw) as { song?: Record<string, unknown>; timeframes?: Timeframe[] }
       if (parsed.song && typeof parsed.song === 'object') {
-        setSong(normalizeLoadedSong(parsed.song))
+        const s = normalizeLoadedSong(parsed.song)
+        setSong(s)
+        setEffectiveAudioSrc((s as Song).audioFilePath ?? '')
       }
       if (parsed.timeframes && Array.isArray(parsed.timeframes) && parsed.timeframes.length > 0) {
         setTimeframes(parsed.timeframes)
@@ -474,6 +497,10 @@ function App() {
     }
   }, [song, timeframes])
 
+  useEffect(() => {
+    if (song.animationType !== 'song') setEffectiveAudioSrc('')
+  }, [song.animationType])
+
   // Keep audio element src in sync with song (blob URL from Browse, or path/URL from field)
   useEffect(() => {
     if (song.animationType !== 'song') {
@@ -496,13 +523,32 @@ function App() {
     if (audioRef.current.src !== effectiveSrc) {
       audioRef.current.src = effectiveSrc
     }
-    audioRef.current.loop = true
+    audioRef.current.loop = false
   }, [song.animationType, song.audioFilePath])
 
-  // Playback animation: use audio time when available (so Run from and timeline stay in sync), else use interval
+  // Playback animation: use audio time when available (so Run from and timeline stay in sync), else use interval.
+  // Stop at song length (same as pressing Stop) instead of looping.
   useEffect(() => {
     const audio = audioRef.current
     const useAudio = isPlaying && song.animationType === 'song' && song.audioFilePath && audio
+    const runStartSec = song.runStartTimeSeconds ?? 0
+    const runStartBeats = (runStartSec / 60) * song.bpm
+    const maxTime = songLengthBeats
+
+    const performStop = () => {
+      if (audio && song.animationType === 'song' && song.audioFilePath) {
+        audio.pause()
+        audio.currentTime = Math.max(0, runStartSec)
+      }
+      if (liveMode && API_BASE) {
+        fetch(`${API_BASE}/api/stop`, { method: 'POST' }).catch((err) =>
+          console.error('Live stop failed', err)
+        )
+      }
+      setIsPlaying(false)
+      setNextRunFromStart(true)
+      setCurrentTime(Math.max(0, Math.min(maxTime, runStartBeats)))
+    }
 
     if (useAudio) {
       let rafId: number
@@ -510,8 +556,12 @@ function App() {
         if (!audioRef.current) return
         const sec = audioRef.current.currentTime
         const beats = (sec / 60) * song.bpm
-        const maxTime = songLengthBeats
-        setCurrentTime(beats >= maxTime ? 0 : beats)
+        if (beats >= maxTime) {
+          cancelAnimationFrame(rafId)
+          performStop()
+          return
+        }
+        setCurrentTime(beats)
         rafId = requestAnimationFrame(syncFromAudio)
       }
       rafId = requestAnimationFrame(syncFromAudio)
@@ -521,9 +571,18 @@ function App() {
     if (isPlaying) {
       playbackIntervalRef.current = setInterval(() => {
         setCurrentTime(prev => {
-          const maxTime = songLengthBeats
           const next = prev + 0.1
-          return next >= maxTime ? 0 : next
+          if (next >= maxTime) {
+            queueMicrotask(() => {
+              if (playbackIntervalRef.current) {
+                clearInterval(playbackIntervalRef.current)
+                playbackIntervalRef.current = null
+              }
+              performStop()
+            })
+            return Math.max(0, Math.min(maxTime, runStartBeats))
+          }
+          return next
         })
       }, 50)
     } else {
@@ -536,9 +595,10 @@ function App() {
     return () => {
       if (playbackIntervalRef.current) {
         clearInterval(playbackIntervalRef.current)
+        playbackIntervalRef.current = null
       }
     }
-  }, [isPlaying, song.animationType, song.audioFilePath, song.bpm, songLengthBeats])
+  }, [isPlaying, song.animationType, song.audioFilePath, song.bpm, song.lengthSeconds, song.runStartTimeSeconds, songLengthBeats, liveMode, API_BASE])
 
   // Clamp current time if song length shrinks
   useEffect(() => {
@@ -570,6 +630,7 @@ function App() {
       URL.revokeObjectURL(audioBlobUrlRef.current)
       audioBlobUrlRef.current = null
     }
+    setEffectiveAudioSrc(value || '')
     handleSongChange({ audioFilePath: value || undefined })
   }
 
@@ -582,13 +643,15 @@ function App() {
     e.target.value = ''
     if (!file) return
     if (audioBlobUrlRef.current) URL.revokeObjectURL(audioBlobUrlRef.current)
-    audioBlobUrlRef.current = URL.createObjectURL(file)
+    const blobUrl = URL.createObjectURL(file)
+    audioBlobUrlRef.current = blobUrl
+    setEffectiveAudioSrc(blobUrl)
     handleSongChange({ audioFilePath: file.name })
-    if (audioRef.current) audioRef.current.src = audioBlobUrlRef.current
+    if (audioRef.current) audioRef.current.src = blobUrl
   }
 
   return (
-    <div className={`app${resizing ? ' app-resizing' : ''}`}>
+    <div className={`app${resizing ? ' app-resizing' : ''}${resizing === 'spectrogram' ? ' app-resizing-spectrogram' : ''}`}>
       <div className="app-header">
         <div className="app-header-title">
           <h1>KivSee Time Simulator</h1>
@@ -751,6 +814,31 @@ function App() {
           </div>
         </div>
       </div>
+      {song.animationType === 'song' && !!(song.audioFilePath?.trim()) && (
+        <div
+          className="app-spectrogram-full"
+          ref={spectrogramContainerRef}
+          style={{ height: spectrogramHeight }}
+        >
+          <Spectrogram
+            audioRef={audioRef}
+            isPlaying={isPlaying}
+            hasAudio
+            audioSrc={effectiveAudioSrc}
+            currentTimeSeconds={(currentTime / song.bpm) * 60}
+            durationSeconds={song.lengthSeconds}
+            visibleStartSeconds={visibleStartBeat != null && visibleEndBeat != null ? (visibleStartBeat / song.bpm) * 60 : undefined}
+            visibleEndSeconds={visibleStartBeat != null && visibleEndBeat != null ? (visibleEndBeat / song.bpm) * 60 : undefined}
+          />
+        </div>
+      )}
+      {song.animationType === 'song' && !!(song.audioFilePath?.trim()) && (
+        <div
+          className="app-resize-handle app-resize-handle-spectrogram"
+          onMouseDown={() => setResizing('spectrogram')}
+          title="Drag to resize spectrogram"
+        />
+      )}
       <div className="app-content" ref={appContentRef}>
         <div
           className="app-playback-wrapper"
@@ -764,18 +852,21 @@ function App() {
           title="Drag to resize Playback panel"
         />
         <div className="app-main">
-          <Timeline
-            timeframes={timeframes}
-            songLengthBeats={songLengthBeats}
-            bpm={song.bpm}
-            onUpdate={updateTimeframe}
-            onDelete={deleteTimeframe}
-            onAdd={addTimeframeFromDrag}
-            focusedTimeframeId={focusedTimeframeId}
-            onFocusedTimeframeChange={setFocusedTimeframeId}
-            currentTime={currentTime}
-            onCurrentTimeChange={handleCurrentTimeChange}
-          />
+          <div className="app-main-timeline-wrap">
+            <Timeline
+              timeframes={timeframes}
+              songLengthBeats={songLengthBeats}
+              bpm={song.bpm}
+              onUpdate={updateTimeframe}
+              onDelete={deleteTimeframe}
+              onAdd={addTimeframeFromDrag}
+              focusedTimeframeId={focusedTimeframeId}
+              onFocusedTimeframeChange={setFocusedTimeframeId}
+              currentTime={currentTime}
+              onCurrentTimeChange={handleCurrentTimeChange}
+              onVisibleRangeChange={(startBeat, endBeat) => setVisibleRangeBeats({ start: startBeat, end: endBeat })}
+            />
+          </div>
         </div>
         <div
           className="app-resize-handle app-resize-handle-details"

@@ -1,0 +1,35 @@
+.spectrogram-wrapper {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  padding: 12px 24px 8px;
+  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+  border-bottom: 1px solid rgba(102, 126, 234, 0.3);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.spectrogram-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 6px;
+  flex-shrink: 0;
+}
+
+.spectrogram-canvas-wrap {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.spectrogram-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}

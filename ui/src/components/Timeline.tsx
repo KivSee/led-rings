@@ -24,11 +24,13 @@ interface TimelineProps {
   onFocusedTimeframeChange: (id: string | null) => void
   currentTime: number
   onCurrentTimeChange: (time: number) => void
+  /** Called when the visible beat range changes (scroll/resize) for spectrogram sync. */
+  onVisibleRangeChange?: (startBeat: number, endBeat: number) => void
 }
 
 const beatToSeconds = (beat: number, bpm: number): number => (beat / bpm) * 60
 
-const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange }: TimelineProps) => {
+const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange, onVisibleRangeChange }: TimelineProps) => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -65,6 +67,41 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
       window.removeEventListener('resize', update)
     }
   }, [])
+
+  // Report visible beat range for spectrogram zoom/scroll sync
+  const pxPerBeatForRange = visibleHeightPx / BEATS_PER_SCREEN
+  useEffect(() => {
+    if (!onVisibleRangeChange || pxPerBeatForRange <= 0) return
+    const scrollEl = timelineScrollViewRef.current
+    if (!scrollEl) return
+    const report = () => {
+      const scrollTop = scrollEl.scrollTop
+      const startBeat = Math.max(0, scrollTop / pxPerBeatForRange)
+      const endBeat = Math.min(maxTime, startBeat + BEATS_PER_SCREEN)
+      onVisibleRangeChange(startBeat, endBeat)
+    }
+    report()
+    scrollEl.addEventListener('scroll', report)
+    return () => scrollEl.removeEventListener('scroll', report)
+  }, [onVisibleRangeChange, pxPerBeatForRange, maxTime])
+
+  // Auto-scroll when playhead reaches the end of the visible range so it stays in view
+  const scrollMarginBeats = 8
+  const scrollLeadBeats = 16
+  useEffect(() => {
+    if (pxPerBeatForRange <= 0) return
+    const scrollEl = timelineScrollViewRef.current
+    if (!scrollEl) return
+    const scrollTop = scrollEl.scrollTop
+    const startBeat = scrollTop / pxPerBeatForRange
+    const endBeat = Math.min(maxTime, startBeat + BEATS_PER_SCREEN)
+    if (currentTime >= endBeat - scrollMarginBeats) {
+      const newStartBeat = Math.max(0, currentTime - scrollLeadBeats)
+      const maxScrollTop = Math.max(0, (maxTime - BEATS_PER_SCREEN) * pxPerBeatForRange)
+      const newScrollTop = Math.min(maxScrollTop, newStartBeat * pxPerBeatForRange)
+      scrollEl.scrollTop = newScrollTop
+    }
+  }, [currentTime, pxPerBeatForRange, maxTime])
 
   const handleTimeframeClick = (id: string, field: 'label' | 'startTime' | 'endTime') => {
     setEditingId(id)

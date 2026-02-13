@@ -45,7 +45,7 @@ import {
 import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "./effects/hue";
 
 const nocturne = async () => {
-  const anim = new Animation("nocturne", 120, 30.00, 0);
+  const anim = new Animation("nocturne", 120, 60.00, 0);
   anim.sync(() => {
     beats(0, 20, () => {
       elements(all, () => {
