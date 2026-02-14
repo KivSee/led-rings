@@ -44,8 +44,8 @@ import {
 } from "./effects/motion";
 import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "./effects/hue";
 
-const nocturne = async () => {
-  const anim = new Animation("nocturne", 120, 60.00, 0);
+const loop = async () => {
+  const anim = new Animation("loop", 116, 245.00, 0);
   anim.sync(() => {
     beats(0, 20, () => {
       elements(all, () => {
@@ -78,10 +78,10 @@ const nocturne = async () => {
   });
 
   console.log("sending sequence");
-  await sendSequence("nocturne", anim.getSequence());
-  await startSong("nocturne", 0);
+  await sendSequence("loop", anim.getSequence());
+  await startSong("loop", 0);
 };
 
 (async () => {
-  await nocturne();
+  await loop();
 })();

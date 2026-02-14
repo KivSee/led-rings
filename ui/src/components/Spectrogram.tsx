@@ -6,7 +6,7 @@ const FFT_SIZE = 2048
 const HOP_SIZE = 512
 const SPECTROGRAM_HEIGHT = 128
 
-/** Map 0..255 magnitude to RGB for a heat-style gradient */
+/** Map 0..255 magnitude to RGB for a heat-style gradient (dark blue -> cyan -> green -> yellow -> red) */
 function magnitudeToRgb(n: number): { r: number; g: number; b: number } {
   const t = Math.min(1, n / 255)
   const r = Math.round(Math.min(255, 255 * (t < 0.5 ? 0 : (t - 0.5) * 2)))
@@ -16,6 +16,9 @@ function magnitudeToRgb(n: number): { r: number; g: number; b: number } {
 }
 
 const AXIS_HEIGHT = 24
+const ZOOM_MIN = 0.25
+const ZOOM_MAX = 4
+const ZOOM_STEP = 1.25
 
 /** Pick a step (seconds) for time axis labels so we get ~5–12 ticks. */
 function timeAxisStep(rangeSec: number): number {
@@ -42,6 +45,10 @@ export interface SpectrogramProps {
   /** When set, spectrogram shows only this range (zoom to timeline). */
   visibleStartSeconds?: number
   visibleEndSeconds?: number
+  /** When user scrolls the spectrogram horizontally, request timeline to show this start time (seconds). */
+  onRequestScrollToStartSeconds?: (startSeconds: number) => void
+  /** When not playing, user clicked the spectrogram at this time (seconds). Seek marker and Run from. */
+  onSeekToSeconds?: (seconds: number) => void
 }
 
 export default function Spectrogram({
@@ -53,20 +60,40 @@ export default function Spectrogram({
   durationSeconds,
   visibleStartSeconds,
   visibleEndSeconds,
+  onRequestScrollToStartSeconds,
+  onSeekToSeconds,
 }: SpectrogramProps) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const scrollViewRef = useRef<HTMLDivElement>(null)
   const paintRef = useRef<() => void>(() => {})
   const spectrogramImageRef = useRef<ImageData | null>(null)
   const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const decodedDurationRef = useRef(0)
+  const isProgrammaticScrollRef = useRef(false)
+  const [scrollViewWidth, setScrollViewWidth] = useState(0)
+  const effectiveDuration = decodedDurationRef.current || durationSeconds || 1
   const isZoomed =
     visibleStartSeconds != null &&
     visibleEndSeconds != null &&
     visibleEndSeconds > visibleStartSeconds
-  const viewStart = isZoomed ? visibleStartSeconds! : 0
-  const viewEnd = isZoomed ? visibleEndSeconds! : durationSeconds || 1
+  const baseStart = isZoomed ? visibleStartSeconds! : 0
+  const baseEnd = isZoomed ? visibleEndSeconds! : effectiveDuration
+  const baseCenter = (baseStart + baseEnd) / 2
+  const baseSpan = Math.max(0.001, baseEnd - baseStart)
+  const [zoomLevel, setZoomLevel] = useState(1)
+  const zoomedSpan = baseSpan / zoomLevel
+  const viewStart = Math.max(0, baseCenter - zoomedSpan / 2)
+  const viewEnd = Math.min(effectiveDuration, baseCenter + zoomedSpan / 2)
   const viewDuration = Math.max(0.001, viewEnd - viewStart)
+  const scrollableDuration = Math.max(0, effectiveDuration - viewDuration)
+  const contentWidthPx = scrollViewWidth > 0 && viewDuration > 0
+    ? scrollViewWidth * (effectiveDuration / viewDuration)
+    : scrollViewWidth
+  const maxScrollLeft = Math.max(0, contentWidthPx - scrollViewWidth)
+  const targetScrollLeft = scrollableDuration > 0
+    ? (viewStart / scrollableDuration) * maxScrollLeft
+    : 0
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -122,7 +149,7 @@ export default function Spectrogram({
         }
 
         const numColumns = Math.max(1, Math.floor((length - FFT_SIZE) / HOP_SIZE) + 1)
-        const cols: Uint8Array[] = []
+        const cols: Float32Array[] = []
         const windowBuf = new Float32Array(FFT_SIZE)
         const numBins = FFT_SIZE / 2 + 1
 
@@ -131,7 +158,7 @@ export default function Spectrogram({
           if (start + FFT_SIZE > length) break
           for (let i = 0; i < FFT_SIZE; i++) windowBuf[i] = mono[start + i]
           const mag = realFftMagnitude(windowBuf, FFT_SIZE)
-          const col = new Uint8Array(SPECTROGRAM_HEIGHT)
+          const col = new Float32Array(SPECTROGRAM_HEIGHT)
           for (let row = 0; row < SPECTROGRAM_HEIGHT; row++) {
             const binStart = Math.floor((row / SPECTROGRAM_HEIGHT) * numBins)
             const binEnd = Math.floor(((row + 1) / SPECTROGRAM_HEIGHT) * numBins)
@@ -142,11 +169,25 @@ export default function Spectrogram({
               count++
             }
             const v = count > 0 ? sum / count : 0
-            const logScale = Math.log1p(v)
-            col[SPECTROGRAM_HEIGHT - 1 - row] = Math.min(255, Math.round(logScale * 40))
+            col[SPECTROGRAM_HEIGHT - 1 - row] = Math.log1p(v)
           }
           cols.push(col)
         }
+
+        let minVal = Infinity
+        let maxVal = -Infinity
+        for (const col of cols) {
+          for (let row = 0; row < col.length; row++) {
+            const v = col[row]
+            if (Number.isFinite(v)) {
+              if (v < minVal) minVal = v
+              if (v > maxVal) maxVal = v
+            }
+          }
+        }
+        if (minVal === Infinity) minVal = 0
+        if (maxVal === -Infinity) maxVal = minVal + 1
+        const range = Math.max(1e-6, maxVal - minVal)
 
         decodedDurationRef.current = buffer.duration
         const w = cols.length
@@ -156,7 +197,11 @@ export default function Spectrogram({
         for (let py = 0; py < h; py++) {
           for (let px = 0; px < w; px++) {
             const col = cols[px]
-            const mag = col ? col[py] : 0
+            const raw = col ? col[py] : 0
+            const norm = Number.isFinite(raw)
+              ? Math.round(((raw - minVal) / range) * 255)
+              : 0
+            const mag = Math.max(0, Math.min(255, norm))
             const { r, g, b } = magnitudeToRgb(mag)
             const i = (py * w + px) << 2
             buf[i] = r
@@ -202,6 +247,36 @@ export default function Spectrogram({
       audioContextRef.current = null
     }
   }, [hasAudio, setupPlayback])
+
+  // Measure horizontal scroll viewport width
+  useEffect(() => {
+    const el = scrollViewRef.current
+    if (!el) return
+    const update = () => setScrollViewWidth(el.clientWidth)
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [hasAudio])
+
+  // Sync horizontal scroll position to current view (from timeline)
+  useEffect(() => {
+    const el = scrollViewRef.current
+    if (!el || maxScrollLeft <= 0) return
+    isProgrammaticScrollRef.current = true
+    el.scrollLeft = Math.max(0, Math.min(maxScrollLeft, targetScrollLeft))
+  }, [targetScrollLeft, maxScrollLeft])
+
+  const handleSpectrogramScroll = useCallback(() => {
+    if (isProgrammaticScrollRef.current) {
+      isProgrammaticScrollRef.current = false
+      return
+    }
+    const el = scrollViewRef.current
+    if (!el || scrollableDuration <= 0 || scrollViewWidth <= 0 || !onRequestScrollToStartSeconds) return
+    const startSec = (el.scrollLeft / maxScrollLeft) * scrollableDuration
+    onRequestScrollToStartSeconds(Math.max(0, Math.min(effectiveDuration - viewDuration, startSec)))
+  }, [scrollableDuration, maxScrollLeft, scrollViewWidth, effectiveDuration, viewDuration, onRequestScrollToStartSeconds])
 
   // Resize canvas to wrapper and repaint (wrapper fills resizable parent height)
   useEffect(() => {
@@ -333,14 +408,57 @@ export default function Spectrogram({
 
   return (
     <div className="spectrogram-wrapper">
-      <div className="spectrogram-label">Spectrogram</div>
+      <div className="spectrogram-header">
+        <span className="spectrogram-label">Spectrogram</span>
+        <div className="spectrogram-zoom-controls">
+          <button
+            type="button"
+            className="spectrogram-zoom-btn"
+            onClick={() => setZoomLevel((z) => Math.max(ZOOM_MIN, z / ZOOM_STEP))}
+            title="Zoom out"
+            aria-label="Zoom out"
+          >
+            −
+          </button>
+          <button
+            type="button"
+            className="spectrogram-zoom-btn"
+            onClick={() => setZoomLevel((z) => Math.min(ZOOM_MAX, z * ZOOM_STEP))}
+            title="Zoom in"
+            aria-label="Zoom in"
+          >
+            +
+          </button>
+        </div>
+      </div>
       <div className="spectrogram-canvas-wrap" ref={wrapperRef}>
         <canvas
           ref={canvasRef}
           className="spectrogram-canvas"
           width={800}
           height={180}
-          title="Full-song spectrogram with playhead; zooms with timeline"
+          title="Full-song spectrogram with playhead; zooms with timeline. When stopped, click to move marker and Run from."
+          onClick={(e) => {
+            if (isPlaying || !onSeekToSeconds) return
+            const canvas = canvasRef.current
+            if (!canvas) return
+            const rect = canvas.getBoundingClientRect()
+            const x = e.clientX - rect.left
+            const width = rect.width
+            if (width <= 0) return
+            const seconds = viewStart + (x / width) * viewDuration
+            onSeekToSeconds(Math.max(0, Math.min(effectiveDuration, seconds)))
+          }}
+        />
+      </div>
+      <div
+        className="spectrogram-scroll-view"
+        ref={scrollViewRef}
+        onScroll={handleSpectrogramScroll}
+      >
+        <div
+          className="spectrogram-scroll-content"
+          style={{ width: Math.max(scrollViewWidth, contentWidthPx) }}
         />
       </div>
     </div>

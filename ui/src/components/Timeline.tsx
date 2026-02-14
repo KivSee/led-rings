@@ -26,11 +26,16 @@ interface TimelineProps {
   onCurrentTimeChange: (time: number) => void
   /** Called when the visible beat range changes (scroll/resize) for spectrogram sync. */
   onVisibleRangeChange?: (startBeat: number, endBeat: number) => void
+  /** When set, timeline scrolls to show this start beat (e.g. from spectrogram scrollbar). Cleared after scroll. */
+  scrollToStartBeat?: number | null
+  onScrollToStartDone?: () => void
+  /** When user clicks the timeline axis (time marks), seek marker and Run from to this beat. */
+  onSeekToBeat?: (beat: number) => void
 }
 
 const beatToSeconds = (beat: number, bpm: number): number => (beat / bpm) * 60
 
-const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange, onVisibleRangeChange }: TimelineProps) => {
+const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange, onVisibleRangeChange, scrollToStartBeat, onScrollToStartDone, onSeekToBeat }: TimelineProps) => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -102,6 +107,15 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
       scrollEl.scrollTop = newScrollTop
     }
   }, [currentTime, pxPerBeatForRange, maxTime])
+
+  useEffect(() => {
+    if (scrollToStartBeat == null || pxPerBeatForRange <= 0 || !onScrollToStartDone) return
+    const scrollEl = timelineScrollViewRef.current
+    if (!scrollEl) return
+    const maxScrollTop = Math.max(0, (maxTime - BEATS_PER_SCREEN) * pxPerBeatForRange)
+    scrollEl.scrollTop = Math.max(0, Math.min(maxScrollTop, scrollToStartBeat * pxPerBeatForRange))
+    onScrollToStartDone()
+  }, [scrollToStartBeat, pxPerBeatForRange, maxTime, onScrollToStartDone])
 
   const handleTimeframeClick = (id: string, field: 'label' | 'startTime' | 'endTime') => {
     setEditingId(id)
@@ -280,8 +294,9 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
       }
     }
 
-    // Don't start drag if clicking on time marks
-    if (target.closest('.time-mark')) {
+    if (target.closest('.time-mark') || target.closest('.timeline-line')) {
+      const beat = Math.max(0, Math.min(maxTime, yToBeat(e.clientY)))
+      onSeekToBeat?.(beat)
       return
     }
 

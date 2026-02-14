@@ -1,12 +1,12 @@
 {
   "song": {
-    "name": "nocturne",
-    "lengthSeconds": 60,
-    "bpm": 120,
+    "name": "loop",
+    "lengthSeconds": 245,
+    "bpm": 116,
     "startOffsetMs": 0,
-    "runStartTimeSeconds": 10,
+    "runStartTimeSeconds": 40,
     "animationType": "song",
-    "audioFilePath": "nocturne.wav"
+    "audioFilePath": "loop.wav"
   },
   "timeframes": [
     {
@@ -91,5 +91,10 @@
         "cyclic": false
       }
     }
-  ]
+  ],
+  "windowSizes": {
+    "playbackPanelWidth": 380,
+    "detailsPanelWidth": 350,
+    "spectrogramHeight": 411
+  }
 }

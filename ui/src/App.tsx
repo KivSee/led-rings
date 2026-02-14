@@ -150,6 +150,7 @@ function App() {
   const [visibleRangeBeats, setVisibleRangeBeats] = useState<{ start: number; end: number } | null>(null)
   const visibleStartBeat = visibleRangeBeats?.start ?? null
   const visibleEndBeat = visibleRangeBeats?.end ?? null
+  const [scrollToStartBeat, setScrollToStartBeat] = useState<number | null>(null)
   const songLengthBeats = Math.max(1, (song.lengthSeconds * song.bpm) / 60)
 
   // Resizable panel widths (px)
@@ -388,6 +389,26 @@ function App() {
 
         setFocusedTimeframeId(null)
         setCurrentTime(0)
+
+        // Restore window sizes if present (same min/max as resize logic)
+        const minPlayback = 240
+        const maxPlayback = 600
+        const minDetails = 240
+        const maxDetails = 600
+        const minSpectrogram = 80
+        const maxSpectrogram = 500
+        const ws = parsed?.windowSizes as { playbackPanelWidth?: number; detailsPanelWidth?: number; spectrogramHeight?: number } | undefined
+        if (ws && typeof ws === 'object') {
+          if (typeof ws.playbackPanelWidth === 'number') {
+            setPlaybackPanelWidth(Math.round(Math.min(maxPlayback, Math.max(minPlayback, ws.playbackPanelWidth))))
+          }
+          if (typeof ws.detailsPanelWidth === 'number') {
+            setDetailsPanelWidth(Math.round(Math.min(maxDetails, Math.max(minDetails, ws.detailsPanelWidth))))
+          }
+          if (typeof ws.spectrogramHeight === 'number') {
+            setSpectrogramHeight(Math.round(Math.min(maxSpectrogram, Math.max(minSpectrogram, ws.spectrogramHeight))))
+          }
+        }
       } catch (err) {
         console.error('Failed to load timeframes file', err)
       }
@@ -395,7 +416,15 @@ function App() {
     input.click()
   }
   const handleSaveTimeframes = async () => {
-    const payload = { song, timeframes }
+    const payload = {
+      song,
+      timeframes,
+      windowSizes: {
+        playbackPanelWidth,
+        detailsPanelWidth,
+        spectrogramHeight,
+      },
+    }
     const dataStr = JSON.stringify(payload, null, 2)
     const safeName = (song.name || 'song').trim() || 'song'
 
@@ -464,12 +493,16 @@ function App() {
     }
   }
 
-  // Autoload last song on startup
+  // Autoload last song and window sizes on startup
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(LAST_SONG_STORAGE_KEY)
       if (!raw) return
-      const parsed = JSON.parse(raw) as { song?: Record<string, unknown>; timeframes?: Timeframe[] }
+      const parsed = JSON.parse(raw) as {
+        song?: Record<string, unknown>
+        timeframes?: Timeframe[]
+        windowSizes?: { playbackPanelWidth?: number; detailsPanelWidth?: number; spectrogramHeight?: number }
+      }
       if (parsed.song && typeof parsed.song === 'object') {
         const s = normalizeLoadedSong(parsed.song)
         setSong(s)
@@ -478,6 +511,19 @@ function App() {
       if (parsed.timeframes && Array.isArray(parsed.timeframes) && parsed.timeframes.length > 0) {
         setTimeframes(parsed.timeframes)
       }
+      const minPlayback = 240, maxPlayback = 600, minDetails = 240, maxDetails = 600, minSpectrogram = 80, maxSpectrogram = 500
+      const ws = parsed.windowSizes
+      if (ws && typeof ws === 'object') {
+        if (typeof ws.playbackPanelWidth === 'number') {
+          setPlaybackPanelWidth(Math.round(Math.min(maxPlayback, Math.max(minPlayback, ws.playbackPanelWidth))))
+        }
+        if (typeof ws.detailsPanelWidth === 'number') {
+          setDetailsPanelWidth(Math.round(Math.min(maxDetails, Math.max(minDetails, ws.detailsPanelWidth))))
+        }
+        if (typeof ws.spectrogramHeight === 'number') {
+          setSpectrogramHeight(Math.round(Math.min(maxSpectrogram, Math.max(minSpectrogram, ws.spectrogramHeight))))
+        }
+      }
     } catch {
       // Ignore corrupted data
     } finally {
@@ -485,17 +531,21 @@ function App() {
     }
   }, [])
 
-  // Persist last worked-on song and its timeframes,
-  // but only after we've attempted to load any existing data.
+  // Persist last worked-on song, timeframes, and window sizes;
+  // only after we've attempted to load any existing data.
   useEffect(() => {
     if (!hasLoadedInitialStateRef.current) return
     try {
-      const payload = JSON.stringify({ song, timeframes })
+      const payload = JSON.stringify({
+        song,
+        timeframes,
+        windowSizes: { playbackPanelWidth, detailsPanelWidth, spectrogramHeight },
+      })
       window.localStorage.setItem(LAST_SONG_STORAGE_KEY, payload)
     } catch {
       // Ignore persistence errors
     }
-  }, [song, timeframes])
+  }, [song, timeframes, playbackPanelWidth, detailsPanelWidth, spectrogramHeight])
 
   useEffect(() => {
     if (song.animationType !== 'song') setEffectiveAudioSrc('')
@@ -621,6 +671,18 @@ function App() {
     const isSongWithAudio = song.animationType === 'song' && song.audioFilePath && audio
     if (isSongWithAudio && isPlaying) {
       const sec = (time / song.bpm) * 60
+      audio.currentTime = Math.max(0, sec)
+    }
+  }
+
+  const handleSeekToBeat = (beat: number) => {
+    const clamped = Math.max(0, Math.min(songLengthBeats, beat))
+    setCurrentTime(clamped)
+    const sec = (clamped / song.bpm) * 60
+    handleSongChange({ runStartTimeSeconds: sec })
+    setNextRunFromStart(true)
+    const audio = audioRef.current
+    if (song.animationType === 'song' && song.audioFilePath && audio && isPlaying) {
       audio.currentTime = Math.max(0, sec)
     }
   }
@@ -829,6 +891,8 @@ function App() {
             durationSeconds={song.lengthSeconds}
             visibleStartSeconds={visibleStartBeat != null && visibleEndBeat != null ? (visibleStartBeat / song.bpm) * 60 : undefined}
             visibleEndSeconds={visibleStartBeat != null && visibleEndBeat != null ? (visibleEndBeat / song.bpm) * 60 : undefined}
+            onRequestScrollToStartSeconds={(startSeconds) => setScrollToStartBeat((startSeconds / 60) * song.bpm)}
+            onSeekToSeconds={(seconds) => handleSeekToBeat((seconds * song.bpm) / 60)}
           />
         </div>
       )}
@@ -865,6 +929,9 @@ function App() {
               currentTime={currentTime}
               onCurrentTimeChange={handleCurrentTimeChange}
               onVisibleRangeChange={(startBeat, endBeat) => setVisibleRangeBeats({ start: startBeat, end: endBeat })}
+              scrollToStartBeat={scrollToStartBeat}
+              onScrollToStartDone={() => setScrollToStartBeat(null)}
+              onSeekToBeat={handleSeekToBeat}
             />
           </div>
         </div>
