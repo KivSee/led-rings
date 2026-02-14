@@ -267,6 +267,16 @@ export default function Spectrogram({
     el.scrollLeft = Math.max(0, Math.min(maxScrollLeft, targetScrollLeft))
   }, [targetScrollLeft, maxScrollLeft])
 
+  // When playing and playhead is out of view (e.g. due to zoom), request scroll to keep it in view without changing zoom
+  const playheadInView = currentTimeSeconds >= viewStart && currentTimeSeconds <= viewEnd
+  useEffect(() => {
+    if (!isPlaying || playheadInView || !isZoomed || !onRequestScrollToStartSeconds || baseSpan <= 0) return
+    const margin = 0.15 * viewDuration
+    const newViewStart = Math.max(0, Math.min(effectiveDuration - viewDuration, currentTimeSeconds - margin))
+    const requestStart = Math.max(0, Math.min(effectiveDuration - baseSpan, newViewStart + viewDuration / 2 - baseSpan / 2))
+    onRequestScrollToStartSeconds(requestStart)
+  }, [isPlaying, playheadInView, isZoomed, currentTimeSeconds, viewStart, viewEnd, viewDuration, baseSpan, effectiveDuration, onRequestScrollToStartSeconds])
+
   const handleSpectrogramScroll = useCallback(() => {
     if (isProgrammaticScrollRef.current) {
       isProgrammaticScrollRef.current = false
