@@ -15,12 +15,25 @@ function magnitudeToRgb(n: number): { r: number; g: number; b: number } {
   return { r: r & 0xff, g: g & 0xff, b: b & 0xff }
 }
 
-const AXIS_HEIGHT = 24
+const AXIS_HEIGHT = 36
 const ZOOM_MIN = 0.25
 const ZOOM_MAX = 4
 const ZOOM_STEP = 1.25
 
-/** Pick a step (seconds) for time axis labels so we get ~5–12 ticks. */
+/** Pick a step in whole beats for axis ticks. Step 1 at max zoom (e.g. 16-beat span); more detail at all zoom levels. */
+function beatAxisStep(rangeBeats: number): number {
+  if (rangeBeats <= 0) return 1
+  const rough = rangeBeats / 8
+  if (rough <= 2) return 1   // span ≤ 16 beats → 1-beat resolution (max zoom)
+  if (rough <= 4) return 2
+  if (rough <= 8) return 4
+  if (rough <= 16) return 8
+  if (rough <= 32) return 16
+  if (rough <= 64) return 32
+  return 64
+}
+
+/** Pick a step in seconds for axis when BPM unknown (fallback). */
 function timeAxisStep(rangeSec: number): number {
   if (rangeSec <= 0) return 1
   const rough = rangeSec / 8
@@ -42,6 +55,8 @@ export interface SpectrogramProps {
   currentTimeSeconds: number
   /** Total duration in seconds (song length or decoded buffer duration) */
   durationSeconds: number
+  /** BPM for showing beat labels under the time axis (seconds → beat = seconds * bpm / 60). */
+  bpm?: number
   /** When set, spectrogram shows only this range (zoom to timeline). */
   visibleStartSeconds?: number
   visibleEndSeconds?: number
@@ -58,6 +73,7 @@ export default function Spectrogram({
   audioSrc,
   currentTimeSeconds,
   durationSeconds,
+  bpm,
   visibleStartSeconds,
   visibleEndSeconds,
   onRequestScrollToStartSeconds,
@@ -372,30 +388,61 @@ export default function Spectrogram({
     ctx.fillStyle = 'rgb(18, 22, 32)'
     ctx.fillRect(0, graphHeight, width, height - graphHeight)
 
-    // X-axis: seconds markers (drawn after playhead so labels are not covered)
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
-    ctx.font = '11px sans-serif'
+    // X-axis: beats (primary, whole numbers) and seconds (secondary, may be fractional)
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
-    const step = timeAxisStep(viewDuration)
-    const firstTick = Math.ceil(viewStart / step) * step
-    for (let t = firstTick; t <= viewEnd; t += step) {
-      const x = ((t - viewStart) / viewDuration) * width
-      if (x < 0 || x > width) continue
-      ctx.beginPath()
-      ctx.moveTo(x, graphHeight)
-      ctx.lineTo(x, height)
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'
-      ctx.lineWidth = 1
-      ctx.stroke()
-      const label = t % 1 === 0 ? `${Math.round(t)}s` : `${t.toFixed(1)}s`
-      ctx.fillText(label, x, graphHeight + 4)
+    const hasBpm = bpm != null && bpm > 0
+    const viewStartBeat = (viewStart * bpm!) / 60
+    const viewEndBeat = (viewEnd * bpm!) / 60
+    const viewSpanBeats = Math.max(0.001, viewEndBeat - viewStartBeat)
+
+    if (hasBpm) {
+      const stepBeats = beatAxisStep(viewSpanBeats)
+      const firstTickBeat = Math.ceil(viewStartBeat / stepBeats) * stepBeats
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
+      ctx.font = '12px sans-serif'
+      for (let beat = firstTickBeat; beat <= viewEndBeat; beat += stepBeats) {
+        const x = ((beat - viewStartBeat) / viewSpanBeats) * width
+        if (x < 0 || x > width) continue
+        ctx.beginPath()
+        ctx.moveTo(x, graphHeight)
+        ctx.lineTo(x, height)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'
+        ctx.lineWidth = 1
+        ctx.stroke()
+        ctx.fillText(String(Math.round(beat)), x, graphHeight + 2)
+        const sec = (beat * 60) / bpm!
+        const secLabel = sec % 1 === 0 ? `${Math.round(sec)}s` : `${sec.toFixed(2)}s`
+        ctx.font = '10px sans-serif'
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)'
+        ctx.fillText(secLabel, x, graphHeight + 16)
+        ctx.font = '12px sans-serif'
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
+      }
+    } else {
+      const step = timeAxisStep(viewDuration)
+      const firstTick = Math.ceil(viewStart / step) * step
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
+      ctx.font = '12px sans-serif'
+      for (let t = firstTick; t <= viewEnd; t += step) {
+        const x = ((t - viewStart) / viewDuration) * width
+        if (x < 0 || x > width) continue
+        ctx.beginPath()
+        ctx.moveTo(x, graphHeight)
+        ctx.lineTo(x, height)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'
+        ctx.lineWidth = 1
+        ctx.stroke()
+        const label = t % 1 === 0 ? `${Math.round(t)}s` : `${t.toFixed(1)}s`
+        ctx.fillText(label, x, graphHeight + 2)
+      }
     }
   }, [
     loading,
     error,
     currentTimeSeconds,
     durationSeconds,
+    bpm,
     isZoomed,
     viewStart,
     viewEnd,

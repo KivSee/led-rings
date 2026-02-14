@@ -889,6 +889,7 @@ function App() {
             audioSrc={effectiveAudioSrc}
             currentTimeSeconds={(currentTime / song.bpm) * 60}
             durationSeconds={song.lengthSeconds}
+            bpm={song.bpm}
             visibleStartSeconds={visibleStartBeat != null && visibleEndBeat != null ? (visibleStartBeat / song.bpm) * 60 : undefined}
             visibleEndSeconds={visibleStartBeat != null && visibleEndBeat != null ? (visibleEndBeat / song.bpm) * 60 : undefined}
             onRequestScrollToStartSeconds={(startSeconds) => setScrollToStartBeat((startSeconds / 60) * song.bpm)}
