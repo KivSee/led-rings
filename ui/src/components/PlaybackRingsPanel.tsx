@@ -1,4 +1,3 @@
-import React from 'react'
 import { Timeframe } from '../App'
 import RingVisualization from './RingVisualization'
 import './PlaybackRingsPanel.css'

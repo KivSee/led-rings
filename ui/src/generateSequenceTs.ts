@@ -24,7 +24,8 @@ export type TimeframeCycleEntry =
 export interface TimeframeEffectEntry {
   id: string
   effectKey: string
-  params?: Record<string, number | boolean>
+  params?: Record<string, number | boolean | object>
+  phase?: number
 }
 
 export interface Timeframe {
@@ -169,12 +170,12 @@ function formatFloatFunction(obj: unknown): string {
   return 'const_value: { value: 1 }'
 }
 
-function formatEffectParams(params: Record<string, number | boolean> | undefined, schema?: { key: string }[]): string {
+function formatEffectParams(params: Record<string, number | boolean | object> | undefined, schema?: { key: string }[]): string {
   if (!params || Object.keys(params).length === 0) return ''
   const keys = schema ? schema.map((s) => s.key) : Object.keys(params)
   const parts = keys
-    .filter((k) => params[k] !== undefined)
-    .map((k) => `${k}: ${formatParamValue(params[k]!)}`)
+    .filter((k) => params[k] !== undefined && (typeof params[k] === 'number' || typeof params[k] === 'boolean'))
+    .map((k) => `${k}: ${formatParamValue(params[k] as number | boolean)}`)
   if (parts.length === 0) return ''
   return `{ ${parts.join(', ')} }`
 }
@@ -191,7 +192,7 @@ const POSITION_KEYS = new Set(['position_brightness', 'position_hue', 'position_
 const SNAKE_KEYS = new Set(['snake_brightness', 'snake_hue', 'snake_saturation'])
 const TIMED_KEYS = new Set(['timed_brightness', 'timed_hue', 'timed_saturation'])
 
-function emitSingleEffect(effectKey: string, params: Record<string, number | boolean | unknown> | undefined): string[] {
+function emitSingleEffect(effectKey: string, params: Record<string, number | boolean | object> | undefined): string[] {
   const p = (params || {}) as Record<string, unknown>
   if (SNAKE_KEYS.has(effectKey)) {
     const head = p.head != null ? formatFloatFunction(p.head) : 'const_value: { value: 0 }'
@@ -230,7 +231,7 @@ function emitSingleEffect(effectKey: string, params: Record<string, number | boo
     if (parts.length === 0) return []
     return [`addEffect({ ${effectKey}: { ${parts.join(', ')} } })`]
   }
-  const args = formatEffectParams(params as Record<string, number | boolean> | undefined)
+  const args = formatEffectParams(params)
   const schemas: Record<string, { key: string }[]> = {
     brightness: [{ key: 'value' }],
     fadeInOut: [{ key: 'high' }],
@@ -252,7 +253,7 @@ function emitSingleEffect(effectKey: string, params: Record<string, number | boo
     if (effectKey === 'fade') return [formatted ? `fade(${formatted})` : 'fade()']
   }
   if (HUE_KEYS.has(effectKey)) {
-    if (effectKey === 'staticHueShift') return [params?.value !== undefined ? `staticHueShift({ value: ${formatParamValue(params!.value)} })` : 'staticHueShift()']
+    if (effectKey === 'staticHueShift') return [params?.value !== undefined ? `staticHueShift({ value: ${formatParamValue(params!.value as number)} })` : 'staticHueShift()']
     if (effectKey === 'hueShiftStartToEnd') return [args ? `hueShiftStartToEnd(${args})` : 'hueShiftStartToEnd()']
     if (effectKey === 'hueShiftSin') return [args ? `hueShiftSin(${args})` : 'hueShiftSin()']
   }
@@ -275,14 +276,23 @@ function indentBlock(block: string, spaces: number): string {
   return block.split('\n').map((line) => prefix + line).join('\n')
 }
 
+function wrapWithPhase(lines: string[], phaseValue: number | undefined): string[] {
+  if (phaseValue == null || phaseValue <= 0 || lines.length === 0) return lines
+  const block = lines.join('\n')
+  return [`phase(${formatParamValue(phaseValue)}, () => {
+${indentBlock(block, 2)}
+});`]
+}
+
 function emitTimeframeBody(tf: Timeframe): string {
   const segmentId = mappingToSegment(tf.mapping)
   const elementsArg = ringsToElementsArg(tf.rings)
   const inner: string[] = []
-  inner.push(...emitColor(tf))
+  inner.push(...wrapWithPhase(emitColor(tf), tf.phase))
   const effectEntries = getTimeframeEffects(tf)
   for (const entry of effectEntries) {
-    inner.push(...emitSingleEffect(entry.effectKey, entry.params))
+    const effectLines = emitSingleEffect(entry.effectKey, entry.params)
+    inner.push(...wrapWithPhase(effectLines, entry.phase))
   }
   const cycles = tf.cycles ?? []
   const effectLines = inner.length ? inner.join('\n') : '// no effects'
@@ -291,11 +301,6 @@ function emitTimeframeBody(tf: Timeframe): string {
 ${indentBlock(effectLines, 4)}
   });
 });`
-  if (tf.phase != null && tf.phase > 0) {
-    core = `phase(${formatParamValue(tf.phase)}, () => {
-${indentBlock(core, 2)}
-});`
-  }
   for (let i = cycles.length - 1; i >= 0; i--) {
     const c = cycles[i]
     if (c.type === 'cycle') {

@@ -28,7 +28,8 @@ export type TimeframeCycleEntry = TimeframeCycle | TimeframeCycleBeats
 export interface TimeframeEffectEntry {
   id: string
   effectKey: string
-  params?: Record<string, number | boolean>
+  params?: Record<string, number | boolean | object>
+  phase?: number
 }
 
 export interface Timeframe {
@@ -411,7 +412,8 @@ function App() {
                     .map((e: any) => ({
                       id: e.id && typeof e.id === 'string' ? e.id : `eff-${Date.now()}-${idx}-${Math.random().toString(36).slice(2)}`,
                       effectKey: e.effectKey,
-                      params: e.params && typeof e.params === 'object' ? e.params as Record<string, number | boolean> : undefined,
+                      params: e.params && typeof e.params === 'object' ? e.params as Record<string, number | boolean | object> : undefined,
+                      phase: typeof e.phase === 'number' ? e.phase : undefined,
                     }))
                 : undefined
               const legacy = {

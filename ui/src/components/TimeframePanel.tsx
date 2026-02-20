@@ -594,11 +594,8 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
               </>
             )}
           </div>
-        </div>
-
-        <div className="timeframe-panel-section">
-          <label className="timeframe-panel-label">Phase</label>
           <div className="timeframe-panel-phase-row">
+            <label className="timeframe-panel-phase-label">Color Phase</label>
             <input
               type="number"
               value={timeframe.phase ?? ''}
@@ -617,7 +614,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
               }}
               className="timeframe-panel-input-small"
             />
-            <span className="timeframe-panel-phase-hint">Offsets hue/brightness/motion per ring</span>
+            <span className="timeframe-panel-phase-hint">Offsets base hue per ring</span>
           </div>
         </div>
 
@@ -702,6 +699,27 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
                           </optgroup>
                         ))}
                         </select>
+                        {entry.id !== 'placeholder' && entry.effectKey && (
+                          <div className="timeframe-panel-effect-phase">
+                            <label className="timeframe-panel-effect-phase-label">Phase</label>
+                            <input
+                              type="number"
+                              value={entry.phase ?? ''}
+                              min={0}
+                              max={12}
+                              step={0.1}
+                              placeholder="0"
+                              onChange={(e) => {
+                                const val = e.target.value
+                                const phase = val === '' ? undefined : parseFloat(val)
+                                if (val !== '' && isNaN(phase!)) return
+                                const next = effects.map((ex, i) => i === idx ? { ...ex, phase } : ex)
+                                setEffects(next)
+                              }}
+                              className="timeframe-panel-effect-phase-input"
+                            />
+                          </div>
+                        )}
                         {entry.id !== 'placeholder' && (
                           <button
                             type="button"
@@ -722,7 +740,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
                               const fVal = (entry.params?.[currentKey] as FloatFunctionValue | undefined)
                               const kind = getFloatFunctionKind(fVal)
                               const kindParams = FLOAT_FUNCTION_KIND_PARAMS[kind]
-                              const currentObj = fVal?.[kind] ?? kindParams.reduce((a, p) => ({ ...a, [p.key]: p.default }), {} as Record<string, number>)
+                              const currentObj = (fVal?.[kind] ?? kindParams.reduce((a, p) => ({ ...a, [p.key]: p.default }), {} as Record<string, number>)) as Record<string, number>
                               const mergeParams = (update: Record<string, unknown>) =>
                                 isSnake ? { ...(entry.params || {}), ...update } : update
                               return (
@@ -734,8 +752,8 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
                                     const tailKind = getFloatFunctionKind(tailVal)
                                     const headParams = FLOAT_FUNCTION_KIND_PARAMS[headKind]
                                     const tailParams = FLOAT_FUNCTION_KIND_PARAMS[tailKind]
-                                    const headObj = headVal?.[headKind] ?? headParams.reduce((a, p) => ({ ...a, [p.key]: p.default }), {} as Record<string, number>)
-                                    const tailObj = tailVal?.[tailKind] ?? tailParams.reduce((a, p) => ({ ...a, [p.key]: p.default }), {} as Record<string, number>)
+                                    const headObj = (headVal?.[headKind] ?? headParams.reduce((a, p) => ({ ...a, [p.key]: p.default }), {} as Record<string, number>)) as Record<string, number>
+                                    const tailObj = (tailVal?.[tailKind] ?? tailParams.reduce((a, p) => ({ ...a, [p.key]: p.default }), {} as Record<string, number>)) as Record<string, number>
                                     return (
                                       <>
                                         <div className="timeframe-panel-float-function-block">
@@ -921,7 +939,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
                                 const fVal = (entry.params?.[def.key] as FloatFunctionValue | undefined)
                                 const kind = getFloatFunctionKind(fVal)
                                 const kindParams = FLOAT_FUNCTION_KIND_PARAMS[kind]
-                                const currentObj = fVal?.[kind] ?? kindParams.reduce((a, p) => ({ ...a, [p.key]: p.default }), {} as Record<string, number>)
+                                const currentObj = (fVal?.[kind] ?? kindParams.reduce((a, p) => ({ ...a, [p.key]: p.default }), {} as Record<string, number>)) as Record<string, number>
                                 return (
                                   <div key={def.key} className="timeframe-panel-float-function-block">
                                     <div className="timeframe-panel-effect-param-row">
