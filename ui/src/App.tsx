@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import Timeline from './components/Timeline'
 import TimeframePanel from './components/TimeframePanel'
 import PlaybackRingsPanel from './components/PlaybackRingsPanel'
@@ -24,6 +24,13 @@ export interface TimeframeCycleBeats {
 
 export type TimeframeCycleEntry = TimeframeCycle | TimeframeCycleBeats
 
+/** A single effect slot: one of brightness / hue / motion effect by key */
+export interface TimeframeEffectEntry {
+  id: string
+  effectKey: string
+  params?: Record<string, number | boolean>
+}
+
 export interface Timeframe {
   id: string
   startTime: number
@@ -36,11 +43,19 @@ export interface Timeframe {
   rainbowRange?: number // Rainbow cycle range (1 = full cycle, 2 = 2 cycles, 0.5 = half cycle)
   /** Optional list of cycle/cycleBeats wrapping this timeframe's content (outermost first) */
   cycles?: TimeframeCycleEntry[]
+  /** Effect slots (one selector per slot, add more as desired). Replaces legacy brightness/hue/motion fields. */
+  effects?: TimeframeEffectEntry[]
+  /** @deprecated Use effects[] instead. Kept for load compat. */
   brightnessEffect?: string
+  /** @deprecated */
   brightnessEffectParams?: Record<string, number | boolean>
+  /** @deprecated */
   hueEffect?: string
+  /** @deprecated */
   hueEffectParams?: Record<string, number | boolean>
+  /** @deprecated */
   motionEffect?: string
+  /** @deprecated */
   motionEffectParams?: Record<string, number | boolean>
 }
 
@@ -61,6 +76,19 @@ export interface Song {
 }
 
 const LAST_SONG_STORAGE_KEY = 'timelineManager:lastSong'
+
+/** Returns normalized effects array: from timeframe.effects or built from legacy brightness/hue/motion fields. */
+export function getTimeframeEffects(tf: Timeframe): TimeframeEffectEntry[] {
+  if (tf.effects && tf.effects.length > 0) return tf.effects
+  const entries: TimeframeEffectEntry[] = []
+  const add = (key: string, params?: Record<string, number | boolean>) => {
+    if (key) entries.push({ id: `legacy-${key}-${entries.length}`, effectKey: key, params })
+  }
+  if (tf.brightnessEffect) add(tf.brightnessEffect, tf.brightnessEffectParams)
+  if (tf.hueEffect) add(tf.hueEffect, tf.hueEffectParams)
+  if (tf.motionEffect) add(tf.motionEffect, tf.motionEffectParams)
+  return entries
+}
 
 function normalizeCycles(cycles: unknown): TimeframeCycleEntry[] | undefined {
   if (!Array.isArray(cycles) || cycles.length === 0) return undefined
@@ -159,6 +187,21 @@ function App() {
   const [spectrogramHeight, setSpectrogramHeight] = useState(180)
   const [resizing, setResizing] = useState<'playback' | 'details' | 'spectrogram' | null>(null)
   const spectrogramContainerRef = React.useRef<HTMLDivElement>(null)
+
+  // Stable callbacks to avoid effect loops in Timeline/Spectrogram (they use these in useEffect deps)
+  const onVisibleRangeChange = useCallback((startBeat: number, endBeat: number) => {
+    setVisibleRangeBeats((prev) => {
+      if (prev && prev.start === startBeat && prev.end === endBeat) return prev
+      return { start: startBeat, end: endBeat }
+    })
+  }, [])
+  const onScrollToStartDone = useCallback(() => setScrollToStartBeat(null), [])
+  const songRef = useRef(song)
+  songRef.current = song
+  const onRequestScrollToStartSeconds = useCallback((startSeconds: number) => {
+    const bpm = songRef.current.bpm
+    setScrollToStartBeat((startSeconds / 60) * bpm)
+  }, [])
 
   useEffect(() => {
     if (!resizing) return
@@ -362,24 +405,38 @@ function App() {
         if (Array.isArray(maybeArray)) {
           const mapped: Timeframe[] = maybeArray
             .filter((item: any) => item && typeof item === 'object')
-            .map((item: any, idx: number) => ({
-              id: item.id?.toString() ?? `tf-${Date.now()}-${idx}`,
-              startTime: Number(item.startTime) || 0,
-              endTime: Number(item.endTime) || 0,
-              label: typeof item.label === 'string' ? item.label : `Timeframe ${idx + 1}`,
-              color: typeof item.color === 'string' ? item.color : '#3b82f6',
-              rings: Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n)) : [1,2,3,4,5,6,7,8,9,10,11,12],
-              mapping: item.mapping,
-              rainbow: item.rainbow,
-              rainbowRange: item.rainbowRange,
-              cycles: normalizeCycles(item.cycles),
-              brightnessEffect: item.brightnessEffect,
-              brightnessEffectParams: item.brightnessEffectParams && typeof item.brightnessEffectParams === 'object' ? item.brightnessEffectParams as Record<string, number | boolean> : undefined,
-              hueEffect: item.hueEffect,
-              hueEffectParams: item.hueEffectParams && typeof item.hueEffectParams === 'object' ? item.hueEffectParams as Record<string, number | boolean> : undefined,
-              motionEffect: item.motionEffect,
-              motionEffectParams: item.motionEffectParams && typeof item.motionEffectParams === 'object' ? item.motionEffectParams as Record<string, number | boolean> : undefined,
-            }))
+            .map((item: any, idx: number) => {
+              const effects = Array.isArray(item.effects)
+                ? item.effects
+                    .filter((e: any) => e && typeof e === 'object' && typeof e.effectKey === 'string')
+                    .map((e: any) => ({
+                      id: e.id && typeof e.id === 'string' ? e.id : `eff-${Date.now()}-${idx}-${Math.random().toString(36).slice(2)}`,
+                      effectKey: e.effectKey,
+                      params: e.params && typeof e.params === 'object' ? e.params as Record<string, number | boolean> : undefined,
+                    }))
+                : undefined
+              const legacy = {
+                brightnessEffect: item.brightnessEffect,
+                brightnessEffectParams: item.brightnessEffectParams && typeof item.brightnessEffectParams === 'object' ? item.brightnessEffectParams as Record<string, number | boolean> : undefined,
+                hueEffect: item.hueEffect,
+                hueEffectParams: item.hueEffectParams && typeof item.hueEffectParams === 'object' ? item.hueEffectParams as Record<string, number | boolean> : undefined,
+                motionEffect: item.motionEffect,
+                motionEffectParams: item.motionEffectParams && typeof item.motionEffectParams === 'object' ? item.motionEffectParams as Record<string, number | boolean> : undefined,
+              }
+              return {
+                id: item.id?.toString() ?? `tf-${Date.now()}-${idx}`,
+                startTime: Number(item.startTime) || 0,
+                endTime: Number(item.endTime) || 0,
+                label: typeof item.label === 'string' ? item.label : `Timeframe ${idx + 1}`,
+                color: typeof item.color === 'string' ? item.color : '#3b82f6',
+                rings: Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n)) : [1,2,3,4,5,6,7,8,9,10,11,12],
+                mapping: item.mapping,
+                rainbow: item.rainbow,
+                rainbowRange: item.rainbowRange,
+                cycles: normalizeCycles(item.cycles),
+                ...(effects && effects.length > 0 ? { effects } : legacy),
+              }
+            })
           setTimeframes(mapped)
         } else if (!parsed?.song) {
           console.error('Invalid file format: expected array of timeframes or { song, timeframes }')
@@ -418,7 +475,13 @@ function App() {
   const handleSaveTimeframes = async () => {
     const payload = {
       song,
-      timeframes,
+      timeframes: timeframes.map(tf => {
+        const effects = tf.effects?.filter(e => e.effectKey !== '')
+        return {
+          ...tf,
+          effects: effects && effects.length > 0 ? effects : undefined,
+        }
+      }),
       windowSizes: {
         playbackPanelWidth,
         detailsPanelWidth,
@@ -892,7 +955,7 @@ function App() {
             bpm={song.bpm}
             visibleStartSeconds={visibleStartBeat != null && visibleEndBeat != null ? (visibleStartBeat / song.bpm) * 60 : undefined}
             visibleEndSeconds={visibleStartBeat != null && visibleEndBeat != null ? (visibleEndBeat / song.bpm) * 60 : undefined}
-            onRequestScrollToStartSeconds={(startSeconds) => setScrollToStartBeat((startSeconds / 60) * song.bpm)}
+            onRequestScrollToStartSeconds={onRequestScrollToStartSeconds}
             onSeekToSeconds={(seconds) => handleSeekToBeat((seconds * song.bpm) / 60)}
           />
         </div>
@@ -929,9 +992,9 @@ function App() {
               onFocusedTimeframeChange={setFocusedTimeframeId}
               currentTime={currentTime}
               onCurrentTimeChange={handleCurrentTimeChange}
-              onVisibleRangeChange={(startBeat, endBeat) => setVisibleRangeBeats({ start: startBeat, end: endBeat })}
+              onVisibleRangeChange={onVisibleRangeChange}
               scrollToStartBeat={scrollToStartBeat}
-              onScrollToStartDone={() => setScrollToStartBeat(null)}
+              onScrollToStartDone={onScrollToStartDone}
               onSeekToBeat={handleSeekToBeat}
             />
           </div>

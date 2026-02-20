@@ -2,6 +2,7 @@ import React from 'react'
 import segmentsData from '../segments.json'
 import { getPixelColor, hsvToRgbString } from '../effectPreview'
 import type { Timeframe } from '../App'
+import { getTimeframeEffects } from '../App'
 import './RingVisualization.css'
 
 interface RingVisualizationProps {
@@ -29,7 +30,7 @@ const RingVisualization = ({
   const useEffectPreview = Boolean(
     timeframe &&
     currentTime !== undefined &&
-    (timeframe.brightnessEffect || timeframe.hueEffect || timeframe.motionEffect)
+    (getTimeframeEffects(timeframe).some(e => e.effectKey !== ''))
   )
   const duration = timeframe ? timeframe.endTime - timeframe.startTime : 0
   const beatOffset = timeframe && currentTime !== undefined ? currentTime - timeframe.startTime : 0

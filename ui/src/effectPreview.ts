@@ -2,6 +2,11 @@
  * Effect preview: evaluates time- and position-based effects so the playback
  * panel can show how each effect changes the ring pixels as time progresses.
  *
+ * Note: Not all effects are currently displayed correctly in the visualization.
+ * Position, Timed, and Snake (snake_brightness, snake_hue, snake_saturation) effects
+ * are supported here; behaviour may differ from the actual renderer for some
+ * FloatFunction combinations or edge cases.
+ *
  * Effects (from src/effects):
  * - Coloring: const_color (solid HSV) or rainbow (hue_start → hue_end by position).
  * - Brightness: mult_factor(t) multiplies value (0 = off, 1 = full).
@@ -9,7 +14,20 @@
  * - Snake: head(t) and tail_length(t); pixels in [head-tail, head] are lit, rest dimmed.
  */
 
-import { Timeframe } from './App'
+import { Timeframe, getTimeframeEffects } from './App'
+
+const BRIGHTNESS_KEYS = new Set(['brightness', 'fadeIn', 'fadeOut', 'fadeInOut', 'fadeOutIn', 'blink', 'pulse', 'fade'])
+const HUE_KEYS = new Set(['staticHueShift', 'hueShiftStartToEnd', 'hueShiftSin'])
+const MOTION_KEYS = new Set(['snakeHeadMove', 'staticSnake', 'snake', 'snakeHeadSin', 'snakeFillGrow', 'snakeInOut', 'snakeSlowFast', 'snakeTailShrinkGrow', 'snakeHeadSteps'])
+const POSITION_BRIGHTNESS_KEYS = new Set(['position_brightness'])
+const POSITION_HUE_KEYS = new Set(['position_hue'])
+const POSITION_SATURATION_KEYS = new Set(['position_saturation'])
+const SNAKE_BRIGHTNESS_KEYS = new Set(['snake_brightness'])
+const SNAKE_HUE_KEYS = new Set(['snake_hue'])
+const SNAKE_SATURATION_KEYS = new Set(['snake_saturation'])
+const TIMED_BRIGHTNESS_KEYS = new Set(['timed_brightness'])
+const TIMED_HUE_KEYS = new Set(['timed_hue'])
+const TIMED_SATURATION_KEYS = new Set(['timed_saturation'])
 
 // --- Float function types (mirror src/effects/functions.ts and preset JSON) ---
 type ConstValue = { value: number }
@@ -100,64 +118,192 @@ function getBaseColor(
   return { h: baseHue, s: 1, v: 1 }
 }
 
-/** Brightness mult at time t from timeframe's brightness effect. */
-function getBrightnessMult(t: number, timeframe: Timeframe): number {
-  const name = timeframe.brightnessEffect
-  const p = timeframe.brightnessEffectParams ?? {}
+/** Apply one FloatFunction-based brightness (increase = lerp toward 1, decrease = multiply). */
+function applyFloatFunctionBrightness(currentMult: number, inputVal: number, isIncrease: boolean): number {
+  if (isIncrease) return currentMult + (1 - currentMult) * inputVal
+  return currentMult * inputVal
+}
 
+/** Brightness mult from timeframe: legacy (time t) + timed (FloatFunction at t) + position (FloatFunction at relPos). */
+function getBrightnessMult(relPos: number, t: number, timeframe: Timeframe): number {
+  let mult = 1
+
+  const legacy = getTimeframeEffects(timeframe).find(e => BRIGHTNESS_KEYS.has(e.effectKey))
+  const name = legacy?.effectKey
+  const p = legacy?.params ?? {}
   switch (name) {
     case 'brightness':
-      return typeof p.value === 'number' ? p.value : 1
+      mult = typeof p.value === 'number' ? p.value : 1
+      break
     case 'fadeIn':
-      return t
+      mult = t
+      break
     case 'fadeOut':
-      return 1 - t
+      mult = 1 - t
+      break
     case 'fadeInOut': {
       const high = typeof p.high === 'number' ? p.high : 1
-      return t < 0.5 ? (t * 2) * high : (1 - (t - 0.5) * 2) * high
+      mult = t < 0.5 ? (t * 2) * high : (1 - (t - 0.5) * 2) * high
+      break
     }
     case 'fadeOutIn': {
       const low = typeof p.low === 'number' ? p.low : 0
-      return t < 0.5 ? 1 - (t * 2) * (1 - low) : low + ((t - 0.5) * 2) * (1 - low)
+      mult = t < 0.5 ? 1 - (t * 2) * (1 - low) : low + ((t - 0.5) * 2) * (1 - low)
+      break
     }
     case 'blink': {
       const low = typeof p.low === 'number' ? p.low : 0.5
-      return t < 0.5 ? low : 1
+      mult = t < 0.5 ? low : 1
+      break
     }
     case 'pulse': {
       const low = typeof p.low === 'number' ? p.low : 0.5
       const staticPhase = typeof p.staticPhase === 'number' ? p.staticPhase : 0
       const x = 2 * Math.PI * t + staticPhase
-      return low + (1 - low) * 0.5 * (1 + Math.sin(x))
+      mult = low + (1 - low) * 0.5 * (1 + Math.sin(x))
+      break
     }
     case 'fade':
-      return (typeof p.start === 'number' && typeof p.end === 'number')
+      mult = (typeof p.start === 'number' && typeof p.end === 'number')
         ? p.start + t * (p.end - p.start)
         : 1
+      break
     default:
-      return 1
+      break
   }
+
+  const timedB = getTimeframeEffects(timeframe).find(e => TIMED_BRIGHTNESS_KEYS.has(e.effectKey))
+  if (timedB?.params) {
+    const par = timedB.params as Record<string, unknown>
+    if (par.mult_factor_increase != null) mult = applyFloatFunctionBrightness(mult, evalFloat(t, par.mult_factor_increase as FloatFunc), true)
+    else if (par.mult_factor_decrease != null) mult = applyFloatFunctionBrightness(mult, evalFloat(t, par.mult_factor_decrease as FloatFunc), false)
+  }
+  const posB = getTimeframeEffects(timeframe).find(e => POSITION_BRIGHTNESS_KEYS.has(e.effectKey))
+  if (posB?.params) {
+    const par = posB.params as Record<string, unknown>
+    if (par.mult_factor_increase != null) mult = applyFloatFunctionBrightness(mult, evalFloat(relPos, par.mult_factor_increase as FloatFunc), true)
+    else if (par.mult_factor_decrease != null) mult = applyFloatFunctionBrightness(mult, evalFloat(relPos, par.mult_factor_decrease as FloatFunc), false)
+  }
+  const snakeB = getTimeframeEffects(timeframe).find(e => SNAKE_BRIGHTNESS_KEYS.has(e.effectKey))
+  if (snakeB?.params) {
+    const par = snakeB.params as Record<string, unknown>
+    const head = evalFloat(t, par.head as FloatFunc)
+    const tailLen = evalFloat(t, (par.tail_length ?? par.tailLength) as FloatFunc)
+    const cyclic = par.cyclic === true
+    const currHead = cyclic ? head - Math.floor(head) : head
+    const currTail = currHead - tailLen
+    let snakeIndex = -1
+    if (cyclic && currTail < 0) {
+      const wrappedTail = currTail + 1
+      if (relPos >= wrappedTail) snakeIndex = tailLen > 0 ? (relPos - wrappedTail) / tailLen : 1
+      else if (relPos <= currHead) snakeIndex = tailLen > 0 ? ((1 - wrappedTail) + relPos) / tailLen : 1
+    } else if (relPos >= currTail && relPos <= currHead) {
+      snakeIndex = tailLen > 0 ? (relPos - currTail) / tailLen : 1
+    }
+    if (snakeIndex >= 0 && snakeIndex <= 1) {
+      if (par.mult_factor_increase != null) mult = applyFloatFunctionBrightness(mult, evalFloat(snakeIndex, par.mult_factor_increase as FloatFunc), true)
+      else if (par.mult_factor_decrease != null) mult = applyFloatFunctionBrightness(mult, evalFloat(snakeIndex, par.mult_factor_decrease as FloatFunc), false)
+    }
+  }
+  return mult
 }
 
-/** Hue offset at time t from timeframe's hue effect. */
-function getHueOffset(t: number, timeframe: Timeframe): number {
-  const name = timeframe.hueEffect
-  const p = timeframe.hueEffectParams ?? {}
+/** Hue offset from timeframe: legacy (time t) + timed (FloatFunction at t) + position (FloatFunction at relPos). */
+function getHueOffset(relPos: number, t: number, timeframe: Timeframe): number {
+  let offset = 0
 
+  const legacy = getTimeframeEffects(timeframe).find(e => HUE_KEYS.has(e.effectKey))
+  const name = legacy?.effectKey
+  const p = legacy?.params ?? {}
   switch (name) {
     case 'staticHueShift':
-      return typeof p.value === 'number' ? p.value : 0
+      offset = typeof p.value === 'number' ? p.value : 0
+      break
     case 'hueShiftStartToEnd':
-      return (typeof p.start === 'number' && typeof p.end === 'number')
+      offset = (typeof p.start === 'number' && typeof p.end === 'number')
         ? p.start + t * (p.end - p.start)
         : 0
+      break
     case 'hueShiftSin': {
       const amount = typeof p.amount === 'number' ? p.amount : 0.5
-      return amount * 0.5 * (1 + Math.sin(2 * Math.PI * t))
+      offset = amount * 0.5 * (1 + Math.sin(2 * Math.PI * t))
+      break
     }
     default:
-      return 0
+      break
   }
+
+  const timedH = getTimeframeEffects(timeframe).find(e => TIMED_HUE_KEYS.has(e.effectKey))
+  if (timedH?.params) {
+    const par = timedH.params as Record<string, unknown>
+    if (par.offset_factor != null) offset += evalFloat(t, par.offset_factor as FloatFunc)
+  }
+  const posH = getTimeframeEffects(timeframe).find(e => POSITION_HUE_KEYS.has(e.effectKey))
+  if (posH?.params) {
+    const par = posH.params as Record<string, unknown>
+    if (par.offset_factor != null) offset += evalFloat(relPos, par.offset_factor as FloatFunc)
+  }
+  const snakeH = getTimeframeEffects(timeframe).find(e => SNAKE_HUE_KEYS.has(e.effectKey))
+  if (snakeH?.params) {
+    const par = snakeH.params as Record<string, unknown>
+    const head = evalFloat(t, par.head as FloatFunc)
+    const tailLen = evalFloat(t, (par.tail_length ?? par.tailLength) as FloatFunc)
+    const cyclic = par.cyclic === true
+    const currHead = cyclic ? head - Math.floor(head) : head
+    const currTail = currHead - tailLen
+    let snakeIndex = -1
+    if (cyclic && currTail < 0) {
+      const wrappedTail = currTail + 1
+      if (relPos >= wrappedTail) snakeIndex = tailLen > 0 ? (relPos - wrappedTail) / tailLen : 1
+      else if (relPos <= currHead) snakeIndex = tailLen > 0 ? ((1 - wrappedTail) + relPos) / tailLen : 1
+    } else if (relPos >= currTail && relPos <= currHead) {
+      snakeIndex = tailLen > 0 ? (relPos - currTail) / tailLen : 1
+    }
+    if (snakeIndex >= 0 && snakeIndex <= 1 && par.offset_factor != null) offset += evalFloat(snakeIndex, par.offset_factor as FloatFunc)
+  }
+  return offset
+}
+
+/** Saturation mult from timeframe: timed (FloatFunction at t) + position (FloatFunction at relPos). Same increase/decrease as brightness. */
+function getSaturationMult(relPos: number, t: number, timeframe: Timeframe): number {
+  let mult = 1
+  const apply = (current: number, inputVal: number, isIncrease: boolean) =>
+    isIncrease ? current + (1 - current) * inputVal : current * inputVal
+
+  const timedS = getTimeframeEffects(timeframe).find(e => TIMED_SATURATION_KEYS.has(e.effectKey))
+  if (timedS?.params) {
+    const par = timedS.params as Record<string, unknown>
+    if (par.mult_factor_increase != null) mult = apply(mult, evalFloat(t, par.mult_factor_increase as FloatFunc), true)
+    else if (par.mult_factor_decrease != null) mult = apply(mult, evalFloat(t, par.mult_factor_decrease as FloatFunc), false)
+  }
+  const posS = getTimeframeEffects(timeframe).find(e => POSITION_SATURATION_KEYS.has(e.effectKey))
+  if (posS?.params) {
+    const par = posS.params as Record<string, unknown>
+    if (par.mult_factor_increase != null) mult = apply(mult, evalFloat(relPos, par.mult_factor_increase as FloatFunc), true)
+    else if (par.mult_factor_decrease != null) mult = apply(mult, evalFloat(relPos, par.mult_factor_decrease as FloatFunc), false)
+  }
+  const snakeS = getTimeframeEffects(timeframe).find(e => SNAKE_SATURATION_KEYS.has(e.effectKey))
+  if (snakeS?.params) {
+    const par = snakeS.params as Record<string, unknown>
+    const head = evalFloat(t, par.head as FloatFunc)
+    const tailLen = evalFloat(t, (par.tail_length ?? par.tailLength) as FloatFunc)
+    const cyclic = par.cyclic === true
+    const currHead = cyclic ? head - Math.floor(head) : head
+    const currTail = currHead - tailLen
+    let snakeIndex = -1
+    if (cyclic && currTail < 0) {
+      const wrappedTail = currTail + 1
+      if (relPos >= wrappedTail) snakeIndex = tailLen > 0 ? (relPos - wrappedTail) / tailLen : 1
+      else if (relPos <= currHead) snakeIndex = tailLen > 0 ? ((1 - wrappedTail) + relPos) / tailLen : 1
+    } else if (relPos >= currTail && relPos <= currHead) {
+      snakeIndex = tailLen > 0 ? (relPos - currTail) / tailLen : 1
+    }
+    if (snakeIndex >= 0 && snakeIndex <= 1) {
+      if (par.mult_factor_increase != null) mult = apply(mult, evalFloat(snakeIndex, par.mult_factor_increase as FloatFunc), true)
+      else if (par.mult_factor_decrease != null) mult = apply(mult, evalFloat(snakeIndex, par.mult_factor_decrease as FloatFunc), false)
+    }
+  }
+  return mult
 }
 
 /** Snake mask: 1 if pixel at relPos is in the lit tail at time t, else 0 (or fade). */
@@ -167,8 +313,9 @@ function getSnakeMask(
   numPixelsInRing: number,
   timeframe: Timeframe
 ): number {
-  const name = timeframe.motionEffect
-  const p = timeframe.motionEffectParams ?? {}
+  const entry = getTimeframeEffects(timeframe).find(e => MOTION_KEYS.has(e.effectKey))
+  const name = entry?.effectKey
+  const p = entry?.params ?? {}
 
   const tailLength = (): number => {
     if (name === 'snake' || name === 'snakeHeadSin' || name === 'snakeSlowFast' || name === 'snakeHeadSteps')
@@ -256,7 +403,7 @@ function getSnakeMask(
 
 /** Whether the timeframe has any motion (snake) effect. */
 export function hasMotionEffect(timeframe: Timeframe): boolean {
-  return Boolean(timeframe.motionEffect)
+  return getTimeframeEffects(timeframe).some(e => MOTION_KEYS.has(e.effectKey))
 }
 
 /**
@@ -270,10 +417,12 @@ export function getPixelColor(
 ): HSV {
   let { h, s, v } = getBaseColor(relPos, timeframe)
 
-  h = (h + getHueOffset(t, timeframe)) % 1
+  h = (h + getHueOffset(relPos, t, timeframe)) % 1
   if (h < 0) h += 1
 
-  const brightnessMult = getBrightnessMult(t, timeframe)
+  s = s * getSaturationMult(relPos, t, timeframe)
+
+  const brightnessMult = getBrightnessMult(relPos, t, timeframe)
   const snakeMask = hasMotionEffect(timeframe)
     ? getSnakeMask(relPos, t, 12, timeframe)
     : 1

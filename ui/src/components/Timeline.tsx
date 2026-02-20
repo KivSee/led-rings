@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Timeframe, TimeframeCycleEntry } from '../App'
+import { Timeframe, TimeframeCycleEntry, getTimeframeEffects } from '../App'
 import { ringsToDisplayLabel } from '../generateSequenceTs'
 import './Timeline.css'
 
@@ -51,6 +51,8 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
   const timelineScrollViewRef = React.useRef<HTMLDivElement>(null)
   const timelineWrapperRef = React.useRef<HTMLDivElement>(null)
   const [visibleHeightPx, setVisibleHeightPx] = useState<number>(600)
+  const onVisibleRangeChangeRef = React.useRef(onVisibleRangeChange)
+  onVisibleRangeChangeRef.current = onVisibleRangeChange
 
   const maxTime = Math.max(songLengthBeats, 4)
   const BEATS_PER_SCREEN = 64
@@ -73,22 +75,23 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
     }
   }, [])
 
-  // Report visible beat range for spectrogram zoom/scroll sync
+  // Report visible beat range for spectrogram zoom/scroll sync (use ref so effect doesn't re-run on parent render)
   const pxPerBeatForRange = visibleHeightPx / BEATS_PER_SCREEN
   useEffect(() => {
-    if (!onVisibleRangeChange || pxPerBeatForRange <= 0) return
+    const cb = onVisibleRangeChangeRef.current
+    if (!cb || pxPerBeatForRange <= 0) return
     const scrollEl = timelineScrollViewRef.current
     if (!scrollEl) return
     const report = () => {
       const scrollTop = scrollEl.scrollTop
       const startBeat = Math.max(0, scrollTop / pxPerBeatForRange)
       const endBeat = Math.min(maxTime, startBeat + BEATS_PER_SCREEN)
-      onVisibleRangeChange(startBeat, endBeat)
+      onVisibleRangeChangeRef.current?.(startBeat, endBeat)
     }
     report()
     scrollEl.addEventListener('scroll', report)
     return () => scrollEl.removeEventListener('scroll', report)
-  }, [onVisibleRangeChange, pxPerBeatForRange, maxTime])
+  }, [pxPerBeatForRange, maxTime])
 
   // Auto-scroll when playhead reaches the end of the visible range so it stays in view
   const scrollMarginBeats = 8
@@ -617,7 +620,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
                       , Mapping: {timeframe.mapping ?? 'all'}
                     </span>
                     <span className="timeframe-effects-inline">
-                      , Effects: {[timeframe.brightnessEffect, timeframe.hueEffect, timeframe.motionEffect].filter(Boolean).join(', ') || '—'}
+                      , Effects: {getTimeframeEffects(timeframe).map(e => e.effectKey).join(', ') || '—'}
                     </span>
                   </div>
                 </div>

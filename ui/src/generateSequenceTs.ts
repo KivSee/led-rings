@@ -21,6 +21,12 @@ export type TimeframeCycleEntry =
   | { type: 'cycle'; beatsInCycle: number }
   | { type: 'cycleBeats'; beatsInCycle: number; startBeat: number; endBeat: number }
 
+export interface TimeframeEffectEntry {
+  id: string
+  effectKey: string
+  params?: Record<string, number | boolean>
+}
+
 export interface Timeframe {
   id: string
   startTime: number
@@ -32,12 +38,25 @@ export interface Timeframe {
   rainbow?: boolean
   rainbowRange?: number
   cycles?: TimeframeCycleEntry[]
+  effects?: TimeframeEffectEntry[]
   brightnessEffect?: string
   brightnessEffectParams?: Record<string, number | boolean>
   hueEffect?: string
   hueEffectParams?: Record<string, number | boolean>
   motionEffect?: string
   motionEffectParams?: Record<string, number | boolean>
+}
+
+function getTimeframeEffects(tf: Timeframe): TimeframeEffectEntry[] {
+  if (tf.effects && tf.effects.length > 0) return tf.effects.filter(e => e.effectKey !== '')
+  const entries: TimeframeEffectEntry[] = []
+  const add = (key: string, params?: Record<string, number | boolean>) => {
+    if (key) entries.push({ id: `legacy-${key}`, effectKey: key, params })
+  }
+  if (tf.brightnessEffect) add(tf.brightnessEffect, tf.brightnessEffectParams)
+  if (tf.hueEffect) add(tf.hueEffect, tf.hueEffectParams)
+  if (tf.motionEffect) add(tf.motionEffect, tf.motionEffectParams)
+  return entries
 }
 
 const RINGS_ALL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
@@ -118,6 +137,39 @@ function formatParamValue(value: number | boolean): string {
   return String(Number(value.toFixed(4)))
 }
 
+/** Serialize a FloatFunction-shaped object to TS source (const_value, linear, sin, steps). */
+function formatFloatFunction(obj: unknown): string {
+  if (!obj || typeof obj !== 'object') return 'const_value: { value: 1 }'
+  const o = obj as Record<string, unknown>
+  if (o.const_value && typeof o.const_value === 'object') {
+    const v = o.const_value as Record<string, unknown>
+    const val = typeof v.value === 'number' ? v.value : 1
+    return `const_value: { value: ${formatParamValue(val)} }`
+  }
+  if (o.linear && typeof o.linear === 'object') {
+    const v = o.linear as Record<string, unknown>
+    const start = typeof v.start === 'number' ? v.start : 0
+    const end = typeof v.end === 'number' ? v.end : 1
+    return `linear: { start: ${formatParamValue(start)}, end: ${formatParamValue(end)} }`
+  }
+  if (o.sin && typeof o.sin === 'object') {
+    const v = o.sin as Record<string, unknown>
+    const min = typeof v.min === 'number' ? v.min : 0
+    const max = typeof v.max === 'number' ? v.max : 1
+    const phase = typeof v.phase === 'number' ? v.phase : 0
+    const repeats = typeof v.repeats === 'number' ? v.repeats : 1
+    return `sin: { min: ${formatParamValue(min)}, max: ${formatParamValue(max)}, phase: ${formatParamValue(phase)}, repeats: ${formatParamValue(repeats)} }`
+  }
+  if (o.steps && typeof o.steps === 'object') {
+    const v = o.steps as Record<string, unknown>
+    const num_steps = typeof v.num_steps === 'number' ? v.num_steps : 4
+    const diff_per_step = typeof v.diff_per_step === 'number' ? v.diff_per_step : 0.25
+    const first_step_value = typeof v.first_step_value === 'number' ? v.first_step_value : 0
+    return `steps: { num_steps: ${formatParamValue(num_steps)}, diff_per_step: ${formatParamValue(diff_per_step)}, first_step_value: ${formatParamValue(first_step_value)} }`
+  }
+  return 'const_value: { value: 1 }'
+}
+
 function formatEffectParams(params: Record<string, number | boolean> | undefined, schema?: { key: string }[]): string {
   if (!params || Object.keys(params).length === 0) return ''
   const keys = schema ? schema.map((s) => s.key) : Object.keys(params)
@@ -141,10 +193,53 @@ function emitColor(tf: Timeframe): string[] {
   return lines
 }
 
-function emitBrightnessEffect(tf: Timeframe): string[] {
-  const eff = tf.brightnessEffect
-  if (!eff) return []
-  const params = tf.brightnessEffectParams
+const BRIGHTNESS_KEYS = new Set(['brightness', 'fadeIn', 'fadeOut', 'fadeInOut', 'fadeOutIn', 'blink', 'pulse', 'fade'])
+const HUE_KEYS = new Set(['staticHueShift', 'hueShiftStartToEnd', 'hueShiftSin'])
+const MOTION_KEYS = new Set(['snakeHeadMove', 'staticSnake', 'snake', 'snakeHeadSin', 'snakeFillGrow', 'snakeInOut', 'snakeSlowFast', 'snakeTailShrinkGrow', 'snakeHeadSteps'])
+const POSITION_KEYS = new Set(['position_brightness', 'position_hue', 'position_saturation'])
+const SNAKE_KEYS = new Set(['snake_brightness', 'snake_hue', 'snake_saturation'])
+const TIMED_KEYS = new Set(['timed_brightness', 'timed_hue', 'timed_saturation'])
+
+function emitSingleEffect(effectKey: string, params: Record<string, number | boolean | unknown> | undefined): string[] {
+  const p = (params || {}) as Record<string, unknown>
+  if (SNAKE_KEYS.has(effectKey)) {
+    const head = p.head != null ? formatFloatFunction(p.head) : 'const_value: { value: 0 }'
+    const tailLength = p.tail_length != null ? formatFloatFunction(p.tail_length) : 'const_value: { value: 0.5 }'
+    const cyclic = p.cyclic === true ? 'true' : 'false'
+    const parts = [`head: { ${head} }`, `tail_length: { ${tailLength} }`, `cyclic: ${cyclic}`]
+    if (effectKey === 'snake_brightness' || effectKey === 'snake_saturation') {
+      if (p.mult_factor_increase != null) parts.push(`mult_factor_increase: { ${formatFloatFunction(p.mult_factor_increase)} }`)
+      if (p.mult_factor_decrease != null) parts.push(`mult_factor_decrease: { ${formatFloatFunction(p.mult_factor_decrease)} }`)
+    } else {
+      if (p.offset_factor != null) parts.push(`offset_factor: { ${formatFloatFunction(p.offset_factor)} }`)
+    }
+    if ((effectKey === 'snake_brightness' || effectKey === 'snake_saturation') && !p.mult_factor_increase && !p.mult_factor_decrease) return []
+    if (effectKey === 'snake_hue' && !p.offset_factor) return []
+    return [`addEffect({ ${effectKey}: { ${parts.join(', ')} } })`]
+  }
+  if (POSITION_KEYS.has(effectKey)) {
+    const parts: string[] = []
+    if (effectKey === 'position_brightness' || effectKey === 'position_saturation') {
+      if (p.mult_factor_increase != null) parts.push(`mult_factor_increase: { ${formatFloatFunction(p.mult_factor_increase)} }`)
+      if (p.mult_factor_decrease != null) parts.push(`mult_factor_decrease: { ${formatFloatFunction(p.mult_factor_decrease)} }`)
+    } else {
+      if (p.offset_factor != null) parts.push(`offset_factor: { ${formatFloatFunction(p.offset_factor)} }`)
+    }
+    if (parts.length === 0) return []
+    return [`addEffect({ ${effectKey}: { ${parts.join(', ')} } })`]
+  }
+  if (TIMED_KEYS.has(effectKey)) {
+    const parts: string[] = []
+    if (effectKey === 'timed_brightness' || effectKey === 'timed_saturation') {
+      if (p.mult_factor_increase != null) parts.push(`mult_factor_increase: { ${formatFloatFunction(p.mult_factor_increase)} }`)
+      if (p.mult_factor_decrease != null) parts.push(`mult_factor_decrease: { ${formatFloatFunction(p.mult_factor_decrease)} }`)
+    } else {
+      if (p.offset_factor != null) parts.push(`offset_factor: { ${formatFloatFunction(p.offset_factor)} }`)
+    }
+    if (parts.length === 0) return []
+    return [`addEffect({ ${effectKey}: { ${parts.join(', ')} } })`]
+  }
+  const args = formatEffectParams(params as Record<string, number | boolean> | undefined)
   const schemas: Record<string, { key: string }[]> = {
     brightness: [{ key: 'value' }],
     fadeInOut: [{ key: 'high' }],
@@ -153,43 +248,33 @@ function emitBrightnessEffect(tf: Timeframe): string[] {
     pulse: [{ key: 'low' }, { key: 'staticPhase' }],
     fade: [{ key: 'start' }, { key: 'end' }],
   }
-  const schema = schemas[eff]
-  const args = formatEffectParams(params, schema)
-  if (eff === 'brightness' && args) return [`brightness(${args})`]
-  if (eff === 'fadeIn') return ['fadeIn()']
-  if (eff === 'fadeOut') return ['fadeOut()']
-  if (eff === 'fadeInOut') return [args ? `fadeInOut(${args})` : 'fadeInOut()']
-  if (eff === 'fadeOutIn') return [args ? `fadeOutIn(${args})` : 'fadeOutIn()']
-  if (eff === 'blink') return [args ? `blink(${args})` : 'blink()']
-  if (eff === 'pulse') return [args ? `pulse(${args})` : 'pulse()']
-  if (eff === 'fade') return [args ? `fade(${args})` : 'fade()']
-  return []
-}
-
-function emitHueEffect(tf: Timeframe): string[] {
-  const eff = tf.hueEffect
-  if (!eff) return []
-  const params = tf.hueEffectParams
-  const args = formatEffectParams(params)
-  if (eff === 'staticHueShift') return [params?.value !== undefined ? `staticHueShift({ value: ${formatParamValue(params.value)} })` : 'staticHueShift()']
-  if (eff === 'hueShiftStartToEnd') return [args ? `hueShiftStartToEnd(${args})` : 'hueShiftStartToEnd()']
-  if (eff === 'hueShiftSin') return [args ? `hueShiftSin(${args})` : 'hueShiftSin()']
-  return []
-}
-
-function emitMotionEffect(tf: Timeframe): string[] {
-  const eff = tf.motionEffect
-  if (!eff) return []
-  const params = tf.motionEffectParams
-  const args = formatEffectParams(params)
-  if (eff === 'snakeFillGrow') {
-    const reverse = params?.reverse === true
-    return [reverse ? 'snakeFillGrow(true)' : 'snakeFillGrow()']
+  if (BRIGHTNESS_KEYS.has(effectKey)) {
+    const schema = schemas[effectKey]
+    const formatted = formatEffectParams(params, schema)
+    if (effectKey === 'brightness' && formatted) return [`brightness(${formatted})`]
+    if (effectKey === 'fadeIn') return ['fadeIn()']
+    if (effectKey === 'fadeOut') return ['fadeOut()']
+    if (effectKey === 'fadeInOut') return [formatted ? `fadeInOut(${formatted})` : 'fadeInOut()']
+    if (effectKey === 'fadeOutIn') return [formatted ? `fadeOutIn(${formatted})` : 'fadeOutIn()']
+    if (effectKey === 'blink') return [formatted ? `blink(${formatted})` : 'blink()']
+    if (effectKey === 'pulse') return [formatted ? `pulse(${formatted})` : 'pulse()']
+    if (effectKey === 'fade') return [formatted ? `fade(${formatted})` : 'fade()']
   }
-  if (eff === 'snakeInOut') return [args ? `snakeInOut(${args})` : 'snakeInOut()']
-  if (eff === 'snakeTailShrinkGrow') return ['snakeTailShrinkGrow()']
-  if (eff === 'snakeHeadMove' || eff === 'staticSnake' || eff === 'snake' || eff === 'snakeHeadSin' || eff === 'snakeSlowFast' || eff === 'snakeHeadSteps') {
-    return [args ? `${eff}(${args})` : `${eff}()`]
+  if (HUE_KEYS.has(effectKey)) {
+    if (effectKey === 'staticHueShift') return [params?.value !== undefined ? `staticHueShift({ value: ${formatParamValue(params!.value)} })` : 'staticHueShift()']
+    if (effectKey === 'hueShiftStartToEnd') return [args ? `hueShiftStartToEnd(${args})` : 'hueShiftStartToEnd()']
+    if (effectKey === 'hueShiftSin') return [args ? `hueShiftSin(${args})` : 'hueShiftSin()']
+  }
+  if (MOTION_KEYS.has(effectKey)) {
+    if (effectKey === 'snakeFillGrow') {
+      const reverse = params?.reverse === true
+      return [reverse ? 'snakeFillGrow(true)' : 'snakeFillGrow()']
+    }
+    if (effectKey === 'snakeInOut') return [args ? `snakeInOut(${args})` : 'snakeInOut()']
+    if (effectKey === 'snakeTailShrinkGrow') return ['snakeTailShrinkGrow()']
+    if (effectKey === 'snakeHeadMove' || effectKey === 'staticSnake' || effectKey === 'snake' || effectKey === 'snakeHeadSin' || effectKey === 'snakeSlowFast' || effectKey === 'snakeHeadSteps') {
+      return [args ? `${effectKey}(${args})` : `${effectKey}()`]
+    }
   }
   return []
 }
@@ -204,9 +289,10 @@ function emitTimeframeBody(tf: Timeframe): string {
   const elementsArg = ringsToElementsArg(tf.rings)
   const inner: string[] = []
   inner.push(...emitColor(tf))
-  inner.push(...emitHueEffect(tf))
-  inner.push(...emitBrightnessEffect(tf))
-  inner.push(...emitMotionEffect(tf))
+  const effectEntries = getTimeframeEffects(tf)
+  for (const entry of effectEntries) {
+    inner.push(...emitSingleEffect(entry.effectKey, entry.params))
+  }
   const cycles = tf.cycles ?? []
   const effectLines = inner.length ? inner.join('\n') : '// no effects'
   let core = `elements(${elementsArg}, () => {
@@ -272,6 +358,7 @@ import { startSong, trigger } from "./services/trigger";
 import { Animation } from "./animation/animation";
 import { beats, cycle, cycleBeats } from "./time/time";
 import { constColor, noColor, rainbow } from "./effects/coloring";
+import { addEffect } from "./effects/effect";
 import {
   blink,
   brightness,
@@ -349,6 +436,7 @@ import * as fs from "fs";
 import { Animation } from "./animation/animation";
 import { beats, cycle, cycleBeats } from "./time/time";
 import { constColor, noColor, rainbow } from "./effects/coloring";
+import { addEffect } from "./effects/effect";
 import {
   blink,
   brightness,
