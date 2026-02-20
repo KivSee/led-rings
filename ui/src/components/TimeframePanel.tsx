@@ -597,6 +597,31 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
         </div>
 
         <div className="timeframe-panel-section">
+          <label className="timeframe-panel-label">Phase</label>
+          <div className="timeframe-panel-phase-row">
+            <input
+              type="number"
+              value={timeframe.phase ?? ''}
+              min={0}
+              max={12}
+              step={0.1}
+              placeholder="0"
+              onChange={(e) => {
+                const val = e.target.value
+                if (val === '') {
+                  onUpdate({ phase: undefined })
+                } else {
+                  const num = parseFloat(val)
+                  if (!isNaN(num)) onUpdate({ phase: num })
+                }
+              }}
+              className="timeframe-panel-input-small"
+            />
+            <span className="timeframe-panel-phase-hint">Offsets hue/brightness/motion per ring</span>
+          </div>
+        </div>
+
+        <div className="timeframe-panel-section">
           <label className="timeframe-panel-label">Rings</label>
           <div className="timeframe-panel-rings">
             <div className="timeframe-panel-rings-grid">

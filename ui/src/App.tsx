@@ -39,6 +39,7 @@ export interface Timeframe {
   color: string
   rings: number[] // Array of ring numbers (1-12) that participate
   mapping?: string // Segment mapping name from segments.json
+  phase?: number // Phase intensity — offsets hue/brightness/motion per ring (0 = none)
   /** Optional list of cycle/cycleBeats wrapping this timeframe's content (outermost first) */
   cycles?: TimeframeCycleEntry[]
   /** Effect slots (one selector per slot, add more as desired). Replaces legacy brightness/hue/motion fields. */
@@ -429,6 +430,7 @@ function App() {
                 color: typeof item.color === 'string' ? item.color : '#3b82f6',
                 rings: Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n)) : [1,2,3,4,5,6,7,8,9,10,11,12],
                 mapping: item.mapping,
+                phase: typeof item.phase === 'number' ? item.phase : undefined,
                 cycles: normalizeCycles(item.cycles),
                 ...(effects && effects.length > 0 ? { effects } : legacy),
               }

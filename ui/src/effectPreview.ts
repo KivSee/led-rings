@@ -87,10 +87,11 @@ export interface HSV {
   v: number
 }
 
-/** Get base color for a pixel from timeframe. */
+/** Get base color for a pixel from timeframe. Phase offsets hue per ring. */
 function getBaseColor(
   _relPos: number,
-  timeframe: Timeframe
+  timeframe: Timeframe,
+  perRingPhase: number = 0
 ): HSV {
   const hueFromHex = (hex: string): number => {
     const r = parseInt(hex.slice(1, 3), 16) / 255
@@ -109,7 +110,9 @@ function getBaseColor(
     return h
   }
 
-  const baseHue = hueFromHex(timeframe.color || '#3b82f6')
+  let baseHue = hueFromHex(timeframe.color || '#3b82f6')
+  baseHue = (baseHue + perRingPhase) % 1
+  if (baseHue < 0) baseHue += 1
   return { h: baseHue, s: 1, v: 1 }
 }
 
@@ -119,7 +122,7 @@ function applyFloatFunctionBrightness(currentMult: number, inputVal: number, _is
 }
 
 /** Brightness mult from timeframe: legacy (time t) + timed (FloatFunction at t) + position (FloatFunction at relPos). */
-function getBrightnessMult(relPos: number, t: number, timeframe: Timeframe): number {
+function getBrightnessMult(relPos: number, t: number, timeframe: Timeframe, perRingPhase: number = 0): number {
   let mult = 1
 
   const legacy = getTimeframeEffects(timeframe).find(e => BRIGHTNESS_KEYS.has(e.effectKey))
@@ -153,7 +156,7 @@ function getBrightnessMult(relPos: number, t: number, timeframe: Timeframe): num
     case 'pulse': {
       const low = typeof p.low === 'number' ? p.low : 0.5
       const staticPhase = typeof p.staticPhase === 'number' ? p.staticPhase : 0
-      const x = 2 * Math.PI * t + staticPhase
+      const x = 2 * Math.PI * t + staticPhase + perRingPhase
       mult = low + (1 - low) * 0.5 * (1 + Math.sin(x))
       break
     }
@@ -203,7 +206,7 @@ function getBrightnessMult(relPos: number, t: number, timeframe: Timeframe): num
 }
 
 /** Hue offset from timeframe: legacy (time t) + timed (FloatFunction at t) + position (FloatFunction at relPos). */
-function getHueOffset(relPos: number, t: number, timeframe: Timeframe): number {
+function getHueOffset(relPos: number, t: number, timeframe: Timeframe, perRingPhase: number = 0): number {
   let offset = 0
 
   const legacy = getTimeframeEffects(timeframe).find(e => HUE_KEYS.has(e.effectKey))
@@ -220,7 +223,7 @@ function getHueOffset(relPos: number, t: number, timeframe: Timeframe): number {
       break
     case 'hueShiftSin': {
       const amount = typeof p.amount === 'number' ? p.amount : 0.5
-      offset = amount * 0.5 * (1 + Math.sin(2 * Math.PI * t))
+      offset = amount * 0.5 * (1 + Math.sin(2 * Math.PI * t + perRingPhase))
       break
     }
     default:
@@ -305,7 +308,8 @@ function getSnakeMask(
   relPos: number,
   t: number,
   numPixelsInRing: number,
-  timeframe: Timeframe
+  timeframe: Timeframe,
+  perRingPhase: number = 0
 ): number {
   const entry = getTimeframeEffects(timeframe).find(e => MOTION_KEYS.has(e.effectKey))
   const name = entry?.effectKey
@@ -331,14 +335,14 @@ function getSnakeMask(
       break
     case 'staticSnake':
       head = (typeof p.start === 'number' && typeof p.end === 'number')
-        ? (p.start + t) % 1
-        : t
+        ? (p.start + perRingPhase + t) % 1
+        : perRingPhase + t
       break
     case 'snake':
-      head = p.reverse ? 1 - t : t
+      head = p.reverse ? perRingPhase + 1 - t : perRingPhase + t
       break
     case 'snakeHeadSin':
-      head = 0.1 + 0.9 * 0.5 * (1 + Math.sin(2 * Math.PI * t))
+      head = 0.1 + 0.9 * 0.5 * (1 + Math.sin(2 * Math.PI * t + perRingPhase))
       break
     case 'snakeFillGrow': {
       const reverse = p.reverse === true
@@ -403,22 +407,27 @@ export function hasMotionEffect(timeframe: Timeframe): boolean {
 /**
  * Compute final pixel color for playback preview.
  * relPos: position along ring 0–1, t: normalized time in segment 0–1.
+ * ringIndex: 0-based ring index (0–11), used with timeframe.phase to compute per-ring phase offset.
  */
 export function getPixelColor(
   relPos: number,
   t: number,
-  timeframe: Timeframe
+  timeframe: Timeframe,
+  ringIndex: number = 0
 ): HSV {
-  let { h, s, v } = getBaseColor(relPos, timeframe)
+  const phaseIntensity = timeframe.phase ?? 0
+  const perRingPhase = phaseIntensity > 0 ? ringIndex / 12 * phaseIntensity : 0
 
-  h = (h + getHueOffset(relPos, t, timeframe)) % 1
+  let { h, s, v } = getBaseColor(relPos, timeframe, perRingPhase)
+
+  h = (h + getHueOffset(relPos, t, timeframe, perRingPhase)) % 1
   if (h < 0) h += 1
 
   s = s * getSaturationMult(relPos, t, timeframe)
 
-  const brightnessMult = getBrightnessMult(relPos, t, timeframe)
+  const brightnessMult = getBrightnessMult(relPos, t, timeframe, perRingPhase)
   const snakeMask = hasMotionEffect(timeframe)
-    ? getSnakeMask(relPos, t, 12, timeframe)
+    ? getSnakeMask(relPos, t, 12, timeframe, perRingPhase)
     : 1
 
   v = v * brightnessMult * snakeMask

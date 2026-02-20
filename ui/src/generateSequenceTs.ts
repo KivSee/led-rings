@@ -35,6 +35,7 @@ export interface Timeframe {
   color: string
   rings: number[]
   mapping?: string
+  phase?: number
   cycles?: TimeframeCycleEntry[]
   effects?: TimeframeEffectEntry[]
   brightnessEffect?: string
@@ -290,6 +291,11 @@ function emitTimeframeBody(tf: Timeframe): string {
 ${indentBlock(effectLines, 4)}
   });
 });`
+  if (tf.phase != null && tf.phase > 0) {
+    core = `phase(${formatParamValue(tf.phase)}, () => {
+${indentBlock(core, 2)}
+});`
+  }
   for (let i = cycles.length - 1; i >= 0; i--) {
     const c = cycles[i]
     if (c.type === 'cycle') {
@@ -347,6 +353,7 @@ import { sendSequence } from "./services/sequence";
 import { startSong, trigger } from "./services/trigger";
 import { Animation } from "./animation/animation";
 import { beats, cycle, cycleBeats } from "./time/time";
+import { phase } from "./phase/phase";
 import { constColor, noColor } from "./effects/coloring";
 import { addEffect } from "./effects/effect";
 import {
@@ -425,6 +432,7 @@ export function generateSequenceRunnerTs(song: Song, timeframes: Timeframe[]): s
 import * as fs from "fs";
 import { Animation } from "./animation/animation";
 import { beats, cycle, cycleBeats } from "./time/time";
+import { phase } from "./phase/phase";
 import { constColor, noColor } from "./effects/coloring";
 import { addEffect } from "./effects/effect";
 import {

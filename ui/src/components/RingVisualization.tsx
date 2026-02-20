@@ -150,7 +150,7 @@ const RingVisualization = ({
               if (!pixel) return null
               const pixelColor = useEffectPreview && timeframe
                 ? (() => {
-                    const { h, s, v } = getPixelColor(pixel.relPos, t, timeframe)
+                    const { h, s, v } = getPixelColor(pixel.relPos, t, timeframe, ringIndex)
                     return hsvToRgbString(h, s, v)
                   })()
                 : relPosToColor(pixel.relPos)
