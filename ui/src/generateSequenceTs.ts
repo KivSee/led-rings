@@ -35,8 +35,6 @@ export interface Timeframe {
   color: string
   rings: number[]
   mapping?: string
-  rainbow?: boolean
-  rainbowRange?: number
   cycles?: TimeframeCycleEntry[]
   effects?: TimeframeEffectEntry[]
   brightnessEffect?: string
@@ -181,16 +179,8 @@ function formatEffectParams(params: Record<string, number | boolean> | undefined
 }
 
 function emitColor(tf: Timeframe): string[] {
-  const lines: string[] = []
-  if (tf.rainbow) {
-    const { h } = hexToHsv(tf.color)
-    const range = tf.rainbowRange ?? 1
-    lines.push(`rainbow({ startHue: ${h.toFixed(4)}, endHue: ${(h + range).toFixed(4)} })`)
-  } else {
-    const { h, s, v } = hexToHsv(tf.color)
-    lines.push(`constColor({ hue: ${h.toFixed(4)}, sat: ${s.toFixed(4)}, val: ${v.toFixed(4)} })`)
-  }
-  return lines
+  const { h, s, v } = hexToHsv(tf.color)
+  return [`constColor({ hue: ${h.toFixed(4)}, sat: ${s.toFixed(4)}, val: ${v.toFixed(4)} })`]
 }
 
 const BRIGHTNESS_KEYS = new Set(['brightness', 'fadeIn', 'fadeOut', 'fadeInOut', 'fadeOutIn', 'blink', 'pulse', 'fade'])
@@ -357,7 +347,7 @@ import { sendSequence } from "./services/sequence";
 import { startSong, trigger } from "./services/trigger";
 import { Animation } from "./animation/animation";
 import { beats, cycle, cycleBeats } from "./time/time";
-import { constColor, noColor, rainbow } from "./effects/coloring";
+import { constColor, noColor } from "./effects/coloring";
 import { addEffect } from "./effects/effect";
 import {
   blink,
@@ -435,7 +425,7 @@ export function generateSequenceRunnerTs(song: Song, timeframes: Timeframe[]): s
 import * as fs from "fs";
 import { Animation } from "./animation/animation";
 import { beats, cycle, cycleBeats } from "./time/time";
-import { constColor, noColor, rainbow } from "./effects/coloring";
+import { constColor, noColor } from "./effects/coloring";
 import { addEffect } from "./effects/effect";
 import {
   blink,

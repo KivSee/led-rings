@@ -41,9 +41,6 @@ const PlaybackRingsPanel = ({ currentTime, timeframes }: PlaybackRingsPanelProps
             <div className="playback-rings-panel-visualization">
               <RingVisualization
                 mapping={activeTimeframe.mapping || 'all'}
-                rainbow={activeTimeframe.rainbow}
-                rainbowRange={activeTimeframe.rainbowRange}
-                startColor={activeTimeframe.color}
                 activeRings={activeTimeframe.rings}
                 timeframe={activeTimeframe}
                 currentTime={currentTime}

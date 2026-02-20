@@ -8,7 +8,7 @@
  * FloatFunction combinations or edge cases.
  *
  * Effects (from src/effects):
- * - Coloring: const_color (solid HSV) or rainbow (hue_start → hue_end by position).
+ * - Coloring: const_color (solid HSV).
  * - Brightness: mult_factor(t) multiplies value (0 = off, 1 = full).
  * - Hue: offset_factor(t) added to hue (0–1 cycle).
  * - Snake: head(t) and tail_length(t); pixels in [head-tail, head] are lit, rest dimmed.
@@ -87,9 +87,9 @@ export interface HSV {
   v: number
 }
 
-/** Get base color for a pixel from timeframe (rainbow or solid). */
+/** Get base color for a pixel from timeframe. */
 function getBaseColor(
-  relPos: number,
+  _relPos: number,
   timeframe: Timeframe
 ): HSV {
   const hueFromHex = (hex: string): number => {
@@ -110,17 +110,11 @@ function getBaseColor(
   }
 
   const baseHue = hueFromHex(timeframe.color || '#3b82f6')
-  if (timeframe.rainbow) {
-    const range = timeframe.rainbowRange ?? 1
-    const hue = (baseHue + (relPos * range)) % 1
-    return { h: hue, s: 1, v: 1 }
-  }
   return { h: baseHue, s: 1, v: 1 }
 }
 
-/** Apply one FloatFunction-based brightness (increase = lerp toward 1, decrease = multiply). */
-function applyFloatFunctionBrightness(currentMult: number, inputVal: number, isIncrease: boolean): number {
-  if (isIncrease) return currentMult + (1 - currentMult) * inputVal
+/** Apply one FloatFunction-based brightness (both increase and decrease multiply). */
+function applyFloatFunctionBrightness(currentMult: number, inputVal: number, _isIncrease: boolean): number {
   return currentMult * inputVal
 }
 
@@ -267,8 +261,8 @@ function getHueOffset(relPos: number, t: number, timeframe: Timeframe): number {
 /** Saturation mult from timeframe: timed (FloatFunction at t) + position (FloatFunction at relPos). Same increase/decrease as brightness. */
 function getSaturationMult(relPos: number, t: number, timeframe: Timeframe): number {
   let mult = 1
-  const apply = (current: number, inputVal: number, isIncrease: boolean) =>
-    isIncrease ? current + (1 - current) * inputVal : current * inputVal
+  const apply = (current: number, inputVal: number, _isIncrease: boolean) =>
+    current * inputVal
 
   const timedS = getTimeframeEffects(timeframe).find(e => TIMED_SATURATION_KEYS.has(e.effectKey))
   if (timedS?.params) {

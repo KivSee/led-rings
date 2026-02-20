@@ -273,43 +273,7 @@ const EFFECT_PARAM_SCHEMAS: Record<string, EffectParamDef[]> = {
   ],
 }
 
-// Helper function to convert hex to hue
-const hexToHue = (hex: string): number => {
-  const r = parseInt(hex.slice(1, 3), 16) / 255
-  const g = parseInt(hex.slice(3, 5), 16) / 255
-  const b = parseInt(hex.slice(5, 7), 16) / 255
-  
-  const max = Math.max(r, g, b)
-  const min = Math.min(r, g, b)
-  let h = 0
-  
-  if (max !== min) {
-    if (max === r) {
-      h = ((g - b) / (max - min)) % 6
-    } else if (max === g) {
-      h = (b - r) / (max - min) + 2
-    } else {
-      h = (r - g) / (max - min) + 4
-    }
-  }
-  h = h / 6
-  if (h < 0) h += 1
-  return h
-}
 
-// Generate rainbow gradient CSS string based on start color and range
-const generateRainbowGradient = (startColor: string, range: number): string => {
-  const startHue = hexToHue(startColor) * 360
-  const steps = 20 // Number of color stops for smooth gradient
-  const colors: string[] = []
-  
-  for (let i = 0; i <= steps; i++) {
-    const hue = (startHue + (i / steps) * range * 360) % 360
-    colors.push(`hsl(${hue}, 100%, 50%)`)
-  }
-  
-  return colors.join(', ')
-}
 
 interface TimeframePanelProps {
   timeframe: Timeframe | null
@@ -318,10 +282,9 @@ interface TimeframePanelProps {
 }
 
 const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) => {
-  const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | 'color' | 'rainbowRange' | null>(null)
+  const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | 'color' | null>(null)
   const [tempStartTime, setTempStartTime] = useState<string>('')
   const [tempEndTime, setTempEndTime] = useState<string>('')
-  const [tempRainbowRange, setTempRainbowRange] = useState<string>('')
 
   // Extract segment names from segments.json, filtering out numeric indices (0-11)
   const segmentNames = useMemo(() => {
@@ -345,7 +308,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
   }
 
   const handleInputChange = (
-    field: 'label' | 'startTime' | 'endTime' | 'color' | 'rainbowRange',
+    field: 'label' | 'startTime' | 'endTime' | 'color',
     value: string | number
   ) => {
     if (field === 'label' || field === 'color') {
@@ -356,9 +319,6 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
     } else if (field === 'endTime') {
       // Store raw input value while typing
       setTempEndTime(value as string)
-    } else if (field === 'rainbowRange') {
-      // Store raw input value while typing
-      setTempRainbowRange(value as string)
     }
   }
 
@@ -376,12 +336,6 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
         onUpdate({ endTime: numValue })
       }
       setTempEndTime('')
-    } else if (editingField === 'rainbowRange' && tempRainbowRange !== '') {
-      const numValue = parseFloat(tempRainbowRange)
-      if (!isNaN(numValue) && numValue > 0) {
-        onUpdate({ rainbowRange: numValue })
-      }
-      setTempRainbowRange('')
     }
     setEditingField(null)
   }
@@ -640,43 +594,6 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
               </>
             )}
           </div>
-          <div className="timeframe-panel-rainbow-row">
-            <label className="timeframe-panel-checkbox-label">
-              <input
-                type="checkbox"
-                checked={timeframe.rainbow || false}
-                onChange={(e) => onUpdate({ rainbow: e.target.checked, rainbowRange: e.target.checked ? (timeframe.rainbowRange || 1) : undefined })}
-                className="timeframe-panel-checkbox"
-              />
-              <span>Rainbow</span>
-            </label>
-            {timeframe.rainbow && (
-              <div className="timeframe-panel-rainbow-range">
-                <span>Range:</span>
-                <div className="timeframe-panel-rainbow-slider-container">
-                  <div 
-                    className="timeframe-panel-rainbow-slider-wrapper"
-                    style={{
-                      background: `linear-gradient(to right, ${generateRainbowGradient(timeframe.color, timeframe.rainbowRange || 1)})`
-                    }}
-                  >
-                    <input
-                      type="range"
-                      min="0.1"
-                      max="3"
-                      step="0.1"
-                      value={timeframe.rainbowRange || 1}
-                      onChange={(e) => onUpdate({ rainbowRange: parseFloat(e.target.value) })}
-                      className="timeframe-panel-rainbow-slider"
-                    />
-                  </div>
-                  <div className="timeframe-panel-rainbow-range-value">
-                    {timeframe.rainbowRange || 1}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
 
         <div className="timeframe-panel-section">
@@ -909,7 +826,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
                                         let nextParams: Record<string, number | boolean | FloatFunctionValue>
                                         if (isSnake) {
                                           nextParams = { ...(entry.params || {}), [newKey]: valueToKeep ?? defaultFloatFunction('const_value') }
-                                          delete nextParams[currentKey === INCREASE_KEY ? DECREASE_KEY : INCREASE_KEY]
+                                          delete nextParams[currentKey]
                                         } else {
                                           nextParams = { [newKey]: valueToKeep ?? defaultFloatFunction('const_value') }
                                         }
@@ -1106,11 +1023,8 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
             ))}
           </select>
           <div className="timeframe-panel-mapping-visualization">
-            <RingVisualization 
+            <RingVisualization
               mapping={timeframe.mapping || 'all'}
-              rainbow={timeframe.rainbow}
-              rainbowRange={timeframe.rainbowRange}
-              startColor={timeframe.color}
             />
           </div>
         </div>

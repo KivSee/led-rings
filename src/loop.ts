@@ -3,7 +3,8 @@ import { sendSequence } from "./services/sequence";
 import { startSong, trigger } from "./services/trigger";
 import { Animation } from "./animation/animation";
 import { beats, cycle, cycleBeats } from "./time/time";
-import { constColor, noColor, rainbow } from "./effects/coloring";
+import { constColor, noColor } from "./effects/coloring";
+import { addEffect } from "./effects/effect";
 import {
   blink,
   brightness,
