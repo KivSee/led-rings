@@ -1,17 +1,10 @@
 /**
- * Effect preview: evaluates time- and position-based effects so the playback
- * panel can show how each effect changes the ring pixels as time progresses.
+ * Effect preview: evaluates effects so the playback panel can show how each
+ * effect changes the ring pixels as time progresses.
  *
- * Note: Not all effects are currently displayed correctly in the visualization.
- * Position, Timed, and Snake (snake_brightness, snake_hue, snake_saturation) effects
- * are supported here; behaviour may differ from the actual renderer for some
- * FloatFunction combinations or edge cases.
- *
- * Effects (from src/effects):
- * - Coloring: const_color (solid HSV).
- * - Brightness: mult_factor(t) multiplies value (0 = off, 1 = full).
- * - Hue: offset_factor(t) added to hue (0–1 cycle).
- * - Snake: head(t) and tail_length(t); pixels in [head-tail, head] are lit, rest dimmed.
+ * Legacy brightness/hue/motion effects are converted to their equivalent
+ * FloatFunc representations and evaluated with evalFloat(), using the same
+ * code path as timed/position/snake effects.
  */
 
 import { Timeframe, TimeframeEffectEntry, getTimeframeEffects } from './App'
@@ -86,6 +79,166 @@ export function evalFloat(t: number, f: FloatFunc | undefined): number {
   return 0
 }
 
+// ---------------------------------------------------------------------------
+// Legacy → FloatFunc conversion (matches src/effects/brightness.ts, hue.ts, motion.ts)
+// ---------------------------------------------------------------------------
+
+/** Convert a legacy brightness effect to its equivalent FloatFunc.
+ *  Phase is injected into sin.phase for pulse (the only brightness effect using phase). */
+function legacyBrightnessToFloatFunc(entry: TimeframeEffectEntry, perRingPhase: number): FloatFunc | null {
+  const p = entry.params ?? {}
+  switch (entry.effectKey) {
+    case 'brightness':
+      return { const_value: { value: typeof p.value === 'number' ? p.value : 1 } }
+    case 'fadeIn':
+      return { linear: { start: 0, end: 1 } }
+    case 'fadeOut':
+      return { linear: { start: 1, end: 0 } }
+    case 'fadeInOut': {
+      const high = typeof p.high === 'number' ? p.high : 1
+      return { half: { f1: { linear: { start: 0, end: high } }, f2: { linear: { start: high, end: 0 } } } }
+    }
+    case 'fadeOutIn': {
+      const low = typeof p.low === 'number' ? p.low : 0
+      return { half: { f1: { linear: { start: 1, end: low } }, f2: { linear: { start: low, end: 1 } } } }
+    }
+    case 'blink': {
+      const low = typeof p.low === 'number' ? p.low : 0.5
+      return { half: { f1: { const_value: { value: low } }, f2: { const_value: { value: 1 } } } }
+    }
+    case 'pulse': {
+      const low = typeof p.low === 'number' ? p.low : 0.5
+      const staticPhase = typeof p.staticPhase === 'number' ? p.staticPhase : 0
+      return { sin: { min: low, max: 1, phase: staticPhase + perRingPhase, repeats: 1 } }
+    }
+    case 'fade': {
+      const start = typeof p.start === 'number' ? p.start : 0
+      const end = typeof p.end === 'number' ? p.end : 1
+      return { linear: { start, end } }
+    }
+    default:
+      return null
+  }
+}
+
+/** Convert a legacy hue effect to its equivalent FloatFunc.
+ *  Phase is injected into sin.phase for hueShiftSin. */
+function legacyHueToFloatFunc(entry: TimeframeEffectEntry, perRingPhase: number): FloatFunc | null {
+  const p = entry.params ?? {}
+  switch (entry.effectKey) {
+    case 'staticHueShift':
+      return { const_value: { value: typeof p.value === 'number' ? p.value : 0 } }
+    case 'hueShiftStartToEnd': {
+      const start = typeof p.start === 'number' ? p.start : 0
+      const end = typeof p.end === 'number' ? p.end : 0.5
+      return { linear: { start, end } }
+    }
+    case 'hueShiftSin': {
+      const amount = typeof p.amount === 'number' ? p.amount : 0.5
+      return { sin: { min: 0, max: amount, phase: perRingPhase, repeats: 1 } }
+    }
+    default:
+      return null
+  }
+}
+
+/** Convert a legacy motion effect to head/tailLength FloatFuncs + cyclic flag.
+ *  Matches the snake params produced by src/effects/motion.ts. */
+function legacyMotionToSnakeParams(
+  entry: TimeframeEffectEntry,
+  perRingPhase: number
+): { head: FloatFunc; tailLength: FloatFunc; cyclic: boolean } | null {
+  const p = entry.params ?? {}
+  switch (entry.effectKey) {
+    case 'snakeHeadMove': {
+      const start = typeof p.start === 'number' ? p.start : 0
+      const end = typeof p.end === 'number' ? p.end : 1
+      const tail = typeof p.tail === 'number' ? p.tail : 0.5
+      return {
+        head: { linear: { start, end } },
+        tailLength: { const_value: { value: tail } },
+        cyclic: false,
+      }
+    }
+    case 'staticSnake': {
+      const start = typeof p.start === 'number' ? p.start : 0
+      const end = typeof p.end === 'number' ? p.end : 0.5
+      return {
+        head: { const_value: { value: start + perRingPhase } },
+        tailLength: { const_value: { value: start - end } },
+        cyclic: true,
+      }
+    }
+    case 'snake': {
+      const tailLen = typeof p.tailLength === 'number' ? p.tailLength : 0.5
+      const rev = p.reverse === true
+      return {
+        head: { linear: { start: rev ? perRingPhase + 1 : perRingPhase, end: rev ? perRingPhase : perRingPhase + 1 } },
+        tailLength: { const_value: { value: tailLen } },
+        cyclic: p.cyclic === true,
+      }
+    }
+    case 'snakeHeadSin': {
+      const tailLen = typeof p.tailLength === 'number' ? p.tailLength : 0.5
+      return {
+        head: { sin: { min: 0.1, max: 1, phase: perRingPhase, repeats: 1 } },
+        tailLength: { const_value: { value: tailLen } },
+        cyclic: p.cyclic === true,
+      }
+    }
+    case 'snakeFillGrow': {
+      const rev = p.reverse === true
+      const f1: FloatFunc = { linear: { start: 0, end: 1 } }
+      const f2: FloatFunc = { const_value: { value: 1 } }
+      return {
+        head: { half: { f1: rev ? f2 : f1, f2: rev ? f1 : f2 } },
+        tailLength: { half: { f1: { const_value: { value: 0.5 } }, f2: { linear: { start: 0.5, end: 3 } } } },
+        cyclic: false,
+      }
+    }
+    case 'snakeInOut':
+      return {
+        head: { sin: { min: 0, max: 1, phase: perRingPhase, repeats: 1 } },
+        tailLength: { const_value: { value: 0.5 } },
+        cyclic: false,
+      }
+    case 'snakeSlowFast': {
+      const tailLen = typeof p.tailLength === 'number' ? p.tailLength : 0.5
+      return {
+        head: { comb2: {
+          f1: { sin: { min: 0, max: 1, phase: perRingPhase, repeats: 1 } },
+          amount1: 1,
+          f2: { linear: { start: 0, end: 1 } },
+          amount2: 1,
+        } },
+        tailLength: { const_value: { value: tailLen } },
+        cyclic: true,
+      }
+    }
+    case 'snakeTailShrinkGrow':
+      return {
+        head: { sin: { min: 0, max: 1, phase: perRingPhase, repeats: 1 } },
+        tailLength: { half: { f1: { linear: { start: 0.5, end: 1 } }, f2: { linear: { start: 1, end: 0.5 } } } },
+        cyclic: true,
+      }
+    case 'snakeHeadSteps': {
+      const steps = typeof p.steps === 'number' ? Math.max(1, p.steps) : 4
+      const tailLen = typeof p.tailLength === 'number' ? p.tailLength : 0.5
+      return {
+        head: { steps: { num_steps: steps, diff_per_step: 1 / steps, first_step_value: perRingPhase } },
+        tailLength: { const_value: { value: tailLen } },
+        cyclic: true,
+      }
+    }
+    default:
+      return null
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Evaluation functions
+// ---------------------------------------------------------------------------
+
 /** HSV in 0–1 range. */
 export interface HSV {
   h: number
@@ -122,74 +275,57 @@ function getBaseColor(
   return { h: baseHue, s: 1, v: 1 }
 }
 
-/** Apply one FloatFunction-based brightness (both increase and decrease multiply). */
-function applyFloatFunctionBrightness(currentMult: number, inputVal: number, _isIncrease: boolean): number {
-  return currentMult * inputVal
+/** Evaluate a timed/position FloatFunc brightness entry (increase or decrease). */
+function evalBrightnessMult(mult: number, t: number, par: Record<string, unknown>): number {
+  if (par.mult_factor_increase != null) return mult * evalFloat(t, par.mult_factor_increase as FloatFunc)
+  if (par.mult_factor_decrease != null) return mult * evalFloat(t, par.mult_factor_decrease as FloatFunc)
+  return mult
 }
 
-/** Brightness mult from timeframe: legacy (time t) + timed (FloatFunction at t) + position (FloatFunction at relPos). */
+/** Standard snake mask: 1 if pixel at relPos is in the lit region, else fade to 0. */
+function computeSnakeMask(relPos: number, head: number, tail: number, cyclic: boolean): number {
+  if (cyclic) {
+    let d = (head - relPos + 1) % 1
+    if (d < 0) d += 1
+    if (d > 1) d -= 1
+    if (d <= tail) return 1
+    if (tail < 1e-6) return 0
+    const dist = Math.min(d, (relPos - head + 1) % 1)
+    return Math.max(0, 1 - (dist - tail) / 0.08)
+  } else {
+    if (relPos <= head && relPos >= head - tail) return 1
+    if (relPos > head) return 0
+    const dist = head - tail - relPos
+    return dist <= 0 ? 1 : Math.max(0, 1 - dist / 0.08)
+  }
+}
+
+/** Brightness mult from timeframe: legacy + timed + position + snake_brightness. */
 function getBrightnessMult(relPos: number, t: number, timeframe: Timeframe, ringIndex: number = 0): number {
   let mult = 1
 
+  // Legacy brightness → FloatFunc conversion
   const legacy = getTimeframeEffects(timeframe).find(e => BRIGHTNESS_KEYS.has(e.effectKey))
-  const name = legacy?.effectKey
-  const p = legacy?.params ?? {}
-  const legacyPhase = entryPhase(legacy, ringIndex)
-  switch (name) {
-    case 'brightness':
-      mult = typeof p.value === 'number' ? p.value : 1
-      break
-    case 'fadeIn':
-      mult = t
-      break
-    case 'fadeOut':
-      mult = 1 - t
-      break
-    case 'fadeInOut': {
-      const high = typeof p.high === 'number' ? p.high : 1
-      mult = t < 0.5 ? (t * 2) * high : (1 - (t - 0.5) * 2) * high
-      break
-    }
-    case 'fadeOutIn': {
-      const low = typeof p.low === 'number' ? p.low : 0
-      mult = t < 0.5 ? 1 - (t * 2) * (1 - low) : low + ((t - 0.5) * 2) * (1 - low)
-      break
-    }
-    case 'blink': {
-      const low = typeof p.low === 'number' ? p.low : 0.5
-      mult = t < 0.5 ? low : 1
-      break
-    }
-    case 'pulse': {
-      const low = typeof p.low === 'number' ? p.low : 0.5
-      const staticPhase = typeof p.staticPhase === 'number' ? p.staticPhase : 0
-      const x = 2 * Math.PI * t + staticPhase + legacyPhase
-      mult = low + (1 - low) * 0.5 * (1 + Math.sin(x))
-      break
-    }
-    case 'fade':
-      mult = (typeof p.start === 'number' && typeof p.end === 'number')
-        ? p.start + t * (p.end - p.start)
-        : 1
-      break
-    default:
-      break
+  if (legacy) {
+    const func = legacyBrightnessToFloatFunc(legacy, entryPhase(legacy, ringIndex))
+    if (func) mult *= evalFloat(t, func)
   }
 
+  // Timed brightness
   const timedB = getTimeframeEffects(timeframe).find(e => TIMED_BRIGHTNESS_KEYS.has(e.effectKey))
   if (timedB?.params) {
     const par = timedB.params as Record<string, unknown>
     const tShifted = ((t + entryPhase(timedB, ringIndex)) % 1 + 1) % 1
-    if (par.mult_factor_increase != null) mult = applyFloatFunctionBrightness(mult, evalFloat(tShifted, par.mult_factor_increase as FloatFunc), true)
-    else if (par.mult_factor_decrease != null) mult = applyFloatFunctionBrightness(mult, evalFloat(tShifted, par.mult_factor_decrease as FloatFunc), false)
+    mult = evalBrightnessMult(mult, tShifted, par)
   }
+  // Position brightness
   const posB = getTimeframeEffects(timeframe).find(e => POSITION_BRIGHTNESS_KEYS.has(e.effectKey))
   if (posB?.params) {
     const par = posB.params as Record<string, unknown>
     const relPosShifted = ((relPos + entryPhase(posB, ringIndex)) % 1 + 1) % 1
-    if (par.mult_factor_increase != null) mult = applyFloatFunctionBrightness(mult, evalFloat(relPosShifted, par.mult_factor_increase as FloatFunc), true)
-    else if (par.mult_factor_decrease != null) mult = applyFloatFunctionBrightness(mult, evalFloat(relPosShifted, par.mult_factor_decrease as FloatFunc), false)
+    mult = evalBrightnessMult(mult, relPosShifted, par)
   }
+  // Snake brightness
   const snakeB = getTimeframeEffects(timeframe).find(e => SNAKE_BRIGHTNESS_KEYS.has(e.effectKey))
   if (snakeB?.params) {
     const par = snakeB.params as Record<string, unknown>
@@ -208,51 +344,38 @@ function getBrightnessMult(relPos: number, t: number, timeframe: Timeframe, ring
       snakeIndex = tailLen > 0 ? (relPos - currTail) / tailLen : 1
     }
     if (snakeIndex >= 0 && snakeIndex <= 1) {
-      if (par.mult_factor_increase != null) mult = applyFloatFunctionBrightness(mult, evalFloat(snakeIndex, par.mult_factor_increase as FloatFunc), true)
-      else if (par.mult_factor_decrease != null) mult = applyFloatFunctionBrightness(mult, evalFloat(snakeIndex, par.mult_factor_decrease as FloatFunc), false)
+      mult = evalBrightnessMult(mult, snakeIndex, par)
     }
   }
   return mult
 }
 
-/** Hue offset from timeframe: legacy (time t) + timed (FloatFunction at t) + position (FloatFunction at relPos). */
+/** Hue offset from timeframe: legacy + timed + position + snake_hue. */
 function getHueOffset(relPos: number, t: number, timeframe: Timeframe, ringIndex: number = 0): number {
   let offset = 0
 
+  // Legacy hue → FloatFunc conversion
   const legacy = getTimeframeEffects(timeframe).find(e => HUE_KEYS.has(e.effectKey))
-  const name = legacy?.effectKey
-  const p = legacy?.params ?? {}
-  const legacyPhase = entryPhase(legacy, ringIndex)
-  switch (name) {
-    case 'staticHueShift':
-      offset = typeof p.value === 'number' ? p.value : 0
-      break
-    case 'hueShiftStartToEnd':
-      offset = (typeof p.start === 'number' && typeof p.end === 'number')
-        ? p.start + t * (p.end - p.start)
-        : 0
-      break
-    case 'hueShiftSin': {
-      const amount = typeof p.amount === 'number' ? p.amount : 0.5
-      offset = amount * 0.5 * (1 + Math.sin(2 * Math.PI * t + legacyPhase))
-      break
-    }
-    default:
-      break
+  if (legacy) {
+    const func = legacyHueToFloatFunc(legacy, entryPhase(legacy, ringIndex))
+    if (func) offset += evalFloat(t, func)
   }
 
+  // Timed hue
   const timedH = getTimeframeEffects(timeframe).find(e => TIMED_HUE_KEYS.has(e.effectKey))
   if (timedH?.params) {
     const par = timedH.params as Record<string, unknown>
     const tShifted = ((t + entryPhase(timedH, ringIndex)) % 1 + 1) % 1
     if (par.offset_factor != null) offset += evalFloat(tShifted, par.offset_factor as FloatFunc)
   }
+  // Position hue
   const posH = getTimeframeEffects(timeframe).find(e => POSITION_HUE_KEYS.has(e.effectKey))
   if (posH?.params) {
     const par = posH.params as Record<string, unknown>
     const relPosShifted = ((relPos + entryPhase(posH, ringIndex)) % 1 + 1) % 1
     if (par.offset_factor != null) offset += evalFloat(relPosShifted, par.offset_factor as FloatFunc)
   }
+  // Snake hue
   const snakeH = getTimeframeEffects(timeframe).find(e => SNAKE_HUE_KEYS.has(e.effectKey))
   if (snakeH?.params) {
     const par = snakeH.params as Record<string, unknown>
@@ -275,25 +398,21 @@ function getHueOffset(relPos: number, t: number, timeframe: Timeframe, ringIndex
   return offset
 }
 
-/** Saturation mult from timeframe: timed (FloatFunction at t) + position (FloatFunction at relPos). Same increase/decrease as brightness. */
+/** Saturation mult from timeframe: timed + position + snake_saturation. */
 function getSaturationMult(relPos: number, t: number, timeframe: Timeframe, ringIndex: number = 0): number {
   let mult = 1
-  const apply = (current: number, inputVal: number, _isIncrease: boolean) =>
-    current * inputVal
 
   const timedS = getTimeframeEffects(timeframe).find(e => TIMED_SATURATION_KEYS.has(e.effectKey))
   if (timedS?.params) {
     const par = timedS.params as Record<string, unknown>
     const tShifted = ((t + entryPhase(timedS, ringIndex)) % 1 + 1) % 1
-    if (par.mult_factor_increase != null) mult = apply(mult, evalFloat(tShifted, par.mult_factor_increase as FloatFunc), true)
-    else if (par.mult_factor_decrease != null) mult = apply(mult, evalFloat(tShifted, par.mult_factor_decrease as FloatFunc), false)
+    mult = evalBrightnessMult(mult, tShifted, par)
   }
   const posS = getTimeframeEffects(timeframe).find(e => POSITION_SATURATION_KEYS.has(e.effectKey))
   if (posS?.params) {
     const par = posS.params as Record<string, unknown>
     const relPosShifted = ((relPos + entryPhase(posS, ringIndex)) % 1 + 1) % 1
-    if (par.mult_factor_increase != null) mult = apply(mult, evalFloat(relPosShifted, par.mult_factor_increase as FloatFunc), true)
-    else if (par.mult_factor_decrease != null) mult = apply(mult, evalFloat(relPosShifted, par.mult_factor_decrease as FloatFunc), false)
+    mult = evalBrightnessMult(mult, relPosShifted, par)
   }
   const snakeS = getTimeframeEffects(timeframe).find(e => SNAKE_SATURATION_KEYS.has(e.effectKey))
   if (snakeS?.params) {
@@ -313,8 +432,7 @@ function getSaturationMult(relPos: number, t: number, timeframe: Timeframe, ring
       snakeIndex = tailLen > 0 ? (relPos - currTail) / tailLen : 1
     }
     if (snakeIndex >= 0 && snakeIndex <= 1) {
-      if (par.mult_factor_increase != null) mult = apply(mult, evalFloat(snakeIndex, par.mult_factor_increase as FloatFunc), true)
-      else if (par.mult_factor_decrease != null) mult = apply(mult, evalFloat(snakeIndex, par.mult_factor_decrease as FloatFunc), false)
+      mult = evalBrightnessMult(mult, snakeIndex, par)
     }
   }
   return mult
@@ -329,92 +447,12 @@ function getSnakeMask(
   ringIndex: number = 0
 ): number {
   const entry = getTimeframeEffects(timeframe).find(e => MOTION_KEYS.has(e.effectKey))
-  const name = entry?.effectKey
-  const p = entry?.params ?? {}
-  const perRingPhase = entryPhase(entry, ringIndex)
-
-  const tailLength = (): number => {
-    if (name === 'snake' || name === 'snakeHeadSin' || name === 'snakeSlowFast' || name === 'snakeHeadSteps')
-      return typeof p.tailLength === 'number' ? p.tailLength : 0.5
-    if (name === 'snakeHeadMove') return typeof p.tail === 'number' ? p.tail : 0.5
-    return 0.5
-  }
-
-  let head: number
-  const cyclic = name === 'snake' || name === 'staticSnake' || name === 'snakeHeadSin' || name === 'snakeSlowFast' || name === 'snakeTailShrinkGrow' || name === 'snakeHeadSteps'
-    ? (p.cyclic === true)
-    : false
-
-  switch (name) {
-    case 'snakeHeadMove':
-      head = (typeof p.start === 'number' && typeof p.end === 'number')
-        ? p.start + t * (p.end - p.start)
-        : t
-      break
-    case 'staticSnake':
-      head = (typeof p.start === 'number' && typeof p.end === 'number')
-        ? (p.start + perRingPhase + t) % 1
-        : perRingPhase + t
-      break
-    case 'snake':
-      head = p.reverse ? perRingPhase + 1 - t : perRingPhase + t
-      break
-    case 'snakeHeadSin':
-      head = 0.1 + 0.9 * 0.5 * (1 + Math.sin(2 * Math.PI * t + perRingPhase))
-      break
-    case 'snakeFillGrow': {
-      const reverse = p.reverse === true
-      if (reverse) {
-        if (t < 0.5) head = 1
-        else head = (t - 0.5) * 2
-      } else {
-        if (t < 0.5) head = t * 2
-        else head = 1
-      }
-      break
-    }
-    case 'snakeInOut':
-      head = 0.5 * (1 + Math.sin(2 * Math.PI * t))
-      break
-    case 'snakeSlowFast': {
-      const sinPart = 0.5 * (1 + Math.sin(2 * Math.PI * t))
-      head = (sinPart + t) / 2
-      break
-    }
-    case 'snakeTailShrinkGrow': {
-      const h = 0.5 * (1 + Math.sin(2 * Math.PI * t))
-      const tail = t < 0.5 ? 0.5 + t : 1.5 - t
-      head = h
-      const dist = cyclic ? (relPos - head + 2) % 1 : relPos - head
-      const tailNorm = Math.max(0, 1 - Math.abs(dist) / Math.max(0.01, tail))
-      return Math.min(1, Math.max(0, tailNorm))
-    }
-    case 'snakeHeadSteps': {
-      const steps = typeof p.steps === 'number' ? Math.max(1, p.steps) : 4
-      head = Math.floor(t * steps) / steps
-      break
-    }
-    default:
-      return 1
-  }
-
-  const tail = tailLength()
-  if (cyclic) {
-    // backward distance from head to relPos along ring
-    let d = (head - relPos + 1) % 1
-    if (d < 0) d += 1
-    if (d > 1) d -= 1
-    const inTail = d <= tail
-    if (inTail) return 1
-    if (tail < 1e-6) return 0
-    const dist = Math.min(d, (relPos - head + 1) % 1)
-    return Math.max(0, 1 - (dist - tail) / 0.08)
-  } else {
-    if (relPos <= head && relPos >= head - tail) return 1
-    if (relPos > head) return 0
-    const dist = head - tail - relPos
-    return dist <= 0 ? 1 : Math.max(0, 1 - dist / 0.08)
-  }
+  if (!entry) return 1
+  const params = legacyMotionToSnakeParams(entry, entryPhase(entry, ringIndex))
+  if (!params) return 1
+  const head = evalFloat(t, params.head)
+  const tail = evalFloat(t, params.tailLength)
+  return computeSnakeMask(relPos, head, tail, params.cyclic)
 }
 
 /** Whether the timeframe has any motion (snake) effect. */

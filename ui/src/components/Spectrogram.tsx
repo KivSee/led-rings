@@ -123,9 +123,20 @@ export default function Spectrogram({
     if (!audio || !canvasRef.current) return true
     if (audioContextRef.current != null) return true
     try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
-      const source = ctx.createMediaElementSource(audio)
+      // Reuse AudioContext & MediaElementSourceNode cached on the element so that
+      // unmounting / remounting the Spectrogram doesn't permanently disconnect audio
+      // output (createMediaElementSource can only be called once per element).
+      const anyAudio = audio as any
+      let ctx: AudioContext = anyAudio.__audioCtx
+      let source: MediaElementAudioSourceNode = anyAudio.__audioSrc
+      if (!ctx || ctx.state === 'closed') {
+        ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+        source = ctx.createMediaElementSource(audio)
+        anyAudio.__audioCtx = ctx
+        anyAudio.__audioSrc = source
+      }
       const analyser = ctx.createAnalyser()
+      source.disconnect()
       source.connect(analyser)
       analyser.connect(ctx.destination)
       analyser.fftSize = 2048
@@ -245,21 +256,31 @@ export default function Spectrogram({
   // Playback routing (audio -> analyser -> destination)
   useEffect(() => {
     if (!hasAudio) {
-      analyserRef.current = null
-      sourceRef.current = null
-      if (audioContextRef.current?.state !== 'closed') {
-        audioContextRef.current?.close().catch(() => {})
+      if (analyserRef.current) {
+        analyserRef.current.disconnect()
+        analyserRef.current = null
       }
+      // Keep AudioContext & source alive on the audio element so audio output
+      // is not permanently disconnected when the Spectrogram unmounts.
+      if (sourceRef.current) {
+        sourceRef.current.disconnect()
+        sourceRef.current.connect(audioContextRef.current!.destination)
+      }
+      sourceRef.current = null
       audioContextRef.current = null
       return
     }
     setupPlayback()
     return () => {
-      analyserRef.current = null
-      sourceRef.current = null
-      if (audioContextRef.current?.state !== 'closed') {
-        audioContextRef.current?.close().catch(() => {})
+      if (analyserRef.current) {
+        analyserRef.current.disconnect()
+        analyserRef.current = null
       }
+      if (sourceRef.current) {
+        sourceRef.current.disconnect()
+        sourceRef.current.connect(audioContextRef.current!.destination)
+      }
+      sourceRef.current = null
       audioContextRef.current = null
     }
   }, [hasAudio, setupPlayback])

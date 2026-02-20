@@ -612,6 +612,7 @@ function App() {
 
   useEffect(() => {
     if (song.animationType !== 'song') setEffectiveAudioSrc('')
+    else setEffectiveAudioSrc(audioBlobUrlRef.current || song.audioFilePath?.trim() || '')
   }, [song.animationType])
 
   // Keep audio element src in sync with song (blob URL from Browse, or path/URL from field)
@@ -620,10 +621,6 @@ function App() {
       if (audioRef.current) {
         audioRef.current.pause()
         audioRef.current.src = ''
-      }
-      if (audioBlobUrlRef.current) {
-        URL.revokeObjectURL(audioBlobUrlRef.current)
-        audioBlobUrlRef.current = null
       }
       return
     }

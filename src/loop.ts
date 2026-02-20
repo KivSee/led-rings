@@ -3,6 +3,7 @@ import { sendSequence } from "./services/sequence";
 import { startSong, trigger } from "./services/trigger";
 import { Animation } from "./animation/animation";
 import { beats, cycle, cycleBeats } from "./time/time";
+import { phase } from "./phase/phase";
 import { constColor, noColor } from "./effects/coloring";
 import { addEffect } from "./effects/effect";
 import {
@@ -48,16 +49,18 @@ import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "./effects/hue";
 const loop = async () => {
   const anim = new Animation("loop", 116, 245.00, 0);
   anim.sync(() => {
-    beats(0, 20, () => {
-      elements(all, () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.6034, sat: 0.7602, val: 0.9647 })
-          fadeIn()
+    beats(0, 32, () => {
+      cycle(8.01, () => {
+        elements(all, () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.6034, sat: 0.7602, val: 0.9647 })
+            snakeHeadSteps({ steps: 12, tailLength: 1 })
+          });
         });
       });
     })
 
-    beats(20, 40, () => {
+    beats(32, 52, () => {
       cycle(4, () => {
         elements(all, () => {
           segment(segment_arc, () => {
@@ -68,7 +71,7 @@ const loop = async () => {
       });
     })
 
-    beats(40, 64, () => {
+    beats(52, 76, () => {
       elements(all, () => {
         segment(segment_centric, () => {
           constColor({ hue: 0.1047, sat: 0.9551, val: 0.9608 })

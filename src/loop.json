@@ -4,7 +4,7 @@
     "lengthSeconds": 245,
     "bpm": 116,
     "startOffsetMs": 0,
-    "runStartTimeSeconds": 40,
+    "runStartTimeSeconds": 0,
     "animationType": "song",
     "audioFilePath": "loop.wav"
   },
@@ -12,7 +12,7 @@
     {
       "id": "1",
       "startTime": 0,
-      "endTime": 20,
+      "endTime": 32,
       "label": "Introduction",
       "color": "#3b82f6",
       "rings": [
@@ -30,12 +30,29 @@
         12
       ],
       "mapping": "all",
-      "brightnessEffect": "fadeIn"
+      "brightnessEffect": "fadeIn",
+      "effects": [
+        {
+          "id": "legacy-fadeIn-0",
+          "effectKey": "snakeHeadSteps",
+          "params": {
+            "steps": 12,
+            "tailLength": 1
+          },
+          "phase": 0
+        }
+      ],
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 8.01
+        }
+      ]
     },
     {
       "id": "2",
-      "startTime": 20,
-      "endTime": 40,
+      "startTime": 32,
+      "endTime": 52,
       "label": "Main Content",
       "color": "#10b981",
       "rings": [
@@ -66,8 +83,8 @@
     },
     {
       "id": "3",
-      "startTime": 40,
-      "endTime": 64,
+      "startTime": 52,
+      "endTime": 76,
       "label": "Conclusion",
       "color": "#f59e0b",
       "rings": [

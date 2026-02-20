@@ -1,8 +1,4 @@
-import { getLineAndCharacterOfPosition } from "typescript";
-import { phase } from "../phase/phase";
 import { addEffect } from "./effect";
-import { reverse } from "dns";
-import { cycle } from "../time/time";
 
 export const snakeHeadMove = ({
   start,
@@ -22,8 +18,8 @@ export const snakeHeadMove = ({
             end: end,
           },
         },
-        tailLength: {
-          constValue: {
+        tail_length: {
+          const_value: {
             value: tail,
           },
         },
@@ -37,12 +33,12 @@ export const staticSnake = ({ start, end }: { start: number; end: number }) => {
     return {
       snake: {
         head: {
-          constValue: {
+          const_value: {
             value: start + phase,
           },
         },
-        tailLength: {
-          constValue: {
+        tail_length: {
+          const_value: {
             value: start - end,
           },
         },
@@ -70,8 +66,8 @@ export const snake = ({
             end: reverse ? phase : phase + 1,
           },
         },
-        tailLength: {
-          constValue: {
+        tail_length: {
+          const_value: {
             value: tailLength ?? 0.5,
           },
         },
@@ -99,8 +95,8 @@ export const snakeHeadSin = ({
             repeats: 1.0,
           },
         },
-        tailLength: {
-          constValue: {
+        tail_length: {
+          const_value: {
             value: tailLength,
           },
         },
@@ -130,7 +126,7 @@ export const snakeFillGrow = (reverse?: boolean) => {
           f2: reverse ? f1 : f2,
         },
       },
-      tailLength: {
+      tail_length: {
         half: {
           f1: {
             const_value: {
@@ -162,8 +158,8 @@ export const snakeInOut = (opt?: { start: number; end: number }) => {
             repeats: 1.0,
           },
         },
-        tailLength: {
-          constValue: {
+        tail_length: {
+          const_value: {
             value: 0.5,
           },
         },
@@ -198,8 +194,8 @@ export const snakeSlowFast = ({ tailLength }: {
             amount2: 1.0,
           },
         },
-        tailLength: {
-          constValue: {
+        tail_length: {
+          const_value: {
             value: tailLength ?? 0.5,
           },
         },
@@ -221,7 +217,7 @@ export const snakeTailShrinkGrow = () => {
             repeats: 1.0,
           },
         },
-        tailLength: {
+        tail_length: {
           half: {
             f1: {
               linear: {
@@ -257,8 +253,8 @@ export const snakeHeadSteps = ({ steps, tailLength }: {
             first_step_value: phase,
           },
         },
-        tailLength: {
-          constValue: {
+        tail_length: {
+          const_value: {
             value: tailLength ?? 0.5,
           },
         },
