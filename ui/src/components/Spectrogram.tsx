@@ -4,18 +4,81 @@ import './Spectrogram.css'
 
 const FFT_SIZE = 2048
 const HOP_SIZE = 512
-const SPECTROGRAM_HEIGHT = 128
+const SPECTROGRAM_HEIGHT = 256
+const DB_FLOOR = -80 // dB floor for magnitude scaling (Audacity default)
+const DB_GAIN = 20 // dB gain boost (Audacity default spectrogram gain)
+const SAMPLE_RATE = 44100 // assumed sample rate for frequency mapping
 
-/** Map 0..255 magnitude to RGB for a heat-style gradient (dark blue -> cyan -> green -> yellow -> red) */
+/**
+ * Piecewise-linear frequency mapping: allocates display space unevenly across
+ * frequency bands so the musically-important mid range gets the most room.
+ *   0–500 Hz   →  5% of height
+ *   500–10 kHz → 80% of height
+ *   10–22 kHz  → 15% of height
+ * Returns a fraction 0..1 (0 = bottom / 0 Hz, 1 = top / Nyquist).
+ */
+const FREQ_BANDS: { freqFrac: number; displayFrac: number }[] = [
+  { freqFrac: 0, displayFrac: 0 },           // 0 Hz  → bottom
+  { freqFrac: 500 / 22050, displayFrac: 0.05 },  // 500 Hz  → 5%
+  { freqFrac: 10000 / 22050, displayFrac: 0.85 }, // 10 kHz → 85%
+  { freqFrac: 1, displayFrac: 1 },           // Nyquist → top
+]
+function freqFracToDisplay(freqFrac: number): number {
+  for (let i = 0; i < FREQ_BANDS.length - 1; i++) {
+    const a = FREQ_BANDS[i], b = FREQ_BANDS[i + 1]
+    if (freqFrac <= b.freqFrac) {
+      const t = (freqFrac - a.freqFrac) / (b.freqFrac - a.freqFrac)
+      return a.displayFrac + t * (b.displayFrac - a.displayFrac)
+    }
+  }
+  return 1
+}
+function displayFracToFreqFrac(displayFrac: number): number {
+  for (let i = 0; i < FREQ_BANDS.length - 1; i++) {
+    const a = FREQ_BANDS[i], b = FREQ_BANDS[i + 1]
+    if (displayFrac <= b.displayFrac) {
+      const t = (displayFrac - a.displayFrac) / (b.displayFrac - a.displayFrac)
+      return a.freqFrac + t * (b.freqFrac - a.freqFrac)
+    }
+  }
+  return 1
+}
+
+/**
+ * Audacity-style spectrogram color gradient.
+ * Maps 0..255 magnitude → RGB: black → dark blue → purple → red → orange → yellow → white
+ */
 function magnitudeToRgb(n: number): { r: number; g: number; b: number } {
-  const t = Math.min(1, n / 255)
-  const r = Math.round(Math.min(255, 255 * (t < 0.5 ? 0 : (t - 0.5) * 2)))
-  const g = Math.round(255 * (t < 0.25 ? t * 4 : t < 0.75 ? 1 : (1 - t) * 4))
-  const b = Math.round(255 * (t < 0.5 ? 0.25 + t * 1.5 : 1 - (t - 0.5) * 1.5))
-  return { r: r & 0xff, g: g & 0xff, b: b & 0xff }
+  const t = Math.min(1, Math.max(0, n / 255))
+  // 6-stop gradient matching Audacity's spectrogram palette
+  const stops = [
+    { p: 0.0, r: 0, g: 0, b: 0 },       // black (silence)
+    { p: 0.16, r: 35, g: 10, b: 90 },     // dark indigo
+    { p: 0.33, r: 100, g: 10, b: 120 },   // purple
+    { p: 0.5, r: 180, g: 20, b: 30 },     // red
+    { p: 0.7, r: 230, g: 140, b: 20 },    // orange
+    { p: 0.85, r: 255, g: 230, b: 60 },   // yellow
+    { p: 1.0, r: 255, g: 255, b: 255 },   // white (loudest)
+  ]
+  let i = 0
+  while (i < stops.length - 2 && stops[i + 1].p < t) i++
+  const a = stops[i], b_ = stops[i + 1]
+  const f = (t - a.p) / (b_.p - a.p)
+  return {
+    r: Math.round(a.r + (b_.r - a.r) * f),
+    g: Math.round(a.g + (b_.g - a.g) * f),
+    b: Math.round(a.b + (b_.b - a.b) * f),
+  }
 }
 
 const AXIS_HEIGHT = 36
+const Y_AXIS_WIDTH = 48
+
+/** Frequency ticks for the Y-axis (log-scale). */
+const FREQ_TICKS = [50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000]
+function freqLabel(hz: number): string {
+  return hz >= 1000 ? `${hz / 1000}k` : String(hz)
+}
 const ZOOM_MIN = 0.25
 const ZOOM_MAX = 4
 const ZOOM_STEP = 1.25
@@ -86,6 +149,7 @@ export default function Spectrogram({
   const spectrogramImageRef = useRef<ImageData | null>(null)
   const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const decodedDurationRef = useRef(0)
+  const decodedSampleRateRef = useRef(SAMPLE_RATE)
   const isProgrammaticScrollRef = useRef(false)
   const [scrollViewWidth, setScrollViewWidth] = useState(0)
   const effectiveDuration = decodedDurationRef.current || durationSeconds || 1
@@ -98,9 +162,27 @@ export default function Spectrogram({
   const baseCenter = (baseStart + baseEnd) / 2
   const baseSpan = Math.max(0.001, baseEnd - baseStart)
   const [zoomLevel, setZoomLevel] = useState(1)
+  const [zoomPanOffset, setZoomPanOffset] = useState(0)
+  const zoomLevelRef = useRef(zoomLevel)
+  zoomLevelRef.current = zoomLevel
+  const zoomPanOffsetRef = useRef(zoomPanOffset)
+  zoomPanOffsetRef.current = zoomPanOffset
+  const lastMouseFracRef = useRef(0.5)
+  const isHoveredRef = useRef(false)
+
+  // Reset pan offset when the timeline's visible range changes
+  const prevBaseCenterRef = useRef(baseCenter)
+  const prevBaseSpanRef = useRef(baseSpan)
+  if (prevBaseCenterRef.current !== baseCenter || prevBaseSpanRef.current !== baseSpan) {
+    prevBaseCenterRef.current = baseCenter
+    prevBaseSpanRef.current = baseSpan
+    if (zoomPanOffset !== 0) setZoomPanOffset(0)
+  }
+
+  const effectiveCenter = baseCenter + zoomPanOffset
   const zoomedSpan = baseSpan / zoomLevel
-  const viewStart = Math.max(0, baseCenter - zoomedSpan / 2)
-  const viewEnd = Math.min(effectiveDuration, baseCenter + zoomedSpan / 2)
+  const viewStart = Math.max(0, effectiveCenter - zoomedSpan / 2)
+  const viewEnd = Math.min(effectiveDuration, effectiveCenter + zoomedSpan / 2)
   const viewDuration = Math.max(0.001, viewEnd - viewStart)
   const scrollableDuration = Math.max(0, effectiveDuration - viewDuration)
   const contentWidthPx = scrollViewWidth > 0 && viewDuration > 0
@@ -175,10 +257,23 @@ export default function Spectrogram({
           for (let i = 0; i < length; i++) mono[i] = (channel[i] + ch1[i]) / 2
         }
 
+        const sampleRate = buffer.sampleRate || SAMPLE_RATE
         const numColumns = Math.max(1, Math.floor((length - FFT_SIZE) / HOP_SIZE) + 1)
         const cols: Float32Array[] = []
         const windowBuf = new Float32Array(FFT_SIZE)
         const numBins = FFT_SIZE / 2 + 1
+
+        // Piecewise-linear frequency mapping (5% low, 80% mid, 15% high)
+        const rowBinStart = new Uint32Array(SPECTROGRAM_HEIGHT)
+        const rowBinEnd = new Uint32Array(SPECTROGRAM_HEIGHT)
+        for (let row = 0; row < SPECTROGRAM_HEIGHT; row++) {
+          const dispLo = row / SPECTROGRAM_HEIGHT
+          const dispHi = (row + 1) / SPECTROGRAM_HEIGHT
+          const freqFracLo = displayFracToFreqFrac(dispLo)
+          const freqFracHi = displayFracToFreqFrac(dispHi)
+          rowBinStart[row] = Math.max(0, Math.floor(freqFracLo * (numBins - 1)))
+          rowBinEnd[row] = Math.min(numBins, Math.ceil(freqFracHi * (numBins - 1)) + 1)
+        }
 
         for (let c = 0; c < numColumns; c++) {
           const start = c * HOP_SIZE
@@ -187,36 +282,28 @@ export default function Spectrogram({
           const mag = realFftMagnitude(windowBuf, FFT_SIZE)
           const col = new Float32Array(SPECTROGRAM_HEIGHT)
           for (let row = 0; row < SPECTROGRAM_HEIGHT; row++) {
-            const binStart = Math.floor((row / SPECTROGRAM_HEIGHT) * numBins)
-            const binEnd = Math.floor(((row + 1) / SPECTROGRAM_HEIGHT) * numBins)
+            const bStart = rowBinStart[row]
+            const bEnd = rowBinEnd[row]
             let sum = 0
             let count = 0
-            for (let b = binStart; b < binEnd && b < numBins; b++) {
+            for (let b = bStart; b < bEnd && b < numBins; b++) {
               sum += mag[b]
               count++
             }
             const v = count > 0 ? sum / count : 0
-            col[SPECTROGRAM_HEIGHT - 1 - row] = Math.log1p(v)
+            // Normalize to 0..1 (dBFS reference), convert to dB, apply gain, clamp
+            const normMag = v / (FFT_SIZE / 2)
+            const dB = normMag > 0 ? 20 * Math.log10(normMag) + DB_GAIN : DB_FLOOR
+            col[SPECTROGRAM_HEIGHT - 1 - row] = Math.max(DB_FLOOR, Math.min(0, dB))
           }
           cols.push(col)
         }
 
-        let minVal = Infinity
-        let maxVal = -Infinity
-        for (const col of cols) {
-          for (let row = 0; row < col.length; row++) {
-            const v = col[row]
-            if (Number.isFinite(v)) {
-              if (v < minVal) minVal = v
-              if (v > maxVal) maxVal = v
-            }
-          }
-        }
-        if (minVal === Infinity) minVal = 0
-        if (maxVal === -Infinity) maxVal = minVal + 1
-        const range = Math.max(1e-6, maxVal - minVal)
+        // Fixed dBFS range: DB_FLOOR → 0 (black), 0 dBFS → 255 (white)
+        const range = -DB_FLOOR // 80 dB
 
         decodedDurationRef.current = buffer.duration
+        decodedSampleRateRef.current = sampleRate
         const w = cols.length
         const h = SPECTROGRAM_HEIGHT
         const imageData = new ImageData(w, h)
@@ -226,7 +313,7 @@ export default function Spectrogram({
             const col = cols[px]
             const raw = col ? col[py] : 0
             const norm = Number.isFinite(raw)
-              ? Math.round(((raw - minVal) / range) * 255)
+              ? Math.round(((raw - DB_FLOOR) / range) * 255)
               : 0
             const mag = Math.max(0, Math.min(255, norm))
             const { r, g, b } = magnitudeToRgb(mag)
@@ -323,7 +410,103 @@ export default function Spectrogram({
     if (!el || scrollableDuration <= 0 || scrollViewWidth <= 0 || !onRequestScrollToStartSeconds) return
     const startSec = (el.scrollLeft / maxScrollLeft) * scrollableDuration
     onRequestScrollToStartSeconds(Math.max(0, Math.min(effectiveDuration - viewDuration, startSec)))
-  }, [scrollableDuration, maxScrollLeft, scrollViewWidth, effectiveDuration, viewDuration, onRequestScrollToStartSeconds])
+  }, [scrollableDuration, maxScrollLeft, scrollViewWidth, effectiveDuration, onRequestScrollToStartSeconds, viewDuration])
+
+  // Mouse-wheel on spectrogram: plain scroll = pan, Ctrl+scroll = zoom to cursor
+  const handleWheelRef = useRef<(e: WheelEvent) => void>(() => {})
+  handleWheelRef.current = (e: WheelEvent) => {
+    if (effectiveDuration <= 0 || viewDuration <= 0) return
+    e.preventDefault()
+    if (e.ctrlKey || e.metaKey) {
+      // Ctrl+scroll: zoom towards mouse cursor
+      const canvas = canvasRef.current
+      let frac = 0.5
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect()
+        const x = e.clientX - rect.left - Y_AXIS_WIDTH
+        const graphW = rect.width - Y_AXIS_WIDTH
+        if (graphW > 0) frac = Math.max(0, Math.min(1, x / graphW))
+      }
+      zoomAt(e.deltaY < 0 ? 'in' : 'out', frac)
+    } else {
+      if (!onRequestScrollToStartSeconds) return
+      const scrollFraction = 0.15
+      const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX
+      const deltaSec = (delta > 0 ? 1 : -1) * viewDuration * scrollFraction
+      const newStart = Math.max(0, Math.min(effectiveDuration - viewDuration, viewStart + deltaSec))
+      onRequestScrollToStartSeconds(newStart)
+    }
+  }
+  useEffect(() => {
+    const el = wrapperRef.current
+    if (!el) return
+    const handler = (e: WheelEvent) => handleWheelRef.current(e)
+    el.addEventListener('wheel', handler, { passive: false })
+    return () => el.removeEventListener('wheel', handler)
+  }, [hasAudio])
+
+  // Zoom towards a specific horizontal fraction (0 = left edge, 1 = right edge of graph)
+  const zoomAt = useCallback((direction: 'in' | 'out', anchorFrac?: number) => {
+    const frac = anchorFrac ?? 0.5
+    const prevZoom = zoomLevelRef.current
+    const prevOffset = zoomPanOffsetRef.current
+
+    const newZoom = direction === 'in'
+      ? Math.min(ZOOM_MAX, prevZoom * ZOOM_STEP)
+      : Math.max(ZOOM_MIN, prevZoom / ZOOM_STEP)
+    if (newZoom === prevZoom) return
+
+    const prevSpan = baseSpan / prevZoom
+    const prevCenter = baseCenter + prevOffset
+    const prevViewStart = Math.max(0, prevCenter - prevSpan / 2)
+    const cursorTime = prevViewStart + frac * prevSpan
+
+    const newSpan = baseSpan / newZoom
+    const newViewStart = cursorTime - frac * newSpan
+    const newCenter = newViewStart + newSpan / 2
+    const newOffset = newCenter - baseCenter
+
+    setZoomLevel(newZoom)
+    setZoomPanOffset(newOffset)
+  }, [baseSpan, baseCenter])
+
+  // Track mouse position over the spectrogram for cursor-aware zoom
+  const handleCanvasMouseMove = useCallback((e: React.MouseEvent) => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const rect = canvas.getBoundingClientRect()
+    const x = e.clientX - rect.left - Y_AXIS_WIDTH
+    const graphW = rect.width - Y_AXIS_WIDTH
+    if (graphW > 0) lastMouseFracRef.current = Math.max(0, Math.min(1, x / graphW))
+  }, [])
+
+  // Keyboard zoom: Ctrl+Plus / Ctrl+Minus (only when hovering the spectrogram)
+  useEffect(() => {
+    const el = wrapperRef.current
+    if (!el) return
+    const onEnter = () => { isHoveredRef.current = true }
+    const onLeave = () => { isHoveredRef.current = false }
+    el.addEventListener('mouseenter', onEnter)
+    el.addEventListener('mouseleave', onLeave)
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!isHoveredRef.current) return
+      if (!e.ctrlKey && !e.metaKey) return
+      if (e.key === '=' || e.key === '+') {
+        e.preventDefault()
+        zoomAt('in', lastMouseFracRef.current)
+      } else if (e.key === '-') {
+        e.preventDefault()
+        zoomAt('out', lastMouseFracRef.current)
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      el.removeEventListener('mouseenter', onEnter)
+      el.removeEventListener('mouseleave', onLeave)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [hasAudio, zoomAt])
 
   // Resize canvas to wrapper and repaint (wrapper fills resizable parent height)
   useEffect(() => {
@@ -343,7 +526,7 @@ export default function Spectrogram({
     return () => ro.disconnect()
   }, [hasAudio])
 
-  // Paint spectrogram + playhead + X-axis
+  // Paint spectrogram + playhead + X-axis + Y-axis
   const paint = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -351,6 +534,8 @@ export default function Spectrogram({
     if (!ctx) return
     const width = canvas.width
     const height = canvas.height
+    const graphLeft = Y_AXIS_WIDTH
+    const graphWidth = Math.max(0, width - Y_AXIS_WIDTH)
     const graphHeight = Math.max(0, height - AXIS_HEIGHT)
 
     const img = spectrogramImageRef.current
@@ -360,11 +545,11 @@ export default function Spectrogram({
       if (loading) {
         ctx.fillStyle = 'rgba(255,255,255,0.6)'
         ctx.font = '14px sans-serif'
-        ctx.fillText('Loading spectrogram…', 12, height / 2)
+        ctx.fillText('Loading spectrogram…', graphLeft + 12, height / 2)
       } else if (error) {
         ctx.fillStyle = 'rgba(255,120,120,0.9)'
         ctx.font = '14px sans-serif'
-        ctx.fillText(error, 12, height / 2)
+        ctx.fillText(error, graphLeft + 12, height / 2)
       }
       return
     }
@@ -381,23 +566,27 @@ export default function Spectrogram({
     }
     offscreen.getContext('2d')?.putImageData(img, 0, 0)
 
+    // Clear Y-axis area
+    ctx.fillStyle = 'rgb(18, 22, 32)'
+    ctx.fillRect(0, 0, graphLeft, height)
+
     if (isZoomed) {
       const srcX = (viewStart / duration) * img.width
       const srcW = (viewDuration / duration) * img.width
       ctx.imageSmoothingEnabled = true
       ctx.imageSmoothingQuality = 'high'
-      ctx.drawImage(offscreen, srcX, 0, srcW, img.height, 0, 0, width, graphHeight)
+      ctx.drawImage(offscreen, srcX, 0, srcW, img.height, graphLeft, 0, graphWidth, graphHeight)
     } else {
       ctx.imageSmoothingEnabled = true
       ctx.imageSmoothingQuality = 'high'
-      ctx.drawImage(offscreen, 0, 0, img.width, img.height, 0, 0, width, graphHeight)
+      ctx.drawImage(offscreen, 0, 0, img.width, img.height, graphLeft, 0, graphWidth, graphHeight)
     }
 
     let playheadX =
       viewDuration > 0
-        ? ((currentTimeSeconds - viewStart) / viewDuration) * width
-        : 0
-    playheadX = Math.max(0, Math.min(width, playheadX))
+        ? graphLeft + ((currentTimeSeconds - viewStart) / viewDuration) * graphWidth
+        : graphLeft
+    playheadX = Math.max(graphLeft, Math.min(width, playheadX))
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)'
     ctx.lineWidth = 2
     ctx.beginPath()
@@ -405,9 +594,29 @@ export default function Spectrogram({
     ctx.lineTo(playheadX, graphHeight)
     ctx.stroke()
 
-    // Clear X-axis strip so previous labels don’t linger when visible range changes
+    // Y-axis: frequency labels (piecewise-linear scale)
+    const maxFreq = decodedSampleRateRef.current / 2
+    ctx.textAlign = 'right'
+    ctx.textBaseline = 'middle'
+    ctx.font = '10px sans-serif'
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'
+    for (const freq of FREQ_TICKS) {
+      if (freq <= 0 || freq > maxFreq) continue
+      const frac = freqFracToDisplay(freq / maxFreq) // mapped display fraction
+      const y = graphHeight * (1 - frac)
+      if (y < 4 || y > graphHeight - 4) continue
+      ctx.fillText(freqLabel(freq), graphLeft - 6, y)
+      ctx.beginPath()
+      ctx.moveTo(graphLeft - 3, y)
+      ctx.lineTo(graphLeft, y)
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'
+      ctx.lineWidth = 1
+      ctx.stroke()
+    }
+
+    // Clear X-axis strip so previous labels don't linger when visible range changes
     ctx.fillStyle = 'rgb(18, 22, 32)'
-    ctx.fillRect(0, graphHeight, width, height - graphHeight)
+    ctx.fillRect(graphLeft, graphHeight, graphWidth, height - graphHeight)
 
     // X-axis: beats (primary, whole numbers) and seconds (secondary, may be fractional)
     ctx.textAlign = 'center'
@@ -423,8 +632,8 @@ export default function Spectrogram({
       ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
       ctx.font = '12px sans-serif'
       for (let beat = firstTickBeat; beat <= viewEndBeat; beat += stepBeats) {
-        const x = ((beat - viewStartBeat) / viewSpanBeats) * width
-        if (x < 0 || x > width) continue
+        const x = graphLeft + ((beat - viewStartBeat) / viewSpanBeats) * graphWidth
+        if (x < graphLeft || x > width) continue
         ctx.beginPath()
         ctx.moveTo(x, graphHeight)
         ctx.lineTo(x, height)
@@ -446,8 +655,8 @@ export default function Spectrogram({
       ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
       ctx.font = '12px sans-serif'
       for (let t = firstTick; t <= viewEnd; t += step) {
-        const x = ((t - viewStart) / viewDuration) * width
-        if (x < 0 || x > width) continue
+        const x = graphLeft + ((t - viewStart) / viewDuration) * graphWidth
+        if (x < graphLeft || x > width) continue
         ctx.beginPath()
         ctx.moveTo(x, graphHeight)
         ctx.lineTo(x, height)
@@ -492,7 +701,12 @@ export default function Spectrogram({
           <button
             type="button"
             className="spectrogram-zoom-btn"
-            onClick={() => setZoomLevel((z) => Math.max(ZOOM_MIN, z / ZOOM_STEP))}
+            onClick={() => {
+              const playheadFrac = viewDuration > 0
+                ? Math.max(0, Math.min(1, (currentTimeSeconds - viewStart) / viewDuration))
+                : 0.5
+              zoomAt('out', playheadFrac)
+            }}
             title="Zoom out"
             aria-label="Zoom out"
           >
@@ -501,7 +715,12 @@ export default function Spectrogram({
           <button
             type="button"
             className="spectrogram-zoom-btn"
-            onClick={() => setZoomLevel((z) => Math.min(ZOOM_MAX, z * ZOOM_STEP))}
+            onClick={() => {
+              const playheadFrac = viewDuration > 0
+                ? Math.max(0, Math.min(1, (currentTimeSeconds - viewStart) / viewDuration))
+                : 0.5
+              zoomAt('in', playheadFrac)
+            }}
             title="Zoom in"
             aria-label="Zoom in"
           >
@@ -516,15 +735,16 @@ export default function Spectrogram({
           width={800}
           height={180}
           title="Full-song spectrogram with playhead; zooms with timeline. When stopped, click to move marker and Run from."
+          onMouseMove={handleCanvasMouseMove}
           onClick={(e) => {
             if (isPlaying || !onSeekToSeconds) return
             const canvas = canvasRef.current
             if (!canvas) return
             const rect = canvas.getBoundingClientRect()
-            const x = e.clientX - rect.left
-            const width = rect.width
-            if (width <= 0) return
-            const seconds = viewStart + (x / width) * viewDuration
+            const x = e.clientX - rect.left - Y_AXIS_WIDTH
+            const graphW = rect.width - Y_AXIS_WIDTH
+            if (graphW <= 0 || x < 0) return
+            const seconds = viewStart + (x / graphW) * viewDuration
             onSeekToSeconds(Math.max(0, Math.min(effectiveDuration, seconds)))
           }}
         />
