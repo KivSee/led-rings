@@ -492,6 +492,36 @@ export function getPixelColor(
   return { h, s, v }
 }
 
+/**
+ * Compose effects from multiple overlapping timeframes for a single pixel.
+ * Each timeframe contributes independently: brightness & snake mask multiply,
+ * hue offsets add, saturation multiplies.
+ * Each entry includes its own relPos resolved from that timeframe's mapping segment.
+ */
+export function getPixelColorMulti(
+  timeframesWithT: Array<{ timeframe: Timeframe; t: number; relPos: number }>,
+  ringIndex: number = 0
+): HSV {
+  if (timeframesWithT.length === 0) return { h: 0, s: 0, v: 0 }
+
+  // Base color from first timeframe
+  const first = timeframesWithT[0]
+  const colorPhaseIntensity = first.timeframe.phase ?? 0
+  const colorPerRingPhase = colorPhaseIntensity > 0 ? ringIndex / 12 * colorPhaseIntensity : 0
+  let { h, s, v } = getBaseColor(first.relPos, first.timeframe, colorPerRingPhase)
+
+  for (const { timeframe, t, relPos } of timeframesWithT) {
+    h = (h + getHueOffset(relPos, t, timeframe, ringIndex)) % 1
+    if (h < 0) h += 1
+    s *= getSaturationMult(relPos, t, timeframe, ringIndex)
+    v *= getBrightnessMult(relPos, t, timeframe, ringIndex)
+    if (hasMotionEffect(timeframe)) {
+      v *= getSnakeMask(relPos, t, 12, timeframe, ringIndex)
+    }
+  }
+  return { h, s, v }
+}
+
 /** Convert HSV (0–1) to rgb() string. */
 export function hsvToRgbString(h: number, s: number, v: number): string {
   let r: number, g: number, b: number

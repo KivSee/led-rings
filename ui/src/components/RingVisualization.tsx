@@ -1,6 +1,6 @@
 import React from 'react'
 import segmentsData from '../segments.json'
-import { getPixelColor, hsvToRgbString } from '../effectPreview'
+import { getPixelColor, getPixelColorMulti, hsvToRgbString } from '../effectPreview'
 import type { Timeframe } from '../App'
 import { getTimeframeEffects } from '../App'
 import './RingVisualization.css'
@@ -56,12 +56,34 @@ const RingVisualization = ({
   )
   const t = singleTf && currentTime !== undefined ? computeT(singleTf, currentTime) : 0
 
-  // Build a per-ring lookup: ringNumber (1-12) → last matching timeframe
-  const ringToTimeframe: Map<number, Timeframe> = new Map()
+  // Pre-build per-segment relPos lookup: segmentName → Map<pixelIndex, relPos>
+  // Each timeframe may use a different mapping, so effects must be evaluated
+  // with the relPos from that timeframe's own mapping segment.
+  const segmentRelPosMap = React.useMemo(() => {
+    const map = new Map<string, Map<number, number>>()
+    for (const seg of segmentsData.segments) {
+      const pixelMap = new Map<number, number>()
+      for (const p of seg.pixels) {
+        pixelMap.set(p.index, p.relPos)
+      }
+      map.set(seg.name, pixelMap)
+    }
+    return map
+  }, [])
+
+  /** Get relPos for a pixel index from a specific segment mapping. */
+  const getRelPosForMapping = React.useCallback((pixelIndex: number, mappingName: string): number | null => {
+    return segmentRelPosMap.get(mappingName)?.get(pixelIndex) ?? null
+  }, [segmentRelPosMap])
+
+  // Build a per-ring lookup: ringNumber (1-12) → all matching timeframes
+  const ringToTimeframes: Map<number, Timeframe[]> = new Map()
   if (timeframes && currentTime !== undefined) {
     for (const tf of timeframes) {
       for (const ring of tf.rings) {
-        ringToTimeframe.set(ring, tf) // last wins
+        const arr = ringToTimeframes.get(ring)
+        if (arr) arr.push(tf)
+        else ringToTimeframes.set(ring, [tf])
       }
     }
   }
@@ -167,16 +189,29 @@ const RingVisualization = ({
               if (!pixel) return null
               const pixelColor = useEffectPreview
                 ? (() => {
-                    // Multi-timeframe mode: find the timeframe for this ring
-                    const ringTf = ringToTimeframe.get(ringNumber)
-                    if (ringTf) {
-                      const ringT = computeT(ringTf, currentTime!)
-                      const { h, s, v } = getPixelColor(pixel.relPos, ringT, ringTf, ringIndex)
+                    // Multi-timeframe mode: find all timeframes for this ring
+                    const ringTfs = ringToTimeframes.get(ringNumber)
+                    if (ringTfs && ringTfs.length > 0) {
+                      // Resolve relPos from each timeframe's own mapping segment;
+                      // skip timeframes whose mapping doesn't include this pixel.
+                      const tfWithT: Array<{ timeframe: Timeframe; t: number; relPos: number }> = []
+                      for (const tf of ringTfs) {
+                        const tfMapping = tf.mapping || 'all'
+                        const rp = getRelPosForMapping(pixel.index, tfMapping)
+                        if (rp == null) continue // pixel not in this timeframe's segment
+                        tfWithT.push({ timeframe: tf, t: computeT(tf, currentTime!), relPos: rp })
+                      }
+                      if (tfWithT.length === 0) return 'rgb(0, 0, 0)'
+                      const { h, s, v } = tfWithT.length === 1
+                        ? getPixelColor(tfWithT[0].relPos, tfWithT[0].t, tfWithT[0].timeframe, ringIndex)
+                        : getPixelColorMulti(tfWithT, ringIndex)
                       return hsvToRgbString(h, s, v)
                     }
                     // Single-timeframe mode (mapping preview in TimeframePanel)
                     if (singleTf) {
-                      const { h, s, v } = getPixelColor(pixel.relPos, t, singleTf, ringIndex)
+                      const tfMapping = singleTf.mapping || 'all'
+                      const tfRelPos = getRelPosForMapping(pixel.index, tfMapping) ?? pixel.relPos
+                      const { h, s, v } = getPixelColor(tfRelPos, t, singleTf, ringIndex)
                       return hsvToRgbString(h, s, v)
                     }
                     // No matching timeframe — dark
