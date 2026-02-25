@@ -538,7 +538,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
                   top: `${topPx}px`,
                   height: `${heightPx}px`,
                   backgroundColor: timeframe.color,
-                  transform: offset !== 0 ? `translateX(${offset}px)` : undefined,
+                  left: offset !== 0 ? `${offset}px` : undefined,
                   zIndex: isFocused ? 10000 : 1 + index,
                   ...typographyVars,
                 }}

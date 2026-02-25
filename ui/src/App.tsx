@@ -341,6 +341,20 @@ function App() {
     }
   }
 
+  // Space bar toggles Run / Pause
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && !e.repeat) {
+        const tag = (e.target as HTMLElement)?.tagName
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+        e.preventDefault()
+        handlePlayPause()
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  })
+
   const handleStop = () => {
     const audio = audioRef.current
     const isSongWithAudio = song.animationType === 'song' && song.audioFilePath && audio
