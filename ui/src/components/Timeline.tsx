@@ -216,7 +216,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
   }
 
   const snapToBeat = (beat: number): number => {
-    return Math.round(beat / 4) * 4
+    return Math.round(beat)
   }
 
   const yToBeat = (y: number): number => {
@@ -354,11 +354,11 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
         const newBeat = dragCurrent
         if (resizingEdge === 'start') {
           // Ensure start doesn't go past end, maintain at least 4 beats difference
-          const newStart = Math.min(newBeat, timeframe.endTime - 4)
+          const newStart = Math.min(newBeat, timeframe.endTime - 1)
           onUpdate(resizingTimeframeId, { startTime: newStart })
         } else {
           // Ensure end doesn't go before start, maintain at least 4 beats difference
-          const newEnd = Math.max(newBeat, timeframe.startTime + 4)
+          const newEnd = Math.max(newBeat, timeframe.startTime + 1)
           onUpdate(resizingTimeframeId, { endTime: newEnd })
         }
       }
@@ -368,7 +368,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
       const endBeat = Math.max(dragStart, dragCurrent)
 
       // Only create if there's at least 4 beats difference
-      if (Math.abs(endBeat - startBeat) >= 4) {
+      if (Math.abs(endBeat - startBeat) >= 1) {
         onAdd(startBeat, endBeat)
       }
     }
@@ -404,11 +404,11 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
         if (timeframe) {
           if (resizingEdge === 'start') {
             // Ensure start doesn't go past end, maintain at least 4 beats difference
-            const newStart = Math.min(beat, timeframe.endTime - 4)
+            const newStart = Math.min(beat, timeframe.endTime - 1)
             onUpdate(resizingTimeframeId, { startTime: newStart })
           } else {
             // Ensure end doesn't go before start, maintain at least 4 beats difference
-            const newEnd = Math.max(beat, timeframe.startTime + 4)
+            const newEnd = Math.max(beat, timeframe.startTime + 1)
             onUpdate(resizingTimeframeId, { endTime: newEnd })
           }
         }
@@ -456,11 +456,11 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
           const newBeat = dragCurrent
           if (resizingEdge === 'start') {
             // Ensure start doesn't go past end, maintain at least 4 beats difference
-            const newStart = Math.min(newBeat, timeframe.endTime - 4)
+            const newStart = Math.min(newBeat, timeframe.endTime - 1)
             onUpdate(resizingTimeframeId, { startTime: newStart })
           } else {
             // Ensure end doesn't go before start, maintain at least 4 beats difference
-            const newEnd = Math.max(newBeat, timeframe.startTime + 4)
+            const newEnd = Math.max(newBeat, timeframe.startTime + 1)
             onUpdate(resizingTimeframeId, { endTime: newEnd })
           }
         }
@@ -469,7 +469,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
         const endBeat = Math.max(dragStart, dragCurrent)
 
         // Only create if there's at least 4 beats difference
-        if (Math.abs(endBeat - startBeat) >= 4) {
+        if (Math.abs(endBeat - startBeat) >= 1) {
           onAdd(startBeat, endBeat)
         }
       }
