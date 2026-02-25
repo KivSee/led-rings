@@ -35,6 +35,7 @@ export interface Timeframe {
   label: string
   color: string
   rings: number[]
+  disabled?: boolean
   mapping?: string
   phase?: number
   cycles?: TimeframeCycleEntry[]
@@ -326,13 +327,14 @@ function toIdentifier(name: string): string {
 }
 
 export function generateSequenceTs(song: Song, timeframes: Timeframe[]): string {
+  const enabledTimeframes = timeframes.filter(tf => !tf.disabled)
   const safeName = (song.name || 'sequence').trim() || 'sequence'
   const totalTimeSeconds = song.lengthSeconds
   const startOffsetMs = song.startOffsetMs ?? 0
   const animationType = song.animationType ?? 'song'
-  const bodyBlocks = timeframes.length === 0
+  const bodyBlocks = enabledTimeframes.length === 0
     ? '    // Empty: add beats() blocks and content here.'
-    : timeframes.map(emitTimeframeBody).join('\n\n')
+    : enabledTimeframes.map(emitTimeframeBody).join('\n\n')
 
   const escapedName = safeName.replace(/"/g, '\\"')
   const isTrigger = animationType === 'trigger'
@@ -420,13 +422,14 @@ ${bodyBlocks}
 
 /** Generates TS that only builds the animation and writes { triggerName, sequence } to process.env.TMP_SEQUENCE_OUT (for control-server send-sequence). */
 export function generateSequenceRunnerTs(song: Song, timeframes: Timeframe[]): string {
+  const enabledTimeframes = timeframes.filter(tf => !tf.disabled)
   const safeName = (song.name || 'sequence').trim() || 'sequence'
   const totalTimeSeconds = song.lengthSeconds
   const startOffsetMs = song.startOffsetMs ?? 0
   const animationType = song.animationType ?? 'song'
-  const bodyBlocks = timeframes.length === 0
+  const bodyBlocks = enabledTimeframes.length === 0
     ? '    // Empty: add beats() blocks and content here.'
-    : timeframes.map(emitTimeframeBody).join('\n\n')
+    : enabledTimeframes.map(emitTimeframeBody).join('\n\n')
   const escapedName = safeName.replace(/"/g, '\\"')
   const isTrigger = animationType === 'trigger'
   const animationCtor = isTrigger

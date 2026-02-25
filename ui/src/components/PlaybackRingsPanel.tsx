@@ -10,7 +10,7 @@ interface PlaybackRingsPanelProps {
 // Get all active timeframes at a given time
 function getActiveTimeframesAt(time: number, timeframes: Timeframe[]): Timeframe[] {
   return timeframes.filter(
-    (tf) => time >= tf.startTime && time < tf.endTime
+    (tf) => !tf.disabled && time >= tf.startTime && time < tf.endTime
   )
 }
 

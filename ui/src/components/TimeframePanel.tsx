@@ -395,6 +395,18 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
         </div>
 
         <div className="timeframe-panel-section">
+          <label className="timeframe-panel-checkbox-label">
+            <input
+              type="checkbox"
+              checked={!timeframe.disabled}
+              onChange={(e) => onUpdate({ disabled: !e.target.checked })}
+              className="timeframe-panel-checkbox"
+            />
+            <span>Enabled</span>
+          </label>
+        </div>
+
+        <div className="timeframe-panel-section">
           <label className="timeframe-panel-label">Time Range</label>
           <div className="timeframe-panel-time-row">
             {editingField === 'startTime' ? (

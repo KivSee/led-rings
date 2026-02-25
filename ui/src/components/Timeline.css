@@ -143,6 +143,17 @@
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
+.timeframe-disabled {
+  opacity: 0.4;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 4px,
+    rgba(0, 0, 0, 0.15) 4px,
+    rgba(0, 0, 0, 0.15) 8px
+  ) !important;
+}
+
 .timeframe.ring-selector-open {
   z-index: 1000 !important;
 }

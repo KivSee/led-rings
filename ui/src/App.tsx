@@ -39,6 +39,7 @@ export interface Timeframe {
   label: string
   color: string
   rings: number[] // Array of ring numbers (1-12) that participate
+  disabled?: boolean // When true, timeframe is excluded from playback and export
   mapping?: string // Segment mapping name from segments.json
   phase?: number // Phase intensity — offsets hue/brightness/motion per ring (0 = none)
   /** Optional list of cycle/cycleBeats wrapping this timeframe's content (outermost first) */

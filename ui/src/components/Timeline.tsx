@@ -531,7 +531,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
             return (
               <div
                 key={timeframe.id}
-                className={`timeframe ${isFocused ? 'timeframe-focused' : ''}`}
+                className={`timeframe ${isFocused ? 'timeframe-focused' : ''} ${timeframe.disabled ? 'timeframe-disabled' : ''}`}
                 data-timeframe-id={timeframe.id}
                 onClick={(e) => handleTimeframeFocus(timeframe.id, e)}
                 style={{
