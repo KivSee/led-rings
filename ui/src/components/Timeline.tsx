@@ -51,11 +51,14 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
   const timelineScrollViewRef = React.useRef<HTMLDivElement>(null)
   const timelineWrapperRef = React.useRef<HTMLDivElement>(null)
   const [visibleHeightPx, setVisibleHeightPx] = useState<number>(600)
+  const [beatsPerScreen, setBeatsPerScreen] = useState(64)
   const onVisibleRangeChangeRef = React.useRef(onVisibleRangeChange)
   onVisibleRangeChangeRef.current = onVisibleRangeChange
 
   const maxTime = Math.max(songLengthBeats, 4)
-  const BEATS_PER_SCREEN = 64
+
+  const handleZoomIn = () => setBeatsPerScreen(prev => Math.max(16, prev / 2))
+  const handleZoomOut = () => setBeatsPerScreen(prev => Math.min(256, prev * 2))
 
   // Fixed scale: 64 beats = one screen height. Measure the scroll viewport.
   useEffect(() => {
@@ -76,7 +79,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
   }, [])
 
   // Report visible beat range for spectrogram zoom/scroll sync (use ref so effect doesn't re-run on parent render)
-  const pxPerBeatForRange = visibleHeightPx / BEATS_PER_SCREEN
+  const pxPerBeatForRange = visibleHeightPx / beatsPerScreen
   useEffect(() => {
     const cb = onVisibleRangeChangeRef.current
     if (!cb || pxPerBeatForRange <= 0) return
@@ -85,7 +88,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
     const report = () => {
       const scrollTop = scrollEl.scrollTop
       const startBeat = Math.max(0, scrollTop / pxPerBeatForRange)
-      const endBeat = Math.min(maxTime, startBeat + BEATS_PER_SCREEN)
+      const endBeat = Math.min(maxTime, startBeat + beatsPerScreen)
       onVisibleRangeChangeRef.current?.(startBeat, endBeat)
     }
     report()
@@ -102,10 +105,10 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
     if (!scrollEl) return
     const scrollTop = scrollEl.scrollTop
     const startBeat = scrollTop / pxPerBeatForRange
-    const endBeat = Math.min(maxTime, startBeat + BEATS_PER_SCREEN)
+    const endBeat = Math.min(maxTime, startBeat + beatsPerScreen)
     if (currentTime >= endBeat - scrollMarginBeats) {
       const newStartBeat = Math.max(0, currentTime - scrollLeadBeats)
-      const maxScrollTop = Math.max(0, (maxTime - BEATS_PER_SCREEN) * pxPerBeatForRange)
+      const maxScrollTop = Math.max(0, (maxTime - beatsPerScreen) * pxPerBeatForRange)
       const newScrollTop = Math.min(maxScrollTop, newStartBeat * pxPerBeatForRange)
       scrollEl.scrollTop = newScrollTop
     }
@@ -115,7 +118,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
     if (scrollToStartBeat == null || pxPerBeatForRange <= 0 || !onScrollToStartDone) return
     const scrollEl = timelineScrollViewRef.current
     if (!scrollEl) return
-    const maxScrollTop = Math.max(0, (maxTime - BEATS_PER_SCREEN) * pxPerBeatForRange)
+    const maxScrollTop = Math.max(0, (maxTime - beatsPerScreen) * pxPerBeatForRange)
     scrollEl.scrollTop = Math.max(0, Math.min(maxScrollTop, scrollToStartBeat * pxPerBeatForRange))
     onScrollToStartDone()
   }, [scrollToStartBeat, pxPerBeatForRange, maxTime, onScrollToStartDone])
@@ -153,8 +156,8 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
   }
 
   // Fixed scale: 64 beats fill the visible screen; 1 beat = pxPerBeat pixels
-  const pxPerBeat = visibleHeightPx / BEATS_PER_SCREEN
-  const wrapperHeightPx = pxPerBeat * Math.max(maxTime, BEATS_PER_SCREEN)
+  const pxPerBeat = visibleHeightPx / beatsPerScreen
+  const wrapperHeightPx = pxPerBeat * Math.max(maxTime, beatsPerScreen)
 
   const getTimeframePosition = (timeframe: Timeframe) => {
     const topPx = timeframe.startTime * pxPerBeat
@@ -499,6 +502,11 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
 
   return (
     <div className="timeline-container">
+      <div className="timeline-zoom-controls">
+        <button onClick={handleZoomIn} disabled={beatsPerScreen <= 16} title="Zoom in">+</button>
+        <span className="timeline-zoom-label">{beatsPerScreen}b</span>
+        <button onClick={handleZoomOut} disabled={beatsPerScreen >= 256} title="Zoom out">-</button>
+      </div>
       <div className="timeline-scroll-view" ref={timelineScrollViewRef}>
         <div 
           className="timeline-wrapper"
