@@ -7,16 +7,16 @@ interface PlaybackRingsPanelProps {
   timeframes: Timeframe[]
 }
 
-// Get the active timeframe at a given time (last in list wins if overlapping)
-function getActiveTimeframeAt(time: number, timeframes: Timeframe[]): Timeframe | null {
-  const active = timeframes.filter(
+// Get all active timeframes at a given time
+function getActiveTimeframesAt(time: number, timeframes: Timeframe[]): Timeframe[] {
+  return timeframes.filter(
     (tf) => time >= tf.startTime && time < tf.endTime
   )
-  return active.length > 0 ? active[active.length - 1]! : null
 }
 
 const PlaybackRingsPanel = ({ currentTime, timeframes }: PlaybackRingsPanelProps) => {
-  const activeTimeframe = getActiveTimeframeAt(currentTime, timeframes)
+  const activeTimeframes = getActiveTimeframesAt(currentTime, timeframes)
+  const activeRings = Array.from(new Set(activeTimeframes.flatMap(tf => tf.rings)))
 
   return (
     <div className="playback-rings-panel">
@@ -27,21 +27,21 @@ const PlaybackRingsPanel = ({ currentTime, timeframes }: PlaybackRingsPanelProps
         </div>
       </div>
       <div className="playback-rings-panel-content">
-        {activeTimeframe ? (
+        {activeTimeframes.length > 0 ? (
           <>
             <div className="playback-rings-panel-segment">
               <span className="playback-rings-panel-segment-label">
-                {activeTimeframe.label}
+                {activeTimeframes.length} active segment{activeTimeframes.length > 1 ? 's' : ''}
               </span>
               <span className="playback-rings-panel-segment-range">
-                {activeTimeframe.startTime}b → {activeTimeframe.endTime}b
+                {activeRings.length} ring{activeRings.length > 1 ? 's' : ''}
               </span>
             </div>
             <div className="playback-rings-panel-visualization">
               <RingVisualization
-                mapping={activeTimeframe.mapping || 'all'}
-                activeRings={activeTimeframe.rings}
-                timeframe={activeTimeframe}
+                mapping="all"
+                activeRings={activeRings}
+                timeframes={activeTimeframes}
                 currentTime={currentTime}
               />
             </div>

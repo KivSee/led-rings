@@ -303,6 +303,11 @@
   min-width: 0;
 }
 
+.timeframe-panel-input-small.input-error {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
 .timeframe-panel-rings {
   padding: 8px 0;
 }

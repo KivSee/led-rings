@@ -198,21 +198,18 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
     const overlapping = timeframes
       .map((tf, idx) => ({ tf, idx }))
       .filter(({ tf, idx }) => idx !== index && checkOverlap(timeframe, tf))
-    
+
     if (overlapping.length === 0) {
       return 0
     }
 
     // Count how many overlapping timeframes come before this one
     const overlappingBefore = overlapping.filter(({ idx }) => idx < index).length
-    
-    // Calculate offset: alternate between left and right offsets
-    // Each overlapping timeframe gets 30px offset
-    const offsetAmount = 30
-    const totalOffset = overlappingBefore * offsetAmount
-    
-    // Alternate direction: even index goes right (positive), odd goes left (negative)
-    return overlappingBefore % 2 === 0 ? totalOffset : -totalOffset
+
+    // Offset to the right so overlapping timeframes don't cover the axis
+    const offsetAmount = 20
+    const level = Math.min(overlappingBefore, 3)
+    return level * offsetAmount
   }
 
   const snapToBeat = (beat: number): number => {

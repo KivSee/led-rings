@@ -454,18 +454,19 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
                         <span>beatsInCycle</span>
                         <input
                           type="number"
-                          min={0.01}
+                          min={0}
                           step={0.25}
                           value={entry.beatsInCycle}
                           onChange={(e) => {
                             const v = parseFloat(e.target.value)
-                            if (!isNaN(v) && v > 0) {
+                            if (!isNaN(v)) {
+                              const clamped = Math.max(0, v)
                               const next = [...(timeframe.cycles ?? [])]
-                              next[idx] = { ...entry, beatsInCycle: v }
+                              next[idx] = { ...entry, beatsInCycle: clamped }
                               onUpdate({ cycles: next })
                             }
                           }}
-                          className="timeframe-panel-input-small"
+                          className={'timeframe-panel-input-small' + (entry.beatsInCycle === 0 ? ' input-error' : '')}
                         />
                       </label>
                     </>
@@ -475,18 +476,19 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
                         <span>beatsInCycle</span>
                         <input
                           type="number"
-                          min={0.01}
+                          min={0}
                           step={0.25}
                           value={entry.beatsInCycle}
                           onChange={(e) => {
                             const v = parseFloat(e.target.value)
-                            if (!isNaN(v) && v > 0) {
+                            if (!isNaN(v)) {
+                              const clamped = Math.max(0, v)
                               const next = [...(timeframe.cycles ?? [])]
-                              next[idx] = { ...entry, beatsInCycle: v }
+                              next[idx] = { ...entry, beatsInCycle: clamped }
                               onUpdate({ cycles: next })
                             }
                           }}
-                          className="timeframe-panel-input-small"
+                          className={'timeframe-panel-input-small' + (entry.beatsInCycle === 0 ? ' input-error' : '')}
                         />
                       </label>
                       <label className="timeframe-panel-cycle-param">

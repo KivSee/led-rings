@@ -11,43 +11,60 @@ interface RingVisualizationProps {
   activeRings?: number[]
   /** When set with currentTime, playback effect preview is shown (brightness/hue/motion over time). */
   timeframe?: Timeframe | null
+  /** Multiple active timeframes for merged playback preview. Overrides single timeframe when set. */
+  timeframes?: Timeframe[]
   /** Current time in beats; with timeframe, used to compute effect phase t in [0,1]. */
   currentTime?: number
+}
+
+/** Compute normalized time t in [0,1] for a timeframe at a given currentTime in beats. */
+function computeT(tf: Timeframe, currentTime: number): number {
+  const duration = tf.endTime - tf.startTime
+  if (duration <= 0) return 0
+  const beatOffset = currentTime - tf.startTime
+  const cycles = tf.cycles ?? []
+  if (cycles.length === 0) {
+    return Math.max(0, Math.min(1, beatOffset / duration))
+  }
+  const c = cycles[0]!
+  if (c.type === 'cycle') {
+    return (beatOffset % c.beatsInCycle) / c.beatsInCycle
+  }
+  const phase = (beatOffset % c.beatsInCycle) / c.beatsInCycle
+  const windowStart = c.startBeat / c.beatsInCycle
+  const windowEnd = c.endBeat / c.beatsInCycle
+  const windowLen = windowEnd - windowStart
+  if (windowLen <= 0) return 0
+  return Math.max(0, Math.min(1, (phase - windowStart) / windowLen))
 }
 
 const RingVisualization = ({
   mapping,
   activeRings,
   timeframe,
+  timeframes,
   currentTime,
 }: RingVisualizationProps) => {
+  // Single-timeframe mode (backward compatible for TimeframePanel mapping preview)
+  const singleTf = timeframe && !timeframes ? timeframe : null
   const useEffectPreview = Boolean(
-    timeframe &&
     currentTime !== undefined &&
-    (getTimeframeEffects(timeframe).some(e => e.effectKey !== ''))
+    (
+      (singleTf && getTimeframeEffects(singleTf).some(e => e.effectKey !== '')) ||
+      (timeframes && timeframes.length > 0)
+    )
   )
-  const duration = timeframe ? timeframe.endTime - timeframe.startTime : 0
-  const beatOffset = timeframe && currentTime !== undefined ? currentTime - timeframe.startTime : 0
-  const cycles = timeframe?.cycles ?? []
-  const hasCycles = cycles.length > 0
-  // When cycle/cycleBeats are present, use the innermost cycle (index 0) to compute effective phase t
-  const t = duration > 0 && currentTime !== undefined && timeframe
-    ? (() => {
-        if (!hasCycles) {
-          return Math.max(0, Math.min(1, beatOffset / duration))
-        }
-        const c = cycles[0]!
-        if (c.type === 'cycle') {
-          return (beatOffset % c.beatsInCycle) / c.beatsInCycle
-        }
-        const phase = (beatOffset % c.beatsInCycle) / c.beatsInCycle
-        const windowStart = c.startBeat / c.beatsInCycle
-        const windowEnd = c.endBeat / c.beatsInCycle
-        const windowLen = windowEnd - windowStart
-        if (windowLen <= 0) return 0
-        return Math.max(0, Math.min(1, (phase - windowStart) / windowLen))
-      })()
-    : 0
+  const t = singleTf && currentTime !== undefined ? computeT(singleTf, currentTime) : 0
+
+  // Build a per-ring lookup: ringNumber (1-12) → last matching timeframe
+  const ringToTimeframe: Map<number, Timeframe> = new Map()
+  if (timeframes && currentTime !== undefined) {
+    for (const tf of timeframes) {
+      for (const ring of tf.rings) {
+        ringToTimeframe.set(ring, tf) // last wins
+      }
+    }
+  }
   // Convert relPos (0-1) to RGB color
   const relPosToColor = (relPos: number): string => {
     // Default rainbow gradient (fallback)
@@ -148,10 +165,22 @@ const RingVisualization = ({
           >
             {ringPixels.map((pixel, positionInRing) => {
               if (!pixel) return null
-              const pixelColor = useEffectPreview && timeframe
+              const pixelColor = useEffectPreview
                 ? (() => {
-                    const { h, s, v } = getPixelColor(pixel.relPos, t, timeframe, ringIndex)
-                    return hsvToRgbString(h, s, v)
+                    // Multi-timeframe mode: find the timeframe for this ring
+                    const ringTf = ringToTimeframe.get(ringNumber)
+                    if (ringTf) {
+                      const ringT = computeT(ringTf, currentTime!)
+                      const { h, s, v } = getPixelColor(pixel.relPos, ringT, ringTf, ringIndex)
+                      return hsvToRgbString(h, s, v)
+                    }
+                    // Single-timeframe mode (mapping preview in TimeframePanel)
+                    if (singleTf) {
+                      const { h, s, v } = getPixelColor(pixel.relPos, t, singleTf, ringIndex)
+                      return hsvToRgbString(h, s, v)
+                    }
+                    // No matching timeframe — dark
+                    return 'rgb(0, 0, 0)'
                   })()
                 : relPosToColor(pixel.relPos)
               return (
