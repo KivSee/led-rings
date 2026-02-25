@@ -4,7 +4,7 @@
     "lengthSeconds": 245,
     "bpm": 116,
     "startOffsetMs": 0,
-    "runStartTimeSeconds": 0,
+    "runStartTimeSeconds": 33.10344827586207,
     "animationType": "song",
     "audioFilePath": "loop.wav"
   },
@@ -15,10 +15,17 @@
       "endTime": 4,
       "label": "Fade In Ring 12",
       "color": "#3b82f6",
-      "rings": [12],
+      "rings": [
+        12
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "fi-12", "effectKey": "fadeIn", "params": {}, "phase": 0 }
+        {
+          "id": "fi-12",
+          "effectKey": "fadeIn",
+          "params": {},
+          "phase": 0
+        }
       ]
     },
     {
@@ -27,10 +34,18 @@
       "endTime": 8,
       "label": "Fade In Rings 1,11",
       "color": "#8b5cf6",
-      "rings": [1, 11],
+      "rings": [
+        1,
+        11
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "fi-1-11", "effectKey": "fadeIn", "params": {}, "phase": 0 }
+        {
+          "id": "fi-1-11",
+          "effectKey": "fadeIn",
+          "params": {},
+          "phase": 0
+        }
       ]
     },
     {
@@ -39,10 +54,18 @@
       "endTime": 12,
       "label": "Fade In Rings 2,10",
       "color": "#ec4899",
-      "rings": [2, 10],
+      "rings": [
+        2,
+        10
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "fi-2-10", "effectKey": "fadeIn", "params": {}, "phase": 0 }
+        {
+          "id": "fi-2-10",
+          "effectKey": "fadeIn",
+          "params": {},
+          "phase": 0
+        }
       ]
     },
     {
@@ -51,10 +74,18 @@
       "endTime": 16,
       "label": "Fade In Rings 3,9",
       "color": "#f59e0b",
-      "rings": [3, 9],
+      "rings": [
+        3,
+        9
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "fi-3-9", "effectKey": "fadeIn", "params": {}, "phase": 0 }
+        {
+          "id": "fi-3-9",
+          "effectKey": "fadeIn",
+          "params": {},
+          "phase": 0
+        }
       ]
     },
     {
@@ -63,10 +94,18 @@
       "endTime": 19,
       "label": "Fade In Rings 4,8",
       "color": "#10b981",
-      "rings": [4, 8],
+      "rings": [
+        4,
+        8
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "fi-4-8", "effectKey": "fadeIn", "params": {}, "phase": 0 }
+        {
+          "id": "fi-4-8",
+          "effectKey": "fadeIn",
+          "params": {},
+          "phase": 0
+        }
       ]
     },
     {
@@ -75,10 +114,18 @@
       "endTime": 22,
       "label": "Fade In Rings 5,7",
       "color": "#06b6d4",
-      "rings": [5, 7],
+      "rings": [
+        5,
+        7
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "fi-5-7", "effectKey": "fadeIn", "params": {}, "phase": 0 }
+        {
+          "id": "fi-5-7",
+          "effectKey": "fadeIn",
+          "params": {},
+          "phase": 0
+        }
       ]
     },
     {
@@ -87,10 +134,17 @@
       "endTime": 25,
       "label": "Fade In Ring 6",
       "color": "#ef4444",
-      "rings": [6],
+      "rings": [
+        6
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "fi-6", "effectKey": "fadeIn", "params": {}, "phase": 0 }
+        {
+          "id": "fi-6",
+          "effectKey": "fadeIn",
+          "params": {},
+          "phase": 0
+        }
       ]
     },
     {
@@ -99,10 +153,19 @@
       "endTime": 43,
       "label": "Hold Ring 12",
       "color": "#3b82f6",
-      "rings": [12],
+      "rings": [
+        12
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "h-12", "effectKey": "brightness", "params": { "value": 1 }, "phase": 0 }
+        {
+          "id": "h-12",
+          "effectKey": "brightness",
+          "params": {
+            "value": 1
+          },
+          "phase": 0
+        }
       ]
     },
     {
@@ -111,10 +174,20 @@
       "endTime": 40,
       "label": "Hold Rings 1,11",
       "color": "#8b5cf6",
-      "rings": [1, 11],
+      "rings": [
+        1,
+        11
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "h-1-11", "effectKey": "brightness", "params": { "value": 1 }, "phase": 0 }
+        {
+          "id": "h-1-11",
+          "effectKey": "brightness",
+          "params": {
+            "value": 1
+          },
+          "phase": 0
+        }
       ]
     },
     {
@@ -123,10 +196,20 @@
       "endTime": 37,
       "label": "Hold Rings 2,10",
       "color": "#ec4899",
-      "rings": [2, 10],
+      "rings": [
+        2,
+        10
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "h-2-10", "effectKey": "brightness", "params": { "value": 1 }, "phase": 0 }
+        {
+          "id": "h-2-10",
+          "effectKey": "brightness",
+          "params": {
+            "value": 1
+          },
+          "phase": 0
+        }
       ]
     },
     {
@@ -135,10 +218,20 @@
       "endTime": 34,
       "label": "Hold Rings 3,9",
       "color": "#f59e0b",
-      "rings": [3, 9],
+      "rings": [
+        3,
+        9
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "h-3-9", "effectKey": "brightness", "params": { "value": 1 }, "phase": 0 }
+        {
+          "id": "h-3-9",
+          "effectKey": "brightness",
+          "params": {
+            "value": 1
+          },
+          "phase": 0
+        }
       ]
     },
     {
@@ -147,10 +240,20 @@
       "endTime": 31,
       "label": "Hold Rings 4,8",
       "color": "#10b981",
-      "rings": [4, 8],
+      "rings": [
+        4,
+        8
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "h-4-8", "effectKey": "brightness", "params": { "value": 1 }, "phase": 0 }
+        {
+          "id": "h-4-8",
+          "effectKey": "brightness",
+          "params": {
+            "value": 1
+          },
+          "phase": 0
+        }
       ]
     },
     {
@@ -159,10 +262,20 @@
       "endTime": 28,
       "label": "Hold Rings 5,7",
       "color": "#06b6d4",
-      "rings": [5, 7],
+      "rings": [
+        5,
+        7
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "h-5-7", "effectKey": "brightness", "params": { "value": 1 }, "phase": 0 }
+        {
+          "id": "h-5-7",
+          "effectKey": "brightness",
+          "params": {
+            "value": 1
+          },
+          "phase": 0
+        }
       ]
     },
     {
@@ -171,10 +284,17 @@
       "endTime": 28,
       "label": "Fade Out Ring 6",
       "color": "#ef4444",
-      "rings": [6],
+      "rings": [
+        6
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "fo-6", "effectKey": "fadeOut", "params": {}, "phase": 0 }
+        {
+          "id": "fo-6",
+          "effectKey": "fadeOut",
+          "params": {},
+          "phase": 0
+        }
       ]
     },
     {
@@ -183,10 +303,18 @@
       "endTime": 31,
       "label": "Fade Out Rings 5,7",
       "color": "#06b6d4",
-      "rings": [5, 7],
+      "rings": [
+        5,
+        7
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "fo-5-7", "effectKey": "fadeOut", "params": {}, "phase": 0 }
+        {
+          "id": "fo-5-7",
+          "effectKey": "fadeOut",
+          "params": {},
+          "phase": 0
+        }
       ]
     },
     {
@@ -195,10 +323,18 @@
       "endTime": 34,
       "label": "Fade Out Rings 4,8",
       "color": "#10b981",
-      "rings": [4, 8],
+      "rings": [
+        4,
+        8
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "fo-4-8", "effectKey": "fadeOut", "params": {}, "phase": 0 }
+        {
+          "id": "fo-4-8",
+          "effectKey": "fadeOut",
+          "params": {},
+          "phase": 0
+        }
       ]
     },
     {
@@ -207,10 +343,18 @@
       "endTime": 37,
       "label": "Fade Out Rings 3,9",
       "color": "#f59e0b",
-      "rings": [3, 9],
+      "rings": [
+        3,
+        9
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "fo-3-9", "effectKey": "fadeOut", "params": {}, "phase": 0 }
+        {
+          "id": "fo-3-9",
+          "effectKey": "fadeOut",
+          "params": {},
+          "phase": 0
+        }
       ]
     },
     {
@@ -219,10 +363,18 @@
       "endTime": 40,
       "label": "Fade Out Rings 2,10",
       "color": "#ec4899",
-      "rings": [2, 10],
+      "rings": [
+        2,
+        10
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "fo-2-10", "effectKey": "fadeOut", "params": {}, "phase": 0 }
+        {
+          "id": "fo-2-10",
+          "effectKey": "fadeOut",
+          "params": {},
+          "phase": 0
+        }
       ]
     },
     {
@@ -231,10 +383,18 @@
       "endTime": 43,
       "label": "Fade Out Rings 1,11",
       "color": "#8b5cf6",
-      "rings": [1, 11],
+      "rings": [
+        1,
+        11
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "fo-1-11", "effectKey": "fadeOut", "params": {}, "phase": 0 }
+        {
+          "id": "fo-1-11",
+          "effectKey": "fadeOut",
+          "params": {},
+          "phase": 0
+        }
       ]
     },
     {
@@ -243,10 +403,17 @@
       "endTime": 46,
       "label": "Fade Out Ring 12",
       "color": "#3b82f6",
-      "rings": [12],
+      "rings": [
+        12
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "fo-12", "effectKey": "fadeOut", "params": {}, "phase": 0 }
+        {
+          "id": "fo-12",
+          "effectKey": "fadeOut",
+          "params": {},
+          "phase": 0
+        }
       ]
     },
     {
@@ -255,13 +422,33 @@
       "endTime": 49,
       "label": "Snake Fade In Ring 12",
       "color": "#3b82f6",
-      "rings": [12],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-fi-12-b", "effectKey": "fadeIn", "params": {}, "phase": 0 },
-        { "id": "s-fi-12-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
+      "rings": [
+        12
       ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 3
+        }
+      ],
+      "effects": [
+        {
+          "id": "s-fi-12-b",
+          "effectKey": "fadeIn",
+          "params": {},
+          "phase": 0
+        },
+        {
+          "id": "s-fi-12-m",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
     },
     {
       "id": "s-fade-in-1-11",
@@ -269,13 +456,34 @@
       "endTime": 52,
       "label": "Snake Fade In Rings 1,11",
       "color": "#8b5cf6",
-      "rings": [1, 11],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-fi-1-11-b", "effectKey": "fadeIn", "params": {}, "phase": 0 },
-        { "id": "s-fi-1-11-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
+      "rings": [
+        1,
+        11
       ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 3
+        }
+      ],
+      "effects": [
+        {
+          "id": "s-fi-1-11-b",
+          "effectKey": "fadeIn",
+          "params": {},
+          "phase": 0
+        },
+        {
+          "id": "s-fi-1-11-m",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
     },
     {
       "id": "s-fade-in-2-10",
@@ -283,13 +491,34 @@
       "endTime": 55,
       "label": "Snake Fade In Rings 2,10",
       "color": "#ec4899",
-      "rings": [2, 10],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-fi-2-10-b", "effectKey": "fadeIn", "params": {}, "phase": 0 },
-        { "id": "s-fi-2-10-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
+      "rings": [
+        2,
+        10
       ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 3
+        }
+      ],
+      "effects": [
+        {
+          "id": "s-fi-2-10-b",
+          "effectKey": "fadeIn",
+          "params": {},
+          "phase": 0
+        },
+        {
+          "id": "s-fi-2-10-m",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
     },
     {
       "id": "s-fade-in-3-9",
@@ -297,13 +526,34 @@
       "endTime": 58,
       "label": "Snake Fade In Rings 3,9",
       "color": "#f59e0b",
-      "rings": [3, 9],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-fi-3-9-b", "effectKey": "fadeIn", "params": {}, "phase": 0 },
-        { "id": "s-fi-3-9-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
+      "rings": [
+        3,
+        9
       ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 3
+        }
+      ],
+      "effects": [
+        {
+          "id": "s-fi-3-9-b",
+          "effectKey": "fadeIn",
+          "params": {},
+          "phase": 0
+        },
+        {
+          "id": "s-fi-3-9-m",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
     },
     {
       "id": "s-fade-in-4-8",
@@ -311,13 +561,34 @@
       "endTime": 61,
       "label": "Snake Fade In Rings 4,8",
       "color": "#10b981",
-      "rings": [4, 8],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-fi-4-8-b", "effectKey": "fadeIn", "params": {}, "phase": 0 },
-        { "id": "s-fi-4-8-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
+      "rings": [
+        4,
+        8
       ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 3
+        }
+      ],
+      "effects": [
+        {
+          "id": "s-fi-4-8-b",
+          "effectKey": "fadeIn",
+          "params": {},
+          "phase": 0
+        },
+        {
+          "id": "s-fi-4-8-m",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
     },
     {
       "id": "s-fade-in-5-7",
@@ -325,13 +596,34 @@
       "endTime": 64,
       "label": "Snake Fade In Rings 5,7",
       "color": "#06b6d4",
-      "rings": [5, 7],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-fi-5-7-b", "effectKey": "fadeIn", "params": {}, "phase": 0 },
-        { "id": "s-fi-5-7-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
+      "rings": [
+        5,
+        7
       ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 3
+        }
+      ],
+      "effects": [
+        {
+          "id": "s-fi-5-7-b",
+          "effectKey": "fadeIn",
+          "params": {},
+          "phase": 0
+        },
+        {
+          "id": "s-fi-5-7-m",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
     },
     {
       "id": "s-fade-in-6",
@@ -339,195 +631,331 @@
       "endTime": 67,
       "label": "Snake Fade In Ring 6",
       "color": "#ef4444",
-      "rings": [6],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-fi-6-b", "effectKey": "fadeIn", "params": {}, "phase": 0 },
-        { "id": "s-fi-6-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
+      "rings": [
+        6
       ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 3
+        }
+      ],
+      "effects": [
+        {
+          "id": "s-fi-6-b",
+          "effectKey": "fadeIn",
+          "params": {},
+          "phase": 0
+        },
+        {
+          "id": "s-fi-6-m",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
     },
     {
       "id": "s-hold-12",
       "startTime": 49,
-      "endTime": 85,
+      "endTime": 67,
       "label": "Snake Hold Ring 12",
       "color": "#3b82f6",
-      "rings": [12],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-h-12-b", "effectKey": "brightness", "params": { "value": 1 }, "phase": 0 },
-        { "id": "s-h-12-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
+      "rings": [
+        12
       ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 3
+        }
+      ],
+      "effects": [
+        {
+          "id": "s-h-12-b",
+          "effectKey": "brightness",
+          "params": {
+            "value": 1
+          },
+          "phase": 0
+        },
+        {
+          "id": "s-h-12-m",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
     },
     {
       "id": "s-hold-1-11",
       "startTime": 52,
-      "endTime": 82,
+      "endTime": 67,
       "label": "Snake Hold Rings 1,11",
       "color": "#8b5cf6",
-      "rings": [1, 11],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-h-1-11-b", "effectKey": "brightness", "params": { "value": 1 }, "phase": 0 },
-        { "id": "s-h-1-11-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
+      "rings": [
+        1,
+        11
       ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 3
+        }
+      ],
+      "effects": [
+        {
+          "id": "s-h-1-11-b",
+          "effectKey": "brightness",
+          "params": {
+            "value": 1
+          },
+          "phase": 0
+        },
+        {
+          "id": "s-h-1-11-m",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
     },
     {
       "id": "s-hold-2-10",
       "startTime": 55,
-      "endTime": 79,
+      "endTime": 67,
       "label": "Snake Hold Rings 2,10",
       "color": "#ec4899",
-      "rings": [2, 10],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-h-2-10-b", "effectKey": "brightness", "params": { "value": 1 }, "phase": 0 },
-        { "id": "s-h-2-10-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
+      "rings": [
+        2,
+        10
       ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 3
+        }
+      ],
+      "effects": [
+        {
+          "id": "s-h-2-10-b",
+          "effectKey": "brightness",
+          "params": {
+            "value": 1
+          },
+          "phase": 0
+        },
+        {
+          "id": "s-h-2-10-m",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
     },
     {
       "id": "s-hold-3-9",
       "startTime": 58,
-      "endTime": 76,
+      "endTime": 67,
       "label": "Snake Hold Rings 3,9",
       "color": "#f59e0b",
-      "rings": [3, 9],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-h-3-9-b", "effectKey": "brightness", "params": { "value": 1 }, "phase": 0 },
-        { "id": "s-h-3-9-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
+      "rings": [
+        3,
+        9
       ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 3
+        }
+      ],
+      "effects": [
+        {
+          "id": "s-h-3-9-b",
+          "effectKey": "brightness",
+          "params": {
+            "value": 1
+          },
+          "phase": 0
+        },
+        {
+          "id": "s-h-3-9-m",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
     },
     {
       "id": "s-hold-4-8",
       "startTime": 61,
-      "endTime": 73,
+      "endTime": 67,
       "label": "Snake Hold Rings 4,8",
       "color": "#10b981",
-      "rings": [4, 8],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-h-4-8-b", "effectKey": "brightness", "params": { "value": 1 }, "phase": 0 },
-        { "id": "s-h-4-8-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
+      "rings": [
+        4,
+        8
       ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 3
+        }
+      ],
+      "effects": [
+        {
+          "id": "s-h-4-8-b",
+          "effectKey": "brightness",
+          "params": {
+            "value": 1
+          },
+          "phase": 0
+        },
+        {
+          "id": "s-h-4-8-m",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
     },
     {
       "id": "s-hold-5-7",
       "startTime": 64,
-      "endTime": 70,
+      "endTime": 67,
       "label": "Snake Hold Rings 5,7",
       "color": "#06b6d4",
-      "rings": [5, 7],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-h-5-7-b", "effectKey": "brightness", "params": { "value": 1 }, "phase": 0 },
-        { "id": "s-h-5-7-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
+      "rings": [
+        5,
+        7
       ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 3
+        }
+      ],
+      "effects": [
+        {
+          "id": "s-h-5-7-b",
+          "effectKey": "brightness",
+          "params": {
+            "value": 1
+          },
+          "phase": 0
+        },
+        {
+          "id": "s-h-5-7-m",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
     },
     {
-      "id": "s-fade-out-6",
+      "id": "sc-snake-all",
       "startTime": 67,
-      "endTime": 70,
-      "label": "Snake Fade Out Ring 6",
-      "color": "#ef4444",
-      "rings": [6],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-fo-6-b", "effectKey": "fadeOut", "params": {}, "phase": 0 },
-        { "id": "s-fo-6-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
-      ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
-    },
-    {
-      "id": "s-fade-out-5-7",
-      "startTime": 70,
-      "endTime": 73,
-      "label": "Snake Fade Out Rings 5,7",
-      "color": "#06b6d4",
-      "rings": [5, 7],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-fo-5-7-b", "effectKey": "fadeOut", "params": {}, "phase": 0 },
-        { "id": "s-fo-5-7-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
-      ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
-    },
-    {
-      "id": "s-fade-out-4-8",
-      "startTime": 73,
-      "endTime": 76,
-      "label": "Snake Fade Out Rings 4,8",
-      "color": "#10b981",
-      "rings": [4, 8],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-fo-4-8-b", "effectKey": "fadeOut", "params": {}, "phase": 0 },
-        { "id": "s-fo-4-8-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
-      ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
-    },
-    {
-      "id": "s-fade-out-3-9",
-      "startTime": 76,
-      "endTime": 79,
-      "label": "Snake Fade Out Rings 3,9",
-      "color": "#f59e0b",
-      "rings": [3, 9],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-fo-3-9-b", "effectKey": "fadeOut", "params": {}, "phase": 0 },
-        { "id": "s-fo-3-9-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
-      ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
-    },
-    {
-      "id": "s-fade-out-2-10",
-      "startTime": 79,
       "endTime": 82,
-      "label": "Snake Fade Out Rings 2,10",
-      "color": "#ec4899",
-      "rings": [2, 10],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-fo-2-10-b", "effectKey": "fadeOut", "params": {}, "phase": 0 },
-        { "id": "s-fo-2-10-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
+      "label": "Snake All Rings",
+      "color": "#a855f7",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
       ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
+      "mapping": "centric",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "sc-s-all",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
     },
     {
-      "id": "s-fade-out-1-11",
-      "startTime": 82,
-      "endTime": 85,
-      "label": "Snake Fade Out Rings 1,11",
-      "color": "#8b5cf6",
-      "rings": [1, 11],
+      "id": "sc-hue-all",
+      "startTime": 67,
+      "endTime": 82,
+      "label": "Hue Step All Rings",
+      "color": "#a855f7",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
       "mapping": "all",
       "effects": [
-        { "id": "s-fo-1-11-b", "effectKey": "fadeOut", "params": {}, "phase": 0 },
-        { "id": "s-fo-1-11-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
-      ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
-    },
-    {
-      "id": "s-fade-out-12",
-      "startTime": 85,
-      "endTime": 88,
-      "label": "Snake Fade Out Ring 12",
-      "color": "#3b82f6",
-      "rings": [12],
-      "mapping": "all",
-      "effects": [
-        { "id": "s-fo-12-b", "effectKey": "fadeOut", "params": {}, "phase": 0 },
-        { "id": "s-fo-12-m", "effectKey": "snake", "params": { "tailLength": 0.5, "cyclic": true }, "phase": 0 }
-      ],
-      "cycles": [{ "type": "cycle", "beatsInCycle": 3 }]
+        {
+          "id": "sc-h-all",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "steps": {
+                "num_steps": 9,
+                "diff_per_step": 0.083,
+                "first_step_value": 0
+              }
+            }
+          },
+          "phase": 1
+        }
+      ]
     }
   ],
   "windowSizes": {

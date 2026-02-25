@@ -228,6 +228,184 @@ const loop = async () => {
         });
       });
     })
+
+    beats(46, 49, () => {
+      cycle(3, () => {
+        elements([12], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.6034, sat: 0.7602, val: 0.9647 })
+            fadeIn()
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(49, 52, () => {
+      cycle(3, () => {
+        elements([1, 11], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.7175, sat: 0.6260, val: 0.9647 })
+            fadeIn()
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(52, 55, () => {
+      cycle(3, () => {
+        elements([2, 10], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.9177, sat: 0.6949, val: 0.9255 })
+            fadeIn()
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(55, 58, () => {
+      cycle(3, () => {
+        elements([3, 9], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.1047, sat: 0.9551, val: 0.9608 })
+            fadeIn()
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(58, 61, () => {
+      cycle(3, () => {
+        elements([4, 8], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.4448, sat: 0.9135, val: 0.7255 })
+            fadeIn()
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(61, 64, () => {
+      cycle(3, () => {
+        elements([5, 7], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.5243, sat: 0.9717, val: 0.8314 })
+            fadeIn()
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(64, 67, () => {
+      cycle(3, () => {
+        elements([6], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.0000, sat: 0.7155, val: 0.9373 })
+            fadeIn()
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(49, 67, () => {
+      cycle(3, () => {
+        elements([12], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.6034, sat: 0.7602, val: 0.9647 })
+            brightness({ value: 1 })
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(52, 67, () => {
+      cycle(3, () => {
+        elements([1, 11], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.7175, sat: 0.6260, val: 0.9647 })
+            brightness({ value: 1 })
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(55, 67, () => {
+      cycle(3, () => {
+        elements([2, 10], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.9177, sat: 0.6949, val: 0.9255 })
+            brightness({ value: 1 })
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(58, 67, () => {
+      cycle(3, () => {
+        elements([3, 9], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.1047, sat: 0.9551, val: 0.9608 })
+            brightness({ value: 1 })
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(61, 67, () => {
+      cycle(3, () => {
+        elements([4, 8], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.4448, sat: 0.9135, val: 0.7255 })
+            brightness({ value: 1 })
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(64, 67, () => {
+      cycle(3, () => {
+        elements([5, 7], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.5243, sat: 0.9717, val: 0.8314 })
+            brightness({ value: 1 })
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(67, 82, () => {
+      cycle(2, () => {
+        elements(all, () => {
+          segment(segment_centric, () => {
+            constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(67, 82, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+          phase(1, () => {
+            addEffect({ timed_hue: { offset_factor: { steps: { num_steps: 9, diff_per_step: 0.083, first_step_value: 0 } } } })
+          });
+        });
+      });
+    })
   });
 
   console.log("sending sequence");
