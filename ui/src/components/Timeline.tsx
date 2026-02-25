@@ -96,23 +96,23 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
     return () => scrollEl.removeEventListener('scroll', report)
   }, [pxPerBeatForRange, maxTime])
 
-  // Auto-scroll when playhead reaches the end of the visible range so it stays in view
-  const scrollMarginBeats = 8
-  const scrollLeadBeats = 16
+  // Auto-scroll so the playhead stays with ~1/4 of the screen showing ahead
   useEffect(() => {
     if (pxPerBeatForRange <= 0) return
     const scrollEl = timelineScrollViewRef.current
     if (!scrollEl) return
     const scrollTop = scrollEl.scrollTop
     const startBeat = scrollTop / pxPerBeatForRange
-    const endBeat = Math.min(maxTime, startBeat + beatsPerScreen)
-    if (currentTime >= endBeat - scrollMarginBeats) {
-      const newStartBeat = Math.max(0, currentTime - scrollLeadBeats)
+    // Scroll when playhead passes 3/4 of the visible area
+    const triggerBeat = startBeat + beatsPerScreen * 3 / 4
+    if (currentTime >= triggerBeat) {
+      // Position playhead at 3/4 from top, leaving 1/4 ahead
+      const newStartBeat = Math.max(0, currentTime - beatsPerScreen * 3 / 4)
       const maxScrollTop = Math.max(0, (maxTime - beatsPerScreen) * pxPerBeatForRange)
       const newScrollTop = Math.min(maxScrollTop, newStartBeat * pxPerBeatForRange)
       scrollEl.scrollTop = newScrollTop
     }
-  }, [currentTime, pxPerBeatForRange, maxTime])
+  }, [currentTime, pxPerBeatForRange, maxTime, beatsPerScreen])
 
   useEffect(() => {
     if (scrollToStartBeat == null || pxPerBeatForRange <= 0 || !onScrollToStartDone) return
