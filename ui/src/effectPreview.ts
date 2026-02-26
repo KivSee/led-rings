@@ -9,10 +9,14 @@
 
 import { Timeframe, TimeframeEffectEntry, getTimeframeEffects } from './App'
 
-/** Compute per-ring phase offset from an effect entry's phase value. */
-function entryPhase(entry: TimeframeEffectEntry | undefined, ringIndex: number): number {
+/** Compute per-ring phase offset from an effect entry's phase value.
+ *  Uses element position in the rings array (matching C++ animation.ts). */
+function entryPhase(entry: TimeframeEffectEntry | undefined, ringIndex: number, rings: number[]): number {
   const intensity = entry?.phase ?? 0
-  return intensity > 0 ? ringIndex / 12 * intensity : 0
+  if (intensity <= 0) return 0
+  const elementIndex = rings.indexOf(ringIndex + 1)  // rings are 1-based
+  if (elementIndex < 0 || rings.length <= 1) return 0
+  return elementIndex / rings.length * intensity
 }
 
 const BRIGHTNESS_KEYS = new Set(['brightness', 'fadeIn', 'fadeOut', 'fadeInOut', 'fadeOutIn', 'blink', 'pulse', 'fade'])
@@ -84,29 +88,32 @@ export function evalFloat(t: number, f: FloatFunc | undefined): number {
 // ---------------------------------------------------------------------------
 
 /** Convert a legacy brightness effect to its equivalent FloatFunc.
- *  Phase is injected into sin.phase for pulse (the only brightness effect using phase). */
+ *  Phase applies a value offset (matching C++ applyPhaseToEffect) for all effects
+ *  except pulse, which injects phase into sin.phase (matching C++ function-based path). */
 function legacyBrightnessToFloatFunc(entry: TimeframeEffectEntry, perRingPhase: number): FloatFunc | null {
   const p = entry.params ?? {}
+  const off = perRingPhase  // value offset to match C++ renderer (applyPhaseToEffect)
   switch (entry.effectKey) {
     case 'brightness':
-      return { const_value: { value: typeof p.value === 'number' ? p.value : 1 } }
+      return { const_value: { value: (typeof p.value === 'number' ? p.value : 1) + off } }
     case 'fadeIn':
-      return { linear: { start: 0, end: 1 } }
+      return { linear: { start: 0 + off, end: 1 + off } }
     case 'fadeOut':
-      return { linear: { start: 1, end: 0 } }
+      return { linear: { start: 1 + off, end: 0 + off } }
     case 'fadeInOut': {
       const high = typeof p.high === 'number' ? p.high : 1
-      return { half: { f1: { linear: { start: 0, end: high } }, f2: { linear: { start: high, end: 0 } } } }
+      return { half: { f1: { linear: { start: 0 + off, end: high + off } }, f2: { linear: { start: high + off, end: 0 + off } } } }
     }
     case 'fadeOutIn': {
       const low = typeof p.low === 'number' ? p.low : 0
-      return { half: { f1: { linear: { start: 1, end: low } }, f2: { linear: { start: low, end: 1 } } } }
+      return { half: { f1: { linear: { start: 1 + off, end: low + off } }, f2: { linear: { start: low + off, end: 1 + off } } } }
     }
     case 'blink': {
       const low = typeof p.low === 'number' ? p.low : 0.5
-      return { half: { f1: { const_value: { value: low } }, f2: { const_value: { value: 1 } } } }
+      return { half: { f1: { const_value: { value: low + off } }, f2: { const_value: { value: 1 + off } } } }
     }
     case 'pulse': {
+      // pulse uses sin.phase for time-shift (matches C++ function-based path, not applyPhaseToEffect)
       const low = typeof p.low === 'number' ? p.low : 0.5
       const staticPhase = typeof p.staticPhase === 'number' ? p.staticPhase : 0
       return { sin: { min: low, max: 1, phase: staticPhase + perRingPhase, repeats: 1 } }
@@ -114,7 +121,7 @@ function legacyBrightnessToFloatFunc(entry: TimeframeEffectEntry, perRingPhase: 
     case 'fade': {
       const start = typeof p.start === 'number' ? p.start : 0
       const end = typeof p.end === 'number' ? p.end : 1
-      return { linear: { start, end } }
+      return { linear: { start: start + off, end: end + off } }
     }
     default:
       return null
@@ -279,10 +286,10 @@ function getBaseColor(
  *  Matches C++ renderer semantics:
  *  - mult_factor_decrease: val *= factor (simple multiply)
  *  - mult_factor_increase: val = val + (1.0 - val) * factor (interpolate towards 1.0) */
-function evalBrightnessMult(mult: number, t: number, par: Record<string, unknown>): number {
-  if (par.mult_factor_decrease != null) return mult * evalFloat(t, par.mult_factor_decrease as FloatFunc)
+function evalBrightnessMult(mult: number, t: number, par: Record<string, unknown>, valueOffset: number = 0): number {
+  if (par.mult_factor_decrease != null) return mult * (evalFloat(t, par.mult_factor_decrease as FloatFunc) + valueOffset)
   if (par.mult_factor_increase != null) {
-    const factor = evalFloat(t, par.mult_factor_increase as FloatFunc)
+    const factor = evalFloat(t, par.mult_factor_increase as FloatFunc) + valueOffset
     return mult + (1.0 - mult) * factor
   }
   return mult
@@ -313,29 +320,27 @@ function getBrightnessMult(relPos: number, t: number, timeframe: Timeframe, ring
   // Legacy brightness → FloatFunc conversion
   const legacy = getTimeframeEffects(timeframe).find(e => BRIGHTNESS_KEYS.has(e.effectKey))
   if (legacy) {
-    const func = legacyBrightnessToFloatFunc(legacy, entryPhase(legacy, ringIndex))
+    const func = legacyBrightnessToFloatFunc(legacy, entryPhase(legacy, ringIndex, timeframe.rings))
     if (func) mult *= evalFloat(t, func)
   }
 
-  // Timed brightness
+  // Timed brightness — value offset matches C++ applyPhaseToEffect
   const timedB = getTimeframeEffects(timeframe).find(e => TIMED_BRIGHTNESS_KEYS.has(e.effectKey))
   if (timedB?.params) {
     const par = timedB.params as Record<string, unknown>
-    const tShifted = ((t + entryPhase(timedB, ringIndex)) % 1 + 1) % 1
-    mult = evalBrightnessMult(mult, tShifted, par)
+    mult = evalBrightnessMult(mult, t, par, entryPhase(timedB, ringIndex, timeframe.rings))
   }
-  // Position brightness
+  // Position brightness — value offset matches C++ applyPhaseToEffect
   const posB = getTimeframeEffects(timeframe).find(e => POSITION_BRIGHTNESS_KEYS.has(e.effectKey))
   if (posB?.params) {
     const par = posB.params as Record<string, unknown>
-    const relPosShifted = ((relPos + entryPhase(posB, ringIndex)) % 1 + 1) % 1
-    mult = evalBrightnessMult(mult, relPosShifted, par)
+    mult = evalBrightnessMult(mult, relPos, par, entryPhase(posB, ringIndex, timeframe.rings))
   }
   // Snake brightness
   const snakeB = getTimeframeEffects(timeframe).find(e => SNAKE_BRIGHTNESS_KEYS.has(e.effectKey))
   if (snakeB?.params) {
     const par = snakeB.params as Record<string, unknown>
-    const snakeBPhase = entryPhase(snakeB, ringIndex)
+    const snakeBPhase = entryPhase(snakeB, ringIndex, timeframe.rings)
     const head = evalFloat(t, par.head as FloatFunc) + snakeBPhase
     const tailLen = evalFloat(t, (par.tail_length ?? par.tailLength) as FloatFunc)
     const cyclic = par.cyclic === true
@@ -363,29 +368,29 @@ function getHueOffset(relPos: number, t: number, timeframe: Timeframe, ringIndex
   // Legacy hue → FloatFunc conversion
   const legacy = getTimeframeEffects(timeframe).find(e => HUE_KEYS.has(e.effectKey))
   if (legacy) {
-    const func = legacyHueToFloatFunc(legacy, entryPhase(legacy, ringIndex))
+    const func = legacyHueToFloatFunc(legacy, entryPhase(legacy, ringIndex, timeframe.rings))
     if (func) offset += evalFloat(t, func)
   }
 
-  // Timed hue
+  // Timed hue — use value offset (matching C++ applyPhaseToEffect)
   const timedH = getTimeframeEffects(timeframe).find(e => TIMED_HUE_KEYS.has(e.effectKey))
   if (timedH?.params) {
     const par = timedH.params as Record<string, unknown>
-    const tShifted = ((t + entryPhase(timedH, ringIndex)) % 1 + 1) % 1
-    if (par.offset_factor != null) offset += evalFloat(tShifted, par.offset_factor as FloatFunc)
+    const huePhaseOffset = entryPhase(timedH, ringIndex, timeframe.rings)
+    if (par.offset_factor != null) offset += evalFloat(t, par.offset_factor as FloatFunc) + huePhaseOffset
   }
   // Position hue
   const posH = getTimeframeEffects(timeframe).find(e => POSITION_HUE_KEYS.has(e.effectKey))
   if (posH?.params) {
     const par = posH.params as Record<string, unknown>
-    const relPosShifted = ((relPos + entryPhase(posH, ringIndex)) % 1 + 1) % 1
+    const relPosShifted = ((relPos + entryPhase(posH, ringIndex, timeframe.rings)) % 1 + 1) % 1
     if (par.offset_factor != null) offset += evalFloat(relPosShifted, par.offset_factor as FloatFunc)
   }
   // Snake hue
   const snakeH = getTimeframeEffects(timeframe).find(e => SNAKE_HUE_KEYS.has(e.effectKey))
   if (snakeH?.params) {
     const par = snakeH.params as Record<string, unknown>
-    const snakeHPhase = entryPhase(snakeH, ringIndex)
+    const snakeHPhase = entryPhase(snakeH, ringIndex, timeframe.rings)
     const head = evalFloat(t, par.head as FloatFunc) + snakeHPhase
     const tailLen = evalFloat(t, (par.tail_length ?? par.tailLength) as FloatFunc)
     const cyclic = par.cyclic === true
@@ -411,19 +416,19 @@ function getSaturationMult(relPos: number, t: number, timeframe: Timeframe, ring
   const timedS = getTimeframeEffects(timeframe).find(e => TIMED_SATURATION_KEYS.has(e.effectKey))
   if (timedS?.params) {
     const par = timedS.params as Record<string, unknown>
-    const tShifted = ((t + entryPhase(timedS, ringIndex)) % 1 + 1) % 1
+    const tShifted = ((t + entryPhase(timedS, ringIndex, timeframe.rings)) % 1 + 1) % 1
     mult = evalBrightnessMult(mult, tShifted, par)
   }
   const posS = getTimeframeEffects(timeframe).find(e => POSITION_SATURATION_KEYS.has(e.effectKey))
   if (posS?.params) {
     const par = posS.params as Record<string, unknown>
-    const relPosShifted = ((relPos + entryPhase(posS, ringIndex)) % 1 + 1) % 1
+    const relPosShifted = ((relPos + entryPhase(posS, ringIndex, timeframe.rings)) % 1 + 1) % 1
     mult = evalBrightnessMult(mult, relPosShifted, par)
   }
   const snakeS = getTimeframeEffects(timeframe).find(e => SNAKE_SATURATION_KEYS.has(e.effectKey))
   if (snakeS?.params) {
     const par = snakeS.params as Record<string, unknown>
-    const snakeSPhase = entryPhase(snakeS, ringIndex)
+    const snakeSPhase = entryPhase(snakeS, ringIndex, timeframe.rings)
     const head = evalFloat(t, par.head as FloatFunc) + snakeSPhase
     const tailLen = evalFloat(t, (par.tail_length ?? par.tailLength) as FloatFunc)
     const cyclic = par.cyclic === true
@@ -454,7 +459,7 @@ function getSnakeMask(
 ): number {
   const entry = getTimeframeEffects(timeframe).find(e => MOTION_KEYS.has(e.effectKey))
   if (!entry) return 1
-  const params = legacyMotionToSnakeParams(entry, entryPhase(entry, ringIndex))
+  const params = legacyMotionToSnakeParams(entry, entryPhase(entry, ringIndex, timeframe.rings))
   if (!params) return 1
   const head = evalFloat(t, params.head)
   const tail = evalFloat(t, params.tailLength)
@@ -479,7 +484,11 @@ export function getPixelColor(
 ): HSV {
   // Color phase from timeframe level (offsets base hue per ring)
   const colorPhaseIntensity = timeframe.phase ?? 0
-  const colorPerRingPhase = colorPhaseIntensity > 0 ? ringIndex / 12 * colorPhaseIntensity : 0
+  let colorPerRingPhase = 0
+  if (colorPhaseIntensity > 0) {
+    const elIdx = timeframe.rings.indexOf(ringIndex + 1)
+    if (elIdx >= 0 && timeframe.rings.length > 1) colorPerRingPhase = elIdx / timeframe.rings.length * colorPhaseIntensity
+  }
 
   let { h, s, v } = getBaseColor(relPos, timeframe, colorPerRingPhase)
 
@@ -513,7 +522,11 @@ export function getPixelColorMulti(
   // Base color from first timeframe
   const first = timeframesWithT[0]
   const colorPhaseIntensity = first.timeframe.phase ?? 0
-  const colorPerRingPhase = colorPhaseIntensity > 0 ? ringIndex / 12 * colorPhaseIntensity : 0
+  let colorPerRingPhase = 0
+  if (colorPhaseIntensity > 0) {
+    const elIdx = first.timeframe.rings.indexOf(ringIndex + 1)
+    if (elIdx >= 0 && first.timeframe.rings.length > 1) colorPerRingPhase = elIdx / first.timeframe.rings.length * colorPhaseIntensity
+  }
   let { h, s, v } = getBaseColor(first.relPos, first.timeframe, colorPerRingPhase)
 
   for (const { timeframe, t, relPos } of timeframesWithT) {
