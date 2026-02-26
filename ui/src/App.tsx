@@ -756,7 +756,7 @@ function App() {
         if (!audioRef.current) return
         const sec = audioRef.current.currentTime
         const beats = audioSecToBeats(sec, song)
-        if (beats >= maxTime) {
+        if (beats >= maxTime || audioRef.current.ended) {
           cancelAnimationFrame(rafId)
           performStop()
           return

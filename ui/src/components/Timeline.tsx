@@ -110,7 +110,10 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
       const newStartBeat = Math.max(0, currentTime - beatsPerScreen * 3 / 4)
       const maxScrollTop = Math.max(0, (maxTime - beatsPerScreen) * pxPerBeatForRange)
       const newScrollTop = Math.min(maxScrollTop, newStartBeat * pxPerBeatForRange)
-      scrollEl.scrollTop = newScrollTop
+      // Only scroll if the position actually changes (avoids vibration at end of song)
+      if (Math.abs(scrollEl.scrollTop - newScrollTop) >= 1) {
+        scrollEl.scrollTop = newScrollTop
+      }
     }
   }, [currentTime, pxPerBeatForRange, maxTime, beatsPerScreen])
 
