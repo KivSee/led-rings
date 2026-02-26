@@ -58,6 +58,12 @@ function hsvToHex(h: number, s: number, v: number): string {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
+/** Normalize raw addEffect keys to the UI's expected effect key names. */
+const EFFECT_KEY_ALIASES: Record<string, string> = {
+  hue: "timed_hue",
+  saturation: "timed_saturation",
+};
+
 class Recorder {
   private timeframes: RecordedTimeframe[] = [];
   private contextMap = new Map<string, RecordedTimeframe>();
@@ -89,9 +95,22 @@ class Recorder {
     const mapping: string = effectConfig.segments || "all";
     const phaseValue: number = store.phase || 0;
 
-    // Reconstruct cycle info
+    // Build cycle info from cycleStack (preferred) or fall back to repeat_num reconstruction
     const cycles: CycleInfo[] = [];
-    if (effectConfig.repeat_num != null && effectConfig.repeat_num > 0) {
+    if (store.cycleStack && store.cycleStack.length > 0) {
+      for (const entry of store.cycleStack) {
+        if (entry.startBeat === 0 && entry.endBeat === entry.beatsInCycle) {
+          cycles.push({ type: "cycle", beatsInCycle: entry.beatsInCycle });
+        } else {
+          cycles.push({
+            type: "cycleBeats",
+            beatsInCycle: entry.beatsInCycle,
+            startBeatInCycle: entry.startBeat,
+            endBeatInCycle: entry.endBeat,
+          });
+        }
+      }
+    } else if (effectConfig.repeat_num != null && effectConfig.repeat_num > 0) {
       const totalBeats = endBeat - startBeat;
       const beatsInCycle = Math.round(totalBeats / effectConfig.repeat_num * 10) / 10;
       const repeatStart = effectConfig.repeat_start ?? 0;
@@ -136,9 +155,24 @@ class Recorder {
       return;
     }
 
+    // noColor sets timeframe to black
+    if (effectKey === "noColor") {
+      tf.color = "#000000";
+      return;
+    }
+
+    // rainbow sets a representative color and records as an effect
+    if (effectKey === "rainbow") {
+      const startHue = params?.startHue ?? 0;
+      tf.color = hsvToHex(startHue, 1, 1);
+    }
+
+    // Normalize effect key aliases (raw addEffect keys like "hue" → "timed_hue")
+    const normalizedKey = EFFECT_KEY_ALIASES[effectKey] || effectKey;
+
     const effect: RecordedEffect = {
       id: `e-${this.effectCounter++}`,
-      effectKey,
+      effectKey: normalizedKey,
     };
     if (params && Object.keys(params).length > 0) effect.params = params;
     if (phaseValue) effect.phase = phaseValue;

@@ -29,7 +29,7 @@ export const cycleBeats = (beatsInCycle: number, startBeat: number, endBeat: num
     const { bpm } = store.animation;
     const totalBeats = (store.effectConfig.end_time - store.effectConfig.start_time) / 1000 / 60 * bpm;
     const repeatNum = totalBeats / beatsInCycle;
-    
+
     const newStore = {
         ...store,
         effectConfig: {
@@ -37,7 +37,8 @@ export const cycleBeats = (beatsInCycle: number, startBeat: number, endBeat: num
             repeat_num: repeatNum,
             repeat_start: startBeat / beatsInCycle,
             repeat_end: endBeat / beatsInCycle,
-        }
+        },
+        cycleStack: [...(store.cycleStack || []), { beatsInCycle, startBeat, endBeat }],
     }
     als.run(newStore, cb);
 }

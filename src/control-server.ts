@@ -87,6 +87,51 @@ async function handleSendSequence(runnerCode: string, res: http.ServerResponse) 
   }
 }
 
+async function handleParseSong(songCode: string, fileName: string, res: http.ServerResponse) {
+  // Write to src/songs/ so relative imports (../effects/, ../time/, etc.) resolve
+  const safeName = `.tmp-parse-${Date.now()}-${fileName.replace(/[^a-zA-Z0-9._-]/g, "")}`;
+  const songPath = path.join(ROOT, "src", "songs", safeName);
+  const outPath = path.join(ROOT, `.tmp-parse-out-${Date.now()}.json`);
+  try {
+    fs.writeFileSync(songPath, songCode, "utf8");
+  } catch (e) {
+    console.error("Failed to write temp song file", e);
+    send(res, 500, JSON.stringify({ error: "Failed to write temp song file" }));
+    return;
+  }
+
+  // Run export-song.ts in a child process for isolation
+  const child = spawn(process.execPath, ["-r", "ts-node/register", "src/export-song.ts", songPath], {
+    cwd: ROOT,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  let stderr = "";
+  child.stderr?.on("data", (d) => { stderr += d.toString(); });
+  child.stdout?.on("data", () => {});
+
+  await new Promise<void>((resolve) => child.on("close", () => resolve()));
+
+  try { fs.unlinkSync(songPath); } catch (_) {}
+
+  if (child.exitCode !== 0) {
+    console.error("Parse song failed", stderr);
+    send(res, 500, JSON.stringify({ error: "Parse song failed", stderr: stderr.slice(0, 500) }));
+    return;
+  }
+
+  // export-song.ts writes to <songPath>.json (replacing .ts with .json)
+  const jsonPath = songPath.replace(/\.ts$/, ".json");
+  try {
+    const raw = fs.readFileSync(jsonPath, "utf8");
+    fs.unlinkSync(jsonPath);
+    send(res, 200, raw);
+  } catch (e) {
+    console.error("Failed to read parse output", e);
+    send(res, 500, JSON.stringify({ error: "Failed to read parse output" }));
+  }
+}
+
 const server = http.createServer(async (req, res) => {
   cors(res);
   if (req.method === "OPTIONS") {
@@ -146,6 +191,23 @@ const server = http.createServer(async (req, res) => {
       console.error("stop failed", e);
       send(res, 500, JSON.stringify({ error: "stop failed" }));
     }
+    return;
+  }
+
+  if (req.method === "POST" && pathname === "/api/parse-song") {
+    const body = await parseBody(req);
+    let payload: { songCode?: string; fileName?: string };
+    try {
+      payload = JSON.parse(body);
+    } catch {
+      send(res, 400, JSON.stringify({ error: "Invalid JSON" }));
+      return;
+    }
+    if (typeof payload.songCode !== "string") {
+      send(res, 400, JSON.stringify({ error: "Missing songCode" }));
+      return;
+    }
+    await handleParseSong(payload.songCode, payload.fileName || "import.ts", res);
     return;
   }
 

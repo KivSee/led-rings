@@ -487,6 +487,69 @@ function App() {
     }
     input.click()
   }
+
+  const handleImportTs = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.ts'
+    input.onchange = async () => {
+      const file = input.files && input.files[0]
+      if (!file) return
+      try {
+        const songCode = await file.text()
+        const res = await fetch(`${API_BASE}/api/parse-song`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ songCode, fileName: file.name }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+
+        if (data.song && typeof data.song === 'object') {
+          const s = normalizeLoadedSong(data.song as Record<string, unknown>)
+          setSong(s)
+          setEffectiveAudioSrc(s.audioFilePath ?? '')
+        }
+
+        if (Array.isArray(data.timeframes)) {
+          const mapped: Timeframe[] = data.timeframes
+            .filter((item: any) => item && typeof item === 'object')
+            .map((item: any, idx: number) => {
+              const effects = Array.isArray(item.effects)
+                ? item.effects
+                    .filter((e: any) => e && typeof e === 'object' && typeof e.effectKey === 'string')
+                    .map((e: any) => ({
+                      id: e.id && typeof e.id === 'string' ? e.id : `eff-${Date.now()}-${idx}-${Math.random().toString(36).slice(2)}`,
+                      effectKey: e.effectKey,
+                      params: e.params && typeof e.params === 'object' ? e.params as Record<string, number | boolean | object> : undefined,
+                      phase: typeof e.phase === 'number' ? e.phase : undefined,
+                    }))
+                : undefined
+              return {
+                id: item.id?.toString() ?? `tf-${Date.now()}-${idx}`,
+                startTime: Number(item.startTime) || 0,
+                endTime: Number(item.endTime) || 0,
+                label: typeof item.label === 'string' ? item.label : `Timeframe ${idx + 1}`,
+                color: typeof item.color === 'string' ? item.color : '#3b82f6',
+                rings: Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n)) : [1,2,3,4,5,6,7,8,9,10,11,12],
+                mapping: item.mapping,
+                phase: typeof item.phase === 'number' ? item.phase : undefined,
+                cycles: normalizeCycles(item.cycles),
+                ...(effects && effects.length > 0 ? { effects } : {}),
+              }
+            })
+          setTimeframes(mapped)
+        }
+
+        setFocusedTimeframeId(null)
+        setCurrentTime(0)
+      } catch (err) {
+        console.error('Failed to import .ts song file', err)
+        alert(`Import failed: ${err instanceof Error ? err.message : err}`)
+      }
+    }
+    input.click()
+  }
   const handleSaveTimeframes = async () => {
     const payload = {
       song,
@@ -941,6 +1004,9 @@ function App() {
           <div className="app-header-actions">
             <button className="secondary-button" onClick={handleLoadTimeframes}>
               Load JSON
+            </button>
+            <button className="secondary-button" onClick={handleImportTs} disabled={!API_BASE} title={!API_BASE ? 'Set VITE_API_URL and run control server' : 'Import a .ts song file'}>
+              Import .ts
             </button>
             <button className="secondary-button" onClick={handleSaveTimeframes}>
               Save Changes
