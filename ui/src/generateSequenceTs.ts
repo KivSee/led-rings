@@ -189,6 +189,7 @@ function emitColor(tf: Timeframe): string[] {
 const BRIGHTNESS_KEYS = new Set(['brightness', 'fadeIn', 'fadeOut', 'fadeInOut', 'fadeOutIn', 'blink', 'pulse', 'fade'])
 const HUE_KEYS = new Set(['staticHueShift', 'hueShiftStartToEnd', 'hueShiftSin'])
 const MOTION_KEYS = new Set(['snakeHeadMove', 'staticSnake', 'snake', 'snakeHeadSin', 'snakeFillGrow', 'snakeInOut', 'snakeSlowFast', 'snakeTailShrinkGrow', 'snakeHeadSteps'])
+
 const POSITION_KEYS = new Set(['position_brightness', 'position_hue', 'position_saturation'])
 const SNAKE_KEYS = new Set(['snake_brightness', 'snake_hue', 'snake_saturation'])
 const TIMED_KEYS = new Set(['timed_brightness', 'timed_hue', 'timed_saturation'])
@@ -285,18 +286,30 @@ ${indentBlock(block, 2)}
 });`]
 }
 
-function emitTimeframeBody(tf: Timeframe): string {
+type EmitLayer = 'color' | 'modifiers' | 'motion'
+
+function emitTimeframeBody(tf: Timeframe, layer: EmitLayer): string | null {
   const segmentId = mappingToSegment(tf.mapping)
   const elementsArg = ringsToElementsArg(tf.rings)
   const inner: string[] = []
-  inner.push(...wrapWithPhase(emitColor(tf), tf.phase))
-  const effectEntries = getTimeframeEffects(tf)
-  for (const entry of effectEntries) {
-    const effectLines = emitSingleEffect(entry.effectKey, entry.params)
-    inner.push(...wrapWithPhase(effectLines, entry.phase))
+
+  if (layer === 'color') {
+    inner.push(...wrapWithPhase(emitColor(tf), tf.phase))
+  } else {
+    const effectEntries = getTimeframeEffects(tf)
+    for (const entry of effectEntries) {
+      const isMotion = MOTION_KEYS.has(entry.effectKey)
+      if (layer === 'motion' && !isMotion) continue
+      if (layer === 'modifiers' && isMotion) continue
+      const effectLines = emitSingleEffect(entry.effectKey, entry.params)
+      inner.push(...wrapWithPhase(effectLines, entry.phase))
+    }
   }
+
+  if (inner.length === 0) return null
+
   const cycles = tf.cycles ?? []
-  const effectLines = inner.length ? inner.join('\n') : '// no effects'
+  const effectLines = inner.join('\n')
   let core = `elements(${elementsArg}, () => {
   segment(${segmentId}, () => {
 ${indentBlock(effectLines, 4)}
@@ -332,9 +345,16 @@ export function generateSequenceTs(song: Song, timeframes: Timeframe[]): string 
   const totalTimeSeconds = song.lengthSeconds
   const startOffsetMs = song.startOffsetMs ?? 0
   const animationType = song.animationType ?? 'song'
-  const bodyBlocks = enabledTimeframes.length === 0
-    ? '    // Empty: add beats() blocks and content here.'
-    : enabledTimeframes.map(emitTimeframeBody).join('\n\n')
+
+  let bodyBlocks: string
+  if (enabledTimeframes.length === 0) {
+    bodyBlocks = '    // Empty: add beats() blocks and content here.'
+  } else {
+    const colorBlocks = enabledTimeframes.map(tf => emitTimeframeBody(tf, 'color')).filter(Boolean) as string[]
+    const modifierBlocks = enabledTimeframes.map(tf => emitTimeframeBody(tf, 'modifiers')).filter(Boolean) as string[]
+    const motionBlocks = enabledTimeframes.map(tf => emitTimeframeBody(tf, 'motion')).filter(Boolean) as string[]
+    bodyBlocks = [...colorBlocks, ...modifierBlocks, ...motionBlocks].join('\n\n')
+  }
 
   const escapedName = safeName.replace(/"/g, '\\"')
   const isTrigger = animationType === 'trigger'
@@ -427,9 +447,16 @@ export function generateSequenceRunnerTs(song: Song, timeframes: Timeframe[]): s
   const totalTimeSeconds = song.lengthSeconds
   const startOffsetMs = song.startOffsetMs ?? 0
   const animationType = song.animationType ?? 'song'
-  const bodyBlocks = enabledTimeframes.length === 0
-    ? '    // Empty: add beats() blocks and content here.'
-    : enabledTimeframes.map(emitTimeframeBody).join('\n\n')
+
+  let bodyBlocks: string
+  if (enabledTimeframes.length === 0) {
+    bodyBlocks = '    // Empty: add beats() blocks and content here.'
+  } else {
+    const colorBlocks = enabledTimeframes.map(tf => emitTimeframeBody(tf, 'color')).filter(Boolean) as string[]
+    const modifierBlocks = enabledTimeframes.map(tf => emitTimeframeBody(tf, 'modifiers')).filter(Boolean) as string[]
+    const motionBlocks = enabledTimeframes.map(tf => emitTimeframeBody(tf, 'motion')).filter(Boolean) as string[]
+    bodyBlocks = [...colorBlocks, ...modifierBlocks, ...motionBlocks].join('\n\n')
+  }
   const escapedName = safeName.replace(/"/g, '\\"')
   const isTrigger = animationType === 'trigger'
   const animationCtor = isTrigger
