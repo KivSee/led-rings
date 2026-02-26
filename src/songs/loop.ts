@@ -1,11 +1,11 @@
 // Generated from Timeline Manager. Place this file in your project's src/ so imports resolve.
-import { sendSequence } from "./services/sequence";
-import { startSong, trigger } from "./services/trigger";
-import { Animation } from "./animation/animation";
-import { beats, cycle, cycleBeats } from "./time/time";
-import { phase } from "./phase/phase";
-import { constColor, noColor } from "./effects/coloring";
-import { addEffect } from "./effects/effect";
+import { sendSequence } from "../services/sequence";
+import { startSong, trigger } from "../services/trigger";
+import { Animation } from "../animation/animation";
+import { beats, cycle, cycleBeats } from "../time/time";
+import { phase } from "../phase/phase";
+import { constColor, noColor } from "../effects/coloring";
+import { addEffect } from "../effects/effect";
 import {
   blink,
   brightness,
@@ -15,8 +15,8 @@ import {
   fadeOut,
   fadeOutIn,
   pulse,
-} from "./effects/brightness";
-import { elements, segment } from "./objects/elements";
+} from "../effects/brightness";
+import { elements, segment } from "../objects/elements";
 import {
   all,
   center,
@@ -32,7 +32,7 @@ import {
   segment_ind,
   segment_rand,
   segment_updown,
-} from "./objects/ring-elements";
+} from "../objects/ring-elements";
 import {
   snake,
   snakeFillGrow,
@@ -43,8 +43,8 @@ import {
   snakeTailShrinkGrow,
   snakeHeadSteps,
   staticSnake,
-} from "./effects/motion";
-import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "./effects/hue";
+} from "../effects/motion";
+import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "../effects/hue";
 
 const loop = async () => {
   const anim = new Animation("loop", 116, 245.00, 0);
