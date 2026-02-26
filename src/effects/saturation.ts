@@ -1,4 +1,5 @@
 import { addEffect } from "./effect";
+import { tagEffect } from "../recorder/effect-key-map";
 
 /** Saturation along snake (head to tail): one of mult_factor_increase or mult_factor_decrease by position in snake. */
 export const snakeSaturation = (opts: {
@@ -7,6 +8,7 @@ export const snakeSaturation = (opts: {
   mult_factor_increase?: { start?: number; end?: number };
   mult_factor_decrease?: { start?: number; end?: number };
 }) => {
+  tagEffect("snakeSaturation", opts);
   const tailLength = opts.tailLength ?? 0.5;
   const cyclic = opts.cyclic ?? false;
   const hasIncrease = opts.mult_factor_increase != null;

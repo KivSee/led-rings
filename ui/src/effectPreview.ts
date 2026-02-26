@@ -275,10 +275,16 @@ function getBaseColor(
   return { h: baseHue, s: 1, v: 1 }
 }
 
-/** Evaluate a timed/position FloatFunc brightness entry (increase or decrease). */
+/** Evaluate a timed/position FloatFunc brightness entry (increase or decrease).
+ *  Matches C++ renderer semantics:
+ *  - mult_factor_decrease: val *= factor (simple multiply)
+ *  - mult_factor_increase: val = val + (1.0 - val) * factor (interpolate towards 1.0) */
 function evalBrightnessMult(mult: number, t: number, par: Record<string, unknown>): number {
-  if (par.mult_factor_increase != null) return mult * evalFloat(t, par.mult_factor_increase as FloatFunc)
   if (par.mult_factor_decrease != null) return mult * evalFloat(t, par.mult_factor_decrease as FloatFunc)
+  if (par.mult_factor_increase != null) {
+    const factor = evalFloat(t, par.mult_factor_increase as FloatFunc)
+    return mult + (1.0 - mult) * factor
+  }
   return mult
 }
 

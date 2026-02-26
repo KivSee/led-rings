@@ -1,4 +1,4 @@
-// Generated from Timeline Manager. Place this file in your project's src/ so imports resolve.
+// Generated from Timeline Manager.
 import { sendSequence } from "../services/sequence";
 import { startSong, trigger } from "../services/trigger";
 import { Animation } from "../animation/animation";

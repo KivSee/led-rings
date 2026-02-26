@@ -15,7 +15,8 @@
     "preset": "ts-node src/preset-runner.ts",
     "buttons": "ts-node-dev --respawn src/songs/buttons.ts",
     "agent": "ts-node-dev --respawn src/songs/agent.ts",
-    "control-server": "ts-node-dev --respawn src/control-server.ts"
+    "control-server": "ts-node-dev --respawn src/control-server.ts",
+    "export-song": "ts-node src/export-song.ts"
   },
   "dependencies": {
     "@types/node": "^22.10.10",

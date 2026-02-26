@@ -1,6 +1,6 @@
 /**
  * Generates TypeScript source that mirrors the Timeline Manager UI (song + timeframes).
- * Output matches the pattern used in src/buttons.ts, src/index.ts, src/agent.ts.
+ * Output matches the pattern used in src/songs/.
  */
 
 export type AnimationType = 'song' | 'trigger'
@@ -355,14 +355,14 @@ export function generateSequenceTs(song: Song, timeframes: Timeframe[]): string 
     : `await startSong("${startSongName}", 0);`
   const fnName = toIdentifier(safeName)
 
-  return `// Generated from Timeline Manager. Place this file in your project's src/ so imports resolve.
-import { sendSequence } from "./services/sequence";
-import { startSong, trigger } from "./services/trigger";
-import { Animation } from "./animation/animation";
-import { beats, cycle, cycleBeats } from "./time/time";
-import { phase } from "./phase/phase";
-import { constColor, noColor } from "./effects/coloring";
-import { addEffect } from "./effects/effect";
+  return `// Generated from Timeline Manager.
+import { sendSequence } from "../services/sequence";
+import { startSong, trigger } from "../services/trigger";
+import { Animation } from "../animation/animation";
+import { beats, cycle, cycleBeats } from "../time/time";
+import { phase } from "../phase/phase";
+import { constColor, noColor } from "../effects/coloring";
+import { addEffect } from "../effects/effect";
 import {
   blink,
   brightness,
@@ -372,8 +372,8 @@ import {
   fadeOut,
   fadeOutIn,
   pulse,
-} from "./effects/brightness";
-import { elements, segment } from "./objects/elements";
+} from "../effects/brightness";
+import { elements, segment } from "../objects/elements";
 import {
   all,
   center,
@@ -389,7 +389,7 @@ import {
   segment_ind,
   segment_rand,
   segment_updown,
-} from "./objects/ring-elements";
+} from "../objects/ring-elements";
 import {
   snake,
   snakeFillGrow,
@@ -400,8 +400,8 @@ import {
   snakeTailShrinkGrow,
   snakeHeadSteps,
   staticSnake,
-} from "./effects/motion";
-import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "./effects/hue";
+} from "../effects/motion";
+import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "../effects/hue";
 
 const ${fnName} = async () => {
   const anim = ${animationCtor};
@@ -436,7 +436,7 @@ export function generateSequenceRunnerTs(song: Song, timeframes: Timeframe[]): s
     ? `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)})`
     : `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)}, ${startOffsetMs})`
   const fnName = toIdentifier(safeName)
-  return `// Runner: builds sequence and writes to TMP_SEQUENCE_OUT. Do not place in src/ permanently.
+  return `// Runner: builds sequence and writes to TMP_SEQUENCE_OUT.
 import * as fs from "fs";
 import { Animation } from "./animation/animation";
 import { beats, cycle, cycleBeats } from "./time/time";

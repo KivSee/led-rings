@@ -1,6 +1,8 @@
 import { addEffect } from "./effect";
+import { tagEffect } from "../recorder/effect-key-map";
 
 export const staticHueShift = (opts: { value: number }) => {
+  tagEffect("staticHueShift", opts);
   addEffect({
     timed_hue: {
       offset_factor: {
@@ -19,6 +21,7 @@ export const hueShiftStartToEnd = ({
   start: number;
   end: number;
 }) => {
+  tagEffect("hueShiftStartToEnd", { start, end });
   addEffect({
     timed_hue: {
       offset_factor: {
@@ -32,6 +35,7 @@ export const hueShiftStartToEnd = ({
 };
 
 export const hueShiftSin = ({ amount }: { amount: number }) => {
+  tagEffect("hueShiftSin", { amount });
   addEffect((phase: number) => ({
     timed_hue: {
       offset_factor: {
@@ -52,6 +56,7 @@ export const snakeHue = (opts: {
   cyclic?: boolean;
   offset?: number;
 }) => {
+  tagEffect("snakeHue", opts);
   const tailLength = opts.tailLength ?? 0.5;
   const cyclic = opts.cyclic ?? false;
   const offset = opts.offset ?? 0.5;

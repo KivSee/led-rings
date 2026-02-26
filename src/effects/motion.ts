@@ -1,4 +1,5 @@
 import { addEffect } from "./effect";
+import { tagEffect } from "../recorder/effect-key-map";
 
 export const snakeHeadMove = ({
   start,
@@ -9,6 +10,7 @@ export const snakeHeadMove = ({
   end: number;
   tail: number;
 }) => {
+  tagEffect("snakeHeadMove", { start, end, tail });
   addEffect((phase: number) => {
     return {
       snake: {
@@ -29,6 +31,7 @@ export const snakeHeadMove = ({
 };
 
 export const staticSnake = ({ start, end }: { start: number; end: number }) => {
+  tagEffect("staticSnake", { start, end });
   addEffect((phase: number) => {
     return {
       snake: {
@@ -57,6 +60,7 @@ export const snake = ({
   cyclic?: boolean;
   reverse?: boolean;
 }) => {
+  tagEffect("snake", { tailLength, cyclic, reverse });
   addEffect((phase: number) => {
     return {
       snake: {
@@ -84,6 +88,7 @@ export const snakeHeadSin = ({
   tailLength: number;
   cyclic?: boolean;
 }) => {
+  tagEffect("snakeHeadSin", { tailLength, cyclic });
   addEffect((phase: number) => {
     return {
       snake: {
@@ -107,6 +112,7 @@ export const snakeHeadSin = ({
 };
 
 export const snakeFillGrow = (reverse?: boolean) => {
+  tagEffect("snakeFillGrow", { reverse });
   const f1 = {
     linear: {
       start: 0,
@@ -147,6 +153,7 @@ export const snakeFillGrow = (reverse?: boolean) => {
 };
 
 export const snakeInOut = (opt?: { start: number; end: number }) => {
+  tagEffect("snakeInOut", opt || {});
   addEffect((phase: number) => {
     return {
       snake: {
@@ -171,6 +178,7 @@ export const snakeInOut = (opt?: { start: number; end: number }) => {
 export const snakeSlowFast = ({ tailLength }: {
   tailLength?: number;
 }) => {
+  tagEffect("snakeSlowFast", { tailLength });
   addEffect((phase: number) => {
     return {
       snake: {
@@ -206,6 +214,7 @@ export const snakeSlowFast = ({ tailLength }: {
 };
 
 export const snakeTailShrinkGrow = () => {
+  tagEffect("snakeTailShrinkGrow", {});
   addEffect((phase: number) => {
     return {
       snake: {
@@ -243,6 +252,7 @@ export const snakeHeadSteps = ({ steps, tailLength }: {
   steps: number;
   tailLength?: number;
 }) => {
+  tagEffect("snakeHeadSteps", { steps, tailLength });
   addEffect((phase: number) => {
     return {
       snake: {
