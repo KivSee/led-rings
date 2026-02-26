@@ -20,6 +20,7 @@ interface RecordedTimeframe {
   endTime: number;
   label: string;
   color: string;
+  hasExplicitColor?: boolean;
   rings: number[];
   mapping: string;
   phase?: number;
@@ -152,12 +153,26 @@ class Recorder {
     // constColor sets the timeframe color instead of being an effect
     if (effectKey === "constColor" && params.hue != null) {
       tf.color = hsvToHex(params.hue, params.sat ?? 1, params.val ?? 1);
+      tf.hasExplicitColor = true;
+      return;
+    }
+
+    // vivid/pastel set the timeframe color (same as constColor)
+    if (effectKey === "vivid" && params.hue != null) {
+      tf.color = hsvToHex(params.hue, 1, 1);
+      tf.hasExplicitColor = true;
+      return;
+    }
+    if (effectKey === "pastel") {
+      tf.color = hsvToHex(params.hue ?? 0, 0.8, 1);
+      tf.hasExplicitColor = true;
       return;
     }
 
     // noColor sets timeframe to black
     if (effectKey === "noColor") {
       tf.color = "#000000";
+      tf.hasExplicitColor = true;
       return;
     }
 
@@ -166,6 +181,7 @@ class Recorder {
       const startHue = params?.startHue ?? 0;
       const endHue = params?.endHue ?? 1;
       tf.color = hsvToHex(startHue, 1, 1);
+      tf.hasExplicitColor = true;
       const effect: RecordedEffect = {
         id: `e-${this.effectCounter++}`,
         effectKey: "position_hue",
@@ -189,6 +205,10 @@ class Recorder {
   }
 
   getResult(songMeta: SongMeta) {
+    // Mark timeframes that never received an explicit color
+    for (const tf of this.timeframes) {
+      if (!tf.hasExplicitColor) tf.hasExplicitColor = false;
+    }
     return {
       song: {
         ...songMeta,

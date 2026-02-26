@@ -1,10 +1,11 @@
-import { Effect } from "../effects/types";
-import { sendSequence, SequencePerThing } from "../services/sequence";
+// Generated from Timeline Manager.
+import { sendSequence } from "../services/sequence";
 import { startSong, trigger } from "../services/trigger";
 import { Animation } from "../animation/animation";
-import { NUMBER_OF_RINGS } from "../sys-config/sys-config";
 import { beats, cycle, cycleBeats } from "../time/time";
-import { constColor, noColor, rainbow, vivid } from "../effects/coloring";
+import { phase } from "../phase/phase";
+import { constColor, noColor } from "../effects/coloring";
+import { addEffect } from "../effects/effect";
 import {
   blink,
   brightness,
@@ -23,402 +24,1537 @@ import {
   left,
   odd,
   right,
+  segment_all,
   segment_arc,
   segment_b1,
   segment_b2,
   segment_centric,
   segment_ind,
+  segment_rand,
   segment_updown,
 } from "../objects/ring-elements";
 import {
   snake,
   snakeFillGrow,
   snakeHeadMove,
+  snakeHeadSin,
   snakeInOut,
+  snakeSlowFast,
+  snakeTailShrinkGrow,
+  snakeHeadSteps,
   staticSnake,
 } from "../effects/motion";
-import { phase } from "../phase/phase";
-import { hueShiftStartToEnd, staticHueShift } from "../effects/hue";
+import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "../effects/hue";
 
-function getRandomSubset(numberRingsOn: number): number[] {
-  const numbers = Array.from({ length: 12 }, (_, i) => i + 1); // [1, 2, ..., 12]
-  const indicesToRemove = new Set<number>();
-  while (indicesToRemove.size < numberRingsOn) {
-    indicesToRemove.add(Math.floor(Math.random() * 12));
-  }
-  return numbers.filter((_, index) => !indicesToRemove.has(index));
-}
-
-const turnOffRand = (numberRingsOn: number) => {
-  elements(getRandomSubset(numberRingsOn), () => {
-    noColor();
-  });
-};
-
-const testSequence = async () => {
-  const testAnimation = new Animation("aladdin", 64.725, 79, 3575);
-  testAnimation.sync(() => {
+const aladdin = async () => {
+  const anim = new Animation("aladdin", 64.725, 79.00, 3575);
+  anim.sync(() => {
     beats(0, 16, () => {
       elements(all, () => {
-        rainbow({ startHue: 0.05, endHue: 0.1 });
-        cycle(12, () => {
-          snake({ tailLength: 0.125, cyclic: true });
+        segment(segment_all, () => {
+          constColor({ hue: 0.0503, sat: 1.0000, val: 1.0000 })
         });
       });
-    });
-
-    beats(0, 1, () => {
-      elements(all, () => {
-        fadeIn();
-      });
-    });
+    })
 
     beats(8, 16, () => {
       elements(center, () => {
         segment(segment_arc, () => {
-          rainbow({ startHue: 0.75, endHue: 0.98 });
-          cycle(8, () => {
-            snakeInOut();
-          });
+          constColor({ hue: 0.7503, sat: 1.0000, val: 1.0000 })
         });
       });
-    });
-
-    beats(7, 9, () => {
-      elements(center, () => {
-        fadeOutIn();
-      });
-    });
-
-    beats(15, 16, () => {
-      elements(all, () => {
-        fadeOut();
-      });
-    });
+    })
 
     beats(16, 24, () => {
       elements(left, () => {
-        constColor({ hue: 0.68, sat: 0.9, val: 1.0 });
+        segment(segment_all, () => {
+          constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
+        });
       });
-    });
+    })
 
-    for (let i = 0; i < 6; i++) {
-      elements([i + 1], () => {
-        beats(16, 16 + i, () => {
-          noColor();
-        });
-        segment(segment_arc, () => {
-          beats(16 + i, 16 + i + 2, () => {
-            hueShiftStartToEnd({ start: 0.2 * i, end: 0.2 * (i + 1) });
-            snakeFillGrow();
-          });
-        });
-        beats(16 + i + 2, 24, () => {
-          staticHueShift({ value: 0.2 * (i + 1) });
+    beats(16, 16, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
         });
       });
-    }
+    })
+
+    beats(16, 17, () => {
+      elements([2], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(16, 18, () => {
+      elements([3], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(16, 19, () => {
+      elements([4], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(16, 20, () => {
+      elements([5], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(16, 21, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
 
     beats(24, 32, () => {
       elements(right, () => {
-        constColor({ hue: 0.68, sat: 0.9, val: 1.0 });
-      });
-    });
-
-    for (let i = 0; i < 6; i++) {
-      elements([12 - i], () => {
-        beats(24, 24 + i, () => {
-          noColor();
+        segment(segment_all, () => {
+          constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
         });
+      });
+    })
+
+    beats(24, 24, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(24, 25, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(24, 26, () => {
+      elements([10], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(24, 27, () => {
+      elements([9], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(24, 28, () => {
+      elements([8], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(24, 29, () => {
+      elements([7], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(31.5, 32, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(31.6, 32.1, () => {
+      elements([2], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(31.7, 32.3, () => {
+      elements([3], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(31.9, 32.4, () => {
+      elements([4], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(32, 32.5, () => {
+      elements([5], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(32.1, 32.6, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(32.3, 32.7, () => {
+      elements([7], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(32.4, 32.9, () => {
+      elements([8], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(32.5, 33, () => {
+      elements([9], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(32.6, 33.1, () => {
+      elements([10], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(32.7, 33.3, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(32.9, 33.4, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(33.5, 34, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(33.6, 34.1, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(33.7, 34.3, () => {
+      elements([10], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(33.9, 34.4, () => {
+      elements([9], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(34, 34.5, () => {
+      elements([8], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(34.1, 34.6, () => {
+      elements([7], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(34.3, 34.7, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(34.4, 34.9, () => {
+      elements([5], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(34.5, 35, () => {
+      elements([4], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(34.6, 35.1, () => {
+      elements([3], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(34.7, 35.3, () => {
+      elements([2], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(34.9, 35.4, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(35.5, 38.5, () => {
+      elements(even, () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0503, sat: 1.0000, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(36.5, 38.5, () => {
+      elements(odd, () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.6601, sat: 0.4980, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(38.5, 48, () => {
+      elements(all, () => {
+        segment(segment_b1, () => {
+          constColor({ hue: 0.0000, sat: 1.0000, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(38.5, 48, () => {
+      elements(all, () => {
+        segment(segment_b2, () => {
+          constColor({ hue: 0.7998, sat: 0.8000, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(38.5, 39.5, () => {
+      elements(all, () => {
+        segment(segment_b2, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(41.5, 42.5, () => {
+      elements(all, () => {
+        segment(segment_b1, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(43.5, 43.7, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(43.7, 44, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(44, 44.3, () => {
+      elements([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(44.3, 44.5, () => {
+      elements([1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(44.5, 44.7, () => {
+      elements([1, 3, 4, 5, 6, 7, 8, 9, 11, 12], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(44.7, 45, () => {
+      elements([1, 2, 3, 4, 5, 6, 8, 9, 11, 12], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(45, 45.3, () => {
+      elements([1, 2, 3, 4, 6, 7, 8, 9, 12], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(45.3, 45.5, () => {
+      elements([1, 2, 3, 4, 6, 7, 8, 10, 11], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(45.5, 45.7, () => {
+      elements([1, 2, 3, 4, 5, 7, 10, 11], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(45.7, 46, () => {
+      elements([1, 4, 5, 6, 8, 10, 11, 12], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(46, 46.3, () => {
+      elements([1, 2, 3, 4, 7, 8, 10], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(46.3, 46.5, () => {
+      elements([1, 3, 4, 6, 9, 11, 12], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(46.5, 46.7, () => {
+      elements([2, 3, 4, 6, 10, 12], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(46.7, 47, () => {
+      elements([1, 2, 5, 6, 7, 11], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(47, 47.3, () => {
+      elements([1, 3, 5, 7, 8], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(47.3, 47.5, () => {
+      elements([2, 3, 6, 11, 12], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(47.5, 47.7, () => {
+      elements([2, 7, 9, 11], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(47.7, 48, () => {
+      elements([3, 7, 10, 12], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+        });
+      });
+    })
+
+    beats(48.5, 50, () => {
+      elements(all, () => {
         segment(segment_arc, () => {
-          beats(24 + i, 24 + i + 2, () => {
-            hueShiftStartToEnd({ start: 0.2 * i, end: 0.2 * (i + 1) });
-            snakeFillGrow();
+          constColor({ hue: 0.0000, sat: 1.0000, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(50, 57, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.6601, sat: 0.6980, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(57, 59, () => {
+      elements(all, () => {
+        segment(segment_arc, () => {
+          constColor({ hue: 0.1002, sat: 0.6980, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(59, 64, () => {
+      elements(all, () => {
+        segment(segment_arc, () => {
+          constColor({ hue: 0.0000, sat: 1.0000, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(62, 64, () => {
+      cycle(0.25, () => {
+        elements(all, () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.0495, sat: 1.0000, val: 0.5020 })
           });
         });
-        beats(24 + i + 2, 32, () => {
-          staticHueShift({ value: 0.2 * (i + 1) });
+      });
+    })
+
+    beats(64, 66, () => {
+      elements(all, () => {
+        segment(segment_arc, () => {
+          constColor({ hue: 0.0000, sat: 1.0000, val: 1.0000 })
         });
       });
-    }
+    })
+
+    beats(66, 73, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.6597, sat: 0.7010, val: 0.8000 })
+        });
+      });
+    })
+
+    beats(70, 73, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0000, sat: 0.0000, val: 0.8000 })
+        });
+      });
+    })
+
+    beats(73, 75, () => {
+      cycle(2, () => {
+        elements(all, () => {
+          segment(segment_arc, () => {
+            constColor({ hue: 0.0000, sat: 1.0000, val: 1.0000 })
+          });
+        });
+      });
+    })
+
+    beats(75, 87, () => {
+      elements(all, () => {
+        segment(segment_arc, () => {
+          constColor({ hue: 0.0000, sat: 1.0000, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(0, 16, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          addEffect({ position_hue: { offset_factor: { linear: { start: 0, end: 0.05 } } } })
+        });
+      });
+    })
+
+    beats(0, 1, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          fadeIn()
+        });
+      });
+    })
+
+    beats(8, 16, () => {
+      elements(center, () => {
+        segment(segment_arc, () => {
+          addEffect({ position_hue: { offset_factor: { linear: { start: 0, end: 0.23 } } } })
+        });
+      });
+    })
+
+    beats(7, 9, () => {
+      elements(center, () => {
+        segment(segment_all, () => {
+          fadeOutIn()
+        });
+      });
+    })
+
+    beats(15, 16, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(16, 18, () => {
+      elements([1], () => {
+        segment(segment_arc, () => {
+          hueShiftStartToEnd({ start: 0, end: 0.2 })
+        });
+      });
+    })
+
+    beats(18, 24, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          staticHueShift({ value: 0.2 })
+        });
+      });
+    })
+
+    beats(17, 19, () => {
+      elements([2], () => {
+        segment(segment_arc, () => {
+          hueShiftStartToEnd({ start: 0.2, end: 0.4 })
+        });
+      });
+    })
+
+    beats(19, 24, () => {
+      elements([2], () => {
+        segment(segment_all, () => {
+          staticHueShift({ value: 0.4 })
+        });
+      });
+    })
+
+    beats(18, 20, () => {
+      elements([3], () => {
+        segment(segment_arc, () => {
+          hueShiftStartToEnd({ start: 0.4, end: 0.6 })
+        });
+      });
+    })
+
+    beats(20, 24, () => {
+      elements([3], () => {
+        segment(segment_all, () => {
+          staticHueShift({ value: 0.6 })
+        });
+      });
+    })
+
+    beats(19, 21, () => {
+      elements([4], () => {
+        segment(segment_arc, () => {
+          hueShiftStartToEnd({ start: 0.6, end: 0.8 })
+        });
+      });
+    })
+
+    beats(21, 24, () => {
+      elements([4], () => {
+        segment(segment_all, () => {
+          staticHueShift({ value: 0.8 })
+        });
+      });
+    })
+
+    beats(20, 22, () => {
+      elements([5], () => {
+        segment(segment_arc, () => {
+          hueShiftStartToEnd({ start: 0.8, end: 1 })
+        });
+      });
+    })
+
+    beats(22, 24, () => {
+      elements([5], () => {
+        segment(segment_all, () => {
+          staticHueShift({ value: 1 })
+        });
+      });
+    })
+
+    beats(21, 23, () => {
+      elements([6], () => {
+        segment(segment_arc, () => {
+          hueShiftStartToEnd({ start: 1, end: 1.2 })
+        });
+      });
+    })
+
+    beats(23, 24, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          staticHueShift({ value: 1.2 })
+        });
+      });
+    })
+
+    beats(24, 26, () => {
+      elements([12], () => {
+        segment(segment_arc, () => {
+          hueShiftStartToEnd({ start: 0, end: 0.2 })
+        });
+      });
+    })
+
+    beats(26, 32, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          staticHueShift({ value: 0.2 })
+        });
+      });
+    })
+
+    beats(25, 27, () => {
+      elements([11], () => {
+        segment(segment_arc, () => {
+          hueShiftStartToEnd({ start: 0.2, end: 0.4 })
+        });
+      });
+    })
+
+    beats(27, 32, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          staticHueShift({ value: 0.4 })
+        });
+      });
+    })
+
+    beats(26, 28, () => {
+      elements([10], () => {
+        segment(segment_arc, () => {
+          hueShiftStartToEnd({ start: 0.4, end: 0.6 })
+        });
+      });
+    })
+
+    beats(28, 32, () => {
+      elements([10], () => {
+        segment(segment_all, () => {
+          staticHueShift({ value: 0.6 })
+        });
+      });
+    })
+
+    beats(27, 29, () => {
+      elements([9], () => {
+        segment(segment_arc, () => {
+          hueShiftStartToEnd({ start: 0.6, end: 0.8 })
+        });
+      });
+    })
+
+    beats(29, 32, () => {
+      elements([9], () => {
+        segment(segment_all, () => {
+          staticHueShift({ value: 0.8 })
+        });
+      });
+    })
+
+    beats(28, 30, () => {
+      elements([8], () => {
+        segment(segment_arc, () => {
+          hueShiftStartToEnd({ start: 0.8, end: 1 })
+        });
+      });
+    })
+
+    beats(30, 32, () => {
+      elements([8], () => {
+        segment(segment_all, () => {
+          staticHueShift({ value: 1 })
+        });
+      });
+    })
+
+    beats(29, 31, () => {
+      elements([7], () => {
+        segment(segment_arc, () => {
+          hueShiftStartToEnd({ start: 1, end: 1.2 })
+        });
+      });
+    })
+
+    beats(31, 32, () => {
+      elements([7], () => {
+        segment(segment_all, () => {
+          staticHueShift({ value: 1.2 })
+        });
+      });
+    })
 
     beats(31, 32, () => {
       elements(all, () => {
-        fadeOut();
+        segment(segment_all, () => {
+          fadeOut()
+        });
       });
-    });
+    })
 
-    // 31.5 - 33.5
-    // when the wind's from the east
-    for (let i = 0; i < 12; i++) {
-      const rel = i / 12;
-      beats(31.5 + rel * 1.5, 31.5 + rel * 1.5 + 0.5, () => {
-        elements([i + 1], () => {
-          constColor({ hue: 0.68, sat: 0.9, val: 1.0 });
-          fadeInOut();
+    beats(31.5, 32, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          fadeInOut()
         });
       });
-    }
+    })
 
-    // 33.5 - 35.5
-    // and the sun's from the west
-    for (let i = 0; i < 12; i++) {
-      const rel = i / 12;
-      beats(33.5 + rel * 1.5, 33.5 + rel * 1.5 + 0.5, () => {
-        elements([12 - i], () => {
-          constColor({ hue: 0.05, sat: 0.95 });
-          fadeOut();
+    beats(31.6, 32.1, () => {
+      elements([2], () => {
+        segment(segment_all, () => {
+          fadeInOut()
         });
       });
-    }
+    })
 
-    // 35.5 - 37.5
-    // and the sand in the glass is right
-    // first beat fade in even rings in orange
-    elements(even, () => {
-      beats(35.5, 38.5, () => {
-        vivid({ hue: 0.05 });
+    beats(31.7, 32.3, () => {
+      elements([3], () => {
+        segment(segment_all, () => {
+          fadeInOut()
+        });
       });
-      beats(35.5, 36.5, () => {
-        fadeIn();
-      });
-    });
-    // glass
-    elements(odd, () => {
-      beats(36.5, 38.5, () => {
-        constColor({ hue: 0.66, sat: 0.5, val: 1.0 });
-      });
-      beats(36.5, 37.5, () => {
-        fadeIn();
-      });
-    });
-    // is right
-    elements(all, () => {
-      beats(37.5, 38.0, () => {
-        fade({ start: 1.0, end: 0.3 });
-      });
-      beats(38.0, 38.5, () => {
-        brightness({ value: 0.5 });
-      });
-    });
+    })
 
-    // 39 - 40 come on
-    // 40 - 40.5 down
-    // 40.5 - 41.5 stop on by
-    // 41.5 - 42.5 hop a carpet
-    // 42.5 - 43 and fly
-    // 43.5 - 46 to another Arabian night
-    // 46 - 48 Ahuuuuuuuu
-    elements(all, () => {
-      // color for all
-      beats(38.5, 48, () => {
+    beats(31.9, 32.4, () => {
+      elements([4], () => {
+        segment(segment_all, () => {
+          fadeInOut()
+        });
+      });
+    })
+
+    beats(32, 32.5, () => {
+      elements([5], () => {
+        segment(segment_all, () => {
+          fadeInOut()
+        });
+      });
+    })
+
+    beats(32.1, 32.6, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          fadeInOut()
+        });
+      });
+    })
+
+    beats(32.3, 32.7, () => {
+      elements([7], () => {
+        segment(segment_all, () => {
+          fadeInOut()
+        });
+      });
+    })
+
+    beats(32.4, 32.9, () => {
+      elements([8], () => {
+        segment(segment_all, () => {
+          fadeInOut()
+        });
+      });
+    })
+
+    beats(32.5, 33, () => {
+      elements([9], () => {
+        segment(segment_all, () => {
+          fadeInOut()
+        });
+      });
+    })
+
+    beats(32.6, 33.1, () => {
+      elements([10], () => {
+        segment(segment_all, () => {
+          fadeInOut()
+        });
+      });
+    })
+
+    beats(32.7, 33.3, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          fadeInOut()
+        });
+      });
+    })
+
+    beats(32.9, 33.4, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          fadeInOut()
+        });
+      });
+    })
+
+    beats(33.5, 34, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(33.6, 34.1, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(33.7, 34.3, () => {
+      elements([10], () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(33.9, 34.4, () => {
+      elements([9], () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(34, 34.5, () => {
+      elements([8], () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(34.1, 34.6, () => {
+      elements([7], () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(34.3, 34.7, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(34.4, 34.9, () => {
+      elements([5], () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(34.5, 35, () => {
+      elements([4], () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(34.6, 35.1, () => {
+      elements([3], () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(34.7, 35.3, () => {
+      elements([2], () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(34.9, 35.4, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(35.5, 36.5, () => {
+      elements(even, () => {
+        segment(segment_all, () => {
+          fadeIn()
+        });
+      });
+    })
+
+    beats(36.5, 37.5, () => {
+      elements(odd, () => {
+        segment(segment_all, () => {
+          fadeIn()
+        });
+      });
+    })
+
+    beats(37.5, 38, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          fade({ start: 1, end: 0.3 })
+        });
+      });
+    })
+
+    beats(38, 38.5, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          brightness({ value: 0.5 })
+        });
+      });
+    })
+
+    beats(38.5, 39.5, () => {
+      elements(all, () => {
         segment(segment_b1, () => {
-          constColor({ hue: 0, val: 1.0 });
-        });
-        segment(segment_b2, () => {
-          constColor({ hue: 0.8, sat: 0.8, val: 1.0 });
+          fadeIn()
         });
       });
-      beats(38.5, 39.5, () => {
+    })
+
+    beats(39.5, 40.5, () => {
+      elements(all, () => {
         segment(segment_b2, () => {
-          noColor();
+          fadeIn()
         });
+      });
+    })
+
+    beats(40.5, 41.5, () => {
+      elements(all, () => {
         segment(segment_b1, () => {
-          fadeIn();
+          fadeOut()
         });
       });
-      // second beat b1 fade in
-      beats(39.5, 40.5, () => {
+    })
+
+    beats(41.5, 42.5, () => {
+      elements(all, () => {
         segment(segment_b2, () => {
-          fadeIn();
+          fadeOut()
         });
       });
-      beats(40.5, 41.5, () => {
-        segment(segment_b1, () => {
-          fadeOut();
+    })
+
+    beats(42.5, 48, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          staticHueShift({ value: 0.8 })
         });
       });
-      beats(41.5, 42.5, () => {
-        segment(segment_b2, () => {
-          fadeOut();
-        });
-        segment(segment_b1, () => {
-          noColor();
+    })
+
+    beats(42.5, 43, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          fadeIn()
         });
       });
-      beats(42.5, 48, () => {
-        staticHueShift({ value: 0.8 });
-        segment(segment_updown, () => {
-          cycle(0.25, () => {
-            snake({ tailLength: 1.0, cyclic: true });
+    })
+
+    beats(48.5, 50, () => {
+      elements(all, () => {
+        segment(segment_arc, () => {
+          addEffect({ position_hue: { offset_factor: { linear: { start: 0, end: 1 } } } })
+          brightness({ value: 0.6 })
+        });
+      });
+    })
+
+    beats(49, 50, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(49, 50, () => {
+      cycle(0.25, () => {
+        elements(all, () => {
+          segment(segment_all, () => {
+            hueShiftStartToEnd({ start: 0, end: 1 })
           });
         });
       });
-      beats(42.5, 43, () => {
-        fadeIn();
-      });
-    });
-    for (let i = 0; i < 18; i++) {
-      beats(43.5 + i * 0.25, 43.5 + i * 0.25 + 0.25, () => {
-        turnOffRand(Math.floor(i / 2));
-      });
-    }
+    })
 
-    elements(all, () => {
-      // boom
-      beats(48.5, 50, () => {
-        segment(segment_arc, () => {
-          rainbow();
-          brightness({ value: 0.6 });
+    beats(53, 54, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          hueShiftStartToEnd({ start: 0, end: 0.4 })
         });
       });
-      // boom fade out and psychedelic
-      beats(49, 50, () => {
-        fadeOut();
-        cycle(0.25, () => {
-          hueShiftStartToEnd({ start: 0.0, end: 1.0 });
-        });
-      });
+    })
 
-      // 50 - 53 - Arabian nights
-      // 53 - 57 - like Arabian days
-      beats(50, 57, () => {
-        constColor({ hue: 0.66, sat: 0.7, val: 1.0 });
-      });
-      beats(50, 53, () => {
-        segment(segment_ind, () => {
-          staticSnake({ start: 0.98, end: 0.4 });
+    beats(54, 57, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          staticHueShift({ value: 0.4 })
         });
       });
-      beats(53, 54, () => {
-        hueShiftStartToEnd({ start: 0.0, end: 0.4 });
-        segment(segment_ind, () => {
-          snakeHeadMove({ start: 0.98, end: 0.4, tail: 0.5 });
-        });
-      });
-      beats(54, 57, () => {
-        staticHueShift({ value: 0.4 });
-        segment(segment_ind, () => {
-          staticSnake({ start: 0.4, end: -0.2 });
-        });
-      });
-      beats(56, 57, () => {
-        fadeOut();
-      });
-      beats(50, 57, () => {
-        cycle(0.6, () => {
-          blink({ low: 0.8 });
-        });
-      });
-    });
+    })
 
-    elements(all, () => {
-      // more often than not
-      beats(57, 59, () => {
-        segment(segment_arc, () => {
-          // rainbow({ startHue: 0.7, endHue: 1.0 });
-          constColor({ hue: 0.1, sat: 0.7, val: 1.0 });
-          snakeInOut();
+    beats(56, 57, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          fadeOut()
         });
       });
-      // are hotter than hot
-      beats(59, 64, () => {
-        segment(segment_arc, () => {
-          rainbow({ startHue: 0.0, endHue: 0.05 });
-          // constColor({ hue: 0.0, sat: 1.0, val: 1.0 });
-          snakeInOut();
-        });
-      });
-      // in a lot of good ways
-      beats(60, 62, () => {
-        snake({ tailLength: 0.4 });
-        fadeInOut();
-      });
-      beats(62, 64, () => {
-        cycle(0.25, () => {
-          constColor({ hue: 0.05, sat: 1.0, val: 0.5 });
-          snake({ tailLength: 0.3 });
-          fadeOutIn();
-        });
-      });
-    });
+    })
 
-    elements(all, () => {
-      // boom
-      beats(64, 66, () => {
-        segment(segment_arc, () => {
-          rainbow();
-          brightness({ value: 0.6 });
-        });
-      });
-      // boom fade out and psychedelic
-      beats(64.5, 66, () => {
-        fadeOut();
-        cycle(0.25, () => {
-          hueShiftStartToEnd({ start: 0.0, end: 1.0 });
-        });
-      });
-    });
-
-    elements(all, () => {
-      beats(66, 73, () => {
-        constColor({ hue: 0.66, sat: 0.7, val: 0.8 });
-      });
-      // Arabian nights
-      beats(66, 69, () => {
-        segment(segment_ind, () => {
-          staticSnake({ start: 0.98, end: 0.4 });
-        });
-      });
-      beats(69, 70, () => {
-        hueShiftStartToEnd({ start: 0.0, end: 0.3 });
-        segment(segment_ind, () => {
-          snakeHeadMove({ start: 0.98, end: 0.4, tail: 0.5 });
-        });
-      });
-      // 'neath Arabian moons
-      beats(70, 73, () => {
-        constColor({ hue: 0.66, sat: 0.0, val: 0.8 });
-        segment(segment_ind, () => {
-          staticSnake({ start: 0.4, end: -0.2 });
-        });
-      });
-      beats(72, 73, () => {
-        fadeOut();
-      });
-      beats(65, 73, () => {
-        cycle(0.3, () => {
-          blink({ low: 0.8 });
-        });
-      });
-      // A fool off his guard
-      beats(73, 75, () => {
-        segment(segment_arc, () => {
-          cycle(2, () => {
-            rainbow();
-            snakeInOut();
+    beats(50, 57, () => {
+      cycle(0.6, () => {
+        elements(all, () => {
+          segment(segment_all, () => {
+            blink({ low: 0.8 })
           });
         });
       });
-      // could fall and fall hard
-      beats(75, 87, () => {
+    })
+
+    beats(59, 64, () => {
+      elements(all, () => {
         segment(segment_arc, () => {
-          rainbow();
-          snakeInOut();
+          addEffect({ position_hue: { offset_factor: { linear: { start: 0, end: 0.05 } } } })
         });
       });
-      // out there on the dunes
-      beats(81, 85, () => {
-        fadeOut();
+    })
+
+    beats(60, 62, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          fadeInOut()
+        });
       });
-    });
+    })
+
+    beats(62, 64, () => {
+      cycle(0.25, () => {
+        elements(all, () => {
+          segment(segment_all, () => {
+            fadeOutIn()
+          });
+        });
+      });
+    })
+
+    beats(64, 66, () => {
+      elements(all, () => {
+        segment(segment_arc, () => {
+          addEffect({ position_hue: { offset_factor: { linear: { start: 0, end: 1 } } } })
+          brightness({ value: 0.6 })
+        });
+      });
+    })
+
+    beats(64.5, 66, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(64.5, 66, () => {
+      cycle(0.25, () => {
+        elements(all, () => {
+          segment(segment_all, () => {
+            hueShiftStartToEnd({ start: 0, end: 1 })
+          });
+        });
+      });
+    })
+
+    beats(69, 70, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          hueShiftStartToEnd({ start: 0, end: 0.3 })
+        });
+      });
+    })
+
+    beats(72, 73, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(65, 73, () => {
+      cycle(0.3, () => {
+        elements(all, () => {
+          segment(segment_all, () => {
+            blink({ low: 0.8 })
+          });
+        });
+      });
+    })
+
+    beats(73, 75, () => {
+      cycle(2, () => {
+        elements(all, () => {
+          segment(segment_arc, () => {
+            addEffect({ position_hue: { offset_factor: { linear: { start: 0, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(75, 87, () => {
+      elements(all, () => {
+        segment(segment_arc, () => {
+          addEffect({ position_hue: { offset_factor: { linear: { start: 0, end: 1 } } } })
+        });
+      });
+    })
+
+    beats(81, 85, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(0, 16, () => {
+      cycle(12, () => {
+        elements(all, () => {
+          segment(segment_all, () => {
+            snake({ tailLength: 0.125, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(8, 16, () => {
+      cycle(8, () => {
+        elements(center, () => {
+          segment(segment_arc, () => {
+            snakeInOut()
+          });
+        });
+      });
+    })
+
+    beats(16, 18, () => {
+      elements([1], () => {
+        segment(segment_arc, () => {
+          snakeFillGrow()
+        });
+      });
+    })
+
+    beats(17, 19, () => {
+      elements([2], () => {
+        segment(segment_arc, () => {
+          snakeFillGrow()
+        });
+      });
+    })
+
+    beats(18, 20, () => {
+      elements([3], () => {
+        segment(segment_arc, () => {
+          snakeFillGrow()
+        });
+      });
+    })
+
+    beats(19, 21, () => {
+      elements([4], () => {
+        segment(segment_arc, () => {
+          snakeFillGrow()
+        });
+      });
+    })
+
+    beats(20, 22, () => {
+      elements([5], () => {
+        segment(segment_arc, () => {
+          snakeFillGrow()
+        });
+      });
+    })
+
+    beats(21, 23, () => {
+      elements([6], () => {
+        segment(segment_arc, () => {
+          snakeFillGrow()
+        });
+      });
+    })
+
+    beats(24, 26, () => {
+      elements([12], () => {
+        segment(segment_arc, () => {
+          snakeFillGrow()
+        });
+      });
+    })
+
+    beats(25, 27, () => {
+      elements([11], () => {
+        segment(segment_arc, () => {
+          snakeFillGrow()
+        });
+      });
+    })
+
+    beats(26, 28, () => {
+      elements([10], () => {
+        segment(segment_arc, () => {
+          snakeFillGrow()
+        });
+      });
+    })
+
+    beats(27, 29, () => {
+      elements([9], () => {
+        segment(segment_arc, () => {
+          snakeFillGrow()
+        });
+      });
+    })
+
+    beats(28, 30, () => {
+      elements([8], () => {
+        segment(segment_arc, () => {
+          snakeFillGrow()
+        });
+      });
+    })
+
+    beats(29, 31, () => {
+      elements([7], () => {
+        segment(segment_arc, () => {
+          snakeFillGrow()
+        });
+      });
+    })
+
+    beats(42.5, 48, () => {
+      cycle(0.25, () => {
+        elements(all, () => {
+          segment(segment_updown, () => {
+            snake({ tailLength: 1, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(50, 53, () => {
+      elements(all, () => {
+        segment(segment_ind, () => {
+          staticSnake({ start: 0.98, end: 0.4 })
+        });
+      });
+    })
+
+    beats(53, 54, () => {
+      elements(all, () => {
+        segment(segment_ind, () => {
+          snakeHeadMove({ start: 0.98, end: 0.4, tail: 0.5 })
+        });
+      });
+    })
+
+    beats(54, 57, () => {
+      elements(all, () => {
+        segment(segment_ind, () => {
+          staticSnake({ start: 0.4, end: -0.2 })
+        });
+      });
+    })
+
+    beats(57, 59, () => {
+      elements(all, () => {
+        segment(segment_arc, () => {
+          snakeInOut()
+        });
+      });
+    })
+
+    beats(59, 64, () => {
+      elements(all, () => {
+        segment(segment_arc, () => {
+          snakeInOut()
+        });
+      });
+    })
+
+    beats(60, 62, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          snake({ tailLength: 0.4 })
+        });
+      });
+    })
+
+    beats(62, 64, () => {
+      cycle(0.25, () => {
+        elements(all, () => {
+          segment(segment_all, () => {
+            snake({ tailLength: 0.3 })
+          });
+        });
+      });
+    })
+
+    beats(66, 69, () => {
+      elements(all, () => {
+        segment(segment_ind, () => {
+          staticSnake({ start: 0.98, end: 0.4 })
+        });
+      });
+    })
+
+    beats(69, 70, () => {
+      elements(all, () => {
+        segment(segment_ind, () => {
+          snakeHeadMove({ start: 0.98, end: 0.4, tail: 0.5 })
+        });
+      });
+    })
+
+    beats(70, 73, () => {
+      elements(all, () => {
+        segment(segment_ind, () => {
+          staticSnake({ start: 0.4, end: -0.2 })
+        });
+      });
+    })
+
+    beats(73, 75, () => {
+      cycle(2, () => {
+        elements(all, () => {
+          segment(segment_arc, () => {
+            snakeInOut()
+          });
+        });
+      });
+    })
+
+    beats(75, 87, () => {
+      elements(all, () => {
+        segment(segment_arc, () => {
+          snakeInOut()
+        });
+      });
+    })
   });
 
   console.log("sending sequence");
-  await sendSequence("aladdin", testAnimation.getSequence());
+  await sendSequence("aladdin", anim.getSequence());
   await startSong("aladdin", 0);
 };
 
 (async () => {
-  await testSequence();
+  await aladdin();
 })();

@@ -38,6 +38,7 @@ export interface Timeframe {
   endTime: number
   label: string
   color: string
+  hasExplicitColor?: boolean // When false, no constColor is emitted (timeframe only has modifiers/motion)
   rings: number[] // Array of ring numbers (1-12) that participate
   disabled?: boolean // When true, timeframe is excluded from playback and export
   mapping?: string // Segment mapping name from segments.json
@@ -454,6 +455,7 @@ function App() {
                 endTime: Number(item.endTime) || 0,
                 label: typeof item.label === 'string' ? item.label : `Timeframe ${idx + 1}`,
                 color: typeof item.color === 'string' ? item.color : '#3b82f6',
+                hasExplicitColor: item.hasExplicitColor !== false ? undefined : false,
                 rings: Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n)) : [1,2,3,4,5,6,7,8,9,10,11,12],
                 mapping: item.mapping,
                 phase: typeof item.phase === 'number' ? item.phase : undefined,
@@ -540,6 +542,7 @@ function App() {
                 endTime: Number(item.endTime) || 0,
                 label: typeof item.label === 'string' ? item.label : `Timeframe ${idx + 1}`,
                 color: typeof item.color === 'string' ? item.color : '#3b82f6',
+                hasExplicitColor: item.hasExplicitColor !== false ? undefined : false,
                 rings: Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n)) : [1,2,3,4,5,6,7,8,9,10,11,12],
                 mapping: item.mapping,
                 phase: typeof item.phase === 'number' ? item.phase : undefined,

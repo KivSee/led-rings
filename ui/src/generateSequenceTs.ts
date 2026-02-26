@@ -34,6 +34,7 @@ export interface Timeframe {
   endTime: number
   label: string
   color: string
+  hasExplicitColor?: boolean
   rings: number[]
   disabled?: boolean
   mapping?: string
@@ -294,6 +295,7 @@ function emitTimeframeBody(tf: Timeframe, layer: EmitLayer): string | null {
   const inner: string[] = []
 
   if (layer === 'color') {
+    if (tf.hasExplicitColor === false) return null
     inner.push(...wrapWithPhase(emitColor(tf), tf.phase))
   } else {
     const effectEntries = getTimeframeEffects(tf)
