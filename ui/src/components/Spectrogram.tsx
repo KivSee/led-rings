@@ -120,6 +120,8 @@ export interface SpectrogramProps {
   durationSeconds: number
   /** BPM for showing beat labels under the time axis (seconds → beat = seconds * bpm / 60). */
   bpm?: number
+  /** Offset in seconds where beat 0 starts in the audio (startOffsetMs / 1000). */
+  beatOffset?: number
   /** When set, spectrogram shows only this range (zoom to timeline). */
   visibleStartSeconds?: number
   visibleEndSeconds?: number
@@ -137,6 +139,7 @@ export default function Spectrogram({
   currentTimeSeconds,
   durationSeconds,
   bpm,
+  beatOffset = 0,
   visibleStartSeconds,
   visibleEndSeconds,
   onRequestScrollToStartSeconds,
@@ -622,8 +625,8 @@ export default function Spectrogram({
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
     const hasBpm = bpm != null && bpm > 0
-    const viewStartBeat = (viewStart * bpm!) / 60
-    const viewEndBeat = (viewEnd * bpm!) / 60
+    const viewStartBeat = ((viewStart - beatOffset) * bpm!) / 60
+    const viewEndBeat = ((viewEnd - beatOffset) * bpm!) / 60
     const viewSpanBeats = Math.max(0.001, viewEndBeat - viewStartBeat)
 
     if (hasBpm) {
@@ -641,7 +644,7 @@ export default function Spectrogram({
         ctx.lineWidth = 1
         ctx.stroke()
         ctx.fillText(String(Math.round(beat)), x, graphHeight + 2)
-        const sec = (beat * 60) / bpm!
+        const sec = (beat * 60) / bpm! + beatOffset
         const secLabel = sec % 1 === 0 ? `${Math.round(sec)}s` : `${sec.toFixed(2)}s`
         ctx.font = '10px sans-serif'
         ctx.fillStyle = 'rgba(255, 255, 255, 0.6)'
@@ -673,6 +676,7 @@ export default function Spectrogram({
     currentTimeSeconds,
     durationSeconds,
     bpm,
+    beatOffset,
     isZoomed,
     viewStart,
     viewEnd,

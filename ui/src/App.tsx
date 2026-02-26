@@ -120,6 +120,14 @@ function App() {
     return Math.round(beat / 4) * 4
   }
 
+  /** Convert beat position to audio seconds (accounts for startOffsetMs). */
+  const beatsToAudioSec = (beats: number, s: Song): number =>
+    (beats / s.bpm) * 60 + (s.startOffsetMs ?? 0) / 1000
+
+  /** Convert audio seconds to beat position (accounts for startOffsetMs). */
+  const audioSecToBeats = (sec: number, s: Song): number =>
+    ((sec - (s.startOffsetMs ?? 0) / 1000) / 60) * s.bpm
+
   // Ensure we don't overwrite saved state before we've tried loading it
   const hasLoadedInitialStateRef = useRef(false)
 
@@ -200,8 +208,8 @@ function App() {
   const songRef = useRef(song)
   songRef.current = song
   const onRequestScrollToStartSeconds = useCallback((startSeconds: number) => {
-    const bpm = songRef.current.bpm
-    setScrollToStartBeat((startSeconds / 60) * bpm)
+    const s = songRef.current
+    setScrollToStartBeat(((startSeconds - (s.startOffsetMs ?? 0) / 1000) / 60) * s.bpm)
   }, [])
 
   useEffect(() => {
@@ -312,10 +320,10 @@ function App() {
       // Run: if nextRunFromStart, jump to runStartTimeSeconds; otherwise resume from currentTime
       const startOffsetSeconds = nextRunFromStart
         ? (song.runStartTimeSeconds ?? 0)
-        : (currentTime / song.bpm) * 60
+        : beatsToAudioSec(currentTime, song)
       if (nextRunFromStart) {
         const startSec = song.runStartTimeSeconds ?? 0
-        const startBeats = (startSec / 60) * song.bpm
+        const startBeats = audioSecToBeats(startSec, song)
         const clamped = Math.max(0, Math.min(songLengthBeats, startBeats))
         setCurrentTime(clamped)
         if (isSongWithAudio) {
@@ -324,7 +332,7 @@ function App() {
         }
         setNextRunFromStart(false)
       } else {
-        const startSec = (currentTime / song.bpm) * 60
+        const startSec = beatsToAudioSec(currentTime, song)
         if (isSongWithAudio) {
           audio.currentTime = Math.max(0, startSec)
           audio.play().catch(() => {})
@@ -370,7 +378,7 @@ function App() {
     }
     setIsPlaying(false)
     setNextRunFromStart(true) // Next Run will start from runStartTimeSeconds
-    const startBeats = ((song.runStartTimeSeconds ?? 0) / 60) * song.bpm
+    const startBeats = audioSecToBeats(song.runStartTimeSeconds ?? 0, song)
     const clamped = Math.max(0, Math.min(songLengthBeats, startBeats))
     setCurrentTime(clamped)
   }
@@ -381,6 +389,7 @@ function App() {
       return
     }
     setSendSequenceLoading(true)
+    handleSaveTimeframes()
     try {
       const runnerCode = generateSequenceRunnerTs(song, timeframes)
       const res = await fetch(`${API_BASE}/api/send-sequence`, {
@@ -720,7 +729,7 @@ function App() {
     const audio = audioRef.current
     const useAudio = isPlaying && song.animationType === 'song' && song.audioFilePath && audio
     const runStartSec = song.runStartTimeSeconds ?? 0
-    const runStartBeats = (runStartSec / 60) * song.bpm
+    const runStartBeats = audioSecToBeats(runStartSec, song)
     const maxTime = songLengthBeats
 
     const performStop = () => {
@@ -743,7 +752,7 @@ function App() {
       const syncFromAudio = () => {
         if (!audioRef.current) return
         const sec = audioRef.current.currentTime
-        const beats = (sec / 60) * song.bpm
+        const beats = audioSecToBeats(sec, song)
         if (beats >= maxTime) {
           cancelAnimationFrame(rafId)
           performStop()
@@ -808,15 +817,14 @@ function App() {
     const audio = audioRef.current
     const isSongWithAudio = song.animationType === 'song' && song.audioFilePath && audio
     if (isSongWithAudio && isPlaying) {
-      const sec = (time / song.bpm) * 60
-      audio.currentTime = Math.max(0, sec)
+      audio.currentTime = Math.max(0, beatsToAudioSec(time, song))
     }
   }
 
   const handleSeekToBeat = (beat: number) => {
     const clamped = Math.max(0, Math.min(songLengthBeats, beat))
     setCurrentTime(clamped)
-    const sec = (clamped / song.bpm) * 60
+    const sec = beatsToAudioSec(clamped, song)
     handleSongChange({ runStartTimeSeconds: sec })
     setNextRunFromStart(true)
     const audio = audioRef.current
@@ -1028,13 +1036,14 @@ function App() {
             isPlaying={isPlaying}
             hasAudio
             audioSrc={effectiveAudioSrc}
-            currentTimeSeconds={(currentTime / song.bpm) * 60}
+            currentTimeSeconds={beatsToAudioSec(currentTime, song)}
             durationSeconds={song.lengthSeconds}
             bpm={song.bpm}
-            visibleStartSeconds={visibleStartBeat != null && visibleEndBeat != null ? (visibleStartBeat / song.bpm) * 60 : undefined}
-            visibleEndSeconds={visibleStartBeat != null && visibleEndBeat != null ? (visibleEndBeat / song.bpm) * 60 : undefined}
+            beatOffset={(song.startOffsetMs ?? 0) / 1000}
+            visibleStartSeconds={visibleStartBeat != null && visibleEndBeat != null ? beatsToAudioSec(visibleStartBeat, song) : undefined}
+            visibleEndSeconds={visibleStartBeat != null && visibleEndBeat != null ? beatsToAudioSec(visibleEndBeat, song) : undefined}
             onRequestScrollToStartSeconds={onRequestScrollToStartSeconds}
-            onSeekToSeconds={(seconds) => handleSeekToBeat((seconds * song.bpm) / 60)}
+            onSeekToSeconds={(seconds) => handleSeekToBeat(audioSecToBeats(seconds, song))}
           />
         </div>
       )}

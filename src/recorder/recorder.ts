@@ -161,10 +161,19 @@ class Recorder {
       return;
     }
 
-    // rainbow sets a representative color and records as an effect
+    // rainbow → constColor + position_hue with linear offset
     if (effectKey === "rainbow") {
       const startHue = params?.startHue ?? 0;
+      const endHue = params?.endHue ?? 1;
       tf.color = hsvToHex(startHue, 1, 1);
+      const effect: RecordedEffect = {
+        id: `e-${this.effectCounter++}`,
+        effectKey: "position_hue",
+        params: { offset_factor: { linear: { start: 0, end: endHue - startHue } } },
+      };
+      if (phaseValue) effect.phase = phaseValue;
+      tf.effects.push(effect);
+      return;
     }
 
     // Normalize effect key aliases (raw addEffect keys like "hue" → "timed_hue")
