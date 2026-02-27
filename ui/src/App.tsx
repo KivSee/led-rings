@@ -181,33 +181,88 @@ function App() {
     {
       id: '1',
       startTime: 0,
-      endTime: 4,
-      label: 'Introduction',
-      color: '#3b82f6',
+      endTime: 8,
+      label: 'Fade In',
+      color: '#7c3aed',
       rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      mapping: 'all'
+      mapping: 'all',
+      effects: [{ id: 'e1', effectKey: 'fadeIn' }],
     },
     {
       id: '2',
-      startTime: 4,
-      endTime: 12,
-      label: 'Main Content',
-      color: '#10b981',
+      startTime: 8,
+      endTime: 20,
+      label: 'Pulse',
+      color: '#3b82f6',
       rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      mapping: 'all'
+      mapping: 'all',
+      cycles: [{ type: 'cycle' as const, beatsInCycle: 2 }],
+      effects: [{ id: 'e2', effectKey: 'pulse', params: { low: 0.2 } }],
     },
     {
       id: '3',
-      startTime: 12,
-      endTime: 16,
-      label: 'Conclusion',
+      startTime: 20,
+      endTime: 32,
+      label: 'Snake Chase',
+      color: '#10b981',
+      rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      mapping: 'centric',
+      effects: [{ id: 'e3', effectKey: 'snake', params: { tailLength: 0.4, cyclic: true } }],
+    },
+    {
+      id: '4',
+      startTime: 32,
+      endTime: 44,
+      label: 'Hue Wave',
       color: '#f59e0b',
       rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      mapping: 'all'
-    }
+      mapping: 'arc',
+      effects: [
+        { id: 'e4a', effectKey: 'snakeInOut', params: { start: 0, end: 1 } },
+        { id: 'e4b', effectKey: 'hueShiftStartToEnd', params: { start: 0, end: 0.7 } },
+      ],
+    },
+    {
+      id: '5',
+      startTime: 44,
+      endTime: 52,
+      label: 'Fill Grow',
+      color: '#ec4899',
+      rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      mapping: 'all',
+      phase: 0.3,
+      effects: [{ id: 'e5', effectKey: 'snakeFillGrow' }],
+    },
+    {
+      id: '6',
+      startTime: 52,
+      endTime: 60,
+      label: 'Slow Fade',
+      color: '#ef4444',
+      rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      mapping: 'all',
+      effects: [
+        { id: 'e6a', effectKey: 'snakeSlowFast', params: { tailLength: 0.6 } },
+        { id: 'e6b', effectKey: 'fade', params: { start: 1, end: 0 } },
+      ],
+    },
+    {
+      id: '7',
+      startTime: 60,
+      endTime: 64,
+      label: 'Final Sweep',
+      color: '#06b6d4',
+      rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      mapping: 'updown',
+      effects: [
+        { id: 'e7a', effectKey: 'snakeHeadSin', params: { tailLength: 0.6, cyclic: true } },
+        { id: 'e7b', effectKey: 'hueShiftStartToEnd', params: { start: 0, end: 1 } },
+      ],
+    },
   ])
 
   const [focusedTimeframeId, setFocusedTimeframeId] = useState<string | null>(null)
+  const [clipboardTimeframe, setClipboardTimeframe] = useState<Timeframe | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0) // Current time in beats
   /** When true, next Run starts from runStartTimeSeconds; when false, next Run resumes from currentTime (after Pause). */
@@ -220,6 +275,7 @@ function App() {
   const audioRef = React.useRef<HTMLAudioElement | null>(null)
   const audioBlobUrlRef = React.useRef<string | null>(null)
   const audioFileInputRef = React.useRef<HTMLInputElement>(null)
+  const savedDirHandleRef = React.useRef<any>(null)
   /** Effective audio URL for spectrogram fetch (path or blob URL). */
   const [effectiveAudioSrc, setEffectiveAudioSrc] = useState('')
   /** Visible time range in beats from Timeline scroll (for spectrogram zoom). */
@@ -319,6 +375,31 @@ function App() {
     }
   }
 
+  const copyTimeframe = (id: string) => {
+    const source = timeframes.find(tf => tf.id === id)
+    if (!source) return
+    setClipboardTimeframe(JSON.parse(JSON.stringify(source)))
+  }
+
+  const pasteTimeframe = (beatPosition: number) => {
+    if (!clipboardTimeframe) return
+    const duration = clipboardTimeframe.endTime - clipboardTimeframe.startTime
+    const cloned: Timeframe = JSON.parse(JSON.stringify(clipboardTimeframe))
+    cloned.id = `dup-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+    cloned.startTime = beatPosition
+    cloned.endTime = beatPosition + duration
+    cloned.label = cloned.label.endsWith(' (copy)') ? cloned.label : `${cloned.label} (copy)`
+    if (cloned.effects) {
+      cloned.effects = cloned.effects.map(e => ({
+        ...e,
+        id: `${e.id}-${Math.random().toString(36).slice(2, 6)}`
+      }))
+    }
+    setTimeframes(prev => [...prev, cloned])
+    setFocusedTimeframeId(cloned.id)
+    setClipboardTimeframe(null)
+  }
+
   const addTimeframeFromDrag = (startTime: number, endTime: number) => {
     const newTimeframe: Timeframe = {
       id: Date.now().toString(),
@@ -406,12 +487,27 @@ function App() {
     }
   }
 
-  // Space bar toggles Run / Pause
+  // Space bar toggles Run / Pause, Escape clears clipboard
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName
+      const inInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
+      if (e.code === 'Escape') {
+        setClipboardTimeframe(null)
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyC' && !inInput && focusedTimeframeId) {
+        e.preventDefault()
+        copyTimeframe(focusedTimeframeId)
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyV' && !inInput && clipboardTimeframe) {
+        e.preventDefault()
+        pasteTimeframe(Math.round(currentTime))
+        return
+      }
       if (e.code === 'Space' && !e.repeat) {
-        const tag = (e.target as HTMLElement)?.tagName
-        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+        if (inInput) return
         e.preventDefault()
         handlePlayPause()
       }
@@ -673,9 +769,22 @@ function App() {
     const anyWindow = window as any
     if (anyWindow.showDirectoryPicker) {
       try {
-        const dirHandle = await anyWindow.showDirectoryPicker({
-          mode: 'readwrite',
-        })
+        // Reuse previously selected directory if available, otherwise prompt
+        let dirHandle = savedDirHandleRef.current
+        if (dirHandle) {
+          // Verify we still have write permission
+          const perm = await dirHandle.queryPermission({ mode: 'readwrite' })
+          if (perm !== 'granted') {
+            const requested = await dirHandle.requestPermission({ mode: 'readwrite' })
+            if (requested !== 'granted') dirHandle = null
+          }
+        }
+        if (!dirHandle) {
+          dirHandle = await anyWindow.showDirectoryPicker({
+            mode: 'readwrite',
+          })
+        }
+        savedDirHandleRef.current = dirHandle
         // Determine import prefix by probing for the services/ directory.
         // If it exists here, we're in src/ (./) — otherwise assume one level below (../).
         let importPrefix = '..'
@@ -1118,9 +1227,6 @@ function App() {
             >
               {sendSequenceLoading ? '…' : 'Send Sequence'}
             </button>
-            <div className="current-time-display">
-              <span>Time: {currentTime.toFixed(1)}b</span>
-            </div>
           </div>
           <div className="app-header-actions">
             <button className="secondary-button" onClick={handleLoadTimeframes}>
@@ -1189,6 +1295,9 @@ function App() {
               onUpdate={updateTimeframe}
               onDelete={deleteTimeframe}
               onAdd={addTimeframeFromDrag}
+              onCopy={copyTimeframe}
+              onPaste={pasteTimeframe}
+              hasClipboard={clipboardTimeframe !== null}
               focusedTimeframeId={focusedTimeframeId}
               onFocusedTimeframeChange={setFocusedTimeframeId}
               currentTime={currentTime}

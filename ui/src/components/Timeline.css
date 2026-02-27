@@ -267,6 +267,30 @@
   outline: none;
 }
 
+.copy-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  opacity: 0.7;
+  margin-right: 4px;
+}
+
+.copy-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
 .delete-button {
   background: rgba(255, 255, 255, 0.2);
   border: none;

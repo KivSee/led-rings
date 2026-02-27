@@ -20,6 +20,9 @@ interface TimelineProps {
   onUpdate: (id: string, updates: Partial<Timeframe>) => void
   onDelete: (id: string) => void
   onAdd: (startTime: number, endTime: number) => void
+  onCopy?: (id: string) => void
+  onPaste?: (beat: number) => void
+  hasClipboard?: boolean
   focusedTimeframeId: string | null
   onFocusedTimeframeChange: (id: string | null) => void
   currentTime: number
@@ -46,7 +49,7 @@ const beatToSeconds = (beat: number, bpm: number, beatTimestampsMs?: number[]): 
   return (beat / bpm) * 60
 }
 
-const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange, onVisibleRangeChange, scrollToStartBeat, onScrollToStartDone, onSeekToBeat, beatTimestampsMs }: TimelineProps) => {
+const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd, onCopy, onPaste, hasClipboard, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange, onVisibleRangeChange, scrollToStartBeat, onScrollToStartDone, onSeekToBeat, beatTimestampsMs }: TimelineProps) => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -431,9 +434,12 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
       const startBeat = Math.min(dragStart, dragCurrent)
       const endBeat = Math.max(dragStart, dragCurrent)
 
-      // Only create if there's at least 4 beats difference
+      // Only create if there's at least 1 beat difference
       if (Math.abs(endBeat - startBeat) >= 1) {
         onAdd(startBeat, endBeat)
+      } else if (hasClipboard && onPaste) {
+        // Short click with clipboard → paste at this beat
+        onPaste(snapToBeat(startBeat))
       }
     }
 
@@ -579,7 +585,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           style={{ 
-            cursor: isDragging ? 'grabbing' : 'grab',
+            cursor: isDragging ? 'grabbing' : hasClipboard ? 'crosshair' : 'grab',
             height: `${wrapperHeightPx}px`,
           }}
         >
@@ -631,6 +637,15 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
                       >
                         {timeframe.label}
                       </span>
+                    )}
+                    {onCopy && (
+                      <button
+                        className="copy-button"
+                        onClick={() => onCopy(timeframe.id)}
+                        title="Copy timeframe"
+                      >
+                        ⎘
+                      </button>
                     )}
                     <button
                       className="delete-button"

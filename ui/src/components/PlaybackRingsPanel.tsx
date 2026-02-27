@@ -23,7 +23,7 @@ const PlaybackRingsPanel = ({ currentTime, timeframes }: PlaybackRingsPanelProps
       <div className="playback-rings-panel-header">
         <h2>Playback</h2>
         <div className="playback-rings-panel-time">
-          {currentTime.toFixed(1)}b
+          Time: {currentTime.toFixed(1)}b
         </div>
       </div>
       <div className="playback-rings-panel-content">

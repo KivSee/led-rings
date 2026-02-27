@@ -2,9 +2,9 @@
   "song": {
     "name": "loop",
     "lengthSeconds": 245,
-    "bpm": 116,
+    "bpm": 93,
     "startOffsetMs": 0,
-    "runStartTimeSeconds": 1.0344827586206897,
+    "runStartTimeSeconds": 38.289699999999996,
     "animationType": "song",
     "audioFilePath": "loop.wav",
     "beatTimestampsMs": [
@@ -1368,7 +1368,7 @@
     {
       "id": "sc-snake-all",
       "startTime": 67,
-      "endTime": 82,
+      "endTime": 84,
       "label": "Snake All Rings",
       "color": "#a855f7",
       "rings": [
@@ -1407,7 +1407,7 @@
     {
       "id": "sc-hue-all",
       "startTime": 67,
-      "endTime": 82,
+      "endTime": 84,
       "label": "Hue Step All Rings",
       "color": "#a855f7",
       "rings": [
@@ -1439,6 +1439,125 @@
             }
           },
           "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "twinkle-cascade",
+      "startTime": 84,
+      "endTime": 85,
+      "label": "Twinkle Cascade",
+      "color": "#a855f7",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "phase": 1,
+      "effects": [
+        {
+          "id": "tc-pulse",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0
+          },
+          "phase": 1
+        },
+        {
+          "id": "tc-snake",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.3,
+            "cyclic": true
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "dup-1772219280676-7yks",
+      "startTime": 85,
+      "endTime": 102,
+      "label": "Hue Step All Rings (copy)",
+      "color": "#a855f7",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "sc-h-all-ua2w",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "steps": {
+                "num_steps": 9,
+                "diff_per_step": 0.083,
+                "first_step_value": 0
+              }
+            }
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "dup-1772219390692-q0s2",
+      "startTime": 85,
+      "endTime": 102,
+      "label": "Snake All Rings (copy)",
+      "color": "#a855f7",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "sc-s-all-fdbk",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
         }
       ]
     }
