@@ -83,16 +83,16 @@ const ZOOM_MIN = 0.25
 const ZOOM_MAX = 4
 const ZOOM_STEP = 1.25
 
-/** Pick a step in whole beats for axis ticks. Step 1 at max zoom (e.g. 16-beat span); more detail at all zoom levels. */
+/** Pick a step in whole beats for axis ticks. Step 1 when span ≤ 64 so grid matches timeline zoom. */
 function beatAxisStep(rangeBeats: number): number {
   if (rangeBeats <= 0) return 1
   const rough = rangeBeats / 8
-  if (rough <= 2) return 1   // span ≤ 16 beats → 1-beat resolution (max zoom)
-  if (rough <= 4) return 2
-  if (rough <= 8) return 4
-  if (rough <= 16) return 8
-  if (rough <= 32) return 16
-  if (rough <= 64) return 32
+  if (rough <= 8) return 1   // span ≤ 64 beats → every beat
+  if (rough <= 16) return 2
+  if (rough <= 32) return 4
+  if (rough <= 64) return 8
+  if (rough <= 128) return 16
+  if (rough <= 256) return 32
   return 64
 }
 
@@ -127,6 +127,8 @@ export interface SpectrogramProps {
   /** When set, spectrogram shows only this range (zoom to timeline). */
   visibleStartSeconds?: number
   visibleEndSeconds?: number
+  /** Visible beat span from timeline (e.g. 16 at max zoom). Used for grid density so it stays consistent when time span varies. */
+  visibleSpanBeats?: number
   /** When user scrolls the spectrogram horizontally, request timeline to show this start time (seconds). */
   onRequestScrollToStartSeconds?: (startSeconds: number) => void
   /** When not playing, user clicked the spectrogram at this time (seconds). Seek marker and Run from. */
@@ -145,6 +147,7 @@ export default function Spectrogram({
   beatTimestampsMs,
   visibleStartSeconds,
   visibleEndSeconds,
+  visibleSpanBeats,
   onRequestScrollToStartSeconds,
   onSeekToSeconds,
 }: SpectrogramProps) {
@@ -164,10 +167,13 @@ export default function Spectrogram({
     visibleStartSeconds != null &&
     visibleEndSeconds != null &&
     visibleEndSeconds > visibleStartSeconds
-  const baseStart = isZoomed ? visibleStartSeconds! : 0
-  const baseEnd = isZoomed ? visibleEndSeconds! : effectiveDuration
-  const baseCenter = (baseStart + baseEnd) / 2
-  const baseSpan = Math.max(0.001, baseEnd - baseStart)
+  const rawBaseStart = isZoomed ? visibleStartSeconds! : 0
+  const rawBaseEnd = isZoomed ? visibleEndSeconds! : effectiveDuration
+  const rawBaseSpan = Math.max(0.001, rawBaseEnd - rawBaseStart)
+  const baseCenter = (rawBaseStart + rawBaseEnd) / 2
+  // Enforce minimum visible duration so we don't stretch a tiny image slice to full width (breaks view at high timeline zoom)
+  const MIN_VIEW_DURATION_SEC = 2
+  const baseSpan = Math.max(rawBaseSpan, MIN_VIEW_DURATION_SEC)
   const [zoomLevel, setZoomLevel] = useState(1)
   const [zoomPanOffset, setZoomPanOffset] = useState(0)
   const zoomLevelRef = useRef(zoomLevel)
@@ -188,8 +194,19 @@ export default function Spectrogram({
 
   const effectiveCenter = baseCenter + zoomPanOffset
   const zoomedSpan = baseSpan / zoomLevel
-  const viewStart = Math.max(0, effectiveCenter - zoomedSpan / 2)
-  const viewEnd = Math.min(effectiveDuration, effectiveCenter + zoomedSpan / 2)
+  // Anchor view at start/end of audio so the beginning (0s) and end stay visible at any zoom
+  let viewStart: number
+  let viewEnd: number
+  if (effectiveCenter - zoomedSpan / 2 < 0) {
+    viewStart = 0
+    viewEnd = Math.min(effectiveDuration, zoomedSpan)
+  } else if (effectiveCenter + zoomedSpan / 2 > effectiveDuration) {
+    viewEnd = effectiveDuration
+    viewStart = Math.max(0, effectiveDuration - zoomedSpan)
+  } else {
+    viewStart = effectiveCenter - zoomedSpan / 2
+    viewEnd = effectiveCenter + zoomedSpan / 2
+  }
   const viewDuration = Math.max(0.001, viewEnd - viewStart)
   const scrollableDuration = Math.max(0, effectiveDuration - viewDuration)
   const contentWidthPx = scrollViewWidth > 0 && viewDuration > 0
@@ -637,10 +654,11 @@ export default function Spectrogram({
     const viewStartBeat = ((viewStart - beatOffset) * bpm!) / 60
     const viewEndBeat = ((viewEnd - beatOffset) * bpm!) / 60
     const viewSpanBeats = Math.max(0.001, viewEndBeat - viewStartBeat)
+    // Use timeline's visible beat span for grid density when available, so at max zoom we always see every beat
+    const spanForStep = visibleSpanBeats != null && visibleSpanBeats > 0 ? visibleSpanBeats : viewSpanBeats
 
     if (beatTimestampsMs && beatTimestampsMs.length > 0) {
-      // Use detected beat positions as the primary beat grid
-      // Count actual detected beats in view for proper tick density
+      // Detected beats: green vertical lines (primary)
       let beatsInView = 0
       for (let i = 0; i < beatTimestampsMs.length; i++) {
         const sec = beatTimestampsMs[i] / 1000
@@ -655,14 +673,12 @@ export default function Spectrogram({
         if (sec < viewStart || sec > viewEnd) continue
         const x = graphLeft + ((sec - viewStart) / viewDuration) * graphWidth
         if (x < graphLeft || x > width) continue
-        // Beat line spanning full spectrogram height
         ctx.beginPath()
         ctx.moveTo(x, 0)
         ctx.lineTo(x, graphHeight)
         ctx.strokeStyle = 'rgba(0, 255, 100, 0.7)'
         ctx.lineWidth = 2
         ctx.stroke()
-        // Axis tick below spectrogram
         ctx.beginPath()
         ctx.moveTo(x, graphHeight)
         ctx.lineTo(x, height)
@@ -678,13 +694,22 @@ export default function Spectrogram({
         ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
       }
     } else if (hasBpm) {
-      const stepBeats = beatAxisStep(viewSpanBeats)
+      // No detected beats: draw white BPM grid through spectrogram + axis below
+      const stepBeats = beatAxisStep(spanForStep)
       const firstTickBeat = Math.ceil(viewStartBeat / stepBeats) * stepBeats
       ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
       ctx.font = '12px sans-serif'
       for (let beat = firstTickBeat; beat <= viewEndBeat; beat += stepBeats) {
         const x = graphLeft + ((beat - viewStartBeat) / viewSpanBeats) * graphWidth
         if (x < graphLeft || x > width) continue
+        // White grid line through full spectrogram height
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, graphHeight)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)'
+        ctx.lineWidth = 1.5
+        ctx.stroke()
+        // Axis tick below spectrogram
         ctx.beginPath()
         ctx.moveTo(x, graphHeight)
         ctx.lineTo(x, height)
@@ -730,6 +755,7 @@ export default function Spectrogram({
     viewStart,
     viewEnd,
     viewDuration,
+    visibleSpanBeats,
   ])
 
   paintRef.current = paint

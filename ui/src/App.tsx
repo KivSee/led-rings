@@ -565,7 +565,7 @@ function App() {
       const res = await fetch(`${API_BASE}/api/detect-beats`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ audioFilePath: song.audioFilePath }),
+        body: JSON.stringify({ audioFilePath: song.audioFilePath, bpm: song.bpm || undefined }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
@@ -1262,6 +1262,7 @@ function App() {
             beatTimestampsMs={song.beatTimestampsMs}
             visibleStartSeconds={visibleStartBeat != null && visibleEndBeat != null ? beatsToAudioSec(visibleStartBeat, song) : undefined}
             visibleEndSeconds={visibleStartBeat != null && visibleEndBeat != null ? beatsToAudioSec(visibleEndBeat, song) : undefined}
+            visibleSpanBeats={visibleStartBeat != null && visibleEndBeat != null ? visibleEndBeat - visibleStartBeat : undefined}
             onRequestScrollToStartSeconds={onRequestScrollToStartSeconds}
             onSeekToSeconds={(seconds) => handleSeekToBeat(audioSecToBeats(seconds, song))}
           />

@@ -269,7 +269,7 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "POST" && pathname === "/api/detect-beats") {
     const body = await parseBody(req);
-    let payload: { audioFilePath?: string };
+    let payload: { audioFilePath?: string; bpm?: number; method?: string };
     try {
       payload = JSON.parse(body);
     } catch {
@@ -287,7 +287,14 @@ const server = http.createServer(async (req, res) => {
       if (fs.existsSync(publicPath)) audioPath = publicPath;
     }
     const scriptPath = path.join(ROOT, "scripts", "detect_beats.py");
-    const child = spawn(PYTHON_CMD, [scriptPath, audioPath], {
+    const pyArgs = [scriptPath, audioPath];
+    if (payload.method === "onset" || payload.method === "beats") {
+      pyArgs.push("--method", payload.method);
+    }
+    if (typeof payload.bpm === "number" && payload.bpm > 0) {
+      pyArgs.push("--bpm", String(payload.bpm));
+    }
+    const child = spawn(PYTHON_CMD, pyArgs, {
       cwd: ROOT,
       stdio: ["ignore", "pipe", "pipe"],
     });
