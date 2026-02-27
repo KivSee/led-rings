@@ -4,6 +4,8 @@ import TimeframePanel from './components/TimeframePanel'
 import PlaybackRingsPanel from './components/PlaybackRingsPanel'
 import Spectrogram from './components/Spectrogram'
 import { generateSequenceTs, generateSequenceRunnerTs } from './generateSequenceTs'
+import { presetToTimeframes } from './presets'
+import type { PresetMetadata } from './presets'
 import './App.css'
 
 const API_BASE = (import.meta as any).env?.VITE_API_URL ?? ''
@@ -292,6 +294,14 @@ function App() {
       mapping: 'all'
     }
     setTimeframes([...timeframes, newTimeframe])
+  }
+
+  const addTimeframesFromPreset = (preset: PresetMetadata) => {
+    const newTimeframes = presetToTimeframes(preset, currentTime, song.bpm)
+    if (newTimeframes.length > 0) {
+      setTimeframes(prev => [...prev, ...newTimeframes])
+      setFocusedTimeframeId(newTimeframes[0].id)
+    }
   }
 
   const focusedTimeframe = timeframes.find(tf => tf.id === focusedTimeframeId) || null
@@ -1102,6 +1112,7 @@ function App() {
             timeframe={focusedTimeframe}
             onUpdate={handlePanelUpdate}
             onClose={() => setFocusedTimeframeId(null)}
+            onApplyPreset={addTimeframesFromPreset}
           />
         </div>
       </div>

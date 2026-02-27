@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from 'react'
 import { Timeframe, TimeframeCycleEntry, TimeframeCycleBeats, getTimeframeEffects, TimeframeEffectEntry } from '../App'
+import type { PresetMetadata } from '../presets'
 import segmentsData from '../segments.json'
 import RingVisualization from './RingVisualization'
+import PresetBrowser from './PresetBrowser'
 import './TimeframePanel.css'
 
 // Effect options by category (brightness.ts, hue.ts, motion.ts — coloring removed)
@@ -279,9 +281,10 @@ interface TimeframePanelProps {
   timeframe: Timeframe | null
   onUpdate: (updates: Partial<Timeframe>) => void
   onClose: () => void
+  onApplyPreset?: (preset: PresetMetadata) => void
 }
 
-const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) => {
+const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: TimeframePanelProps) => {
   const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | 'color' | null>(null)
   const [tempStartTime, setTempStartTime] = useState<string>('')
   const [tempEndTime, setTempEndTime] = useState<string>('')
@@ -300,9 +303,13 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose }: TimeframePanelProps) =
   if (!timeframe) {
     return (
       <div className="timeframe-panel">
-        <div className="timeframe-panel-empty">
-          <p>Select a timeframe to view and edit its properties</p>
-        </div>
+        {onApplyPreset ? (
+          <PresetBrowser onApplyPreset={onApplyPreset} />
+        ) : (
+          <div className="timeframe-panel-empty">
+            <p>Select a timeframe to view and edit its properties</p>
+          </div>
+        )}
       </div>
     )
   }
