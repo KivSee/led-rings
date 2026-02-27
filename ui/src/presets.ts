@@ -175,7 +175,9 @@ function detectPhaseIntensity(
   for (let i = 2; i < values.length; i++) {
     if (!approxEqual(values[i] - values[i - 1], delta, tolerance)) return 0
   }
-  return delta * rings.length
+  const raw = delta * rings.length
+  const rounded = Math.round(raw * 100) / 100
+  return rounded
 }
 
 /** Check if an effect is a windowed crossfade padding (< 5% of duration). */
@@ -457,10 +459,8 @@ export function presetToTimeframes(
     segmentGroups.get(seg)!.push(effect)
   }
 
-  // Determine duration in beats from the first effect's timing
   const firstEffect = ring1.effects[0]
-  const presetDurationMs = (firstEffect.effect_config?.end_time ?? 30000) - (firstEffect.effect_config?.start_time ?? 0)
-  const durationBeats = (presetDurationMs / 1000) * (bpm / 60)
+  const durationBeats = 16
 
   const timeframes: Timeframe[] = []
   const segEntries = [...segmentGroups.entries()]

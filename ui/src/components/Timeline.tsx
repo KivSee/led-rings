@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Timeframe, TimeframeCycleEntry, getTimeframeEffects } from '../App'
 import { ringsToDisplayLabel } from '../generateSequenceTs'
 import './Timeline.css'
@@ -195,28 +195,78 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
     }
   }
 
-  const checkOverlap = (tf1: Timeframe, tf2: Timeframe): boolean => {
-    return !(tf1.endTime <= tf2.startTime || tf1.startTime >= tf2.endTime)
-  }
+  // Compute lane assignments for all timeframes using greedy interval scheduling.
+  // Timeframes in the same connected component share a column count equal to
+  // the max concurrent overlap depth, and non-overlapping timeframes reuse lanes.
+  const timeframeLanes = useMemo(() => {
+    const n = timeframes.length
+    const result = new Map<number, { lane: number; totalLanes: number }>()
+    if (n === 0) return result
 
-  const getTimeframeOffset = (timeframe: Timeframe, index: number): number => {
-    // Find all timeframes that overlap with this one
-    const overlapping = timeframes
-      .map((tf, idx) => ({ tf, idx }))
-      .filter(({ tf, idx }) => idx !== index && checkOverlap(timeframe, tf))
+    const checkOverlap = (tf1: Timeframe, tf2: Timeframe): boolean =>
+      !(tf1.endTime <= tf2.startTime || tf1.startTime >= tf2.endTime)
 
-    if (overlapping.length === 0) {
-      return 0
+    // Build overlap adjacency
+    const adj: Set<number>[] = Array.from({ length: n }, () => new Set())
+    for (let i = 0; i < n; i++) {
+      for (let j = i + 1; j < n; j++) {
+        if (checkOverlap(timeframes[i], timeframes[j])) {
+          adj[i].add(j)
+          adj[j].add(i)
+        }
+      }
     }
 
-    // Count how many overlapping timeframes come before this one
-    const overlappingBefore = overlapping.filter(({ idx }) => idx < index).length
+    // Find connected components via BFS
+    const compId = new Array(n).fill(-1)
+    let numComps = 0
+    for (let i = 0; i < n; i++) {
+      if (compId[i] !== -1) continue
+      const queue = [i]
+      compId[i] = numComps
+      while (queue.length > 0) {
+        const curr = queue.shift()!
+        for (const j of adj[curr]) {
+          if (compId[j] === -1) { compId[j] = numComps; queue.push(j) }
+        }
+      }
+      numComps++
+    }
 
-    // Offset to the right so overlapping timeframes don't cover the axis
-    const offsetAmount = 20
-    const level = Math.min(overlappingBefore, 3)
-    return level * offsetAmount
-  }
+    // For each component, sort by start time and greedily assign lanes
+    for (let comp = 0; comp < numComps; comp++) {
+      const members: number[] = []
+      for (let i = 0; i < n; i++) {
+        if (compId[i] === comp) members.push(i)
+      }
+      members.sort((a, b) => timeframes[a].startTime - timeframes[b].startTime || a - b)
+
+      const lanes: number[][] = [] // each lane holds indices of its assigned timeframes
+      for (const idx of members) {
+        let assigned = false
+        for (let lane = 0; lane < lanes.length; lane++) {
+          const lastIdx = lanes[lane][lanes[lane].length - 1]
+          if (!checkOverlap(timeframes[idx], timeframes[lastIdx])) {
+            lanes[lane].push(idx)
+            result.set(idx, { lane, totalLanes: 0 })
+            assigned = true
+            break
+          }
+        }
+        if (!assigned) {
+          lanes.push([idx])
+          result.set(idx, { lane: lanes.length - 1, totalLanes: 0 })
+        }
+      }
+
+      const totalLanes = lanes.length
+      for (const idx of members) {
+        result.get(idx)!.totalLanes = totalLanes
+      }
+    }
+
+    return result
+  }, [timeframes])
 
   const snapToBeat = (beat: number): number => {
     return Math.round(beat)
@@ -527,7 +577,9 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
           {timeframes.map((timeframe, index) => {
             const { topPx, heightPx } = getTimeframePosition(timeframe)
             const isEditing = editingId === timeframe.id
-            const offset = getTimeframeOffset(timeframe, index)
+            const laneInfo = timeframeLanes.get(index)
+            const leftPct = laneInfo && laneInfo.totalLanes > 1 ? (laneInfo.lane / laneInfo.totalLanes) * 100 : 0
+            const rightPct = laneInfo && laneInfo.totalLanes > 1 ? ((laneInfo.totalLanes - laneInfo.lane - 1) / laneInfo.totalLanes) * 100 : 0
             const isFocused = focusedTimeframeId === timeframe.id
             const typographyVars = getTimeframeTypographyVars(heightPx)
 
@@ -541,7 +593,8 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
                   top: `${topPx}px`,
                   height: `${heightPx}px`,
                   backgroundColor: timeframe.color,
-                  left: offset !== 0 ? `${offset}px` : undefined,
+                  left: leftPct > 0 ? `${leftPct}%` : undefined,
+                  right: rightPct > 0 ? `${rightPct}%` : undefined,
                   zIndex: isFocused ? 10000 : 1 + index,
                   ...typographyVars,
                 }}

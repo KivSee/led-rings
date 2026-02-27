@@ -297,7 +297,8 @@ function App() {
   }
 
   const addTimeframesFromPreset = (preset: PresetMetadata) => {
-    const newTimeframes = presetToTimeframes(preset, currentTime, song.bpm)
+    const snappedBeat = Math.round(currentTime)
+    const newTimeframes = presetToTimeframes(preset, snappedBeat, song.bpm)
     if (newTimeframes.length > 0) {
       setTimeframes(prev => [...prev, ...newTimeframes])
       setFocusedTimeframeId(newTimeframes[0].id)
