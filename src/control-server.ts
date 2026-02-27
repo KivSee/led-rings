@@ -6,12 +6,45 @@
 import http from "http";
 import path from "path";
 import fs from "fs";
-import { spawn } from "child_process";
+import { spawn, execSync } from "child_process";
 import { sendSequence } from "./services/sequence";
 import { startSong, stop, trigger } from "./services/trigger";
 
 const PORT = parseInt(process.env.CONTROL_SERVER_PORT || "3080", 10);
 const ROOT = process.cwd();
+
+/** Find a Python executable that has librosa installed. */
+function findPython(): string {
+  const candidates = [
+    process.env.PYTHON,
+    "python",
+    "python3",
+  ].filter(Boolean) as string[];
+
+  // Also check for virtualenvs in common locations
+  const home = process.env.USERPROFILE || process.env.HOME || "";
+  const venvGlob = path.join(home, ".virtualenvs");
+  try {
+    if (fs.existsSync(venvGlob)) {
+      for (const dir of fs.readdirSync(venvGlob)) {
+        const winPath = path.join(venvGlob, dir, "Scripts", "python.exe");
+        const unixPath = path.join(venvGlob, dir, "bin", "python");
+        if (fs.existsSync(winPath)) candidates.push(winPath);
+        else if (fs.existsSync(unixPath)) candidates.push(unixPath);
+      }
+    }
+  } catch {}
+
+  for (const cmd of candidates) {
+    try {
+      execSync(`"${cmd}" -c "import librosa"`, { stdio: "ignore", timeout: 10000 });
+      return cmd;
+    } catch {}
+  }
+  return "python"; // fallback
+}
+
+const PYTHON_CMD = findPython();
 
 function send(res: http.ServerResponse, status: number, body: string, contentType = "application/json") {
   res.writeHead(status, { "Content-Type": contentType });
@@ -234,9 +267,60 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "POST" && pathname === "/api/detect-beats") {
+    const body = await parseBody(req);
+    let payload: { audioFilePath?: string };
+    try {
+      payload = JSON.parse(body);
+    } catch {
+      send(res, 400, JSON.stringify({ error: "Invalid JSON" }));
+      return;
+    }
+    if (typeof payload.audioFilePath !== "string") {
+      send(res, 400, JSON.stringify({ error: "Missing audioFilePath" }));
+      return;
+    }
+    // Resolve audio path: try as-is first, then check ui/public/ (where audio files live for the UI)
+    let audioPath = path.resolve(ROOT, payload.audioFilePath);
+    if (!fs.existsSync(audioPath)) {
+      const publicPath = path.resolve(ROOT, "ui", "public", payload.audioFilePath);
+      if (fs.existsSync(publicPath)) audioPath = publicPath;
+    }
+    const scriptPath = path.join(ROOT, "scripts", "detect_beats.py");
+    const child = spawn(PYTHON_CMD, [scriptPath, audioPath], {
+      cwd: ROOT,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+
+    let stdout = "";
+    let stderr = "";
+    child.stdout?.on("data", (d) => { stdout += d.toString(); });
+    child.stderr?.on("data", (d) => { stderr += d.toString(); });
+
+    await new Promise<void>((resolve) => child.on("close", () => resolve()));
+
+    if (child.exitCode !== 0) {
+      console.error("Beat detection failed", stderr);
+      send(res, 500, JSON.stringify({ error: "Beat detection failed", stderr: stderr.slice(0, 500) }));
+      return;
+    }
+
+    // Read the output .beats.json file
+    const beatsPath = audioPath.replace(/\.[^.]+$/, ".beats.json");
+    try {
+      const raw = fs.readFileSync(beatsPath, "utf8");
+      send(res, 200, raw);
+    } catch (e) {
+      console.error("Failed to read beats file", e);
+      send(res, 500, JSON.stringify({ error: "Failed to read beats file" }));
+    }
+    return;
+  }
+
   send(res, 404, JSON.stringify({ error: "Not found" }));
 });
 
 server.listen(PORT, () => {
   console.log(`Control server listening on http://localhost:${PORT}`);
+  console.log(`Python for beat detection: ${PYTHON_CMD}`);
 });

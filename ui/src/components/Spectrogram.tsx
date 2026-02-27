@@ -122,6 +122,8 @@ export interface SpectrogramProps {
   bpm?: number
   /** Offset in seconds where beat 0 starts in the audio (startOffsetMs / 1000). */
   beatOffset?: number
+  /** Detected beat timestamps in milliseconds. When present, drawn as markers on the spectrogram. */
+  beatTimestampsMs?: number[]
   /** When set, spectrogram shows only this range (zoom to timeline). */
   visibleStartSeconds?: number
   visibleEndSeconds?: number
@@ -140,6 +142,7 @@ export default function Spectrogram({
   durationSeconds,
   bpm,
   beatOffset = 0,
+  beatTimestampsMs,
   visibleStartSeconds,
   visibleEndSeconds,
   onRequestScrollToStartSeconds,
@@ -670,6 +673,21 @@ export default function Spectrogram({
         ctx.fillText(label, x, graphHeight + 2)
       }
     }
+
+    // Draw detected beat markers as green vertical lines
+    if (beatTimestampsMs && beatTimestampsMs.length > 0) {
+      ctx.strokeStyle = 'rgba(0, 255, 100, 0.7)'
+      ctx.lineWidth = 2
+      for (const ms of beatTimestampsMs) {
+        const sec = ms / 1000
+        if (sec < viewStart || sec > viewEnd) continue
+        const x = graphLeft + ((sec - viewStart) / viewDuration) * graphWidth
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, graphHeight)
+        ctx.stroke()
+      }
+    }
   }, [
     loading,
     error,
@@ -677,6 +695,7 @@ export default function Spectrogram({
     durationSeconds,
     bpm,
     beatOffset,
+    beatTimestampsMs,
     isZoomed,
     viewStart,
     viewEnd,

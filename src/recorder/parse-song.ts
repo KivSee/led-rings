@@ -21,7 +21,7 @@ export async function parseSongFile(absolutePath: string) {
   trigModule.stop = async () => {};
 
   // Capture Animation metadata by patching sync()
-  let songMeta: { name: string; bpm: number; lengthSeconds: number; startOffsetMs: number } | null = null;
+  let songMeta: { name: string; bpm: number; lengthSeconds: number; startOffsetMs: number; beatTimestampsMs?: number[] } | null = null;
   const originalSync = Animation.prototype.sync;
   Animation.prototype.sync = function (cb: Function) {
     songMeta = {
@@ -29,6 +29,7 @@ export async function parseSongFile(absolutePath: string) {
       bpm: this.bpm,
       lengthSeconds: this.totalTimeSeconds,
       startOffsetMs: this.startOffsetMs,
+      beatTimestampsMs: this.beatTimestampsMs,
     };
     recorder.setBpm(this.bpm, this.startOffsetMs);
     return originalSync.call(this, cb);

@@ -291,6 +291,40 @@
   opacity: 0.85;
 }
 
+.beat-detect-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.beat-detect-button {
+  padding: 4px 10px;
+  font-size: 11px;
+  border-radius: 6px;
+}
+
+.beat-detect-status {
+  font-size: 11px;
+  color: #86efac;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.beat-detect-clear {
+  background: none;
+  border: none;
+  color: #86efac;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+  opacity: 0.7;
+}
+
+.beat-detect-clear:hover {
+  opacity: 1;
+}
+
 .add-button {
   background: white;
   color: #667eea;

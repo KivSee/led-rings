@@ -77,6 +77,8 @@ export interface Song {
   animationType?: AnimationType
   /** Path or URL to the audio file for timeline playback (e.g. /audio/song.wav). Supported: .wav, .mp3, .ogg, etc. */
   audioFilePath?: string
+  /** Detected beat positions in milliseconds. When present, beatToMs uses lookup instead of fixed-BPM formula. */
+  beatTimestampsMs?: number[]
 }
 
 const LAST_SONG_STORAGE_KEY = 'timelineManager:lastSong'
@@ -179,6 +181,7 @@ function App() {
   const [nextRunFromStart, setNextRunFromStart] = useState(true)
   const [liveMode, setLiveMode] = useState(false)
   const [sendSequenceLoading, setSendSequenceLoading] = useState(false)
+  const [detectBeatsLoading, setDetectBeatsLoading] = useState(false)
   const playbackIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
   const appContentRef = React.useRef<HTMLDivElement>(null)
   const audioRef = React.useRef<HTMLAudioElement | null>(null)
@@ -426,6 +429,27 @@ function App() {
     }
   }
 
+  const handleDetectBeats = async () => {
+    if (!API_BASE || !song.audioFilePath?.trim()) return
+    setDetectBeatsLoading(true)
+    try {
+      const res = await fetch(`${API_BASE}/api/detect-beats`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audioFilePath: song.audioFilePath }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+      if (data.beatTimestampsMs && Array.isArray(data.beatTimestampsMs)) {
+        handleSongChange({ beatTimestampsMs: data.beatTimestampsMs })
+      }
+    } catch (err) {
+      console.error('Beat detection failed', err)
+    } finally {
+      setDetectBeatsLoading(false)
+    }
+  }
+
   const handleLoadTimeframes = () => {
     const input = document.createElement('input')
     input.type = 'file'
@@ -670,6 +694,7 @@ function App() {
       runStartTimeSeconds,
       animationType: (s.animationType === 'trigger' ? 'trigger' : 'song') as AnimationType,
       audioFilePath: typeof s.audioFilePath === 'string' ? s.audioFilePath : undefined,
+      beatTimestampsMs: Array.isArray(s.beatTimestampsMs) ? s.beatTimestampsMs as number[] : undefined,
     }
   }
 
@@ -1002,6 +1027,31 @@ function App() {
                 />
                 <span className="song-meta-suffix">sec</span>
               </label>
+              {song.animationType === 'song' && (
+                <div className="song-meta-field beat-detect-field">
+                  <button
+                    type="button"
+                    className="secondary-button beat-detect-button"
+                    onClick={handleDetectBeats}
+                    disabled={detectBeatsLoading || !API_BASE || !song.audioFilePath?.trim()}
+                    title={!API_BASE ? 'Set VITE_API_URL and run control server' : !song.audioFilePath?.trim() ? 'Set audio file path first' : 'Run beat detection on audio file (requires Python + librosa)'}
+                  >
+                    {detectBeatsLoading ? 'Detecting…' : 'Detect Beats'}
+                  </button>
+                  {song.beatTimestampsMs && song.beatTimestampsMs.length > 0 && (
+                    <span className="beat-detect-status" title="Click to clear detected beats and revert to fixed BPM">
+                      {song.beatTimestampsMs.length} beats
+                      <button
+                        type="button"
+                        className="beat-detect-clear"
+                        onClick={() => handleSongChange({ beatTimestampsMs: undefined })}
+                      >
+                        x
+                      </button>
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1070,6 +1120,7 @@ function App() {
             durationSeconds={song.lengthSeconds}
             bpm={song.bpm}
             beatOffset={(song.startOffsetMs ?? 0) / 1000}
+            beatTimestampsMs={song.beatTimestampsMs}
             visibleStartSeconds={visibleStartBeat != null && visibleEndBeat != null ? beatsToAudioSec(visibleStartBeat, song) : undefined}
             visibleEndSeconds={visibleStartBeat != null && visibleEndBeat != null ? beatsToAudioSec(visibleEndBeat, song) : undefined}
             onRequestScrollToStartSeconds={onRequestScrollToStartSeconds}

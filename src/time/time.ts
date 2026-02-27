@@ -1,14 +1,40 @@
 import { als } from "../async-local-storage";
 
-const beatToMs = (beat: number, bpm: number) => {
-    return beat * 60 / bpm * 1000;
+/**
+ * Convert a beat number to milliseconds.
+ * When beatTimestampsMs is available, uses lookup with linear interpolation
+ * for fractional beats. Falls back to fixed-BPM formula otherwise.
+ */
+const beatToMs = (beat: number, bpm: number, beatTimestampsMs?: number[]): number => {
+    if (!beatTimestampsMs || beatTimestampsMs.length === 0) {
+        return beat * 60 / bpm * 1000;
+    }
+
+    const maxIndex = beatTimestampsMs.length - 1;
+
+    if (beat <= 0) return beatTimestampsMs[0] ?? 0;
+    if (beat >= maxIndex) {
+        // Extrapolate beyond detected beats using average beat duration
+        const lastMs = beatTimestampsMs[maxIndex];
+        const avgBeatMs = maxIndex > 0 ? lastMs / maxIndex : 60 / bpm * 1000;
+        return lastMs + (beat - maxIndex) * avgBeatMs;
+    }
+
+    // Integer beat: direct lookup
+    const floor = Math.floor(beat);
+    const ceil = Math.ceil(beat);
+    if (floor === ceil) return beatTimestampsMs[floor];
+
+    // Fractional beat: linear interpolation between adjacent detected beats
+    const frac = beat - floor;
+    return beatTimestampsMs[floor] + frac * (beatTimestampsMs[ceil] - beatTimestampsMs[floor]);
 }
 
 export const beats = (startBeat: number, endBeat: number, cb: Function) => {
     const store = als.getStore();
-    const { bpm, startOffsetMs } = store.animation;
-    const startTime = Math.round(beatToMs(startBeat, bpm)) + startOffsetMs;
-    const endTime = Math.round(beatToMs(endBeat, bpm)) + startOffsetMs;
+    const { bpm, startOffsetMs, beatTimestampsMs } = store.animation;
+    const startTime = Math.round(beatToMs(startBeat, bpm, beatTimestampsMs)) + startOffsetMs;
+    const endTime = Math.round(beatToMs(endBeat, bpm, beatTimestampsMs)) + startOffsetMs;
     const newStore = {
         ...store,
         effectConfig: {

@@ -56,7 +56,8 @@ export class Animation {
         public name: string,
         public bpm: number,
         public totalTimeSeconds: number,
-        public startOffsetMs: number = 0
+        public startOffsetMs: number = 0,
+        public beatTimestampsMs?: number[]
     ) { }
 
     public sync(cb: Function) {

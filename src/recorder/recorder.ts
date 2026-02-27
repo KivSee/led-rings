@@ -34,6 +34,7 @@ interface SongMeta {
   lengthSeconds: number;
   startOffsetMs: number;
   animationType?: string;
+  beatTimestampsMs?: number[];
 }
 
 function msToBeats(ms: number, bpm: number): number {

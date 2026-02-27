@@ -15,6 +15,8 @@ export interface Song {
   animationType?: AnimationType
   /** Path or URL to the audio file for timeline playback (e.g. /audio/song.wav). Supported: .wav, .mp3, .ogg, etc. */
   audioFilePath?: string
+  /** Detected beat positions in milliseconds. When present, beatToMs uses lookup instead of fixed-BPM formula. Index = beat number, value = ms timestamp. */
+  beatTimestampsMs?: number[]
 }
 
 export type TimeframeCycleEntry =
@@ -369,9 +371,12 @@ export function generateSequenceTs(song: Song, timeframes: Timeframe[], importPr
     return withoutExt.replace(/"/g, '\\"')
   })()
 
+  const beatTimestampsArg = !isTrigger && song.beatTimestampsMs && song.beatTimestampsMs.length > 0
+    ? `, ${JSON.stringify(song.beatTimestampsMs)}`
+    : ''
   const animationCtor = isTrigger
     ? `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)})`
-    : `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)}, ${startOffsetMs})`
+    : `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)}, ${startOffsetMs}${beatTimestampsArg})`
   const runCall = isTrigger
     ? `await trigger("${escapedName}");`
     : `await startSong("${startSongName}", 0);`
@@ -461,9 +466,12 @@ export function generateSequenceRunnerTs(song: Song, timeframes: Timeframe[]): s
   }
   const escapedName = safeName.replace(/"/g, '\\"')
   const isTrigger = animationType === 'trigger'
+  const beatTimestampsArg = !isTrigger && song.beatTimestampsMs && song.beatTimestampsMs.length > 0
+    ? `, ${JSON.stringify(song.beatTimestampsMs)}`
+    : ''
   const animationCtor = isTrigger
     ? `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)})`
-    : `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)}, ${startOffsetMs})`
+    : `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)}, ${startOffsetMs}${beatTimestampsArg})`
   const fnName = toIdentifier(safeName)
   return `// Runner: builds sequence and writes to TMP_SEQUENCE_OUT.
 import * as fs from "fs";
