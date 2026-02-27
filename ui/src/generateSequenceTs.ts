@@ -341,7 +341,7 @@ function toIdentifier(name: string): string {
   return id.charAt(0).toLowerCase() + id.slice(1)
 }
 
-export function generateSequenceTs(song: Song, timeframes: Timeframe[]): string {
+export function generateSequenceTs(song: Song, timeframes: Timeframe[], importPrefix = '..'): string {
   const enabledTimeframes = timeframes.filter(tf => !tf.disabled)
   const safeName = (song.name || 'sequence').trim() || 'sequence'
   const totalTimeSeconds = song.lengthSeconds
@@ -378,13 +378,13 @@ export function generateSequenceTs(song: Song, timeframes: Timeframe[]): string 
   const fnName = toIdentifier(safeName)
 
   return `// Generated from Timeline Manager.
-import { sendSequence } from "../services/sequence";
-import { startSong, trigger } from "../services/trigger";
-import { Animation } from "../animation/animation";
-import { beats, cycle, cycleBeats } from "../time/time";
-import { phase } from "../phase/phase";
-import { constColor, noColor } from "../effects/coloring";
-import { addEffect } from "../effects/effect";
+import { sendSequence } from "${importPrefix}/services/sequence";
+import { startSong, trigger } from "${importPrefix}/services/trigger";
+import { Animation } from "${importPrefix}/animation/animation";
+import { beats, cycle, cycleBeats } from "${importPrefix}/time/time";
+import { phase } from "${importPrefix}/phase/phase";
+import { constColor, noColor } from "${importPrefix}/effects/coloring";
+import { addEffect } from "${importPrefix}/effects/effect";
 import {
   blink,
   brightness,
@@ -394,8 +394,8 @@ import {
   fadeOut,
   fadeOutIn,
   pulse,
-} from "../effects/brightness";
-import { elements, segment } from "../objects/elements";
+} from "${importPrefix}/effects/brightness";
+import { elements, segment } from "${importPrefix}/objects/elements";
 import {
   all,
   center,
@@ -411,7 +411,7 @@ import {
   segment_ind,
   segment_rand,
   segment_updown,
-} from "../objects/ring-elements";
+} from "${importPrefix}/objects/ring-elements";
 import {
   snake,
   snakeFillGrow,
@@ -422,8 +422,8 @@ import {
   snakeTailShrinkGrow,
   snakeHeadSteps,
   staticSnake,
-} from "../effects/motion";
-import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "../effects/hue";
+} from "${importPrefix}/effects/motion";
+import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "${importPrefix}/effects/hue";
 
 const ${fnName} = async () => {
   const anim = ${animationCtor};

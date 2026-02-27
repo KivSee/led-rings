@@ -61,7 +61,7 @@ export function evalFloat(t: number, f: FloatFunc | undefined): number {
   }
   if (f.sin !== undefined) {
     const { min, max, phase, repeats } = f.sin
-    const x = 2 * Math.PI * repeats * t + phase
+    const x = 2 * Math.PI * (repeats * t + phase)
     return min + (max - min) * 0.5 * (1 + Math.sin(x))
   }
   if (f.steps !== undefined) {
@@ -253,33 +253,35 @@ export interface HSV {
   v: number
 }
 
+/** Extract HSV from a hex color string. */
+function hsvFromHex(hex: string): HSV {
+  const r = parseInt(hex.slice(1, 3), 16) / 255
+  const g = parseInt(hex.slice(3, 5), 16) / 255
+  const b = parseInt(hex.slice(5, 7), 16) / 255
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  let h = 0
+  if (max !== min) {
+    if (max === r) h = ((g - b) / (max - min)) % 6
+    else if (max === g) h = (b - r) / (max - min) + 2
+    else h = (r - g) / (max - min) + 4
+  }
+  h = h / 6
+  if (h < 0) h += 1
+  const s = max === 0 ? 0 : (max - min) / max
+  return { h, s, v: max }
+}
+
 /** Get base color for a pixel from timeframe. Phase offsets hue per ring. */
 function getBaseColor(
   _relPos: number,
   timeframe: Timeframe,
   perRingPhase: number = 0
 ): HSV {
-  const hueFromHex = (hex: string): number => {
-    const r = parseInt(hex.slice(1, 3), 16) / 255
-    const g = parseInt(hex.slice(3, 5), 16) / 255
-    const b = parseInt(hex.slice(5, 7), 16) / 255
-    const max = Math.max(r, g, b)
-    const min = Math.min(r, g, b)
-    let h = 0
-    if (max !== min) {
-      if (max === r) h = ((g - b) / (max - min)) % 6
-      else if (max === g) h = (b - r) / (max - min) + 2
-      else h = (r - g) / (max - min) + 4
-    }
-    h = h / 6
-    if (h < 0) h += 1
-    return h
-  }
-
-  let baseHue = hueFromHex(timeframe.color || '#3b82f6')
-  baseHue = (baseHue + perRingPhase) % 1
+  const { h, s, v } = hsvFromHex(timeframe.color || '#3b82f6')
+  let baseHue = (h + perRingPhase) % 1
   if (baseHue < 0) baseHue += 1
-  return { h: baseHue, s: 1, v: 1 }
+  return { h: baseHue, s, v }
 }
 
 /** Evaluate a timed/position FloatFunc brightness entry (increase or decrease).
@@ -295,21 +297,21 @@ function evalBrightnessMult(mult: number, t: number, par: Record<string, unknown
   return mult
 }
 
-/** Standard snake mask: 1 if pixel at relPos is in the lit region, else fade to 0. */
+/** Snake brightness: linear gradient from 0 at tail end to 1 at head.
+ *  Matches C++ getBrightnessFactor: (rel_pos - curr_tail) / curr_tail_length. */
 function computeSnakeMask(relPos: number, head: number, tail: number, cyclic: boolean): number {
+  if (tail < 1e-6) return 0
   if (cyclic) {
+    // d = wrapped distance from relPos back toward head (0 = at head, tail = at tail end)
     let d = (head - relPos + 1) % 1
     if (d < 0) d += 1
     if (d > 1) d -= 1
-    if (d <= tail) return 1
-    if (tail < 1e-6) return 0
-    const dist = Math.min(d, (relPos - head + 1) % 1)
-    return Math.max(0, 1 - (dist - tail) / 0.08)
+    if (d <= tail) return 1 - d / tail
+    return 0
   } else {
-    if (relPos <= head && relPos >= head - tail) return 1
-    if (relPos > head) return 0
-    const dist = head - tail - relPos
-    return dist <= 0 ? 1 : Math.max(0, 1 - dist / 0.08)
+    const currTail = head - tail
+    if (relPos > head || relPos < currTail) return 0
+    return (relPos - currTail) / tail
   }
 }
 

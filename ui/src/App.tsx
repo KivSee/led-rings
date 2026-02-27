@@ -350,12 +350,20 @@ function App() {
         }
       }
       if (liveMode && API_BASE) {
-        const songName = (song.name || 'sequence').trim() || 'sequence'
-        fetch(`${API_BASE}/api/start-song`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ songName, startOffsetSeconds }),
-        }).catch((err) => console.error('Live start-song failed', err))
+        const name = (song.name || 'sequence').trim() || 'sequence'
+        if (song.animationType === 'trigger') {
+          fetch(`${API_BASE}/api/trigger`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ triggerName: name }),
+          }).catch((err) => console.error('Live trigger failed', err))
+        } else {
+          fetch(`${API_BASE}/api/start-song`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ songName: name, startOffsetSeconds }),
+          }).catch((err) => console.error('Live start-song failed', err))
+        }
       }
       setIsPlaying(true)
     }
@@ -591,9 +599,6 @@ function App() {
     const dataStr = JSON.stringify(payload, null, 2)
     const safeName = (song.name || 'song').trim() || 'song'
 
-    // Generate TypeScript implementation from current song + timeframes
-    const tsCode = generateSequenceTs(song, timeframes)
-
     const downloadFile = (content: string, filename: string, mimeType: string) => {
       const blob = new Blob([content], { type: mimeType })
       const url = URL.createObjectURL(blob)
@@ -613,6 +618,14 @@ function App() {
         const dirHandle = await anyWindow.showDirectoryPicker({
           mode: 'readwrite',
         })
+        // Determine import prefix by probing for the services/ directory.
+        // If it exists here, we're in src/ (./) — otherwise assume one level below (../).
+        let importPrefix = '..'
+        try {
+          await dirHandle.getDirectoryHandle('services')
+          importPrefix = '.'
+        } catch {}
+        const tsCode = generateSequenceTs(song, timeframes, importPrefix)
         const jsonFile = await dirHandle.getFileHandle(`${safeName}.json`, { create: true })
         const tsFile = await dirHandle.getFileHandle(`${safeName}.ts`, { create: true })
         const jsonWritable = await jsonFile.createWritable()
@@ -626,6 +639,9 @@ function App() {
         // User cancelled or error – fall back to downloads
       }
     }
+
+    // Fallback: generate with default ../ prefix (assumes src/songs/)
+    const tsCode = generateSequenceTs(song, timeframes)
 
     // Fallback: download both files (same song name, correct types)
     downloadFile(dataStr, `${safeName}.json`, 'application/json')

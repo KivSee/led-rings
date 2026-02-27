@@ -8,7 +8,7 @@ import path from "path";
 import fs from "fs";
 import { spawn } from "child_process";
 import { sendSequence } from "./services/sequence";
-import { startSong, stop } from "./services/trigger";
+import { startSong, stop, trigger } from "./services/trigger";
 
 const PORT = parseInt(process.env.CONTROL_SERVER_PORT || "3080", 10);
 const ROOT = process.cwd();
@@ -179,6 +179,29 @@ const server = http.createServer(async (req, res) => {
     } catch (e) {
       console.error("startSong failed", e);
       send(res, 500, JSON.stringify({ error: "startSong failed" }));
+    }
+    return;
+  }
+
+  if (req.method === "POST" && pathname === "/api/trigger") {
+    const body = await parseBody(req);
+    let payload: { triggerName?: string };
+    try {
+      payload = JSON.parse(body);
+    } catch {
+      send(res, 400, JSON.stringify({ error: "Invalid JSON" }));
+      return;
+    }
+    if (typeof payload.triggerName !== "string") {
+      send(res, 400, JSON.stringify({ error: "Missing triggerName" }));
+      return;
+    }
+    try {
+      await trigger(payload.triggerName);
+      send(res, 200, JSON.stringify({ ok: true }));
+    } catch (e) {
+      console.error("trigger failed", e);
+      send(res, 500, JSON.stringify({ error: "trigger failed" }));
     }
     return;
   }

@@ -127,18 +127,105 @@ export function summarizePresetEffects(data: PresetData): string {
 
 function getFloatFuncKind(ff: FloatFunc): string | null {
   if (!ff || typeof ff !== 'object') return null
-  for (const key of ['const_value', 'linear', 'sin', 'steps', 'half', 'comb2']) {
-    if (key in ff) return key
+  for (const key of ['const_value', 'constValue', 'linear', 'sin', 'steps', 'half', 'comb2']) {
+    if (key in ff) return key === 'constValue' ? 'const_value' : key
   }
   return null
 }
 
 function getFloatFuncValue(ff: FloatFunc, kind: string): Record<string, unknown> {
-  return (ff as Record<string, unknown>)[kind] as Record<string, unknown> ?? {}
+  const r = ff as Record<string, unknown>
+  if (kind === 'const_value') return (r.const_value ?? r.constValue ?? {}) as Record<string, unknown>
+  return r[kind] as Record<string, unknown> ?? {}
 }
 
 function approxEqual(a: number, b: number, eps = 0.01): boolean {
   return Math.abs(a - b) < eps
+}
+
+// ── Phase detection helpers ───────────────────────────────────────────────
+
+/** Extract ring1-ring12 from preset data in numeric order. */
+function getOrderedRings(data: PresetData): PresetRingData[] {
+  const rings: PresetRingData[] = []
+  for (let i = 1; i <= 12; i++) {
+    if (data[`ring${i}`]) rings.push(data[`ring${i}`])
+  }
+  return rings
+}
+
+/**
+ * Detect if a numeric value extracted from each ring forms a linear progression.
+ * Returns the phase intensity (delta * numRings) or 0 if no pattern detected.
+ */
+function detectPhaseIntensity(
+  rings: PresetRingData[],
+  extractor: (ring: PresetRingData) => number | null | undefined,
+  tolerance = 0.02,
+): number {
+  if (rings.length < 2) return 0
+  const values: number[] = []
+  for (const ring of rings) {
+    const v = extractor(ring)
+    if (v == null) return 0
+    values.push(v)
+  }
+  const delta = values[1] - values[0]
+  if (Math.abs(delta) < tolerance) return 0
+  for (let i = 2; i < values.length; i++) {
+    if (!approxEqual(values[i] - values[i - 1], delta, tolerance)) return 0
+  }
+  return delta * rings.length
+}
+
+/** Check if an effect is a windowed crossfade padding (< 5% of duration). */
+function isWindowedFade(effect: PresetEffect): boolean {
+  const cfg = effect.effect_config
+  if (!cfg || cfg.repeat_num !== 1) return false
+  const start = cfg.repeat_start ?? 0
+  const end = cfg.repeat_end ?? 1
+  return (end - start) < 0.05
+}
+
+/** Find an effect in a ring matching a predicate. */
+function findRingEffect(ring: PresetRingData, pred: (e: PresetEffect) => boolean): PresetEffect | undefined {
+  return ring.effects.find(pred)
+}
+
+function extractColorHue(ring: PresetRingData, segment: string): number | null {
+  const e = findRingEffect(ring, e => e.const_color != null && (e.effect_config?.segments ?? 'all') === segment)
+  return e?.const_color?.color?.hue ?? null
+}
+
+function extractBrightnessSinPhase(ring: PresetRingData, segment: string): number | null {
+  const e = findRingEffect(ring, e =>
+    e.brightness != null && (e.effect_config?.segments ?? 'all') === segment && !isWindowedFade(e),
+  )
+  if (!e?.brightness?.mult_factor) return null
+  const kind = getFloatFuncKind(e.brightness.mult_factor)
+  if (kind !== 'sin') return null
+  const v = getFloatFuncValue(e.brightness.mult_factor, 'sin')
+  return Number(v.phase ?? 0)
+}
+
+function extractSnakePhase(ring: PresetRingData, segment: string): number | null {
+  const e = findRingEffect(ring, e => e.snake != null && (e.effect_config?.segments ?? 'all') === segment)
+  if (!e?.snake?.head) return null
+  const headKind = getFloatFuncKind(e.snake.head)
+  if (headKind === 'comb2') {
+    const comb2 = getFloatFuncValue(e.snake.head, 'comb2')
+    const f1 = comb2.f1 as FloatFunc | undefined
+    if (f1 && getFloatFuncKind(f1) === 'sin') {
+      return Number(getFloatFuncValue(f1, 'sin').phase ?? 0)
+    }
+  }
+  if (headKind === 'sin') {
+    return Number(getFloatFuncValue(e.snake.head, 'sin').phase ?? 0)
+  }
+  if (headKind === 'linear') {
+    return Number(getFloatFuncValue(e.snake.head, 'linear').start ?? 0)
+  }
+  return null
 }
 
 // ── Reverse mappers ────────────────────────────────────────────────────────
@@ -354,12 +441,15 @@ export function presetToTimeframes(
   insertBeat: number,
   bpm: number,
 ): Timeframe[] {
-  // Use ring1 (all rings have identical effects)
-  const ring1Key = Object.keys(preset.data).find(k => k.startsWith('ring')) ?? ''
-  const ring1 = preset.data[ring1Key]
+  // Get all rings in order for phase detection
+  const orderedRings = getOrderedRings(preset.data)
+  if (orderedRings.length === 0) return []
+
+  // Use ring1 as the base for effect structure
+  const ring1 = orderedRings[0]
   if (!ring1?.effects?.length) return []
 
-  // Group effects by segment
+  // Group effects by segment (from ring1)
   const segmentGroups = new Map<string, PresetEffect[]>()
   for (const effect of ring1.effects) {
     const seg = effect.effect_config?.segments ?? 'all'
@@ -370,9 +460,7 @@ export function presetToTimeframes(
   // Determine duration in beats from the first effect's timing
   const firstEffect = ring1.effects[0]
   const presetDurationMs = (firstEffect.effect_config?.end_time ?? 30000) - (firstEffect.effect_config?.start_time ?? 0)
-  const presetDurationBeats = (presetDurationMs / 1000) * (bpm / 60)
-  // Use a reasonable duration: cap at 8 beats for usability, or the actual duration if shorter
-  const durationBeats = Math.min(presetDurationBeats, 8)
+  const durationBeats = (presetDurationMs / 1000) * (bpm / 60)
 
   const timeframes: Timeframe[] = []
   const segEntries = [...segmentGroups.entries()]
@@ -384,28 +472,46 @@ export function presetToTimeframes(
     const colorEffect = effects.find(e => e.const_color)
     let color = '#3b82f6' // default blue
     let hasExplicitColor: boolean | undefined = undefined
+    let colorPhase: number | undefined = undefined
     if (colorEffect?.const_color?.color) {
       const { hue, sat, val } = colorEffect.const_color.color
       color = hsvToHex(hue, sat, val)
+      // Detect per-ring hue progression
+      if (orderedRings.length > 1) {
+        const intensity = detectPhaseIntensity(orderedRings, r => extractColorHue(r, segment))
+        if (intensity !== 0) colorPhase = intensity
+      }
     } else {
       hasExplicitColor = false
     }
 
-    // Build effect entries from non-const_color effects
+    // Build effect entries from non-const_color, non-windowed-fade effects
     const effectEntries: TimeframeEffectEntry[] = []
     let cycles: TimeframeCycleEntry[] | undefined
 
     for (const effect of effects) {
-      if (effect.const_color) continue // Color is handled via timeframe.color
+      if (effect.const_color) continue
+      if (isWindowedFade(effect)) continue
 
       let mapped: MappedEffect | null = null
+      let effectPhase: number | undefined = undefined
 
       if (effect.brightness?.mult_factor) {
         mapped = reverseMapBrightness(effect.brightness.mult_factor)
+        // Detect per-ring brightness sin phase progression
+        if (orderedRings.length > 1 && getFloatFuncKind(effect.brightness.mult_factor) === 'sin') {
+          const intensity = detectPhaseIntensity(orderedRings, r => extractBrightnessSinPhase(r, segment))
+          if (intensity !== 0) effectPhase = intensity
+        }
       } else if (effect.hue?.offset_factor) {
         mapped = reverseMapHue(effect.hue.offset_factor)
       } else if (effect.snake) {
         mapped = reverseMapSnake(effect.snake)
+        // Detect per-ring snake phase progression
+        if (orderedRings.length > 1) {
+          const intensity = detectPhaseIntensity(orderedRings, r => extractSnakePhase(r, segment))
+          if (intensity !== 0) effectPhase = intensity
+        }
       }
 
       if (mapped) {
@@ -413,6 +519,7 @@ export function presetToTimeframes(
           id: `preset-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
           effectKey: mapped.effectKey,
           params: mapped.params,
+          ...(effectPhase != null ? { phase: effectPhase } : {}),
         })
       }
 
@@ -439,6 +546,7 @@ export function presetToTimeframes(
       hasExplicitColor,
       rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
       mapping: segment === 'all' ? undefined : segment,
+      ...(colorPhase != null ? { phase: colorPhase } : {}),
       cycles,
       effects: effectEntries.length > 0 ? effectEntries : undefined,
     })
