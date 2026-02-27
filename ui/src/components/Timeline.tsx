@@ -31,11 +31,22 @@ interface TimelineProps {
   onScrollToStartDone?: () => void
   /** When user clicks the timeline axis (time marks), seek marker and Run from to this beat. */
   onSeekToBeat?: (beat: number) => void
+  /** Detected beat timestamps in milliseconds. When present, seconds labels use actual detected times. */
+  beatTimestampsMs?: number[]
 }
 
-const beatToSeconds = (beat: number, bpm: number): number => (beat / bpm) * 60
+const beatToSeconds = (beat: number, bpm: number, beatTimestampsMs?: number[]): number => {
+  if (beatTimestampsMs && beatTimestampsMs.length > 0 && beat >= 0) {
+    if (beat < beatTimestampsMs.length) return beatTimestampsMs[beat] / 1000
+    // Extrapolate beyond detected beats
+    const last = beatTimestampsMs[beatTimestampsMs.length - 1]
+    const avg = beatTimestampsMs.length > 1 ? last / (beatTimestampsMs.length - 1) : 60 / bpm
+    return (last + (beat - (beatTimestampsMs.length - 1)) * avg) / 1000
+  }
+  return (beat / bpm) * 60
+}
 
-const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange, onVisibleRangeChange, scrollToStartBeat, onScrollToStartDone, onSeekToBeat }: TimelineProps) => {
+const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange, onVisibleRangeChange, scrollToStartBeat, onScrollToStartDone, onSeekToBeat, beatTimestampsMs }: TimelineProps) => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -714,7 +725,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
         <div className="time-marks">
           {Array.from({ length: Math.ceil(maxTime / 4) + 1 }, (_, i) => i * 4).map((beat) => {
             const isLarge = beat % 16 === 0
-            const sec = beatToSeconds(beat, bpm)
+            const sec = beatToSeconds(beat, bpm, beatTimestampsMs)
             const secLabel = sec % 1 === 0 ? `${sec}s` : `${sec.toFixed(1)}s`
             return (
               <div

@@ -125,13 +125,46 @@ function App() {
     return Math.round(beat / 4) * 4
   }
 
-  /** Convert beat position to audio seconds (accounts for startOffsetMs). */
-  const beatsToAudioSec = (beats: number, s: Song): number =>
-    (beats / s.bpm) * 60 + (s.startOffsetMs ?? 0) / 1000
+  /** Convert beat position to audio seconds (accounts for startOffsetMs and detected beats). */
+  const beatsToAudioSec = (beats: number, s: Song): number => {
+    const ts = s.beatTimestampsMs
+    if (ts && ts.length > 0) {
+      const maxIdx = ts.length - 1
+      if (beats <= 0) return (ts[0] + (s.startOffsetMs ?? 0)) / 1000
+      if (beats >= maxIdx) {
+        const avgMs = maxIdx > 0 ? ts[maxIdx] / maxIdx : 60000 / s.bpm
+        return (ts[maxIdx] + (beats - maxIdx) * avgMs + (s.startOffsetMs ?? 0)) / 1000
+      }
+      const floor = Math.floor(beats)
+      const ceil = Math.ceil(beats)
+      const ms = floor === ceil ? ts[floor] : ts[floor] + (beats - floor) * (ts[ceil] - ts[floor])
+      return (ms + (s.startOffsetMs ?? 0)) / 1000
+    }
+    return (beats / s.bpm) * 60 + (s.startOffsetMs ?? 0) / 1000
+  }
 
-  /** Convert audio seconds to beat position (accounts for startOffsetMs). */
-  const audioSecToBeats = (sec: number, s: Song): number =>
-    ((sec - (s.startOffsetMs ?? 0) / 1000) / 60) * s.bpm
+  /** Convert audio seconds to beat position (accounts for startOffsetMs and detected beats). */
+  const audioSecToBeats = (sec: number, s: Song): number => {
+    const ts = s.beatTimestampsMs
+    const ms = sec * 1000 - (s.startOffsetMs ?? 0)
+    if (ts && ts.length > 0) {
+      if (ms <= ts[0]) return 0
+      if (ms >= ts[ts.length - 1]) {
+        const maxIdx = ts.length - 1
+        const avgMs = maxIdx > 0 ? ts[maxIdx] / maxIdx : 60000 / s.bpm
+        return maxIdx + (ms - ts[maxIdx]) / avgMs
+      }
+      // Binary search for surrounding beats
+      let lo = 0, hi = ts.length - 1
+      while (lo < hi - 1) {
+        const mid = (lo + hi) >> 1
+        if (ts[mid] <= ms) lo = mid; else hi = mid
+      }
+      const range = ts[hi] - ts[lo]
+      return range > 0 ? lo + (ms - ts[lo]) / range : lo
+    }
+    return ((sec - (s.startOffsetMs ?? 0) / 1000) / 60) * s.bpm
+  }
 
   // Ensure we don't overwrite saved state before we've tried loading it
   const hasLoadedInitialStateRef = useRef(false)
@@ -215,7 +248,7 @@ function App() {
   songRef.current = song
   const onRequestScrollToStartSeconds = useCallback((startSeconds: number) => {
     const s = songRef.current
-    setScrollToStartBeat(((startSeconds - (s.startOffsetMs ?? 0) / 1000) / 60) * s.bpm)
+    setScrollToStartBeat(audioSecToBeats(startSeconds, s))
   }, [])
 
   useEffect(() => {
@@ -1164,6 +1197,7 @@ function App() {
               scrollToStartBeat={scrollToStartBeat}
               onScrollToStartDone={onScrollToStartDone}
               onSeekToBeat={handleSeekToBeat}
+              beatTimestampsMs={song.beatTimestampsMs}
             />
           </div>
         </div>

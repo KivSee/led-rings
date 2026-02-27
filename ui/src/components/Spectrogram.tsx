@@ -157,6 +157,7 @@ export default function Spectrogram({
   const decodedDurationRef = useRef(0)
   const decodedSampleRateRef = useRef(SAMPLE_RATE)
   const isProgrammaticScrollRef = useRef(false)
+  const userScrollingUntilRef = useRef(0)
   const [scrollViewWidth, setScrollViewWidth] = useState(0)
   const effectiveDuration = decodedDurationRef.current || durationSeconds || 1
   const isZoomed =
@@ -390,9 +391,11 @@ export default function Spectrogram({
   }, [hasAudio])
 
   // Sync horizontal scroll position to current view (from timeline)
+  // Skip if user is actively scrolling to avoid fighting the scrollbar
   useEffect(() => {
     const el = scrollViewRef.current
     if (!el || maxScrollLeft <= 0) return
+    if (Date.now() < userScrollingUntilRef.current) return
     isProgrammaticScrollRef.current = true
     el.scrollLeft = Math.max(0, Math.min(maxScrollLeft, targetScrollLeft))
   }, [targetScrollLeft, maxScrollLeft])
@@ -414,6 +417,8 @@ export default function Spectrogram({
     }
     const el = scrollViewRef.current
     if (!el || scrollableDuration <= 0 || scrollViewWidth <= 0 || !onRequestScrollToStartSeconds) return
+    // Suppress programmatic scroll-back for 200ms so it doesn't fight user input
+    userScrollingUntilRef.current = Date.now() + 200
     const startSec = (el.scrollLeft / maxScrollLeft) * scrollableDuration
     onRequestScrollToStartSeconds(Math.max(0, Math.min(effectiveDuration - viewDuration, startSec)))
   }, [scrollableDuration, maxScrollLeft, scrollViewWidth, effectiveDuration, onRequestScrollToStartSeconds, viewDuration])
@@ -436,6 +441,7 @@ export default function Spectrogram({
       zoomAt(e.deltaY < 0 ? 'in' : 'out', frac)
     } else {
       if (!onRequestScrollToStartSeconds) return
+      userScrollingUntilRef.current = Date.now() + 200
       const scrollFraction = 0.15
       const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX
       const deltaSec = (delta > 0 ? 1 : -1) * viewDuration * scrollFraction
@@ -632,7 +638,46 @@ export default function Spectrogram({
     const viewEndBeat = ((viewEnd - beatOffset) * bpm!) / 60
     const viewSpanBeats = Math.max(0.001, viewEndBeat - viewStartBeat)
 
-    if (hasBpm) {
+    if (beatTimestampsMs && beatTimestampsMs.length > 0) {
+      // Use detected beat positions as the primary beat grid
+      // Count actual detected beats in view for proper tick density
+      let beatsInView = 0
+      for (let i = 0; i < beatTimestampsMs.length; i++) {
+        const sec = beatTimestampsMs[i] / 1000
+        if (sec >= viewStart && sec <= viewEnd) beatsInView++
+      }
+      const stepBeats = beatAxisStep(beatsInView)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
+      ctx.font = '12px sans-serif'
+      for (let i = 0; i < beatTimestampsMs.length; i++) {
+        if (i % stepBeats !== 0) continue
+        const sec = beatTimestampsMs[i] / 1000
+        if (sec < viewStart || sec > viewEnd) continue
+        const x = graphLeft + ((sec - viewStart) / viewDuration) * graphWidth
+        if (x < graphLeft || x > width) continue
+        // Beat line spanning full spectrogram height
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, graphHeight)
+        ctx.strokeStyle = 'rgba(0, 255, 100, 0.7)'
+        ctx.lineWidth = 2
+        ctx.stroke()
+        // Axis tick below spectrogram
+        ctx.beginPath()
+        ctx.moveTo(x, graphHeight)
+        ctx.lineTo(x, height)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'
+        ctx.lineWidth = 1
+        ctx.stroke()
+        ctx.fillText(String(i), x, graphHeight + 2)
+        const secLabel = sec % 1 === 0 ? `${Math.round(sec)}s` : `${sec.toFixed(2)}s`
+        ctx.font = '10px sans-serif'
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)'
+        ctx.fillText(secLabel, x, graphHeight + 16)
+        ctx.font = '12px sans-serif'
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
+      }
+    } else if (hasBpm) {
       const stepBeats = beatAxisStep(viewSpanBeats)
       const firstTickBeat = Math.ceil(viewStartBeat / stepBeats) * stepBeats
       ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
@@ -671,21 +716,6 @@ export default function Spectrogram({
         ctx.stroke()
         const label = t % 1 === 0 ? `${Math.round(t)}s` : `${t.toFixed(1)}s`
         ctx.fillText(label, x, graphHeight + 2)
-      }
-    }
-
-    // Draw detected beat markers as green vertical lines
-    if (beatTimestampsMs && beatTimestampsMs.length > 0) {
-      ctx.strokeStyle = 'rgba(0, 255, 100, 0.7)'
-      ctx.lineWidth = 2
-      for (const ms of beatTimestampsMs) {
-        const sec = ms / 1000
-        if (sec < viewStart || sec > viewEnd) continue
-        const x = graphLeft + ((sec - viewStart) / viewDuration) * graphWidth
-        ctx.beginPath()
-        ctx.moveTo(x, 0)
-        ctx.lineTo(x, graphHeight)
-        ctx.stroke()
       }
     }
   }, [
