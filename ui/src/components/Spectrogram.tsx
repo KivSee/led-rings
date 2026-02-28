@@ -133,6 +133,16 @@ export interface SpectrogramProps {
   onRequestScrollToStartSeconds?: (startSeconds: number) => void
   /** When not playing, user clicked the spectrogram at this time (seconds). Seek marker and Run from. */
   onSeekToSeconds?: (seconds: number) => void
+  /** When true, edit mode: select beat by click, Add beat button adds at playhead, Remove beat button removes selected; drag still moves. */
+  beatEditMode?: boolean
+  /** Called when user toggles Edit beats checkbox in spectrogram header. */
+  onBeatEditModeChange?: (checked: boolean) => void
+  /** Called when user clicks Add beat (adds at current playhead time). */
+  onBeatAdd?: (timeMs: number) => void
+  /** Called when user clicks Remove beat (removes selected beat index). */
+  onBeatRemove?: (beatIndex: number) => void
+  /** Called when user moves the beat at index to new time (ms). */
+  onBeatMove?: (beatIndex: number, newTimeMs: number) => void
 }
 
 export default function Spectrogram({
@@ -150,6 +160,11 @@ export default function Spectrogram({
   visibleSpanBeats,
   onRequestScrollToStartSeconds,
   onSeekToSeconds,
+  beatEditMode = false,
+  onBeatEditModeChange,
+  onBeatAdd,
+  onBeatRemove,
+  onBeatMove,
 }: SpectrogramProps) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -182,6 +197,11 @@ export default function Spectrogram({
   zoomPanOffsetRef.current = zoomPanOffset
   const lastMouseFracRef = useRef(0.5)
   const isHoveredRef = useRef(false)
+  const [draggingBeatIndex, setDraggingBeatIndex] = useState<number | null>(null)
+  const [dragPreviewMs, setDragPreviewMs] = useState<number | null>(null)
+  const [selectedBeatIndex, setSelectedBeatIndex] = useState<number | null>(null)
+  const dragPreviewMsRef = useRef<number | null>(null)
+  const viewBoundsRef = useRef({ viewStart: 0, viewEnd: 0, viewDuration: 0 })
 
   // Reset pan offset when the timeline's visible range changes
   const prevBaseCenterRef = useRef(baseCenter)
@@ -208,6 +228,7 @@ export default function Spectrogram({
     viewEnd = effectiveCenter + zoomedSpan / 2
   }
   const viewDuration = Math.max(0.001, viewEnd - viewStart)
+  viewBoundsRef.current = { viewStart, viewEnd, viewDuration }
   const scrollableDuration = Math.max(0, effectiveDuration - viewDuration)
   const contentWidthPx = scrollViewWidth > 0 && viewDuration > 0
     ? scrollViewWidth * (effectiveDuration / viewDuration)
@@ -499,7 +520,34 @@ export default function Spectrogram({
     setZoomPanOffset(newOffset)
   }, [baseSpan, baseCenter])
 
-  // Track mouse position over the spectrogram for cursor-aware zoom
+  const BEAT_HIT_THRESHOLD_PX = 12
+
+  const getBeatEditStateAtClientX = useCallback((clientX: number) => {
+    const canvas = canvasRef.current
+    const bounds = viewBoundsRef.current
+    if (!canvas || !beatTimestampsMs?.length) return { timeMs: 0, beatIndex: null as number | null }
+    const rect = canvas.getBoundingClientRect()
+    const x = clientX - rect.left - Y_AXIS_WIDTH
+    const graphW = rect.width - Y_AXIS_WIDTH
+    if (graphW <= 0) return { timeMs: bounds.viewStart * 1000, beatIndex: null }
+    const timeSec = bounds.viewStart + (x / graphW) * bounds.viewDuration
+    const timeMs = Math.max(0, timeSec * 1000)
+    let nearestIdx = -1
+    let nearestDistPx = BEAT_HIT_THRESHOLD_PX + 1
+    for (let i = 0; i < beatTimestampsMs.length; i++) {
+      const beatSec = beatTimestampsMs[i] / 1000
+      if (beatSec < bounds.viewStart || beatSec > bounds.viewEnd) continue
+      const beatX = (beatSec - bounds.viewStart) / bounds.viewDuration * graphW
+      const distPx = Math.abs(x - beatX)
+      if (distPx < nearestDistPx) {
+        nearestDistPx = distPx
+        nearestIdx = i
+      }
+    }
+    return { timeMs, beatIndex: nearestIdx >= 0 ? nearestIdx : null }
+  }, [beatTimestampsMs])
+
+  // Track mouse position over the spectrogram for cursor-aware zoom; in beat edit mode set cursor
   const handleCanvasMouseMove = useCallback((e: React.MouseEvent) => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -507,6 +555,48 @@ export default function Spectrogram({
     const x = e.clientX - rect.left - Y_AXIS_WIDTH
     const graphW = rect.width - Y_AXIS_WIDTH
     if (graphW > 0) lastMouseFracRef.current = Math.max(0, Math.min(1, x / graphW))
+    if (beatEditMode) {
+      const { beatIndex } = getBeatEditStateAtClientX(e.clientX)
+      canvas.style.cursor = beatIndex !== null ? 'pointer' : 'crosshair'
+    }
+  }, [beatEditMode, getBeatEditStateAtClientX])
+
+  const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const rect = canvas.getBoundingClientRect()
+    const graphW = rect.width - Y_AXIS_WIDTH
+    if (graphW <= 0) return
+
+    if (beatEditMode) {
+      const { beatIndex } = getBeatEditStateAtClientX(e.clientX)
+      if (beatIndex !== null) {
+        e.preventDefault()
+        setSelectedBeatIndex((prev) => (prev === beatIndex ? null : beatIndex))
+        return
+      }
+    }
+
+    if (!isPlaying && onSeekToSeconds) {
+      const bounds = viewBoundsRef.current
+      const x = e.clientX - rect.left - Y_AXIS_WIDTH
+      const seconds = bounds.viewStart + (x / graphW) * bounds.viewDuration
+      onSeekToSeconds(Math.max(0, Math.min(effectiveDuration, seconds)))
+    }
+  }, [beatEditMode, isPlaying, onSeekToSeconds, effectiveDuration, getBeatEditStateAtClientX])
+
+  const handleCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (e.button !== 0 || !beatEditMode || !onBeatMove || !beatTimestampsMs?.length) return
+    const { beatIndex } = getBeatEditStateAtClientX(e.clientX)
+    if (beatIndex !== null) {
+      e.preventDefault()
+      setDraggingBeatIndex(beatIndex)
+      setDragPreviewMs(beatTimestampsMs[beatIndex])
+    }
+  }, [beatEditMode, onBeatMove, beatTimestampsMs, getBeatEditStateAtClientX])
+
+  const handleCanvasContextMenu = useCallback((_e: React.MouseEvent<HTMLCanvasElement>) => {
+    // Beat removal is done via Remove beat button after selecting a line
   }, [])
 
   // Keyboard zoom: Ctrl+Plus / Ctrl+Minus (only when hovering the spectrogram)
@@ -536,6 +626,48 @@ export default function Spectrogram({
       document.removeEventListener('keydown', onKeyDown)
     }
   }, [hasAudio, zoomAt])
+
+  // Document-level drag handlers for moving a beat
+  dragPreviewMsRef.current = dragPreviewMs
+  useEffect(() => {
+    if (draggingBeatIndex === null) return
+    const onMove = (e: MouseEvent) => {
+      const canvas = canvasRef.current
+      if (!canvas) return
+      const rect = canvas.getBoundingClientRect()
+      const bounds = viewBoundsRef.current
+      const x = e.clientX - rect.left - Y_AXIS_WIDTH
+      const graphW = rect.width - Y_AXIS_WIDTH
+      if (graphW <= 0) return
+      const timeSec = bounds.viewStart + (x / graphW) * bounds.viewDuration
+      const ms = Math.max(0, timeSec * 1000)
+      dragPreviewMsRef.current = ms
+      setDragPreviewMs(ms)
+    }
+    const onUp = () => {
+      const finalMs = dragPreviewMsRef.current
+      if (draggingBeatIndex !== null && finalMs !== null && onBeatMove) {
+        onBeatMove(draggingBeatIndex, finalMs)
+      }
+      setDraggingBeatIndex(null)
+      setDragPreviewMs(null)
+      dragPreviewMsRef.current = null
+    }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+    return () => {
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+    }
+  }, [draggingBeatIndex, onBeatMove])
+
+  // Clear selection when beats array shrinks (e.g. after remove)
+  useEffect(() => {
+    const len = beatTimestampsMs?.length ?? 0
+    if (selectedBeatIndex !== null && selectedBeatIndex >= len) {
+      setSelectedBeatIndex(null)
+    }
+  }, [beatTimestampsMs?.length, selectedBeatIndex])
 
   // Resize canvas to wrapper and repaint (wrapper fills resizable parent height)
   useEffect(() => {
@@ -658,13 +790,13 @@ export default function Spectrogram({
     const spanForStep = visibleSpanBeats != null && visibleSpanBeats > 0 ? visibleSpanBeats : viewSpanBeats
 
     if (beatTimestampsMs && beatTimestampsMs.length > 0) {
-      // Detected beats: green vertical lines (primary)
+      // Detected beats: green vertical lines (primary). In beat edit mode draw every beat in view for hit-test.
       let beatsInView = 0
       for (let i = 0; i < beatTimestampsMs.length; i++) {
         const sec = beatTimestampsMs[i] / 1000
         if (sec >= viewStart && sec <= viewEnd) beatsInView++
       }
-      const stepBeats = beatAxisStep(beatsInView)
+      const stepBeats = beatEditMode ? 1 : beatAxisStep(beatsInView)
       ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
       ctx.font = '12px sans-serif'
       for (let i = 0; i < beatTimestampsMs.length; i++) {
@@ -673,11 +805,12 @@ export default function Spectrogram({
         if (sec < viewStart || sec > viewEnd) continue
         const x = graphLeft + ((sec - viewStart) / viewDuration) * graphWidth
         if (x < graphLeft || x > width) continue
+        const isSelected = selectedBeatIndex === i
         ctx.beginPath()
         ctx.moveTo(x, 0)
         ctx.lineTo(x, graphHeight)
-        ctx.strokeStyle = 'rgba(0, 255, 100, 0.7)'
-        ctx.lineWidth = 2
+        ctx.strokeStyle = isSelected ? 'rgba(255, 180, 0, 0.95)' : 'rgba(0, 255, 100, 0.7)'
+        ctx.lineWidth = beatEditMode ? (isSelected ? 3.5 : 2.5) : 2
         ctx.stroke()
         ctx.beginPath()
         ctx.moveTo(x, graphHeight)
@@ -685,13 +818,30 @@ export default function Spectrogram({
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'
         ctx.lineWidth = 1
         ctx.stroke()
-        ctx.fillText(String(i), x, graphHeight + 2)
-        const secLabel = sec % 1 === 0 ? `${Math.round(sec)}s` : `${sec.toFixed(2)}s`
-        ctx.font = '10px sans-serif'
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)'
-        ctx.fillText(secLabel, x, graphHeight + 16)
-        ctx.font = '12px sans-serif'
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
+        if (!beatEditMode || i % Math.max(1, beatAxisStep(beatsInView)) === 0) {
+          ctx.fillText(String(i), x, graphHeight + 2)
+          const secLabel = sec % 1 === 0 ? `${Math.round(sec)}s` : `${sec.toFixed(2)}s`
+          ctx.font = '10px sans-serif'
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.6)'
+          ctx.fillText(secLabel, x, graphHeight + 16)
+          ctx.font = '12px sans-serif'
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
+        }
+      }
+      // Drag preview line when moving a beat
+      if (dragPreviewMs !== null) {
+        const sec = dragPreviewMs / 1000
+        if (sec >= viewStart && sec <= viewEnd) {
+          const x = graphLeft + ((sec - viewStart) / viewDuration) * graphWidth
+          ctx.setLineDash([4, 4])
+          ctx.strokeStyle = 'rgba(255, 180, 0, 0.9)'
+          ctx.lineWidth = 2
+          ctx.beginPath()
+          ctx.moveTo(x, 0)
+          ctx.lineTo(x, graphHeight)
+          ctx.stroke()
+          ctx.setLineDash([])
+        }
       }
     } else if (hasBpm) {
       // No detected beats: draw white BPM grid through spectrogram + axis below
@@ -756,6 +906,9 @@ export default function Spectrogram({
     viewEnd,
     viewDuration,
     visibleSpanBeats,
+    beatEditMode,
+    dragPreviewMs,
+    selectedBeatIndex,
   ])
 
   paintRef.current = paint
@@ -772,39 +925,83 @@ export default function Spectrogram({
 
   if (!hasAudio) return null
 
+  const handleRemoveBeat = useCallback(() => {
+    if (selectedBeatIndex !== null && onBeatRemove) {
+      onBeatRemove(selectedBeatIndex)
+      setSelectedBeatIndex(null)
+    }
+  }, [selectedBeatIndex, onBeatRemove])
+
+  const handleAddBeat = useCallback(() => {
+    if (onBeatAdd) onBeatAdd(currentTimeSeconds * 1000)
+  }, [onBeatAdd, currentTimeSeconds])
+
   return (
     <div className="spectrogram-wrapper">
       <div className="spectrogram-header">
         <span className="spectrogram-label">Spectrogram</span>
-        <div className="spectrogram-zoom-controls">
-          <button
-            type="button"
-            className="spectrogram-zoom-btn"
-            onClick={() => {
-              const playheadFrac = viewDuration > 0
-                ? Math.max(0, Math.min(1, (currentTimeSeconds - viewStart) / viewDuration))
-                : 0.5
-              zoomAt('out', playheadFrac)
-            }}
-            title="Zoom out"
-            aria-label="Zoom out"
-          >
-            −
-          </button>
-          <button
-            type="button"
-            className="spectrogram-zoom-btn"
-            onClick={() => {
-              const playheadFrac = viewDuration > 0
-                ? Math.max(0, Math.min(1, (currentTimeSeconds - viewStart) / viewDuration))
-                : 0.5
-              zoomAt('in', playheadFrac)
-            }}
-            title="Zoom in"
-            aria-label="Zoom in"
-          >
-            +
-          </button>
+        <div className="spectrogram-header-right">
+          {onBeatEditModeChange != null && (
+            <label className="spectrogram-edit-beats-toggle" title="Select beats to remove or move; use Add beat / Remove beat buttons">
+              <input
+                type="checkbox"
+                checked={beatEditMode}
+                onChange={(e) => onBeatEditModeChange(e.target.checked)}
+              />
+              <span>Edit beats</span>
+            </label>
+          )}
+          {beatEditMode && onBeatAdd != null && (
+            <button
+              type="button"
+              className="spectrogram-tool-btn"
+              onClick={handleAddBeat}
+              title="Add a beat at current playhead position"
+            >
+              Add beat
+            </button>
+          )}
+          {beatEditMode && onBeatRemove != null && (
+            <button
+              type="button"
+              className="spectrogram-tool-btn"
+              onClick={handleRemoveBeat}
+              disabled={selectedBeatIndex === null}
+              title="Remove the selected beat (click a green line first)"
+            >
+              Remove beat
+            </button>
+          )}
+          <div className="spectrogram-zoom-controls">
+            <button
+              type="button"
+              className="spectrogram-zoom-btn"
+              onClick={() => {
+                const playheadFrac = viewDuration > 0
+                  ? Math.max(0, Math.min(1, (currentTimeSeconds - viewStart) / viewDuration))
+                  : 0.5
+                zoomAt('out', playheadFrac)
+              }}
+              title="Zoom out"
+              aria-label="Zoom out"
+            >
+              −
+            </button>
+            <button
+              type="button"
+              className="spectrogram-zoom-btn"
+              onClick={() => {
+                const playheadFrac = viewDuration > 0
+                  ? Math.max(0, Math.min(1, (currentTimeSeconds - viewStart) / viewDuration))
+                  : 0.5
+                zoomAt('in', playheadFrac)
+              }}
+              title="Zoom in"
+              aria-label="Zoom in"
+            >
+              +
+            </button>
+          </div>
         </div>
       </div>
       <div className="spectrogram-canvas-wrap" ref={wrapperRef}>
@@ -813,19 +1010,11 @@ export default function Spectrogram({
           className="spectrogram-canvas"
           width={800}
           height={180}
-          title="Full-song spectrogram with playhead; zooms with timeline. When stopped, click to move marker and Run from."
+          title={beatEditMode ? 'Click a green line to select it; use Remove beat to delete. Drag a line to move. Use Add beat to add at playhead.' : 'Full-song spectrogram with playhead; zooms with timeline. When stopped, click to move marker and Run from.'}
           onMouseMove={handleCanvasMouseMove}
-          onClick={(e) => {
-            if (isPlaying || !onSeekToSeconds) return
-            const canvas = canvasRef.current
-            if (!canvas) return
-            const rect = canvas.getBoundingClientRect()
-            const x = e.clientX - rect.left - Y_AXIS_WIDTH
-            const graphW = rect.width - Y_AXIS_WIDTH
-            if (graphW <= 0 || x < 0) return
-            const seconds = viewStart + (x / graphW) * viewDuration
-            onSeekToSeconds(Math.max(0, Math.min(effectiveDuration, seconds)))
-          }}
+          onMouseDown={handleCanvasMouseDown}
+          onClick={handleCanvasClick}
+          onContextMenu={handleCanvasContextMenu}
         />
       </div>
       <div

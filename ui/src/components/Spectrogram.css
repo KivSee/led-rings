@@ -27,6 +27,45 @@
   color: rgba(255, 255, 255, 0.6);
 }
 
+.spectrogram-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.spectrogram-edit-beats-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  user-select: none;
+}
+
+.spectrogram-edit-beats-toggle input {
+  margin: 0;
+}
+
+.spectrogram-tool-btn {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+}
+
+.spectrogram-tool-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.spectrogram-tool-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .spectrogram-zoom-controls {
   display: flex;
   align-items: center;

@@ -104,91 +104,31 @@
 .app-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 24px 32px;
+  align-items: flex-start;
+  padding: 18px 24px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  gap: 16px;
 }
 
 .app-header-title {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.app-header-controls {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
 }
 
 .app-header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.playback-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.playback-button {
-  background: white;
-  color: #667eea;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.playback-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.playback-button.playing {
-  background: #10b981;
-  color: white;
-}
-
-.playback-button.stop-button {
-  background: #ef4444;
-  color: white;
-}
-
-.playback-button.send-sequence-button {
-  background: #8b5cf6;
-  color: white;
-}
-
-.playback-button.send-sequence-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.live-mode-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  user-select: none;
-}
-
-.live-mode-checkbox input {
-  cursor: pointer;
+  gap: 10px;
+  flex-shrink: 0;
+  align-self: flex-end;
 }
 
 .app-header h1 {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 600;
 }
 
@@ -206,7 +146,8 @@
 }
 
 .song-meta-row-name {
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .song-name-input {
@@ -217,11 +158,12 @@
   color: #f9fafb;
   font-size: 14px;
   outline: none;
-  min-width: 220px;
+  min-width: 140px;
+  width: 200px;
 }
 
 .song-meta-field-audio .song-meta-input-audio {
-  width: 200px;
+  width: 180px;
 }
 
 .song-audio-file-input {
@@ -281,15 +223,51 @@
   opacity: 0.85;
 }
 
-.beat-detect-field {
+.beat-detect-bottom-row {
   display: flex;
   align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.beat-detect-scope {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+  color: inherit;
+  cursor: pointer;
+}
+
+.beat-detect-bottom-row .beat-detect-range-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.beat-detect-range-input {
+  width: 56px;
+  padding: 2px 4px;
+  font-size: 11px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+  color: inherit;
+}
+
+.beat-detect-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 8px;
 }
 
 .beat-detect-button {
-  padding: 4px 10px;
-  font-size: 11px;
+  padding: 6px 14px;
+  font-size: 13px;
   border-radius: 6px;
 }
 
@@ -315,30 +293,50 @@
   opacity: 1;
 }
 
+.beat-edit-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.beat-edit-toggle input {
+  margin: 0;
+}
+
 .add-button {
   background: white;
   color: #667eea;
   border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 16px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  min-width: 0;
+  flex-shrink: 1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .secondary-button {
   background: rgba(255, 255, 255, 0.15);
   color: #f9fafb;
   border: 1px solid rgba(255, 255, 255, 0.35);
-  padding: 10px 18px;
+  padding: 10px 20px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
 }
 
 .secondary-button:hover {

@@ -1,5 +1,5 @@
 .playback-rings-panel {
-  width: 380px;
+  width: 440px;
   flex-shrink: 0;
   background: #f9fafb;
   border-right: 1px solid #e5e7eb;
@@ -11,12 +11,18 @@
 
 .playback-rings-panel-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 12px;
   padding: 16px 20px;
   border-bottom: 1px solid #e5e7eb;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+}
+
+.playback-rings-panel-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .playback-rings-panel-header h2 {
@@ -26,11 +32,79 @@
 }
 
 .playback-rings-panel-time {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.2);
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 5px 12px;
+  border-radius: 6px;
+}
+
+.playback-rings-panel-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.playback-live-mode {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  margin-right: 4px;
+}
+
+.playback-live-mode input {
+  cursor: pointer;
+  margin: 0;
+}
+
+.playback-ctrl-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.playback-ctrl-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.playback-ctrl-btn.playing {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+.playback-ctrl-btn.stop {
+  background: rgba(239, 68, 68, 0.7);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.playback-ctrl-btn.stop:hover {
+  background: rgba(239, 68, 68, 0.9);
+}
+
+.playback-ctrl-btn.send {
+  background: rgba(139, 92, 246, 0.7);
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+.playback-ctrl-btn.send:hover {
+  background: rgba(139, 92, 246, 0.9);
+}
+
+.playback-ctrl-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .playback-rings-panel-content {

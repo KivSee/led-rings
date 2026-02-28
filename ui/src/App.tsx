@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback, Component } from 'react'
 import Timeline from './components/Timeline'
 import TimeframePanel from './components/TimeframePanel'
 import PlaybackRingsPanel from './components/PlaybackRingsPanel'
@@ -9,6 +9,34 @@ import type { PresetMetadata } from './presets'
 import './App.css'
 
 const API_BASE = (import.meta as any).env?.VITE_API_URL ?? ''
+
+export class AppErrorBoundary extends Component<{ children: React.ReactNode }, { error: Error | null }> {
+  state = { error: null as Error | null }
+  static getDerivedStateFromError(error: Error) {
+    return { error }
+  }
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('App render error', error, info.componentStack)
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ padding: 24, fontFamily: 'sans-serif', maxWidth: 600 }}>
+          <h2>Something went wrong</h2>
+          <p style={{ color: '#c00' }}>{this.state.error.message}</p>
+          <p style={{ fontSize: 12, marginTop: 8 }}>Check the console for details. Try loading a different file or refresh the page.</p>
+          <button type="button" onClick={() => window.location.reload()} style={{ marginTop: 12, marginRight: 8, padding: '8px 16px' }}>
+            Reload page
+          </button>
+          <button type="button" onClick={() => this.setState({ error: null })} style={{ marginTop: 12, padding: '8px 16px' }}>
+            Try again
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
 
 /** cycle(beatsInCycle, cb) — full cycle */
 export interface TimeframeCycle {
@@ -270,6 +298,13 @@ function App() {
   const [liveMode, setLiveMode] = useState(false)
   const [sendSequenceLoading, setSendSequenceLoading] = useState(false)
   const [detectBeatsLoading, setDetectBeatsLoading] = useState(false)
+  const [detectBeatsProgress, setDetectBeatsProgress] = useState<string | null>(null)
+  const [detectBeatsScope, setDetectBeatsScope] = useState<'full' | 'range'>('full')
+  const [rangeStartSec, setRangeStartSec] = useState(0)
+  const [rangeEndSec, setRangeEndSec] = useState(60)
+  const [beatEditMode, setBeatEditMode] = useState(false)
+  /** When user is editing a numeric field, allow empty string; commit validated value on blur. */
+  const [numericEdit, setNumericEdit] = useState<{ field: string; value: string } | null>(null)
   const playbackIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
   const appContentRef = React.useRef<HTMLDivElement>(null)
   const audioRef = React.useRef<HTMLAudioElement | null>(null)
@@ -286,7 +321,7 @@ function App() {
   const songLengthBeats = Math.max(1, (song.lengthSeconds * song.bpm) / 60)
 
   // Resizable panel widths (px)
-  const [playbackPanelWidth, setPlaybackPanelWidth] = useState(380)
+  const [playbackPanelWidth, setPlaybackPanelWidth] = useState(440)
   const [detailsPanelWidth, setDetailsPanelWidth] = useState(350)
   const [spectrogramHeight, setSpectrogramHeight] = useState(180)
   const [resizing, setResizing] = useState<'playback' | 'details' | 'spectrogram' | null>(null)
@@ -558,24 +593,97 @@ function App() {
     }
   }
 
+  const mergeBeatTimestamps = (arrays: number[][], dedupeMs = 20): number[] => {
+    const combined = arrays.flat().sort((a, b) => a - b)
+    if (combined.length === 0) return []
+    const out: number[] = [combined[0]]
+    for (let i = 1; i < combined.length; i++) {
+      if (combined[i] - out[out.length - 1] > dedupeMs) out.push(combined[i])
+    }
+    return out
+  }
+
+  /** Props for numeric inputs: allow empty while editing, commit validated value on blur. */
+  const numericInputProps = (
+    field: string,
+    modelValue: number,
+    defaultVal: number,
+    min: number,
+    parseAs: 'int' | 'float',
+    onCommit: (n: number) => void,
+    max?: number
+  ) => {
+    const isEditing = numericEdit?.field === field
+    const clamp = (n: number) => {
+      const v = Math.max(min, n)
+      return max != null ? Math.min(max, v) : v
+    }
+    return {
+      value: isEditing ? numericEdit!.value : String(modelValue),
+      onFocus: () => setNumericEdit({ field, value: String(modelValue) }),
+      onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+        setNumericEdit((prev) => (prev?.field === field ? { ...prev, value: e.target.value } : null)),
+      onBlur: () => {
+        if (numericEdit?.field !== field) return
+        const raw = numericEdit.value.trim()
+        const parsed = parseAs === 'int' ? parseInt(raw, 10) : parseFloat(raw)
+        const num = raw === '' || isNaN(parsed) ? defaultVal : clamp(parsed)
+        onCommit(num)
+        setNumericEdit(null)
+      },
+    }
+  }
+
   const handleDetectBeats = async () => {
     if (!API_BASE || !song.audioFilePath?.trim()) return
     setDetectBeatsLoading(true)
+    setDetectBeatsProgress(null)
     try {
-      const res = await fetch(`${API_BASE}/api/detect-beats`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ audioFilePath: song.audioFilePath, bpm: song.bpm || undefined }),
-      })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
-      if (data.beatTimestampsMs && Array.isArray(data.beatTimestampsMs)) {
-        handleSongChange({ beatTimestampsMs: data.beatTimestampsMs })
+      if (detectBeatsScope === 'full') {
+        setDetectBeatsProgress('Detecting…')
+        const res = await fetch(`${API_BASE}/api/detect-beats`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ audioFilePath: song.audioFilePath, bpm: song.bpm || undefined }),
+        })
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+        if (data.beatTimestampsMs && Array.isArray(data.beatTimestampsMs)) {
+          handleSongChange({ beatTimestampsMs: data.beatTimestampsMs })
+        }
+      } else if (detectBeatsScope === 'range') {
+        const startSec = Math.max(0, Math.min(rangeStartSec, song.lengthSeconds - 0.1))
+        const endSec = Math.max(startSec + 0.1, Math.min(rangeEndSec, song.lengthSeconds))
+        const startMs = startSec * 1000
+        const endMs = endSec * 1000
+        const inRange = (ms: number) => ms >= startMs && ms <= endMs
+        const existing = song.beatTimestampsMs ?? []
+        const kept = existing.filter((ms) => !inRange(ms))
+        // Clear beats in range immediately so the spectrogram updates (green lines removed)
+        handleSongChange({ beatTimestampsMs: kept.length ? kept : undefined })
+        setDetectBeatsProgress('Detecting range…')
+        const res = await fetch(`${API_BASE}/api/detect-beats`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            audioFilePath: song.audioFilePath,
+            bpm: song.bpm || undefined,
+            startSec,
+            endSec,
+          }),
+        })
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+        if (data.beatTimestampsMs && Array.isArray(data.beatTimestampsMs)) {
+          const merged = mergeBeatTimestamps([kept, data.beatTimestampsMs])
+          handleSongChange({ beatTimestampsMs: merged.length ? merged : undefined })
+        }
       }
     } catch (err) {
       console.error('Beat detection failed', err)
     } finally {
       setDetectBeatsLoading(false)
+      setDetectBeatsProgress(null)
     }
   }
 
@@ -588,13 +696,24 @@ function App() {
       if (!file) return
       try {
         const text = await file.text()
-        const parsed = JSON.parse(text)
+        let parsed: unknown
+        try {
+          parsed = JSON.parse(text)
+        } catch (parseErr) {
+          console.error('Failed to parse JSON', parseErr)
+          alert('Invalid JSON file. Check the console for details.')
+          return
+        }
+        if (!parsed || typeof parsed !== 'object') {
+          alert('Invalid file: expected a JSON object or array.')
+          return
+        }
 
         // Support: raw array (timeframes only), { timeframes: [...] }, or { song, timeframes }
-        const maybeArray = Array.isArray(parsed) ? parsed : parsed?.timeframes
+        const maybeArray = Array.isArray(parsed) ? parsed : (parsed as { timeframes?: unknown }).timeframes
 
-        if (parsed?.song && typeof parsed.song === 'object') {
-          const s = normalizeLoadedSong(parsed.song as Record<string, unknown>)
+        if ((parsed as { song?: unknown }).song && typeof (parsed as { song: unknown }).song === 'object') {
+          const s = normalizeLoadedSong((parsed as { song: Record<string, unknown> }).song)
           setSong(s)
           setEffectiveAudioSrc(s.audioFilePath ?? '')
         }
@@ -621,14 +740,21 @@ function App() {
                 motionEffect: item.motionEffect,
                 motionEffectParams: item.motionEffectParams && typeof item.motionEffectParams === 'object' ? item.motionEffectParams as Record<string, number | boolean> : undefined,
               }
+              let startTime = Number(item.startTime)
+              let endTime = Number(item.endTime)
+              if (!Number.isFinite(startTime)) startTime = 0
+              if (!Number.isFinite(endTime)) endTime = startTime + 4
+              if (endTime <= startTime) endTime = startTime + 4
+              let rings = Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n) && n >= 1 && n <= 12) : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+              if (rings.length === 0) rings = [1]
               return {
                 id: item.id?.toString() ?? `tf-${Date.now()}-${idx}`,
-                startTime: Number(item.startTime) || 0,
-                endTime: Number(item.endTime) || 0,
+                startTime,
+                endTime,
                 label: typeof item.label === 'string' ? item.label : `Timeframe ${idx + 1}`,
                 color: typeof item.color === 'string' ? item.color : '#3b82f6',
                 hasExplicitColor: item.hasExplicitColor !== false ? undefined : false,
-                rings: Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n)) : [1,2,3,4,5,6,7,8,9,10,11,12],
+                rings,
                 mapping: item.mapping,
                 phase: typeof item.phase === 'number' ? item.phase : undefined,
                 cycles: normalizeCycles(item.cycles),
@@ -636,8 +762,9 @@ function App() {
               }
             })
           setTimeframes(mapped)
-        } else if (!parsed?.song) {
+        } else if (!(parsed as { song?: unknown }).song) {
           console.error('Invalid file format: expected array of timeframes or { song, timeframes }')
+          alert('Invalid file format: expected array of timeframes or { song, timeframes }.')
           return
         }
         // If we have song but no timeframes array, leave timeframes unchanged
@@ -652,7 +779,7 @@ function App() {
         const maxDetails = 600
         const minSpectrogram = 80
         const maxSpectrogram = 500
-        const ws = parsed?.windowSizes as { playbackPanelWidth?: number; detailsPanelWidth?: number; spectrogramHeight?: number } | undefined
+        const ws = (parsed as { windowSizes?: { playbackPanelWidth?: number; detailsPanelWidth?: number; spectrogramHeight?: number } }).windowSizes
         if (ws && typeof ws === 'object') {
           if (typeof ws.playbackPanelWidth === 'number') {
             setPlaybackPanelWidth(Math.round(Math.min(maxPlayback, Math.max(minPlayback, ws.playbackPanelWidth))))
@@ -665,7 +792,8 @@ function App() {
           }
         }
       } catch (err) {
-        console.error('Failed to load timeframes file', err)
+        console.error('Failed to load file', err)
+        alert(`Failed to load file: ${err instanceof Error ? err.message : String(err)}`)
       }
     }
     input.click()
@@ -1030,6 +1158,27 @@ function App() {
     }
   }
 
+  const handleBeatAdd = useCallback((timeMs: number) => {
+    const next = [...(song.beatTimestampsMs ?? []), timeMs].sort((a, b) => a - b)
+    handleSongChange({ beatTimestampsMs: next })
+  }, [song.beatTimestampsMs])
+
+  const handleBeatRemove = useCallback((beatIndex: number) => {
+    const cur = song.beatTimestampsMs
+    if (!cur || beatIndex < 0 || beatIndex >= cur.length) return
+    const next = cur.filter((_, i) => i !== beatIndex)
+    handleSongChange({ beatTimestampsMs: next.length ? next : undefined })
+  }, [song.beatTimestampsMs])
+
+  const handleBeatMove = useCallback((beatIndex: number, newTimeMs: number) => {
+    const cur = song.beatTimestampsMs
+    if (!cur || beatIndex < 0 || beatIndex >= cur.length) return
+    const next = [...cur]
+    next[beatIndex] = newTimeMs
+    next.sort((a, b) => a - b)
+    handleSongChange({ beatTimestampsMs: next })
+  }, [song.beatTimestampsMs])
+
   const handleAudioFilePathChange = (value: string) => {
     if (audioBlobUrlRef.current) {
       URL.revokeObjectURL(audioBlobUrlRef.current)
@@ -1117,11 +1266,7 @@ function App() {
                   min={0.1}
                   step={0.1}
                   className="song-meta-input"
-                  value={song.lengthSeconds}
-                  onChange={(e) => {
-                    const val = parseFloat(e.target.value)
-                    handleSongChange({ lengthSeconds: isNaN(val) ? 1 : Math.max(0.1, val) })
-                  }}
+                  {...numericInputProps('lengthSeconds', song.lengthSeconds, 1, 0.1, 'float', (n) => handleSongChange({ lengthSeconds: n }))}
                 />
                 <span className="song-meta-suffix">sec</span>
               </label>
@@ -1132,11 +1277,7 @@ function App() {
                   min={1}
                   step={1}
                   className="song-meta-input"
-                  value={song.bpm}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value, 10)
-                    handleSongChange({ bpm: isNaN(val) ? 1 : Math.max(1, val) })
-                  }}
+                  {...numericInputProps('bpm', song.bpm, 120, 1, 'int', (n) => handleSongChange({ bpm: n }))}
                 />
               </label>
               <label className="song-meta-field">
@@ -1146,11 +1287,7 @@ function App() {
                   min={0}
                   step={1}
                   className="song-meta-input"
-                  value={song.startOffsetMs ?? 0}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value, 10)
-                    handleSongChange({ startOffsetMs: isNaN(val) ? 0 : Math.max(0, val) })
-                  }}
+                  {...numericInputProps('startOffsetMs', song.startOffsetMs ?? 0, 0, 0, 'int', (n) => handleSongChange({ startOffsetMs: n }))}
                 />
                 <span className="song-meta-suffix">ms</span>
               </label>
@@ -1161,25 +1298,72 @@ function App() {
                   min={0}
                   step={0.1}
                   className="song-meta-input"
-                  value={song.runStartTimeSeconds ?? 0}
-                  onChange={(e) => {
-                    const val = parseFloat(e.target.value)
-                    handleSongChange({ runStartTimeSeconds: isNaN(val) ? 0 : Math.max(0, val) })
-                  }}
+                  {...numericInputProps('runStartTimeSeconds', song.runStartTimeSeconds ?? 0, 0, 0, 'float', (n) => handleSongChange({ runStartTimeSeconds: n }))}
                 />
                 <span className="song-meta-suffix">sec</span>
               </label>
               {song.animationType === 'song' && (
-                <div className="song-meta-field beat-detect-field">
+                <div className="beat-detect-column">
                   <button
                     type="button"
                     className="secondary-button beat-detect-button"
                     onClick={handleDetectBeats}
-                    disabled={detectBeatsLoading || !API_BASE || !song.audioFilePath?.trim()}
-                    title={!API_BASE ? 'Set VITE_API_URL and run control server' : !song.audioFilePath?.trim() ? 'Set audio file path first' : 'Run beat detection on audio file (requires Python + librosa)'}
+                    disabled={
+                      detectBeatsLoading ||
+                      !API_BASE ||
+                      !song.audioFilePath?.trim() ||
+                      (detectBeatsScope === 'range' && rangeStartSec >= rangeEndSec)
+                    }
+                    title={
+                      !API_BASE
+                        ? 'Set VITE_API_URL and run control server'
+                        : !song.audioFilePath?.trim()
+                          ? 'Set audio file path first'
+                          : detectBeatsScope === 'range' && rangeStartSec >= rangeEndSec
+                            ? 'From time must be less than To time'
+                            : 'Run beat detection (requires Python + librosa)'
+                    }
                   >
-                    {detectBeatsLoading ? 'Detecting…' : 'Detect Beats'}
+                    {detectBeatsLoading ? (detectBeatsProgress ?? 'Detecting…') : 'Detect Beats'}
                   </button>
+                  <div className="beat-detect-bottom-row">
+                    <select
+                      className="beat-detect-scope"
+                      value={detectBeatsScope}
+                      onChange={(e) => setDetectBeatsScope(e.target.value as 'full' | 'range')}
+                      title="Full song or time range"
+                    >
+                    <option value="full">Full song</option>
+                    <option value="range">Range</option>
+                  </select>
+                  {detectBeatsScope === 'range' && (
+                    <>
+                      <label className="beat-detect-range-label">
+                        <span>From</span>
+                        <input
+                          type="number"
+                          min={0}
+                          max={song.lengthSeconds}
+                          step={0.1}
+                          className="beat-detect-range-input"
+                          {...numericInputProps('rangeStartSec', rangeStartSec, 0, 0, 'float', setRangeStartSec, song.lengthSeconds)}
+                        />
+                        <span className="song-meta-suffix">sec</span>
+                      </label>
+                      <label className="beat-detect-range-label">
+                        <span>To</span>
+                        <input
+                          type="number"
+                          min={0}
+                          max={song.lengthSeconds}
+                          step={0.1}
+                          className="beat-detect-range-input"
+                          {...numericInputProps('rangeEndSec', rangeEndSec, song.lengthSeconds, 0, 'float', setRangeEndSec, song.lengthSeconds)}
+                        />
+                        <span className="song-meta-suffix">sec</span>
+                      </label>
+                    </>
+                  )}
                   {song.beatTimestampsMs && song.beatTimestampsMs.length > 0 && (
                     <span className="beat-detect-status" title="Click to clear detected beats and revert to fixed BPM">
                       {song.beatTimestampsMs.length} beats
@@ -1192,56 +1376,25 @@ function App() {
                       </button>
                     </span>
                   )}
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </div>
-        <div className="app-header-controls">
-          <div className="playback-controls">
-            <label className="live-mode-checkbox" title="When on, Run also starts the song on the device; Stop sends stop.">
-              <input
-                type="checkbox"
-                checked={liveMode}
-                onChange={(e) => setLiveMode(e.target.checked)}
-              />
-              <span>Live mode</span>
-            </label>
-            <button
-              className={`playback-button ${isPlaying ? 'playing' : ''}`}
-              onClick={handlePlayPause}
-            >
-              {isPlaying ? '⏸ Pause' : '▶ Run'}
-            </button>
-            <button
-              className="playback-button stop-button"
-              onClick={handleStop}
-            >
-              ⏹ Stop
-            </button>
-            <button
-              className="playback-button send-sequence-button"
-              onClick={handleSendSequence}
-              disabled={sendSequenceLoading || !API_BASE}
-              title={!API_BASE ? 'Set VITE_API_URL and run control server' : 'Send current sequence to device'}
-            >
-              {sendSequenceLoading ? '…' : 'Send Sequence'}
-            </button>
-          </div>
-          <div className="app-header-actions">
-            <button className="secondary-button" onClick={handleLoadTimeframes}>
-              Load JSON
-            </button>
-            <button className="secondary-button" onClick={handleImportTs} disabled={!API_BASE} title={!API_BASE ? 'Set VITE_API_URL and run control server' : 'Import a .ts song file'}>
-              Import .ts
-            </button>
-            <button className="secondary-button" onClick={handleSaveTimeframes}>
-              Save Changes
-            </button>
-            <button className="add-button" onClick={addTimeframe}>
-              + Add Timeframe
-            </button>
-          </div>
+        <div className="app-header-actions">
+          <button className="secondary-button" onClick={addTimeframe}>
+            + Add Timeframe
+          </button>
+          <button className="secondary-button" onClick={handleLoadTimeframes}>
+            Load JSON
+          </button>
+          <button className="secondary-button" onClick={handleImportTs} disabled={!API_BASE} title={!API_BASE ? 'Set VITE_API_URL and run control server' : 'Import a .ts song file'}>
+            Import .ts
+          </button>
+          <button className="secondary-button" onClick={handleSaveTimeframes}>
+            Save Changes
+          </button>
         </div>
       </div>
       {song.animationType === 'song' && !!(song.audioFilePath?.trim()) && (
@@ -1265,6 +1418,11 @@ function App() {
             visibleSpanBeats={visibleStartBeat != null && visibleEndBeat != null ? visibleEndBeat - visibleStartBeat : undefined}
             onRequestScrollToStartSeconds={onRequestScrollToStartSeconds}
             onSeekToSeconds={(seconds) => handleSeekToBeat(audioSecToBeats(seconds, song))}
+            beatEditMode={beatEditMode}
+            onBeatEditModeChange={setBeatEditMode}
+            onBeatAdd={handleBeatAdd}
+            onBeatRemove={handleBeatRemove}
+            onBeatMove={handleBeatMove}
           />
         </div>
       )}
@@ -1280,7 +1438,18 @@ function App() {
           className="app-playback-wrapper"
           style={{ width: playbackPanelWidth, minWidth: playbackPanelWidth }}
         >
-          <PlaybackRingsPanel currentTime={currentTime} timeframes={timeframes} />
+          <PlaybackRingsPanel
+            currentTime={currentTime}
+            timeframes={timeframes}
+            isPlaying={isPlaying}
+            liveMode={liveMode}
+            sendSequenceLoading={sendSequenceLoading}
+            apiAvailable={!!API_BASE}
+            onPlayPause={handlePlayPause}
+            onStop={handleStop}
+            onSendSequence={handleSendSequence}
+            onLiveModeChange={setLiveMode}
+          />
         </div>
         <div
           className="app-resize-handle app-resize-handle-playback"

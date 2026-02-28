@@ -269,7 +269,7 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "POST" && pathname === "/api/detect-beats") {
     const body = await parseBody(req);
-    let payload: { audioFilePath?: string; bpm?: number; method?: string };
+    let payload: { audioFilePath?: string; bpm?: number; method?: string; startSec?: number; endSec?: number };
     try {
       payload = JSON.parse(body);
     } catch {
@@ -278,6 +278,13 @@ const server = http.createServer(async (req, res) => {
     }
     if (typeof payload.audioFilePath !== "string") {
       send(res, 400, JSON.stringify({ error: "Missing audioFilePath" }));
+      return;
+    }
+    const startSec = payload.startSec;
+    const endSec = payload.endSec;
+    const useRange = typeof startSec === "number" && typeof endSec === "number";
+    if (useRange && startSec >= endSec) {
+      send(res, 400, JSON.stringify({ error: "startSec must be less than endSec" }));
       return;
     }
     // Resolve audio path: try as-is first, then check ui/public/ (where audio files live for the UI)
@@ -293,6 +300,9 @@ const server = http.createServer(async (req, res) => {
     }
     if (typeof payload.bpm === "number" && payload.bpm > 0) {
       pyArgs.push("--bpm", String(payload.bpm));
+    }
+    if (useRange) {
+      pyArgs.push("--start-sec", String(startSec), "--end-sec", String(endSec), "--output", "-");
     }
     const child = spawn(PYTHON_CMD, pyArgs, {
       cwd: ROOT,
@@ -312,14 +322,22 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    // Read the output .beats.json file
-    const beatsPath = audioPath.replace(/\.[^.]+$/, ".beats.json");
-    try {
-      const raw = fs.readFileSync(beatsPath, "utf8");
-      send(res, 200, raw);
-    } catch (e) {
-      console.error("Failed to read beats file", e);
-      send(res, 500, JSON.stringify({ error: "Failed to read beats file" }));
+    if (useRange) {
+      try {
+        send(res, 200, stdout);
+      } catch (e) {
+        console.error("Invalid JSON from script", e);
+        send(res, 500, JSON.stringify({ error: "Invalid JSON from beat detection script" }));
+      }
+    } else {
+      const beatsPath = audioPath.replace(/\.[^.]+$/, ".beats.json");
+      try {
+        const raw = fs.readFileSync(beatsPath, "utf8");
+        send(res, 200, raw);
+      } catch (e) {
+        console.error("Failed to read beats file", e);
+        send(res, 500, JSON.stringify({ error: "Failed to read beats file" }));
+      }
     }
     return;
   }

@@ -5,25 +5,72 @@ import './PlaybackRingsPanel.css'
 interface PlaybackRingsPanelProps {
   currentTime: number
   timeframes: Timeframe[]
+  isPlaying: boolean
+  liveMode: boolean
+  sendSequenceLoading: boolean
+  apiAvailable: boolean
+  onPlayPause: () => void
+  onStop: () => void
+  onSendSequence: () => void
+  onLiveModeChange: (value: boolean) => void
 }
 
-// Get all active timeframes at a given time
 function getActiveTimeframesAt(time: number, timeframes: Timeframe[]): Timeframe[] {
   return timeframes.filter(
     (tf) => !tf.disabled && time >= tf.startTime && time < tf.endTime
   )
 }
 
-const PlaybackRingsPanel = ({ currentTime, timeframes }: PlaybackRingsPanelProps) => {
+const PlaybackRingsPanel = ({
+  currentTime,
+  timeframes,
+  isPlaying,
+  liveMode,
+  sendSequenceLoading,
+  apiAvailable,
+  onPlayPause,
+  onStop,
+  onSendSequence,
+  onLiveModeChange,
+}: PlaybackRingsPanelProps) => {
   const activeTimeframes = getActiveTimeframesAt(currentTime, timeframes)
   const activeRings = Array.from(new Set(activeTimeframes.flatMap(tf => tf.rings)))
 
   return (
     <div className="playback-rings-panel">
       <div className="playback-rings-panel-header">
-        <h2>Playback</h2>
-        <div className="playback-rings-panel-time">
-          Time: {currentTime.toFixed(1)}b
+        <div className="playback-rings-panel-header-top">
+          <h2>Playback</h2>
+          <div className="playback-rings-panel-time">
+            Time: {currentTime.toFixed(1)}b
+          </div>
+        </div>
+        <div className="playback-rings-panel-controls">
+          <label className="playback-live-mode" title="When on, Run also starts the song on the device; Stop sends stop.">
+            <input
+              type="checkbox"
+              checked={liveMode}
+              onChange={(e) => onLiveModeChange(e.target.checked)}
+            />
+            <span>Live</span>
+          </label>
+          <button
+            className={`playback-ctrl-btn ${isPlaying ? 'playing' : ''}`}
+            onClick={onPlayPause}
+          >
+            {isPlaying ? '⏸ Pause' : '▶ Run'}
+          </button>
+          <button className="playback-ctrl-btn stop" onClick={onStop}>
+            ⏹ Stop
+          </button>
+          <button
+            className="playback-ctrl-btn send"
+            onClick={onSendSequence}
+            disabled={sendSequenceLoading || !apiAvailable}
+            title={!apiAvailable ? 'Set VITE_API_URL and run control server' : 'Send current sequence to device'}
+          >
+            {sendSequenceLoading ? '…' : 'Send'}
+          </button>
         </div>
       </div>
       <div className="playback-rings-panel-content">
