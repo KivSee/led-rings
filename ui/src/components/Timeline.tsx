@@ -27,11 +27,16 @@ interface TimelineProps {
   onFocusedTimeframeChange: (id: string | null) => void
   currentTime: number
   onCurrentTimeChange: (time: number) => void
-  /** Called when the visible beat range changes (scroll/resize) for spectrogram sync. */
-  onVisibleRangeChange?: (startBeat: number, endBeat: number) => void
-  /** When set, timeline scrolls to show this start beat (e.g. from spectrogram scrollbar). Cleared after scroll. */
-  scrollToStartBeat?: number | null
-  onScrollToStartDone?: () => void
+  /** First visible beat (from unified view range). */
+  viewStartBeat: number
+  /** Number of beats visible on screen (from unified view range). */
+  beatsPerScreen: number
+  /** Scroll the unified view to a specific start beat. */
+  onScrollTo: (startBeat: number) => void
+  /** Zoom at a beat with anchor fraction (0=top, 1=bottom). */
+  onZoomAt: (direction: 'in' | 'out', anchorBeat: number, anchorFraction: number) => void
+  /** Pan by a delta in beats. */
+  onPanBy: (deltaBeats: number) => void
   /** When user clicks the timeline axis (time marks), seek marker and Run from to this beat. */
   onSeekToBeat?: (beat: number) => void
   /** Detected beat timestamps in milliseconds. When present, seconds labels use actual detected times. */
@@ -49,7 +54,7 @@ const beatToSeconds = (beat: number, bpm: number, beatTimestampsMs?: number[]): 
   return (beat / bpm) * 60
 }
 
-const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd, onCopy, onPaste, hasClipboard, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange, onVisibleRangeChange, scrollToStartBeat, onScrollToStartDone, onSeekToBeat, beatTimestampsMs }: TimelineProps) => {
+const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd, onCopy, onPaste, hasClipboard, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange, viewStartBeat, beatsPerScreen, onScrollTo, onZoomAt, onPanBy: _onPanBy, onSeekToBeat, beatTimestampsMs }: TimelineProps) => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -65,16 +70,20 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
   const timelineScrollViewRef = React.useRef<HTMLDivElement>(null)
   const timelineWrapperRef = React.useRef<HTMLDivElement>(null)
   const [visibleHeightPx, setVisibleHeightPx] = useState<number>(600)
-  const [beatsPerScreen, setBeatsPerScreen] = useState(64)
-  const onVisibleRangeChangeRef = React.useRef(onVisibleRangeChange)
-  onVisibleRangeChangeRef.current = onVisibleRangeChange
+  const isProgrammaticScrollRef = React.useRef(false)
 
   const maxTime = Math.max(songLengthBeats, 4)
 
-  const handleZoomIn = () => setBeatsPerScreen(prev => Math.max(16, prev / 2))
-  const handleZoomOut = () => setBeatsPerScreen(prev => Math.min(256, prev * 2))
+  const handleZoomIn = () => {
+    const centerBeat = viewStartBeat + beatsPerScreen / 2
+    onZoomAt('in', centerBeat, 0.5)
+  }
+  const handleZoomOut = () => {
+    const centerBeat = viewStartBeat + beatsPerScreen / 2
+    onZoomAt('out', centerBeat, 0.5)
+  }
 
-  // Fixed scale: 64 beats = one screen height. Measure the scroll viewport.
+  // Measure the scroll viewport height
   useEffect(() => {
     const scrollEl = timelineScrollViewRef.current
     if (!scrollEl) return
@@ -92,53 +101,81 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
     }
   }, [])
 
-  // Report visible beat range for spectrogram zoom/scroll sync (use ref so effect doesn't re-run on parent render)
-  const pxPerBeatForRange = visibleHeightPx / beatsPerScreen
-  useEffect(() => {
-    const cb = onVisibleRangeChangeRef.current
-    if (!cb || pxPerBeatForRange <= 0) return
-    const scrollEl = timelineScrollViewRef.current
-    if (!scrollEl) return
-    const report = () => {
-      const scrollTop = scrollEl.scrollTop
-      const startBeat = Math.max(0, scrollTop / pxPerBeatForRange)
-      const endBeat = Math.min(maxTime, startBeat + beatsPerScreen)
-      onVisibleRangeChangeRef.current?.(startBeat, endBeat)
-    }
-    report()
-    scrollEl.addEventListener('scroll', report)
-    return () => scrollEl.removeEventListener('scroll', report)
-  }, [pxPerBeatForRange, maxTime])
+  const pxPerBeat = visibleHeightPx / beatsPerScreen
 
-  // Auto-scroll so the playhead stays with ~1/4 of the screen showing ahead
+  // Drive scrollTop from unified viewStartBeat
   useEffect(() => {
-    if (pxPerBeatForRange <= 0) return
+    const scrollEl = timelineScrollViewRef.current
+    if (!scrollEl || pxPerBeat <= 0) return
+    const targetScrollTop = viewStartBeat * pxPerBeat
+    if (Math.abs(scrollEl.scrollTop - targetScrollTop) >= 1) {
+      isProgrammaticScrollRef.current = true
+      scrollEl.scrollTop = targetScrollTop
+    }
+  }, [viewStartBeat, pxPerBeat])
+
+  // User scroll -> feed back to shared onScrollTo
+  useEffect(() => {
+    const scrollEl = timelineScrollViewRef.current
+    if (!scrollEl || pxPerBeat <= 0) return
+    const handleScroll = () => {
+      if (isProgrammaticScrollRef.current) {
+        isProgrammaticScrollRef.current = false
+        return
+      }
+      const startBeat = scrollEl.scrollTop / pxPerBeat
+      onScrollTo(startBeat)
+    }
+    scrollEl.addEventListener('scroll', handleScroll)
+    return () => scrollEl.removeEventListener('scroll', handleScroll)
+  }, [pxPerBeat, onScrollTo])
+
+  // Ctrl+wheel zoom on timeline
+  useEffect(() => {
     const scrollEl = timelineScrollViewRef.current
     if (!scrollEl) return
-    const scrollTop = scrollEl.scrollTop
-    const startBeat = scrollTop / pxPerBeatForRange
-    // Scroll when playhead passes 3/4 of the visible area
-    const triggerBeat = startBeat + beatsPerScreen * 3 / 4
-    if (currentTime >= triggerBeat) {
-      // Position playhead at 3/4 from top, leaving 1/4 ahead
-      const newStartBeat = Math.max(0, currentTime - beatsPerScreen * 3 / 4)
-      const maxScrollTop = Math.max(0, (maxTime - beatsPerScreen) * pxPerBeatForRange)
-      const newScrollTop = Math.min(maxScrollTop, newStartBeat * pxPerBeatForRange)
-      // Only scroll if the position actually changes (avoids vibration at end of song)
-      if (Math.abs(scrollEl.scrollTop - newScrollTop) >= 1) {
-        scrollEl.scrollTop = newScrollTop
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault()
+        const rect = scrollEl.getBoundingClientRect()
+        const fraction = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height))
+        const anchorBeat = viewStartBeat + fraction * beatsPerScreen
+        onZoomAt(e.deltaY < 0 ? 'in' : 'out', anchorBeat, fraction)
+      }
+      // Plain scroll: let native scrollbar handle it (which triggers handleScroll above)
+    }
+    scrollEl.addEventListener('wheel', handleWheel, { passive: false })
+    return () => scrollEl.removeEventListener('wheel', handleWheel)
+  }, [viewStartBeat, beatsPerScreen, onZoomAt])
+
+  // Ctrl+keyboard zoom on timeline (when hovered)
+  useEffect(() => {
+    const scrollEl = timelineScrollViewRef.current
+    if (!scrollEl) return
+    let isHovered = false
+    const onEnter = () => { isHovered = true }
+    const onLeave = () => { isHovered = false }
+    scrollEl.addEventListener('mouseenter', onEnter)
+    scrollEl.addEventListener('mouseleave', onLeave)
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!isHovered || (!e.ctrlKey && !e.metaKey)) return
+      if (e.key === '=' || e.key === '+') {
+        e.preventDefault()
+        const centerBeat = viewStartBeat + beatsPerScreen / 2
+        onZoomAt('in', centerBeat, 0.5)
+      } else if (e.key === '-') {
+        e.preventDefault()
+        const centerBeat = viewStartBeat + beatsPerScreen / 2
+        onZoomAt('out', centerBeat, 0.5)
       }
     }
-  }, [currentTime, pxPerBeatForRange, maxTime, beatsPerScreen])
-
-  useEffect(() => {
-    if (scrollToStartBeat == null || pxPerBeatForRange <= 0 || !onScrollToStartDone) return
-    const scrollEl = timelineScrollViewRef.current
-    if (!scrollEl) return
-    const maxScrollTop = Math.max(0, (maxTime - beatsPerScreen) * pxPerBeatForRange)
-    scrollEl.scrollTop = Math.max(0, Math.min(maxScrollTop, scrollToStartBeat * pxPerBeatForRange))
-    onScrollToStartDone()
-  }, [scrollToStartBeat, pxPerBeatForRange, maxTime, onScrollToStartDone])
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      scrollEl.removeEventListener('mouseenter', onEnter)
+      scrollEl.removeEventListener('mouseleave', onLeave)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [viewStartBeat, beatsPerScreen, onZoomAt])
 
   const handleTimeframeClick = (id: string, field: 'label' | 'startTime' | 'endTime') => {
     setEditingId(id)
@@ -172,8 +209,6 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
     }
   }
 
-  // Fixed scale: 64 beats fill the visible screen; 1 beat = pxPerBeat pixels
-  const pxPerBeat = visibleHeightPx / beatsPerScreen
   const wrapperHeightPx = pxPerBeat * Math.max(maxTime, beatsPerScreen)
 
   const getTimeframePosition = (timeframe: Timeframe) => {
@@ -573,7 +608,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
   return (
     <div className="timeline-container">
       <div className="timeline-zoom-controls">
-        <button onClick={handleZoomIn} disabled={beatsPerScreen <= 16} title="Zoom in">+</button>
+        <button onClick={handleZoomIn} disabled={beatsPerScreen <= 4} title="Zoom in">+</button>
         <span className="timeline-zoom-label">{beatsPerScreen}b</span>
         <button onClick={handleZoomOut} disabled={beatsPerScreen >= 256} title="Zoom out">-</button>
       </div>

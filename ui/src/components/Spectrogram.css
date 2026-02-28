@@ -105,21 +105,6 @@
   width: 100%;
 }
 
-.spectrogram-scroll-view {
-  flex-shrink: 0;
-  width: 100%;
-  height: 14px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  margin-top: 6px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.25);
-}
-
-.spectrogram-scroll-content {
-  height: 1px;
-  pointer-events: none;
-}
 
 .spectrogram-canvas {
   display: block;

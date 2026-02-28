@@ -3,6 +3,7 @@ import Timeline from './components/Timeline'
 import TimeframePanel from './components/TimeframePanel'
 import PlaybackRingsPanel from './components/PlaybackRingsPanel'
 import Spectrogram from './components/Spectrogram'
+import { useViewRange } from './hooks/useViewRange'
 import { generateSequenceTs, generateSequenceRunnerTs } from './generateSequenceTs'
 import { presetToTimeframes } from './presets'
 import type { PresetMetadata } from './presets'
@@ -313,12 +314,10 @@ function App() {
   const savedDirHandleRef = React.useRef<any>(null)
   /** Effective audio URL for spectrogram fetch (path or blob URL). */
   const [effectiveAudioSrc, setEffectiveAudioSrc] = useState('')
-  /** Visible time range in beats from Timeline scroll (for spectrogram zoom). */
-  const [visibleRangeBeats, setVisibleRangeBeats] = useState<{ start: number; end: number } | null>(null)
-  const visibleStartBeat = visibleRangeBeats?.start ?? null
-  const visibleEndBeat = visibleRangeBeats?.end ?? null
-  const [scrollToStartBeat, setScrollToStartBeat] = useState<number | null>(null)
   const songLengthBeats = Math.max(1, (song.lengthSeconds * song.bpm) / 60)
+  const [viewRange, viewActions] = useViewRange(songLengthBeats)
+  const { startBeat: viewStartBeat, beatsPerScreen } = viewRange
+  const viewEndBeat = viewStartBeat + beatsPerScreen
 
   // Resizable panel widths (px)
   const [playbackPanelWidth, setPlaybackPanelWidth] = useState(440)
@@ -327,20 +326,33 @@ function App() {
   const [resizing, setResizing] = useState<'playback' | 'details' | 'spectrogram' | null>(null)
   const spectrogramContainerRef = React.useRef<HTMLDivElement>(null)
 
-  // Stable callbacks to avoid effect loops in Timeline/Spectrogram (they use these in useEffect deps)
-  const onVisibleRangeChange = useCallback((startBeat: number, endBeat: number) => {
-    setVisibleRangeBeats((prev) => {
-      if (prev && prev.start === startBeat && prev.end === endBeat) return prev
-      return { start: startBeat, end: endBeat }
-    })
-  }, [])
-  const onScrollToStartDone = useCallback(() => setScrollToStartBeat(null), [])
   const songRef = useRef(song)
   songRef.current = song
-  const onRequestScrollToStartSeconds = useCallback((startSeconds: number) => {
+
+  // Unified auto-scroll during playback
+  useEffect(() => {
+    if (!isPlaying) return
+    viewActions.autoScrollTo(currentTime, 0.75)
+  }, [currentTime, isPlaying, viewActions])
+
+  // Stable callbacks for Spectrogram (convert seconds → beats then call viewActions)
+  const onScrollToSeconds = useCallback((sec: number) => {
+    viewActions.scrollTo(audioSecToBeats(sec, songRef.current))
+  }, [viewActions])
+  const onZoomAtSeconds = useCallback((dir: 'in' | 'out', anchorSec: number, frac: number) => {
+    viewActions.zoomAt(dir, audioSecToBeats(anchorSec, songRef.current), frac)
+  }, [viewActions])
+  const viewStartBeatRef = useRef(viewStartBeat)
+  viewStartBeatRef.current = viewStartBeat
+  const beatsPerScreenRef = useRef(beatsPerScreen)
+  beatsPerScreenRef.current = beatsPerScreen
+  const onPanBySeconds = useCallback((deltaSec: number) => {
     const s = songRef.current
-    setScrollToStartBeat(audioSecToBeats(startSeconds, s))
-  }, [])
+    const currentCenterBeat = viewStartBeatRef.current + beatsPerScreenRef.current / 2
+    const currentCenterSec = beatsToAudioSec(currentCenterBeat, s)
+    const newCenterBeat = audioSecToBeats(currentCenterSec + deltaSec, s)
+    viewActions.panBy(newCenterBeat - currentCenterBeat)
+  }, [viewActions])
 
   useEffect(() => {
     if (!resizing) return
@@ -1413,10 +1425,12 @@ function App() {
             bpm={song.bpm}
             beatOffset={(song.startOffsetMs ?? 0) / 1000}
             beatTimestampsMs={song.beatTimestampsMs}
-            visibleStartSeconds={visibleStartBeat != null && visibleEndBeat != null ? beatsToAudioSec(visibleStartBeat, song) : undefined}
-            visibleEndSeconds={visibleStartBeat != null && visibleEndBeat != null ? beatsToAudioSec(visibleEndBeat, song) : undefined}
-            visibleSpanBeats={visibleStartBeat != null && visibleEndBeat != null ? visibleEndBeat - visibleStartBeat : undefined}
-            onRequestScrollToStartSeconds={onRequestScrollToStartSeconds}
+            viewStartSeconds={beatsToAudioSec(viewStartBeat, song)}
+            viewEndSeconds={beatsToAudioSec(viewEndBeat, song)}
+            viewSpanBeats={beatsPerScreen}
+            onScrollToSeconds={onScrollToSeconds}
+            onZoomAtSeconds={onZoomAtSeconds}
+            onPanBySeconds={onPanBySeconds}
             onSeekToSeconds={(seconds) => handleSeekToBeat(audioSecToBeats(seconds, song))}
             beatEditMode={beatEditMode}
             onBeatEditModeChange={setBeatEditMode}
@@ -1472,9 +1486,11 @@ function App() {
               onFocusedTimeframeChange={setFocusedTimeframeId}
               currentTime={currentTime}
               onCurrentTimeChange={handleCurrentTimeChange}
-              onVisibleRangeChange={onVisibleRangeChange}
-              scrollToStartBeat={scrollToStartBeat}
-              onScrollToStartDone={onScrollToStartDone}
+              viewStartBeat={viewStartBeat}
+              beatsPerScreen={beatsPerScreen}
+              onScrollTo={viewActions.scrollTo}
+              onZoomAt={viewActions.zoomAt}
+              onPanBy={viewActions.panBy}
               onSeekToBeat={handleSeekToBeat}
               beatTimestampsMs={song.beatTimestampsMs}
             />

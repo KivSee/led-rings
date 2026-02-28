@@ -79,10 +79,6 @@ const FREQ_TICKS = [50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000]
 function freqLabel(hz: number): string {
   return hz >= 1000 ? `${hz / 1000}k` : String(hz)
 }
-const ZOOM_MIN = 0.25
-const ZOOM_MAX = 4
-const ZOOM_STEP = 1.25
-
 /** Pick a step in whole beats for axis ticks. Step 1 when span ≤ 64 so grid matches timeline zoom. */
 function beatAxisStep(rangeBeats: number): number {
   if (rangeBeats <= 0) return 1
@@ -124,13 +120,18 @@ export interface SpectrogramProps {
   beatOffset?: number
   /** Detected beat timestamps in milliseconds. When present, drawn as markers on the spectrogram. */
   beatTimestampsMs?: number[]
-  /** When set, spectrogram shows only this range (zoom to timeline). */
-  visibleStartSeconds?: number
-  visibleEndSeconds?: number
-  /** Visible beat span from timeline (e.g. 16 at max zoom). Used for grid density so it stays consistent when time span varies. */
-  visibleSpanBeats?: number
-  /** When user scrolls the spectrogram horizontally, request timeline to show this start time (seconds). */
-  onRequestScrollToStartSeconds?: (startSeconds: number) => void
+  /** Start of visible range in seconds (from unified view range). */
+  viewStartSeconds: number
+  /** End of visible range in seconds (from unified view range). */
+  viewEndSeconds: number
+  /** Visible span in beats (for beat grid density). */
+  viewSpanBeats: number
+  /** Scroll to a start time in seconds. */
+  onScrollToSeconds: (seconds: number) => void
+  /** Zoom at a cursor position in seconds. */
+  onZoomAtSeconds: (direction: 'in' | 'out', anchorSeconds: number, fraction: number) => void
+  /** Pan by a delta in seconds. */
+  onPanBySeconds: (deltaSeconds: number) => void
   /** When not playing, user clicked the spectrogram at this time (seconds). Seek marker and Run from. */
   onSeekToSeconds?: (seconds: number) => void
   /** When true, edit mode: select beat by click, Add beat button adds at playhead, Remove beat button removes selected; drag still moves. */
@@ -155,10 +156,12 @@ export default function Spectrogram({
   bpm,
   beatOffset = 0,
   beatTimestampsMs,
-  visibleStartSeconds,
-  visibleEndSeconds,
-  visibleSpanBeats,
-  onRequestScrollToStartSeconds,
+  viewStartSeconds,
+  viewEndSeconds,
+  viewSpanBeats,
+  onScrollToSeconds: _onScrollToSeconds,
+  onZoomAtSeconds,
+  onPanBySeconds,
   onSeekToSeconds,
   beatEditMode = false,
   onBeatEditModeChange,
@@ -168,33 +171,11 @@ export default function Spectrogram({
 }: SpectrogramProps) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const scrollViewRef = useRef<HTMLDivElement>(null)
   const paintRef = useRef<() => void>(() => {})
   const spectrogramImageRef = useRef<ImageData | null>(null)
   const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const decodedDurationRef = useRef(0)
   const decodedSampleRateRef = useRef(SAMPLE_RATE)
-  const isProgrammaticScrollRef = useRef(false)
-  const userScrollingUntilRef = useRef(0)
-  const [scrollViewWidth, setScrollViewWidth] = useState(0)
-  const effectiveDuration = decodedDurationRef.current || durationSeconds || 1
-  const isZoomed =
-    visibleStartSeconds != null &&
-    visibleEndSeconds != null &&
-    visibleEndSeconds > visibleStartSeconds
-  const rawBaseStart = isZoomed ? visibleStartSeconds! : 0
-  const rawBaseEnd = isZoomed ? visibleEndSeconds! : effectiveDuration
-  const rawBaseSpan = Math.max(0.001, rawBaseEnd - rawBaseStart)
-  const baseCenter = (rawBaseStart + rawBaseEnd) / 2
-  // Enforce minimum visible duration so we don't stretch a tiny image slice to full width (breaks view at high timeline zoom)
-  const MIN_VIEW_DURATION_SEC = 2
-  const baseSpan = Math.max(rawBaseSpan, MIN_VIEW_DURATION_SEC)
-  const [zoomLevel, setZoomLevel] = useState(1)
-  const [zoomPanOffset, setZoomPanOffset] = useState(0)
-  const zoomLevelRef = useRef(zoomLevel)
-  zoomLevelRef.current = zoomLevel
-  const zoomPanOffsetRef = useRef(zoomPanOffset)
-  zoomPanOffsetRef.current = zoomPanOffset
   const lastMouseFracRef = useRef(0.5)
   const isHoveredRef = useRef(false)
   const [draggingBeatIndex, setDraggingBeatIndex] = useState<number | null>(null)
@@ -202,41 +183,24 @@ export default function Spectrogram({
   const [selectedBeatIndex, setSelectedBeatIndex] = useState<number | null>(null)
   const dragPreviewMsRef = useRef<number | null>(null)
   const viewBoundsRef = useRef({ viewStart: 0, viewEnd: 0, viewDuration: 0 })
+  const effectiveDuration = decodedDurationRef.current || durationSeconds || 1
 
-  // Reset pan offset when the timeline's visible range changes
-  const prevBaseCenterRef = useRef(baseCenter)
-  const prevBaseSpanRef = useRef(baseSpan)
-  if (prevBaseCenterRef.current !== baseCenter || prevBaseSpanRef.current !== baseSpan) {
-    prevBaseCenterRef.current = baseCenter
-    prevBaseSpanRef.current = baseSpan
-    if (zoomPanOffset !== 0) setZoomPanOffset(0)
-  }
-
-  const effectiveCenter = baseCenter + zoomPanOffset
-  const zoomedSpan = baseSpan / zoomLevel
-  // Anchor view at start/end of audio so the beginning (0s) and end stay visible at any zoom
-  let viewStart: number
-  let viewEnd: number
-  if (effectiveCenter - zoomedSpan / 2 < 0) {
-    viewStart = 0
-    viewEnd = Math.min(effectiveDuration, zoomedSpan)
-  } else if (effectiveCenter + zoomedSpan / 2 > effectiveDuration) {
-    viewEnd = effectiveDuration
-    viewStart = Math.max(0, effectiveDuration - zoomedSpan)
-  } else {
-    viewStart = effectiveCenter - zoomedSpan / 2
-    viewEnd = effectiveCenter + zoomedSpan / 2
-  }
+  // View range directly from props (unified zoom/scroll)
+  const viewStart = viewStartSeconds
+  const viewEnd = viewEndSeconds
   const viewDuration = Math.max(0.001, viewEnd - viewStart)
   viewBoundsRef.current = { viewStart, viewEnd, viewDuration }
-  const scrollableDuration = Math.max(0, effectiveDuration - viewDuration)
-  const contentWidthPx = scrollViewWidth > 0 && viewDuration > 0
-    ? scrollViewWidth * (effectiveDuration / viewDuration)
-    : scrollViewWidth
-  const maxScrollLeft = Math.max(0, contentWidthPx - scrollViewWidth)
-  const targetScrollLeft = scrollableDuration > 0
-    ? (viewStart / scrollableDuration) * maxScrollLeft
-    : 0
+
+  // MIN_VIEW_DURATION_SEC only affects rendering quality (source image slice), not logical range
+  const MIN_VIEW_DURATION_SEC = 2
+  const renderStart = viewDuration < MIN_VIEW_DURATION_SEC
+    ? Math.max(0, (viewStart + viewEnd) / 2 - MIN_VIEW_DURATION_SEC / 2)
+    : viewStart
+  const renderEnd = viewDuration < MIN_VIEW_DURATION_SEC
+    ? Math.min(effectiveDuration, renderStart + MIN_VIEW_DURATION_SEC)
+    : viewEnd
+  const renderDuration = Math.max(0.001, renderEnd - renderStart)
+  const visibleSpanBeats = viewSpanBeats
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -417,74 +381,32 @@ export default function Spectrogram({
     }
   }, [hasAudio, setupPlayback])
 
-  // Measure horizontal scroll viewport width
-  useEffect(() => {
-    const el = scrollViewRef.current
-    if (!el) return
-    const update = () => setScrollViewWidth(el.clientWidth)
-    update()
-    const ro = new ResizeObserver(update)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [hasAudio])
-
-  // Sync horizontal scroll position to current view (from timeline)
-  // Skip if user is actively scrolling to avoid fighting the scrollbar
-  useEffect(() => {
-    const el = scrollViewRef.current
-    if (!el || maxScrollLeft <= 0) return
-    if (Date.now() < userScrollingUntilRef.current) return
-    isProgrammaticScrollRef.current = true
-    el.scrollLeft = Math.max(0, Math.min(maxScrollLeft, targetScrollLeft))
-  }, [targetScrollLeft, maxScrollLeft])
-
-  // When playing and playhead is out of view (e.g. due to zoom), request scroll to keep it in view without changing zoom
-  const playheadInView = currentTimeSeconds >= viewStart && currentTimeSeconds <= viewEnd
-  useEffect(() => {
-    if (!isPlaying || playheadInView || !isZoomed || !onRequestScrollToStartSeconds || baseSpan <= 0) return
-    const margin = 0.15 * viewDuration
-    const newViewStart = Math.max(0, Math.min(effectiveDuration - viewDuration, currentTimeSeconds - margin))
-    const requestStart = Math.max(0, Math.min(effectiveDuration - baseSpan, newViewStart + viewDuration / 2 - baseSpan / 2))
-    onRequestScrollToStartSeconds(requestStart)
-  }, [isPlaying, playheadInView, isZoomed, currentTimeSeconds, viewStart, viewEnd, viewDuration, baseSpan, effectiveDuration, onRequestScrollToStartSeconds])
-
-  const handleSpectrogramScroll = useCallback(() => {
-    if (isProgrammaticScrollRef.current) {
-      isProgrammaticScrollRef.current = false
-      return
-    }
-    const el = scrollViewRef.current
-    if (!el || scrollableDuration <= 0 || scrollViewWidth <= 0 || !onRequestScrollToStartSeconds) return
-    // Suppress programmatic scroll-back for 200ms so it doesn't fight user input
-    userScrollingUntilRef.current = Date.now() + 200
-    const startSec = (el.scrollLeft / maxScrollLeft) * scrollableDuration
-    onRequestScrollToStartSeconds(Math.max(0, Math.min(effectiveDuration - viewDuration, startSec)))
-  }, [scrollableDuration, maxScrollLeft, scrollViewWidth, effectiveDuration, onRequestScrollToStartSeconds, viewDuration])
-
   // Mouse-wheel on spectrogram: plain scroll = pan, Ctrl+scroll = zoom to cursor
   const handleWheelRef = useRef<(e: WheelEvent) => void>(() => {})
   handleWheelRef.current = (e: WheelEvent) => {
-    if (effectiveDuration <= 0 || viewDuration <= 0) return
+    if (viewDuration <= 0) return
     e.preventDefault()
     if (e.ctrlKey || e.metaKey) {
       // Ctrl+scroll: zoom towards mouse cursor
       const canvas = canvasRef.current
       let frac = 0.5
+      let anchorSeconds = (viewStart + viewEnd) / 2
       if (canvas) {
         const rect = canvas.getBoundingClientRect()
         const x = e.clientX - rect.left - Y_AXIS_WIDTH
         const graphW = rect.width - Y_AXIS_WIDTH
-        if (graphW > 0) frac = Math.max(0, Math.min(1, x / graphW))
+        if (graphW > 0) {
+          frac = Math.max(0, Math.min(1, x / graphW))
+          anchorSeconds = viewStart + frac * viewDuration
+        }
       }
-      zoomAt(e.deltaY < 0 ? 'in' : 'out', frac)
+      onZoomAtSeconds(e.deltaY < 0 ? 'in' : 'out', anchorSeconds, frac)
     } else {
-      if (!onRequestScrollToStartSeconds) return
-      userScrollingUntilRef.current = Date.now() + 200
+      // Plain scroll: pan
       const scrollFraction = 0.15
       const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX
       const deltaSec = (delta > 0 ? 1 : -1) * viewDuration * scrollFraction
-      const newStart = Math.max(0, Math.min(effectiveDuration - viewDuration, viewStart + deltaSec))
-      onRequestScrollToStartSeconds(newStart)
+      onPanBySeconds(deltaSec)
     }
   }
   useEffect(() => {
@@ -494,31 +416,6 @@ export default function Spectrogram({
     el.addEventListener('wheel', handler, { passive: false })
     return () => el.removeEventListener('wheel', handler)
   }, [hasAudio])
-
-  // Zoom towards a specific horizontal fraction (0 = left edge, 1 = right edge of graph)
-  const zoomAt = useCallback((direction: 'in' | 'out', anchorFrac?: number) => {
-    const frac = anchorFrac ?? 0.5
-    const prevZoom = zoomLevelRef.current
-    const prevOffset = zoomPanOffsetRef.current
-
-    const newZoom = direction === 'in'
-      ? Math.min(ZOOM_MAX, prevZoom * ZOOM_STEP)
-      : Math.max(ZOOM_MIN, prevZoom / ZOOM_STEP)
-    if (newZoom === prevZoom) return
-
-    const prevSpan = baseSpan / prevZoom
-    const prevCenter = baseCenter + prevOffset
-    const prevViewStart = Math.max(0, prevCenter - prevSpan / 2)
-    const cursorTime = prevViewStart + frac * prevSpan
-
-    const newSpan = baseSpan / newZoom
-    const newViewStart = cursorTime - frac * newSpan
-    const newCenter = newViewStart + newSpan / 2
-    const newOffset = newCenter - baseCenter
-
-    setZoomLevel(newZoom)
-    setZoomPanOffset(newOffset)
-  }, [baseSpan, baseCenter])
 
   const BEAT_HIT_THRESHOLD_PX = 12
 
@@ -600,6 +497,8 @@ export default function Spectrogram({
   }, [])
 
   // Keyboard zoom: Ctrl+Plus / Ctrl+Minus (only when hovering the spectrogram)
+  const onZoomAtSecondsRef = useRef(onZoomAtSeconds)
+  onZoomAtSecondsRef.current = onZoomAtSeconds
   useEffect(() => {
     const el = wrapperRef.current
     if (!el) return
@@ -611,12 +510,14 @@ export default function Spectrogram({
     const onKeyDown = (e: KeyboardEvent) => {
       if (!isHoveredRef.current) return
       if (!e.ctrlKey && !e.metaKey) return
+      const bounds = viewBoundsRef.current
+      const anchorSeconds = bounds.viewStart + lastMouseFracRef.current * bounds.viewDuration
       if (e.key === '=' || e.key === '+') {
         e.preventDefault()
-        zoomAt('in', lastMouseFracRef.current)
+        onZoomAtSecondsRef.current('in', anchorSeconds, lastMouseFracRef.current)
       } else if (e.key === '-') {
         e.preventDefault()
-        zoomAt('out', lastMouseFracRef.current)
+        onZoomAtSecondsRef.current('out', anchorSeconds, lastMouseFracRef.current)
       }
     }
     document.addEventListener('keydown', onKeyDown)
@@ -625,7 +526,7 @@ export default function Spectrogram({
       el.removeEventListener('mouseleave', onLeave)
       document.removeEventListener('keydown', onKeyDown)
     }
-  }, [hasAudio, zoomAt])
+  }, [hasAudio])
 
   // Document-level drag handlers for moving a beat
   dragPreviewMsRef.current = dragPreviewMs
@@ -731,17 +632,12 @@ export default function Spectrogram({
     ctx.fillStyle = 'rgb(18, 22, 32)'
     ctx.fillRect(0, 0, graphLeft, height)
 
-    if (isZoomed) {
-      const srcX = (viewStart / duration) * img.width
-      const srcW = (viewDuration / duration) * img.width
-      ctx.imageSmoothingEnabled = true
-      ctx.imageSmoothingQuality = 'high'
-      ctx.drawImage(offscreen, srcX, 0, srcW, img.height, graphLeft, 0, graphWidth, graphHeight)
-    } else {
-      ctx.imageSmoothingEnabled = true
-      ctx.imageSmoothingQuality = 'high'
-      ctx.drawImage(offscreen, 0, 0, img.width, img.height, graphLeft, 0, graphWidth, graphHeight)
-    }
+    // Use renderStart/renderDuration for image quality (may be wider than logical view at high zoom)
+    const srcX = (renderStart / duration) * img.width
+    const srcW = (renderDuration / duration) * img.width
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
+    ctx.drawImage(offscreen, srcX, 0, srcW, img.height, graphLeft, 0, graphWidth, graphHeight)
 
     let playheadX =
       viewDuration > 0
@@ -901,10 +797,11 @@ export default function Spectrogram({
     bpm,
     beatOffset,
     beatTimestampsMs,
-    isZoomed,
     viewStart,
     viewEnd,
     viewDuration,
+    renderStart,
+    renderDuration,
     visibleSpanBeats,
     beatEditMode,
     dragPreviewMs,
@@ -980,7 +877,8 @@ export default function Spectrogram({
                 const playheadFrac = viewDuration > 0
                   ? Math.max(0, Math.min(1, (currentTimeSeconds - viewStart) / viewDuration))
                   : 0.5
-                zoomAt('out', playheadFrac)
+                const anchorSec = viewStart + playheadFrac * viewDuration
+                onZoomAtSeconds('out', anchorSec, playheadFrac)
               }}
               title="Zoom out"
               aria-label="Zoom out"
@@ -994,7 +892,8 @@ export default function Spectrogram({
                 const playheadFrac = viewDuration > 0
                   ? Math.max(0, Math.min(1, (currentTimeSeconds - viewStart) / viewDuration))
                   : 0.5
-                zoomAt('in', playheadFrac)
+                const anchorSec = viewStart + playheadFrac * viewDuration
+                onZoomAtSeconds('in', anchorSec, playheadFrac)
               }}
               title="Zoom in"
               aria-label="Zoom in"
@@ -1015,16 +914,6 @@ export default function Spectrogram({
           onMouseDown={handleCanvasMouseDown}
           onClick={handleCanvasClick}
           onContextMenu={handleCanvasContextMenu}
-        />
-      </div>
-      <div
-        className="spectrogram-scroll-view"
-        ref={scrollViewRef}
-        onScroll={handleSpectrogramScroll}
-      >
-        <div
-          className="spectrogram-scroll-content"
-          style={{ width: Math.max(scrollViewWidth, contentWidthPx) }}
         />
       </div>
     </div>
