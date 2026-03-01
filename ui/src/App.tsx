@@ -6,6 +6,8 @@ import Spectrogram from './components/Spectrogram'
 import { useViewRange } from './hooks/useViewRange'
 import { generateSequenceTs, generateSequenceRunnerTs } from './generateSequenceTs'
 import { presetToTimeframes } from './presets'
+import { normalizeMovement } from './movementGenerators'
+import type { TimeframeMovement } from './movementGenerators'
 import type { PresetMetadata } from './presets'
 import './App.css'
 
@@ -74,6 +76,8 @@ export interface Timeframe {
   disabled?: boolean // When true, timeframe is excluded from playback and export
   mapping?: string // Segment mapping name from segments.json
   phase?: number // Phase intensity — offsets hue/brightness/motion per ring (0 = none)
+  /** Movement pattern — distributes the effect across rings over time (accumulate, sweep, dissolve, bounce). */
+  movement?: TimeframeMovement
   /** Optional list of cycle/cycleBeats wrapping this timeframe's content (outermost first) */
   cycles?: TimeframeCycleEntry[]
   /** Effect slots (one selector per slot, add more as desired). Replaces legacy brightness/hue/motion fields. */
@@ -769,6 +773,7 @@ function App() {
                 rings,
                 mapping: item.mapping,
                 phase: typeof item.phase === 'number' ? item.phase : undefined,
+                movement: normalizeMovement(item.movement),
                 cycles: normalizeCycles(item.cycles),
                 ...(effects && effects.length > 0 ? { effects } : legacy),
               }
@@ -858,6 +863,7 @@ function App() {
                 rings: Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n)) : [1,2,3,4,5,6,7,8,9,10,11,12],
                 mapping: item.mapping,
                 phase: typeof item.phase === 'number' ? item.phase : undefined,
+                movement: normalizeMovement(item.movement),
                 cycles: normalizeCycles(item.cycles),
                 ...(effects && effects.length > 0 ? { effects } : {}),
               }

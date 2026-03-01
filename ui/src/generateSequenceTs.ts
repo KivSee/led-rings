@@ -3,6 +3,9 @@
  * Output matches the pattern used in src/songs/.
  */
 
+import { getMovementCodeGenEntries } from './movementGenerators'
+import type { TimeframeMovement } from './movementGenerators'
+
 export type AnimationType = 'song' | 'trigger'
 
 export interface Song {
@@ -41,6 +44,7 @@ export interface Timeframe {
   disabled?: boolean
   mapping?: string
   phase?: number
+  movement?: TimeframeMovement
   cycles?: TimeframeCycleEntry[]
   effects?: TimeframeEffectEntry[]
   brightnessEffect?: string
@@ -184,9 +188,10 @@ function formatEffectParams(params: Record<string, number | boolean | object> | 
   return `{ ${parts.join(', ')} }`
 }
 
-function emitColor(tf: Timeframe): string[] {
+function emitColor(tf: Timeframe, hueOffset = 0): string[] {
   const { h, s, v } = hexToHsv(tf.color)
-  return [`constColor({ hue: ${h.toFixed(4)}, sat: ${s.toFixed(4)}, val: ${v.toFixed(4)} })`]
+  const hue = h + hueOffset
+  return [`constColor({ hue: ${hue.toFixed(4)}, sat: ${s.toFixed(4)}, val: ${v.toFixed(4)} })`]
 }
 
 const BRIGHTNESS_KEYS = new Set(['brightness', 'fadeIn', 'fadeOut', 'fadeInOut', 'fadeOutIn', 'blink', 'pulse', 'fade'])
@@ -291,14 +296,16 @@ ${indentBlock(block, 2)}
 
 type EmitLayer = 'color' | 'modifiers' | 'motion'
 
-function emitTimeframeBody(tf: Timeframe, layer: EmitLayer): string | null {
-  const segmentId = mappingToSegment(tf.mapping)
-  const elementsArg = ringsToElementsArg(tf.rings)
+function emitInnerContent(tf: Timeframe, layer: EmitLayer, hueOffset?: number): string[] {
   const inner: string[] = []
-
   if (layer === 'color') {
-    if (tf.hasExplicitColor === false) return null
-    inner.push(...wrapWithPhase(emitColor(tf), tf.phase))
+    if (tf.hasExplicitColor === false) return []
+    if (hueOffset != null) {
+      // Phase baked into hue directly (used for movement per-ring blocks)
+      inner.push(...emitColor(tf, hueOffset))
+    } else {
+      inner.push(...wrapWithPhase(emitColor(tf), tf.phase))
+    }
   } else {
     const effectEntries = getTimeframeEffects(tf)
     for (const entry of effectEntries) {
@@ -309,18 +316,12 @@ function emitTimeframeBody(tf: Timeframe, layer: EmitLayer): string | null {
       inner.push(...wrapWithPhase(effectLines, entry.phase))
     }
   }
+  return inner
+}
 
-  if (inner.length === 0) return null
-
-  const cycles = tf.cycles ?? []
-  const effectLines = inner.join('\n')
-  let core = `elements(${elementsArg}, () => {
-  segment(${segmentId}, () => {
-${indentBlock(effectLines, 4)}
-  });
-});`
-  for (let i = cycles.length - 1; i >= 0; i--) {
-    const c = cycles[i]
+function wrapWithCycles(core: string, cycles: Timeframe['cycles']): string {
+  for (let i = (cycles ?? []).length - 1; i >= 0; i--) {
+    const c = cycles![i]
     if (c.type === 'cycle') {
       core = `cycle(${c.beatsInCycle}, () => {
 ${indentBlock(core, 2)}
@@ -331,6 +332,69 @@ ${indentBlock(core, 2)}
 });`
     }
   }
+  return core
+}
+
+function emitTimeframeBody(tf: Timeframe, layer: EmitLayer): string | null {
+  const segmentId = mappingToSegment(tf.mapping)
+  const inner = emitInnerContent(tf, layer)
+  if (inner.length === 0) return null
+
+  // Movement: emit separate beats() per ring with per-ring timing
+  if (tf.movement) {
+    const entries = getMovementCodeGenEntries(tf.startTime, tf.endTime, tf.rings, tf.movement)
+    const sortedRings = [...tf.rings].sort((a, b) => a - b)
+    const phasePerRing = (layer === 'color' && tf.phase && tf.phase > 0 && tf.hasExplicitColor !== false)
+    const blocks: string[] = []
+    for (const entry of entries) {
+      for (const w of entry.windows) {
+        // When phase is set on a color layer, bake hue offset per ring
+        const ringInner = phasePerRing
+          ? emitInnerContent(tf, layer, (sortedRings.indexOf(entry.ringNum) / sortedRings.length) * tf.phase!)
+          : inner
+        const effectLines = ringInner.join('\n')
+        let core: string
+
+        if (entry.staggerOffset != null && entry.staggerOffset > 0) {
+          // Stagger: wrap content in a cycle with per-ring offset
+          const dur = w.end - w.start
+          let innerContent = effectLines
+          innerContent = wrapWithCycles(innerContent, tf.cycles)
+          core = `elements([${entry.ringNum}], () => {
+  segment(${segmentId}, () => {
+    cycle(${dur}, () => {
+      cycleBeats(${dur}, ${entry.staggerOffset}, ${dur}, () => {
+${indentBlock(innerContent, 8)}
+      });
+    });
+  });
+});`
+        } else {
+          core = `elements([${entry.ringNum}], () => {
+  segment(${segmentId}, () => {
+${indentBlock(effectLines, 4)}
+  });
+});`
+          core = wrapWithCycles(core, tf.cycles)
+        }
+
+        blocks.push(`    beats(${w.start}, ${w.end}, () => {
+${indentBlock(core, 6)}
+    })`)
+      }
+    }
+    return blocks.length > 0 ? blocks.join('\n\n') : null
+  }
+
+  // No movement: single beats() block with all rings
+  const elementsArg = ringsToElementsArg(tf.rings)
+  const effectLines = inner.join('\n')
+  let core = `elements(${elementsArg}, () => {
+  segment(${segmentId}, () => {
+${indentBlock(effectLines, 4)}
+  });
+});`
+  core = wrapWithCycles(core, tf.cycles)
   return `    beats(${tf.startTime}, ${tf.endTime}, () => {
 ${indentBlock(core, 6)}
     })`

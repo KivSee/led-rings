@@ -3,6 +3,7 @@ import segmentsData from '../segments.json'
 import { getPixelColor, getPixelColorMulti, hsvToRgbString } from '../effectPreview'
 import type { Timeframe } from '../App'
 import { getTimeframeEffects } from '../App'
+import { getMovementRingT } from '../movementGenerators'
 import './RingVisualization.css'
 
 interface RingVisualizationProps {
@@ -17,11 +18,14 @@ interface RingVisualizationProps {
   currentTime?: number
 }
 
-/** Compute normalized time t in [0,1] for a timeframe at a given currentTime in beats. */
-function computeT(tf: Timeframe, currentTime: number): number {
-  const duration = tf.endTime - tf.startTime
+/** Compute normalized time t in [0,1] for a timeframe at a given currentTime in beats.
+ *  When windowOverride is provided, t is computed within that window instead of the full timeframe. */
+function computeT(tf: Timeframe, currentTime: number, windowOverride?: { start: number; end: number }): number {
+  const start = windowOverride ? windowOverride.start : tf.startTime
+  const end = windowOverride ? windowOverride.end : tf.endTime
+  const duration = end - start
   if (duration <= 0) return 0
-  const beatOffset = currentTime - tf.startTime
+  const beatOffset = currentTime - start
   const cycles = tf.cycles ?? []
   if (cycles.length === 0) {
     return Math.max(0, Math.min(1, beatOffset / duration))
@@ -36,6 +40,18 @@ function computeT(tf: Timeframe, currentTime: number): number {
   const windowLen = windowEnd - windowStart
   if (windowLen <= 0) return 0
   return Math.max(0, Math.min(1, (phase - windowStart) / windowLen))
+}
+
+/** Compute t for a specific ring, accounting for movement timing.
+ *  Returns null if the ring is not active at currentTime per the movement. */
+function computeRingT(tf: Timeframe, currentTime: number, ringNumber: number): number | null {
+  if (!tf.movement) {
+    if (!tf.rings.includes(ringNumber)) return null
+    return computeT(tf, currentTime)
+  }
+  const mt = getMovementRingT(tf.startTime, tf.endTime, tf.rings, tf.movement, ringNumber, currentTime)
+  if (!mt) return null
+  return computeT(tf, currentTime, { start: mt.windowStart, end: mt.windowEnd })
 }
 
 const RingVisualization = ({
@@ -77,13 +93,16 @@ const RingVisualization = ({
   }, [segmentRelPosMap])
 
   // Build a per-ring lookup: ringNumber (1-12) → all matching timeframes
+  // With movement, a ring might be in tf.rings but not active at currentTime
   const ringToTimeframes: Map<number, Timeframe[]> = new Map()
   if (timeframes && currentTime !== undefined) {
     for (const tf of timeframes) {
       for (const ring of tf.rings) {
-        const arr = ringToTimeframes.get(ring)
-        if (arr) arr.push(tf)
-        else ringToTimeframes.set(ring, [tf])
+        if (computeRingT(tf, currentTime, ring) != null) {
+          const arr = ringToTimeframes.get(ring)
+          if (arr) arr.push(tf)
+          else ringToTimeframes.set(ring, [tf])
+        }
       }
     }
   }
@@ -192,14 +211,14 @@ const RingVisualization = ({
                     // Multi-timeframe mode: find all timeframes for this ring
                     const ringTfs = ringToTimeframes.get(ringNumber)
                     if (ringTfs && ringTfs.length > 0) {
-                      // Resolve relPos from each timeframe's own mapping segment;
-                      // skip timeframes whose mapping doesn't include this pixel.
                       const tfWithT: Array<{ timeframe: Timeframe; t: number; relPos: number }> = []
                       for (const tf of ringTfs) {
                         const tfMapping = tf.mapping || 'all'
                         const rp = getRelPosForMapping(pixel.index, tfMapping)
-                        if (rp == null) continue // pixel not in this timeframe's segment
-                        tfWithT.push({ timeframe: tf, t: computeT(tf, currentTime!), relPos: rp })
+                        if (rp == null) continue
+                        const ringT = computeRingT(tf, currentTime!, ringNumber)
+                        if (ringT == null) continue
+                        tfWithT.push({ timeframe: tf, t: ringT, relPos: rp })
                       }
                       if (tfWithT.length === 0) return 'rgb(0, 0, 0)'
                       const { h, s, v } = tfWithT.length === 1
@@ -211,10 +230,10 @@ const RingVisualization = ({
                     if (singleTf) {
                       const tfMapping = singleTf.mapping || 'all'
                       const tfRelPos = getRelPosForMapping(pixel.index, tfMapping) ?? pixel.relPos
-                      const { h, s, v } = getPixelColor(tfRelPos, t, singleTf, ringIndex)
+                      const ringT = computeRingT(singleTf, currentTime!, ringNumber)
+                      const { h, s, v } = getPixelColor(tfRelPos, ringT ?? t, singleTf, ringIndex)
                       return hsvToRgbString(h, s, v)
                     }
-                    // No matching timeframe — dark
                     return 'rgb(0, 0, 0)'
                   })()
                 : relPosToColor(pixel.relPos)

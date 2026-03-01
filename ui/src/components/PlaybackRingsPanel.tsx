@@ -1,4 +1,5 @@
 import { Timeframe } from '../App'
+import { isRingActiveAtBeat } from '../movementGenerators'
 import RingVisualization from './RingVisualization'
 import './PlaybackRingsPanel.css'
 
@@ -34,7 +35,13 @@ const PlaybackRingsPanel = ({
   onLiveModeChange,
 }: PlaybackRingsPanelProps) => {
   const activeTimeframes = getActiveTimeframesAt(currentTime, timeframes)
-  const activeRings = Array.from(new Set(activeTimeframes.flatMap(tf => tf.rings)))
+  const activeRings = Array.from(new Set(
+    activeTimeframes.flatMap(tf =>
+      tf.rings.filter(r =>
+        isRingActiveAtBeat(tf.startTime, tf.endTime, tf.rings, tf.movement, r, currentTime)
+      )
+    )
+  ))
 
   return (
     <div className="playback-rings-panel">

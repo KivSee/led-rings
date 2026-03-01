@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react'
 import { Timeframe, TimeframeCycleEntry, TimeframeCycleBeats, getTimeframeEffects, TimeframeEffectEntry } from '../App'
 import type { PresetMetadata } from '../presets'
+import { MOVEMENT_TYPES, MOVEMENT_DIRECTIONS, defaultBeatsPerRing } from '../movementGenerators'
+import type { MovementType, MovementDirection } from '../movementGenerators'
 import segmentsData from '../segments.json'
 import RingVisualization from './RingVisualization'
 import PresetBrowser from './PresetBrowser'
@@ -1069,6 +1071,99 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: Timefra
                   </button>
                 )}
               </>
+            )
+          })()}
+        </div>
+
+        <div className="timeframe-panel-section timeframe-panel-movement-section">
+          <label className="timeframe-panel-label">Movement</label>
+          <select
+            value={timeframe.movement?.type ?? ''}
+            onChange={(e) => {
+              const val = e.target.value as MovementType | ''
+              if (!val) {
+                onUpdate({ movement: undefined })
+              } else {
+                const dir = timeframe.movement?.direction ?? 'forward'
+                const bpr = defaultBeatsPerRing(val, timeframe.startTime, timeframe.endTime, timeframe.rings, dir)
+                onUpdate({
+                  movement: {
+                    type: val,
+                    direction: dir,
+                    beatsPerRing: bpr,
+                  },
+                })
+              }
+            }}
+            className="timeframe-panel-select"
+          >
+            <option value="">(none)</option>
+            {MOVEMENT_TYPES.map(mt => (
+              <option key={mt.id} value={mt.id}>{mt.label}</option>
+            ))}
+          </select>
+          {timeframe.movement && (() => {
+            const mv = timeframe.movement
+            const typeDef = MOVEMENT_TYPES.find(mt => mt.id === mv.type)
+            return (
+              <div className="timeframe-panel-movement-config">
+                <p className="timeframe-panel-movement-desc">{typeDef?.description}</p>
+                <div className="timeframe-panel-movement-param-row">
+                  <label className="timeframe-panel-effect-param-label">Direction</label>
+                  <select
+                    value={mv.direction}
+                    onChange={(e) => {
+                      const dir = e.target.value as MovementDirection
+                      const bpr = defaultBeatsPerRing(mv.type, timeframe.startTime, timeframe.endTime, timeframe.rings, dir, mv.bounce, mv.retire)
+                      onUpdate({
+                        movement: { ...mv, direction: dir, beatsPerRing: bpr },
+                      })
+                    }}
+                    className="timeframe-panel-select timeframe-panel-select-small"
+                  >
+                    {MOVEMENT_DIRECTIONS.map(d => (
+                      <option key={d.id} value={d.id}>{d.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="timeframe-panel-movement-param-row">
+                  <label className="timeframe-panel-effect-param-label">Beats / ring</label>
+                  <input
+                    type="number"
+                    value={mv.beatsPerRing}
+                    min={0.25}
+                    step={0.25}
+                    onChange={(e) => {
+                      const num = parseFloat(e.target.value)
+                      if (!isNaN(num) && num > 0) {
+                        onUpdate({ movement: { ...mv, beatsPerRing: num } })
+                      }
+                    }}
+                    className="timeframe-panel-effect-param-input"
+                  />
+                </div>
+                {typeDef?.extraParams.map(ep => (
+                  <div key={ep.key} className="timeframe-panel-movement-param-row">
+                    <label className="timeframe-panel-checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={mv[ep.key] === true}
+                        onChange={(e) => {
+                          const checked = e.target.checked
+                          const bpr = defaultBeatsPerRing(
+                            mv.type, timeframe.startTime, timeframe.endTime, timeframe.rings, mv.direction,
+                            ep.key === 'bounce' ? checked : mv.bounce,
+                            ep.key === 'retire' ? checked : mv.retire,
+                          )
+                          onUpdate({ movement: { ...mv, [ep.key]: checked || undefined, beatsPerRing: bpr } })
+                        }}
+                        className="timeframe-panel-checkbox"
+                      />
+                      <span>{ep.label}</span>
+                    </label>
+                  </div>
+                ))}
+              </div>
             )
           })()}
         </div>
