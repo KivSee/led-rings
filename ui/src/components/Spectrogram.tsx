@@ -159,7 +159,7 @@ export default function Spectrogram({
   viewStartSeconds,
   viewEndSeconds,
   viewSpanBeats,
-  onScrollToSeconds: _onScrollToSeconds,
+  onScrollToSeconds,
   onZoomAtSeconds,
   onPanBySeconds,
   onSeekToSeconds,
@@ -171,6 +171,9 @@ export default function Spectrogram({
 }: SpectrogramProps) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const scrollViewRef = useRef<HTMLDivElement>(null)
+  const isProgrammaticScrollRef = useRef(false)
+  const [scrollViewWidth, setScrollViewWidth] = useState(0)
   const paintRef = useRef<() => void>(() => {})
   const spectrogramImageRef = useRef<ImageData | null>(null)
   const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -183,6 +186,9 @@ export default function Spectrogram({
   const [selectedBeatIndex, setSelectedBeatIndex] = useState<number | null>(null)
   const dragPreviewMsRef = useRef<number | null>(null)
   const viewBoundsRef = useRef({ viewStart: 0, viewEnd: 0, viewDuration: 0 })
+  const [rangeSelection, setRangeSelection] = useState<{ startSec: number; endSec: number } | null>(null)
+  const rangeSelectRef = useRef<{ startSec: number; startClientX: number; active: boolean } | null>(null)
+  const didRangeSelectRef = useRef(false)
   const effectiveDuration = decodedDurationRef.current || durationSeconds || 1
 
   // View range directly from props (unified zoom/scroll)
@@ -459,6 +465,10 @@ export default function Spectrogram({
   }, [beatEditMode, getBeatEditStateAtClientX])
 
   const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (didRangeSelectRef.current) {
+      didRangeSelectRef.current = false
+      return
+    }
     const canvas = canvasRef.current
     if (!canvas) return
     const rect = canvas.getBoundingClientRect()
@@ -483,13 +493,26 @@ export default function Spectrogram({
   }, [beatEditMode, isPlaying, onSeekToSeconds, effectiveDuration, getBeatEditStateAtClientX])
 
   const handleCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (e.button !== 0 || !beatEditMode || !onBeatMove || !beatTimestampsMs?.length) return
-    const { beatIndex } = getBeatEditStateAtClientX(e.clientX)
-    if (beatIndex !== null) {
-      e.preventDefault()
-      setDraggingBeatIndex(beatIndex)
-      setDragPreviewMs(beatTimestampsMs[beatIndex])
+    if (e.button !== 0) return
+    if (beatEditMode && onBeatMove && beatTimestampsMs?.length) {
+      const { beatIndex } = getBeatEditStateAtClientX(e.clientX)
+      if (beatIndex !== null) {
+        e.preventDefault()
+        setDraggingBeatIndex(beatIndex)
+        setDragPreviewMs(beatTimestampsMs[beatIndex])
+        return
+      }
     }
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const rect = canvas.getBoundingClientRect()
+    const x = e.clientX - rect.left - Y_AXIS_WIDTH
+    const graphW = rect.width - Y_AXIS_WIDTH
+    if (graphW <= 0) return
+    const bounds = viewBoundsRef.current
+    const timeSec = bounds.viewStart + (x / graphW) * bounds.viewDuration
+    rangeSelectRef.current = { startSec: Math.max(0, timeSec), startClientX: e.clientX, active: false }
+    setRangeSelection(null)
   }, [beatEditMode, onBeatMove, beatTimestampsMs, getBeatEditStateAtClientX])
 
   const handleCanvasContextMenu = useCallback((_e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -562,6 +585,36 @@ export default function Spectrogram({
     }
   }, [draggingBeatIndex, onBeatMove])
 
+  // Document-level drag handlers for range selection measurement
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      const rs = rangeSelectRef.current
+      if (!rs) return
+      if (!rs.active && Math.abs(e.clientX - rs.startClientX) < 3) return
+      rs.active = true
+      const canvas = canvasRef.current
+      if (!canvas) return
+      const rect = canvas.getBoundingClientRect()
+      const x = e.clientX - rect.left - Y_AXIS_WIDTH
+      const graphW = rect.width - Y_AXIS_WIDTH
+      if (graphW <= 0) return
+      const bounds = viewBoundsRef.current
+      const timeSec = bounds.viewStart + (x / graphW) * bounds.viewDuration
+      setRangeSelection({ startSec: rs.startSec, endSec: Math.max(0, timeSec) })
+    }
+    const onUp = () => {
+      const rs = rangeSelectRef.current
+      if (rs?.active) didRangeSelectRef.current = true
+      rangeSelectRef.current = null
+    }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+    return () => {
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+    }
+  }, [])
+
   // Clear selection when beats array shrinks (e.g. after remove)
   useEffect(() => {
     const len = beatTimestampsMs?.length ?? 0
@@ -587,6 +640,45 @@ export default function Spectrogram({
     ro.observe(wrapper)
     return () => ro.disconnect()
   }, [hasAudio])
+
+  // Measure horizontal scroll viewport width
+  useEffect(() => {
+    const el = scrollViewRef.current
+    if (!el) return
+    const update = () => setScrollViewWidth(el.clientWidth)
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [hasAudio])
+
+  const scrollContentWidth = scrollViewWidth > 0 && viewDuration > 0
+    ? scrollViewWidth * (effectiveDuration / viewDuration)
+    : scrollViewWidth
+  const scrollMaxLeft = Math.max(0, scrollContentWidth - scrollViewWidth)
+  const scrollableDuration = Math.max(0, effectiveDuration - viewDuration)
+
+  // Sync horizontal scroll position from unified view range
+  useEffect(() => {
+    const el = scrollViewRef.current
+    if (!el || scrollMaxLeft <= 0 || scrollableDuration <= 0) return
+    const target = (viewStart / scrollableDuration) * scrollMaxLeft
+    if (Math.abs(el.scrollLeft - target) >= 1) {
+      isProgrammaticScrollRef.current = true
+      el.scrollLeft = Math.max(0, Math.min(scrollMaxLeft, target))
+    }
+  }, [viewStart, scrollMaxLeft, scrollableDuration])
+
+  const handleScrollbarScroll = useCallback(() => {
+    if (isProgrammaticScrollRef.current) {
+      isProgrammaticScrollRef.current = false
+      return
+    }
+    const el = scrollViewRef.current
+    if (!el || scrollableDuration <= 0 || scrollMaxLeft <= 0 || !onScrollToSeconds) return
+    const startSec = (el.scrollLeft / scrollMaxLeft) * scrollableDuration
+    onScrollToSeconds(Math.max(0, Math.min(scrollableDuration, startSec)))
+  }, [scrollableDuration, scrollMaxLeft, onScrollToSeconds])
 
   // Paint spectrogram + playhead + X-axis + Y-axis
   const paint = useCallback(() => {
@@ -789,6 +881,48 @@ export default function Spectrogram({
         ctx.fillText(label, x, graphHeight + 2)
       }
     }
+
+    // Range selection overlay and duration label
+    if (rangeSelection) {
+      const selStart = Math.min(rangeSelection.startSec, rangeSelection.endSec)
+      const selEnd = Math.max(rangeSelection.startSec, rangeSelection.endSec)
+      const x1 = Math.max(graphLeft, graphLeft + ((selStart - viewStart) / viewDuration) * graphWidth)
+      const x2 = Math.min(width, graphLeft + ((selEnd - viewStart) / viewDuration) * graphWidth)
+      if (x2 > x1) {
+        ctx.fillStyle = 'rgba(70, 160, 255, 0.2)'
+        ctx.fillRect(x1, 0, x2 - x1, graphHeight)
+
+        ctx.strokeStyle = 'rgba(70, 160, 255, 0.85)'
+        ctx.lineWidth = 1.5
+        ctx.setLineDash([4, 3])
+        ctx.beginPath()
+        ctx.moveTo(x1, 0)
+        ctx.lineTo(x1, graphHeight)
+        ctx.stroke()
+        ctx.beginPath()
+        ctx.moveTo(x2, 0)
+        ctx.lineTo(x2, graphHeight)
+        ctx.stroke()
+        ctx.setLineDash([])
+
+        const selDuration = selEnd - selStart
+        const label = `${selDuration.toFixed(3)}s`
+        ctx.font = 'bold 13px sans-serif'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'top'
+        const tw = ctx.measureText(label).width
+        const pad = 6
+        const lh = 20
+        const midX = (x1 + x2) / 2
+        const ly = 6
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.75)'
+        ctx.beginPath()
+        ctx.roundRect(midX - tw / 2 - pad, ly, tw + pad * 2, lh, 4)
+        ctx.fill()
+        ctx.fillStyle = 'rgba(70, 160, 255, 1)'
+        ctx.fillText(label, midX, ly + 3)
+      }
+    }
   }, [
     loading,
     error,
@@ -806,6 +940,7 @@ export default function Spectrogram({
     beatEditMode,
     dragPreviewMs,
     selectedBeatIndex,
+    rangeSelection,
   ])
 
   paintRef.current = paint
@@ -914,6 +1049,16 @@ export default function Spectrogram({
           onMouseDown={handleCanvasMouseDown}
           onClick={handleCanvasClick}
           onContextMenu={handleCanvasContextMenu}
+        />
+      </div>
+      <div
+        className="spectrogram-scroll-view"
+        ref={scrollViewRef}
+        onScroll={handleScrollbarScroll}
+      >
+        <div
+          className="spectrogram-scroll-content"
+          style={{ width: Math.max(scrollViewWidth, scrollContentWidth) }}
         />
       </div>
     </div>

@@ -113,3 +113,19 @@
   border-radius: 8px;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
+
+.spectrogram-scroll-view {
+  flex-shrink: 0;
+  width: 100%;
+  height: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin-top: 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.spectrogram-scroll-content {
+  height: 1px;
+  pointer-events: none;
+}
