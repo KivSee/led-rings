@@ -210,14 +210,299 @@ class Recorder {
     for (const tf of this.timeframes) {
       if (!tf.hasExplicitColor) tf.hasExplicitColor = false;
     }
+    const collapsed = detectMovementPatterns(this.timeframes);
     return {
       song: {
         ...songMeta,
         animationType: songMeta.animationType || "song",
       },
-      timeframes: this.timeframes,
+      timeframes: collapsed,
     };
   }
 }
 
 export const recorder = new Recorder();
+
+// ---------------------------------------------------------------------------
+// Movement pattern detection — collapses per-ring timeframes back into
+// single movement-enabled timeframes when they match spread/sweep patterns.
+// ---------------------------------------------------------------------------
+
+const RING_CENTER = 6.5;
+
+type MovementDirection = "forward" | "backward" | "center-out" | "edges-in";
+
+interface MovementInfo {
+  type: "spread" | "sweep";
+  direction: MovementDirection;
+  beatsPerRing: number;
+  retire?: boolean;
+  bounce?: boolean;
+}
+
+/** Fingerprint that identifies timeframes with identical "shape" (same effects, mapping, cycles). */
+function effectsFingerprint(tf: RecordedTimeframe): string {
+  const efx = tf.effects.map(e => ({
+    effectKey: e.effectKey,
+    params: e.params,
+    phase: e.phase,
+  }));
+  return JSON.stringify({
+    mapping: tf.mapping,
+    cycles: tf.cycles ?? [],
+    effects: efx,
+    hasExplicitColor: tf.hasExplicitColor,
+  });
+}
+
+/** Try to detect the direction from an ordered sequence of ring numbers at each step. */
+function detectDirection(steps: number[][]): MovementDirection | null {
+  const flatForward = steps.every(s => s.length === 1)
+    && steps.map(s => s[0]).every((r, i, arr) => i === 0 || r > arr[i - 1]);
+  if (flatForward) return "forward";
+
+  const flatBackward = steps.every(s => s.length === 1)
+    && steps.map(s => s[0]).every((r, i, arr) => i === 0 || r < arr[i - 1]);
+  if (flatBackward) return "backward";
+
+  // For edges-in / center-out, check distance from center
+  const distances = steps.map(group => {
+    const avgDist = group.reduce((sum, r) => sum + Math.abs(r - RING_CENTER), 0) / group.length;
+    return avgDist;
+  });
+
+  const isDescending = distances.every((d, i, arr) => i === 0 || d <= arr[i - 1] + 0.01);
+  if (isDescending) return "edges-in";
+
+  const isAscending = distances.every((d, i, arr) => i === 0 || d >= arr[i - 1] - 0.01);
+  if (isAscending) return "center-out";
+
+  return null;
+}
+
+/** Detect phase (hue progression) across rings and return base color + phase intensity, or null. */
+function detectPhase(
+  ringColors: Map<number, string>,
+  sortedRings: number[],
+): { color: string; phase: number } | null {
+  if (sortedRings.length < 3) return null;
+
+  const hues: number[] = [];
+  for (const r of sortedRings) {
+    const hex = ringColors.get(r);
+    if (!hex) return null;
+    hues.push(hexToHue(hex));
+  }
+
+  // Check if hue differences between consecutive rings are roughly equal
+  const diffs: number[] = [];
+  for (let i = 1; i < hues.length; i++) {
+    let d = hues[i] - hues[i - 1];
+    // Normalize to [-0.5, 0.5]
+    while (d > 0.5) d -= 1;
+    while (d < -0.5) d += 1;
+    diffs.push(d);
+  }
+
+  const avgDiff = diffs.reduce((a, b) => a + b, 0) / diffs.length;
+  if (Math.abs(avgDiff) < 0.01) return null; // no meaningful hue variation
+
+  const maxDeviation = Math.max(...diffs.map(d => Math.abs(d - avgDiff)));
+  if (maxDeviation > 0.05) return null; // not a uniform progression
+
+  const phase = avgDiff * sortedRings.length;
+  const baseColor = ringColors.get(sortedRings[0])!;
+  return { color: baseColor, phase: Math.round(phase * 100) / 100 };
+}
+
+function hexToHue(hex: string): number {
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  let h = 0;
+  if (d !== 0) {
+    if (max === r) h = ((g - b) / d) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+  }
+  h = h / 6;
+  if (h < 0) h += 1;
+  return h;
+}
+
+function approxEqual(a: number, b: number, eps = 0.15): boolean {
+  return Math.abs(a - b) < eps;
+}
+
+function detectMovementPatterns(timeframes: RecordedTimeframe[]): RecordedTimeframe[] {
+  // Group single-ring timeframes by effects fingerprint
+  const groups = new Map<string, RecordedTimeframe[]>();
+  const nonSingleRing: RecordedTimeframe[] = [];
+
+  for (const tf of timeframes) {
+    if (tf.rings.length === 1) {
+      const key = effectsFingerprint(tf);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(tf);
+    } else {
+      nonSingleRing.push(tf);
+    }
+  }
+
+  const result: RecordedTimeframe[] = [...nonSingleRing];
+  const consumed = new Set<string>(); // track timeframe IDs that got merged
+
+  for (const [, group] of groups) {
+    if (group.length < 3) {
+      // Too few to be a meaningful pattern
+      result.push(...group);
+      continue;
+    }
+
+    const merged = tryMergeGroup(group);
+    if (merged) {
+      result.push(merged);
+      for (const tf of group) consumed.add(tf.id);
+    } else {
+      result.push(...group);
+    }
+  }
+
+  // Stable sort by start time
+  result.sort((a, b) => a.startTime - b.startTime || a.id.localeCompare(b.id));
+  return result;
+}
+
+function tryMergeGroup(group: RecordedTimeframe[]): RecordedTimeframe | null {
+  // Sort by start time
+  const sorted = [...group].sort((a, b) => a.startTime - b.startTime);
+
+  // Group by start time to find step groups (rings at same start = same step)
+  const stepsByStart = new Map<number, RecordedTimeframe[]>();
+  for (const tf of sorted) {
+    const key = Math.round(tf.startTime * 100) / 100;
+    if (!stepsByStart.has(key)) stepsByStart.set(key, []);
+    stepsByStart.get(key)!.push(tf);
+  }
+  const startTimes = [...stepsByStart.keys()].sort((a, b) => a - b);
+  const steps: number[][] = startTimes.map(t => {
+    const tfs = stepsByStart.get(t)!;
+    return tfs.map(tf => tf.rings[0]).sort((a, b) => a - b);
+  });
+  const allRings = steps.flat().sort((a, b) => a - b);
+
+  // Detect direction
+  const direction = detectDirection(steps);
+  if (!direction) return null;
+
+  // Calculate beatsPerRing from start time intervals
+  if (startTimes.length < 2) return null;
+  const intervals = startTimes.slice(1).map((t, i) => t - startTimes[i]);
+  const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+  const intervalsUniform = intervals.every(iv => approxEqual(iv, avgInterval));
+  if (!intervalsUniform) return null;
+  const beatsPerRing = Math.round(avgInterval * 100) / 100;
+
+  // Check end times to determine pattern type
+  const endTimes = sorted.map(tf => tf.endTime);
+  const uniqueEndTimes = [...new Set(endTimes.map(e => Math.round(e * 100) / 100))].sort((a, b) => a - b);
+
+  // Group end times by step
+  const endsByStep = startTimes.map(t => {
+    const tfs = stepsByStart.get(t)!;
+    const ends = [...new Set(tfs.map(tf => Math.round(tf.endTime * 100) / 100))];
+    return ends.length === 1 ? ends[0] : null;
+  });
+  if (endsByStep.some(e => e === null)) return null;
+
+  const allSameEnd = uniqueEndTimes.length === 1;
+  const representative = sorted[0];
+
+  let movement: MovementInfo;
+
+  if (allSameEnd) {
+    // All same end time: could be spread or sweep
+    const commonEnd = uniqueEndTimes[0];
+    const lastStart = startTimes[startTimes.length - 1];
+    const lastWindow = commonEnd - lastStart;
+
+    if (approxEqual(lastWindow, beatsPerRing)) {
+      // Each ring's window ≈ beatsPerRing: sweep
+      movement = { type: "sweep", direction, beatsPerRing };
+    } else {
+      // First ring has longest window, last has shortest: spread
+      movement = { type: "spread", direction, beatsPerRing };
+    }
+  } else {
+    // Different end times: check for retire (diamond) pattern
+    const endTimesByStep = endsByStep as number[];
+    const endIntervals = endTimesByStep.slice(1).map((e, i) => endTimesByStep[i] - e);
+    const avgEndInterval = endIntervals.reduce((a, b) => a + b, 0) / endIntervals.length;
+    const endIntervalsUniform = endIntervals.every(iv => approxEqual(iv, avgEndInterval));
+
+    if (endIntervalsUniform && approxEqual(avgEndInterval, beatsPerRing)) {
+      // Ends shrink by beatsPerRing each step → spread + retire
+      movement = { type: "spread", direction, beatsPerRing, retire: true };
+    } else {
+      // Unrecognized pattern
+      return null;
+    }
+  }
+
+  // Detect sweep+bounce: if some rings appear twice in the group
+  const ringCounts = new Map<number, number>();
+  for (const tf of group) {
+    const r = tf.rings[0];
+    ringCounts.set(r, (ringCounts.get(r) || 0) + 1);
+  }
+  const hasDoubles = [...ringCounts.values()].some(c => c > 1);
+  if (hasDoubles && movement.type === "sweep") {
+    movement.bounce = true;
+  }
+
+  // Detect phase from per-ring colors
+  const ringColors = new Map<number, string>();
+  for (const tf of sorted) {
+    if (tf.hasExplicitColor) {
+      ringColors.set(tf.rings[0], tf.color);
+    }
+  }
+
+  let mergedColor = representative.color;
+  let mergedPhase: number | undefined;
+  const phaseResult = detectPhase(ringColors, allRings);
+  if (phaseResult) {
+    mergedColor = phaseResult.color;
+    mergedPhase = phaseResult.phase;
+  }
+
+  // Build merged timeframe
+  const globalStart = Math.min(...sorted.map(tf => tf.startTime));
+  const globalEnd = Math.max(...sorted.map(tf => tf.endTime));
+
+  const merged: RecordedTimeframe = {
+    id: representative.id,
+    startTime: globalStart,
+    endTime: globalEnd,
+    label: "",
+    color: mergedColor,
+    rings: allRings,
+    mapping: representative.mapping,
+    effects: representative.effects,
+  };
+  if (representative.hasExplicitColor) merged.hasExplicitColor = true;
+  if (mergedPhase) merged.phase = mergedPhase;
+  if (representative.cycles?.length) merged.cycles = representative.cycles;
+  (merged as any).movement = {
+    type: movement.type,
+    direction: movement.direction,
+    beatsPerRing: movement.beatsPerRing,
+    ...(movement.retire ? { retire: true } : {}),
+    ...(movement.bounce ? { bounce: true } : {}),
+  };
+
+  return merged;
+}
