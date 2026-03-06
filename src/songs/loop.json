@@ -4,7 +4,7 @@
     "lengthSeconds": 245,
     "bpm": 300,
     "startOffsetMs": 0,
-    "runStartTimeSeconds": 18.7269,
+    "runStartTimeSeconds": 44.5359,
     "animationType": "song",
     "audioFilePath": "loop.wav",
     "beatTimestampsMs": [
@@ -270,7 +270,7 @@
       53626.5,
       53777.4,
       53951.6,
-      54067.7,
+      54114.93656312833,
       54276.6,
       54439.2,
       54613.3,
@@ -282,69 +282,69 @@
       55600.2,
       55762.7,
       55902,
-      56041.4,
+      56085.12367065941,
       56238.7,
       56412.9,
       56587,
       56761.2,
       56912.1,
-      57028.2,
+      57080.73423745448,
       57248.8,
       57411.3,
       57562.3,
       57748,
       57910.6,
-      58038.3,
+      58083.35614626923,
       58247.3,
       58398.2,
       58572.3,
       58723.3,
       58897.4,
-      59025.1,
+      59064.32892743496,
       59222.5,
-      59373.4,
+      59400.12136570744,
       59559.2,
       59721.7,
       59895.9,
-      60012,
+      60057.416541932325,
       60221,
       60383.5,
-      60534.4,
+      60552.49492318834,
       60708.6,
       60882.7,
-      60998.8,
+      61044.047585807915,
       61207.8,
       61382,
       61544.5,
       61718.6,
       61869.6,
-      61997.3,
-      62183,
+      62042.22485610095,
+      62200.56803100152,
       62380.4,
       62542.9,
-      62693.9,
+      62707.61817478781,
       62868,
-      62995.7,
+      63021.639500379504,
       63193.1,
       63367.3,
       63518.2,
       63692.3,
       63866.5,
-      63982.6,
+      64022.21016202351,
       64191.6,
       64342.5,
       64528.3,
       64690.8,
       64853.3,
-      64981,
-      65085.5,
-      65271.3,
+      65015.14856954096,
+      65177.69762970526,
+      65340.24668986957,
       65515.1,
       65677.6,
       65851.8,
-      65967.9,
-      66084,
-      66327.8,
+      66009.49950459042,
+      66168.16860307373,
+      66335.65265147279,
       66513.6,
       66676.1,
       66827,
@@ -368,7 +368,7 @@
       69950.1,
       70310,
       70484.2,
-      70646.7,
+      70712.58922203607,
       71018.2,
       71482.6,
       71970.2,
@@ -1377,7 +1377,7 @@
     {
       "id": "fade-in-wave",
       "startTime": 0,
-      "endTime": 36,
+      "endTime": 38,
       "label": "Fade In Wave",
       "color": "#6366f1",
       "hasExplicitColor": false,
@@ -1411,7 +1411,7 @@
     },
     {
       "id": "fade-out-wave",
-      "startTime": 36,
+      "startTime": 38,
       "endTime": 76,
       "label": "Fade Out Wave",
       "color": "#f87171",
@@ -1447,7 +1447,7 @@
     {
       "id": "snake-wave",
       "startTime": 76,
-      "endTime": 144,
+      "endTime": 124,
       "label": "Snake Wave",
       "color": "#8b5cf6",
       "rings": [
@@ -1491,7 +1491,7 @@
     {
       "id": "snake-fade-in",
       "startTime": 76,
-      "endTime": 144,
+      "endTime": 124,
       "label": "Snake Fade In",
       "color": "#6366f1",
       "hasExplicitColor": false,
@@ -1525,8 +1525,8 @@
     },
     {
       "id": "sc-snake-all",
-      "startTime": 144,
-      "endTime": 192,
+      "startTime": 124,
+      "endTime": 166,
       "label": "Snake All Rings",
       "color": "#a855f7",
       "rings": [
@@ -1564,8 +1564,8 @@
     },
     {
       "id": "sc-hue-all",
-      "startTime": 144,
-      "endTime": 192,
+      "startTime": 124,
+      "endTime": 166,
       "label": "Hue Step All Rings",
       "color": "#a855f7",
       "rings": [
@@ -1590,8 +1590,8 @@
           "params": {
             "offset_factor": {
               "steps": {
-                "num_steps": 9,
-                "diff_per_step": 0.083,
+                "num_steps": 7,
+                "diff_per_step": 0.143,
                 "first_step_value": 0
               }
             }
@@ -1630,22 +1630,13 @@
             "low": 0
           },
           "phase": 1
-        },
-        {
-          "id": "tc-snake",
-          "effectKey": "snake",
-          "params": {
-            "tailLength": 0.3,
-            "cyclic": true
-          },
-          "phase": 1
         }
       ]
     },
     {
       "id": "dup-1772219280676-7yks",
-      "startTime": 193,
-      "endTime": 216,
+      "startTime": 192,
+      "endTime": 312,
       "label": "Hue Step All Rings Again",
       "color": "#a855f7",
       "rings": [
@@ -1666,12 +1657,26 @@
       "effects": [
         {
           "id": "sc-h-all-ua2w",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "steps": {
+                "num_steps": 5,
+                "diff_per_step": -0.14,
+                "first_step_value": 1
+              }
+            }
+          },
+          "phase": 0
+        },
+        {
+          "id": "eff-1772825253565-dwsv5ndt95l",
           "effectKey": "timed_hue",
           "params": {
             "offset_factor": {
               "steps": {
-                "num_steps": 9,
-                "diff_per_step": 0.083,
+                "num_steps": 5,
+                "diff_per_step": 0.25,
                 "first_step_value": 0
               }
             }
@@ -1682,8 +1687,8 @@
     },
     {
       "id": "dup-1772219390692-q0s2",
-      "startTime": 193,
-      "endTime": 216,
+      "startTime": 192,
+      "endTime": 312,
       "label": "Snake All Rings Rand",
       "color": "#a855f7",
       "rings": [
@@ -1717,12 +1722,152 @@
           },
           "phase": 0
         }
+      ],
+      "disabled": false
+    },
+    {
+      "id": "1772819630627",
+      "startTime": 116,
+      "endTime": 132,
+      "label": "Fade Out In",
+      "color": "#c71c0a",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1772819697267-97r3hv4qwne",
+          "effectKey": "fadeOutIn",
+          "params": {
+            "low": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1772819818817-8493",
+      "startTime": 166,
+      "endTime": 192,
+      "label": "Snake All Rings Arc",
+      "color": "#a855f7",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "sc-s-all-uh9m",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
+    },
+    {
+      "id": "dup-1772819914062-46ik",
+      "startTime": 166,
+      "endTime": 192,
+      "label": "Hue Step All Rings Again",
+      "color": "#a855f7",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "sc-h-all-5lnp",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "steps": {
+                "num_steps": 8,
+                "diff_per_step": 0.5,
+                "first_step_value": 0
+              }
+            }
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "dup-1772819954019-s6rq",
+      "startTime": 158,
+      "endTime": 174,
+      "label": "Fade Out In 2",
+      "color": "#c71c0a",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1772819697267-97r3hv4qwne-d7rn",
+          "effectKey": "fadeOutIn",
+          "params": {
+            "low": 0
+          }
+        }
       ]
     }
   ],
   "windowSizes": {
     "playbackPanelWidth": 380,
     "detailsPanelWidth": 350,
-    "spectrogramHeight": 343
+    "spectrogramHeight": 500
   }
 }
