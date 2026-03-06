@@ -305,8 +305,13 @@ function App() {
   const [detectBeatsLoading, setDetectBeatsLoading] = useState(false)
   const [detectBeatsProgress, setDetectBeatsProgress] = useState<string | null>(null)
   const [detectBeatsScope, setDetectBeatsScope] = useState<'full' | 'range'>('full')
+  const [detectBeatsMethod, setDetectBeatsMethod] = useState<'onset' | 'beats'>('onset')
   const [rangeStartSec, setRangeStartSec] = useState(0)
   const [rangeEndSec, setRangeEndSec] = useState(60)
+  /** Optional BPM for range-only detection; empty = use song BPM. Helps variable-BPM songs. */
+  const [rangeBpm, setRangeBpm] = useState<number | ''>('')
+  /** For range + onset: fill a full beat grid from estimated BPM (fixes sparse every-2nd-beat). */
+  const [rangeFillGrid, setRangeFillGrid] = useState(false)
   const [beatEditMode, setBeatEditMode] = useState(false)
   /** When user is editing a numeric field, allow empty string; commit validated value on blur. */
   const [numericEdit, setNumericEdit] = useState<{ field: string; value: string } | null>(null)
@@ -660,7 +665,11 @@ function App() {
         const res = await fetch(`${API_BASE}/api/detect-beats`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ audioFilePath: song.audioFilePath, bpm: song.bpm || undefined }),
+          body: JSON.stringify({
+            audioFilePath: song.audioFilePath,
+            bpm: song.bpm || undefined,
+            method: detectBeatsMethod,
+          }),
         })
         const data = await res.json().catch(() => ({}))
         if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
@@ -678,14 +687,17 @@ function App() {
         // Clear beats in range immediately so the spectrogram updates (green lines removed)
         handleSongChange({ beatTimestampsMs: kept.length ? kept : undefined })
         setDetectBeatsProgress('Detecting range…')
+        const bpmForRange = typeof rangeBpm === 'number' && rangeBpm > 0 ? rangeBpm : (song.bpm || undefined)
         const res = await fetch(`${API_BASE}/api/detect-beats`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             audioFilePath: song.audioFilePath,
-            bpm: song.bpm || undefined,
+            bpm: bpmForRange,
+            method: detectBeatsMethod,
             startSec,
             endSec,
+            fillGrid: rangeFillGrid,
           }),
         })
         const data = await res.json().catch(() => ({}))
@@ -1040,10 +1052,11 @@ function App() {
     }
   }, [song, timeframes, playbackPanelWidth, detailsPanelWidth, spectrogramHeight])
 
+  // Keep spectrogram audio URL in sync: blob from Browse, or path from song (so Load JSON doesn't race)
   useEffect(() => {
     if (song.animationType !== 'song') setEffectiveAudioSrc('')
     else setEffectiveAudioSrc(audioBlobUrlRef.current || song.audioFilePath?.trim() || '')
-  }, [song.animationType])
+  }, [song.animationType, song.audioFilePath])
 
   // Keep audio element src in sync with song (blob URL from Browse, or path/URL from field)
   useEffect(() => {
@@ -1320,83 +1333,6 @@ function App() {
                 />
                 <span className="song-meta-suffix">sec</span>
               </label>
-              {song.animationType === 'song' && (
-                <div className="beat-detect-column">
-                  <button
-                    type="button"
-                    className="secondary-button beat-detect-button"
-                    onClick={handleDetectBeats}
-                    disabled={
-                      detectBeatsLoading ||
-                      !API_BASE ||
-                      !song.audioFilePath?.trim() ||
-                      (detectBeatsScope === 'range' && rangeStartSec >= rangeEndSec)
-                    }
-                    title={
-                      !API_BASE
-                        ? 'Set VITE_API_URL and run control server'
-                        : !song.audioFilePath?.trim()
-                          ? 'Set audio file path first'
-                          : detectBeatsScope === 'range' && rangeStartSec >= rangeEndSec
-                            ? 'From time must be less than To time'
-                            : 'Run beat detection (requires Python + librosa)'
-                    }
-                  >
-                    {detectBeatsLoading ? (detectBeatsProgress ?? 'Detecting…') : 'Detect Beats'}
-                  </button>
-                  <div className="beat-detect-bottom-row">
-                    <select
-                      className="beat-detect-scope"
-                      value={detectBeatsScope}
-                      onChange={(e) => setDetectBeatsScope(e.target.value as 'full' | 'range')}
-                      title="Full song or time range"
-                    >
-                    <option value="full">Full song</option>
-                    <option value="range">Range</option>
-                  </select>
-                  {detectBeatsScope === 'range' && (
-                    <>
-                      <label className="beat-detect-range-label">
-                        <span>From</span>
-                        <input
-                          type="number"
-                          min={0}
-                          max={song.lengthSeconds}
-                          step={0.1}
-                          className="beat-detect-range-input"
-                          {...numericInputProps('rangeStartSec', rangeStartSec, 0, 0, 'float', setRangeStartSec, song.lengthSeconds)}
-                        />
-                        <span className="song-meta-suffix">sec</span>
-                      </label>
-                      <label className="beat-detect-range-label">
-                        <span>To</span>
-                        <input
-                          type="number"
-                          min={0}
-                          max={song.lengthSeconds}
-                          step={0.1}
-                          className="beat-detect-range-input"
-                          {...numericInputProps('rangeEndSec', rangeEndSec, song.lengthSeconds, 0, 'float', setRangeEndSec, song.lengthSeconds)}
-                        />
-                        <span className="song-meta-suffix">sec</span>
-                      </label>
-                    </>
-                  )}
-                  {song.beatTimestampsMs && song.beatTimestampsMs.length > 0 && (
-                    <span className="beat-detect-status" title="Click to clear detected beats and revert to fixed BPM">
-                      {song.beatTimestampsMs.length} beats
-                      <button
-                        type="button"
-                        className="beat-detect-clear"
-                        onClick={() => handleSongChange({ beatTimestampsMs: undefined })}
-                      >
-                        x
-                      </button>
-                    </span>
-                  )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -1425,7 +1361,13 @@ function App() {
             audioRef={audioRef}
             isPlaying={isPlaying}
             hasAudio
-            audioSrc={effectiveAudioSrc}
+            audioSrc={
+              effectiveAudioSrc.startsWith('blob:')
+                ? effectiveAudioSrc
+                : API_BASE && effectiveAudioSrc
+                  ? `${API_BASE}/api/audio?path=${encodeURIComponent(effectiveAudioSrc)}`
+                  : effectiveAudioSrc
+            }
             currentTimeSeconds={beatsToAudioSec(currentTime, song)}
             durationSeconds={song.lengthSeconds}
             bpm={song.bpm}
@@ -1443,6 +1385,120 @@ function App() {
             onBeatAdd={handleBeatAdd}
             onBeatRemove={handleBeatRemove}
             onBeatMove={handleBeatMove}
+            beatDetectControls={(
+              <div className="spectrogram-beat-detect-inner">
+                <button
+                  type="button"
+                  className="spectrogram-beat-detect-btn"
+                  onClick={handleDetectBeats}
+                  disabled={
+                    detectBeatsLoading ||
+                    !API_BASE ||
+                    !song.audioFilePath?.trim() ||
+                    (detectBeatsScope === 'range' && rangeStartSec >= rangeEndSec)
+                  }
+                  title={
+                    !API_BASE
+                      ? 'Set VITE_API_URL and run control server'
+                      : !song.audioFilePath?.trim()
+                        ? 'Set audio file path first'
+                        : detectBeatsScope === 'range' && rangeStartSec >= rangeEndSec
+                          ? 'From time must be less than To time'
+                          : 'Run beat detection (requires Python + librosa)'
+                  }
+                >
+                  {detectBeatsLoading ? (detectBeatsProgress ?? 'Detecting…') : 'Detect Beats'}
+                </button>
+                <div className="spectrogram-beat-detect-row">
+                  <select
+                    className="spectrogram-beat-detect-select"
+                    value={detectBeatsScope}
+                    onChange={(e) => setDetectBeatsScope(e.target.value as 'full' | 'range')}
+                    title="Full song or time range"
+                  >
+                    <option value="full">Full song</option>
+                    <option value="range">Range</option>
+                  </select>
+                  <select
+                    className="spectrogram-beat-detect-select"
+                    value={detectBeatsMethod}
+                    onChange={(e) => setDetectBeatsMethod(e.target.value as 'onset' | 'beats')}
+                    title="Onset = variable tempo; Beats = constant tempo grid with BPM hint"
+                  >
+                    <option value="onset">Onset</option>
+                    <option value="beats">Beats</option>
+                  </select>
+                  {song.beatTimestampsMs && song.beatTimestampsMs.length > 0 && (
+                    <span className="spectrogram-beat-detect-status" title="Click to clear detected beats and revert to fixed BPM">
+                      {song.beatTimestampsMs.length} beats
+                      <button
+                        type="button"
+                        className="spectrogram-beat-detect-clear"
+                        onClick={() => handleSongChange({ beatTimestampsMs: undefined })}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                </div>
+                {detectBeatsScope === 'range' && (
+                  <div className="spectrogram-beat-detect-range-row">
+                    <label className="spectrogram-beat-detect-label">
+                      <span>From</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={song.lengthSeconds}
+                        step={0.1}
+                        className="spectrogram-beat-detect-input"
+                        {...numericInputProps('rangeStartSec', rangeStartSec, 0, 0, 'float', setRangeStartSec, song.lengthSeconds)}
+                      />
+                      <span className="spectrogram-beat-detect-suffix">s</span>
+                    </label>
+                    <label className="spectrogram-beat-detect-label">
+                      <span>To</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={song.lengthSeconds}
+                        step={0.1}
+                        className="spectrogram-beat-detect-input"
+                        {...numericInputProps('rangeEndSec', rangeEndSec, song.lengthSeconds, 0, 'float', setRangeEndSec, song.lengthSeconds)}
+                      />
+                      <span className="spectrogram-beat-detect-suffix">s</span>
+                    </label>
+                    <label className="spectrogram-beat-detect-label" title="Override BPM for this range (variable-BPM songs). Leave empty to use song BPM.">
+                      <span>BPM</span>
+                      <input
+                        type="number"
+                        min={1}
+                        max={300}
+                        step={1}
+                        className="spectrogram-beat-detect-input"
+                        placeholder={String(song.bpm || 120)}
+                        value={rangeBpm === '' ? '' : rangeBpm}
+                        onChange={(e) => {
+                          const v = e.target.value.trim()
+                          setRangeBpm(v === '' ? '' : Math.max(1, Math.min(300, parseInt(v, 10) || 1)))
+                        }}
+                        onBlur={(e) => {
+                          const v = e.target.value.trim()
+                          if (v === '') setRangeBpm('')
+                        }}
+                      />
+                    </label>
+                    <label className="spectrogram-beat-detect-label" title="Build a full beat grid from onsets (fixes detection that only hits every 2nd/3rd beat).">
+                      <input
+                        type="checkbox"
+                        checked={rangeFillGrid}
+                        onChange={(e) => setRangeFillGrid(e.target.checked)}
+                      />
+                      <span>Fill grid</span>
+                    </label>
+                  </div>
+                )}
+              </div>
+            )}
           />
         </div>
       )}

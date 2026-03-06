@@ -39,9 +39,13 @@ def _onset_envelope_percussive(y, sr):
     )
 
 
-def detect_beats_onset(audio_path, min_gap_ms=250.0, start_sec=None, end_sec=None):
-    # type: (str, float, Optional[float], Optional[float]) -> dict
-    """Detect beats via percussive onset peaks — no tempo grid imposed."""
+def detect_beats_onset(audio_path, min_gap_ms=250.0, start_sec=None, end_sec=None, fill_grid=False, bpm_hint=None):
+    # type: (str, float, Optional[float], Optional[float], bool, Optional[float]) -> dict
+    """Detect beats via percussive onset peaks — no tempo grid imposed.
+    If fill_grid=True and we have a segment (start_sec/end_sec), estimate BPM from onsets
+    (or use bpm_hint if given) and output a full beat grid (one timestamp per beat) to fix
+    'every 2nd/3rd beat' sparse output.
+    """
     kwargs = {"sr": None, "mono": True}
     if start_sec is not None and end_sec is not None:
         kwargs["offset"] = float(start_sec)
@@ -74,8 +78,24 @@ def detect_beats_onset(audio_path, min_gap_ms=250.0, start_sec=None, end_sec=Non
         estimated_bpm = 0.0
 
     offset_ms = (float(start_sec) * 1000) if start_sec is not None else 0
+    beat_times_s = list(onset_times)
+
+    # Option: fill a regular grid from first onset so we get one beat per beat (fixes sparse output)
+    grid_bpm = (bpm_hint if bpm_hint and bpm_hint > 0 else None) or (estimated_bpm if estimated_bpm > 0 else None)
+    if fill_grid and start_sec is not None and end_sec is not None and len(onset_times) >= 1 and grid_bpm and grid_bpm > 0:
+        segment_duration_s = float(end_sec - start_sec)
+        beat_interval_s = 60.0 / grid_bpm
+        t0 = float(onset_times[0])
+        grid_times = []
+        t = t0
+        while t < segment_duration_s + 0.001:
+            if t >= 0:
+                grid_times.append(t)
+            t += beat_interval_s
+        beat_times_s = grid_times
+
     return {
-        "beatTimestampsMs": [round(offset_ms + t * 1000, 1) for t in onset_times],
+        "beatTimestampsMs": [round(offset_ms + t * 1000, 1) for t in beat_times_s],
         "estimatedBpm": round(estimated_bpm, 2),
     }
 
@@ -127,7 +147,7 @@ def main():
     )
     parser.add_argument(
         "--min-gap", type=float, default=250,
-        help="[onset method] Minimum ms between beats (default: 250)",
+        help="[onset method] Minimum ms between beats when --bpm not set (default: 250). When --bpm is set, min gap is derived from BPM (half beat).",
     )
     parser.add_argument(
         "--start-sec", type=float, default=None,
@@ -136,6 +156,10 @@ def main():
     parser.add_argument(
         "--end-sec", type=float, default=None,
         help="End time of segment in seconds (use with --start-sec for section detection)",
+    )
+    parser.add_argument(
+        "--fill-grid", action="store_true",
+        help="[onset + segment] After onset detection, output a full beat grid from estimated BPM (fixes sparse every-2nd-beat output)",
     )
     args = parser.parse_args()
 
@@ -146,9 +170,16 @@ def main():
         sys.exit(1)
 
     if args.method == "onset":
+        # When BPM is provided, derive min gap from it (half beat) so faster tempos get tighter spacing
+        if args.bpm is not None and args.bpm > 0:
+            min_gap_ms = max(80.0, min(2000.0, 30000.0 / args.bpm))
+        else:
+            min_gap_ms = args.min_gap
         result = detect_beats_onset(
-            args.audio_file, min_gap_ms=args.min_gap,
+            args.audio_file, min_gap_ms=min_gap_ms,
             start_sec=start_sec, end_sec=end_sec,
+            fill_grid=args.fill_grid,
+            bpm_hint=args.bpm,
         )
     else:
         result = detect_beats_beattrack(

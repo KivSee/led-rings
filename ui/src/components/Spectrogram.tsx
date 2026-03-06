@@ -144,6 +144,8 @@ export interface SpectrogramProps {
   onBeatRemove?: (beatIndex: number) => void
   /** Called when user moves the beat at index to new time (ms). */
   onBeatMove?: (beatIndex: number, newTimeMs: number) => void
+  /** When in beat edit mode, this toolbar is shown in the spectrogram header (detect beats, scope, method, range, etc.). */
+  beatDetectControls?: React.ReactNode
 }
 
 export default function Spectrogram({
@@ -168,6 +170,7 @@ export default function Spectrogram({
   onBeatAdd,
   onBeatRemove,
   onBeatMove,
+  beatDetectControls,
 }: SpectrogramProps) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -197,15 +200,6 @@ export default function Spectrogram({
   const viewDuration = Math.max(0.001, viewEnd - viewStart)
   viewBoundsRef.current = { viewStart, viewEnd, viewDuration }
 
-  // MIN_VIEW_DURATION_SEC only affects rendering quality (source image slice), not logical range
-  const MIN_VIEW_DURATION_SEC = 2
-  const renderStart = viewDuration < MIN_VIEW_DURATION_SEC
-    ? Math.max(0, (viewStart + viewEnd) / 2 - MIN_VIEW_DURATION_SEC / 2)
-    : viewStart
-  const renderEnd = viewDuration < MIN_VIEW_DURATION_SEC
-    ? Math.min(effectiveDuration, renderStart + MIN_VIEW_DURATION_SEC)
-    : viewEnd
-  const renderDuration = Math.max(0.001, renderEnd - renderStart)
   const visibleSpanBeats = viewSpanBeats
 
   const [loading, setLoading] = useState(false)
@@ -623,6 +617,13 @@ export default function Spectrogram({
     }
   }, [beatTimestampsMs?.length, selectedBeatIndex])
 
+  // Clear selection when exiting edit beat mode so the beat reverts to normal color
+  useEffect(() => {
+    if (!beatEditMode) {
+      setSelectedBeatIndex(null)
+    }
+  }, [beatEditMode])
+
   // Resize canvas to wrapper and repaint (wrapper fills resizable parent height)
   useEffect(() => {
     const wrapper = wrapperRef.current
@@ -724,9 +725,9 @@ export default function Spectrogram({
     ctx.fillStyle = 'rgb(18, 22, 32)'
     ctx.fillRect(0, 0, graphLeft, height)
 
-    // Use renderStart/renderDuration for image quality (may be wider than logical view at high zoom)
-    const srcX = (renderStart / duration) * img.width
-    const srcW = (renderDuration / duration) * img.width
+    // Draw the slice that matches the visible view so spectrogram stays in sync with beat markers and playhead
+    const srcX = (viewStart / duration) * img.width
+    const srcW = (viewDuration / duration) * img.width
     ctx.imageSmoothingEnabled = true
     ctx.imageSmoothingQuality = 'high'
     ctx.drawImage(offscreen, srcX, 0, srcW, img.height, graphLeft, 0, graphWidth, graphHeight)
@@ -934,8 +935,6 @@ export default function Spectrogram({
     viewStart,
     viewEnd,
     viewDuration,
-    renderStart,
-    renderDuration,
     visibleSpanBeats,
     beatEditMode,
     dragPreviewMs,
@@ -1038,6 +1037,11 @@ export default function Spectrogram({
           </div>
         </div>
       </div>
+      {beatEditMode && beatDetectControls != null && (
+        <div className="spectrogram-beat-detect-toolbar">
+          {beatDetectControls}
+        </div>
+      )}
       <div className="spectrogram-canvas-wrap" ref={wrapperRef}>
         <canvas
           ref={canvasRef}

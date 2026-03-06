@@ -53,7 +53,7 @@ function send(res: http.ServerResponse, status: number, body: string, contentTyp
 
 function cors(res: http.ServerResponse) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
@@ -269,7 +269,7 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "POST" && pathname === "/api/detect-beats") {
     const body = await parseBody(req);
-    let payload: { audioFilePath?: string; bpm?: number; method?: string; startSec?: number; endSec?: number };
+    let payload: { audioFilePath?: string; bpm?: number; method?: string; startSec?: number; endSec?: number; fillGrid?: boolean };
     try {
       payload = JSON.parse(body);
     } catch {
@@ -287,11 +287,15 @@ const server = http.createServer(async (req, res) => {
       send(res, 400, JSON.stringify({ error: "startSec must be less than endSec" }));
       return;
     }
-    // Resolve audio path: try as-is first, then check ui/public/ (where audio files live for the UI)
+    // Resolve audio path: try as-is first, then ui/public/, then src/songs/ (next to JSON)
     let audioPath = path.resolve(ROOT, payload.audioFilePath);
     if (!fs.existsSync(audioPath)) {
       const publicPath = path.resolve(ROOT, "ui", "public", payload.audioFilePath);
       if (fs.existsSync(publicPath)) audioPath = publicPath;
+      else {
+        const songsPath = path.resolve(ROOT, "src", "songs", path.basename(payload.audioFilePath));
+        if (fs.existsSync(songsPath)) audioPath = songsPath;
+      }
     }
     const scriptPath = path.join(ROOT, "scripts", "detect_beats.py");
     const pyArgs = [scriptPath, audioPath];
@@ -303,6 +307,9 @@ const server = http.createServer(async (req, res) => {
     }
     if (useRange) {
       pyArgs.push("--start-sec", String(startSec), "--end-sec", String(endSec), "--output", "-");
+      if (payload.fillGrid) {
+        pyArgs.push("--fill-grid");
+      }
     }
     const child = spawn(PYTHON_CMD, pyArgs, {
       cwd: ROOT,
@@ -339,6 +346,39 @@ const server = http.createServer(async (req, res) => {
         send(res, 500, JSON.stringify({ error: "Failed to read beats file" }));
       }
     }
+    return;
+  }
+
+  // GET /api/audio?path=... — serve audio file for spectrogram (same path resolution as detect-beats)
+  if (req.method === "GET" && pathname === "/api/audio") {
+    const q = new URL(url, `http://localhost`).searchParams;
+    const audioPathParam = q.get("path");
+    if (typeof audioPathParam !== "string" || !audioPathParam.trim()) {
+      send(res, 400, JSON.stringify({ error: "Missing path query" }));
+      return;
+    }
+    let audioPath = path.resolve(ROOT, audioPathParam);
+    if (!fs.existsSync(audioPath)) {
+      const publicPath = path.resolve(ROOT, "ui", "public", audioPathParam);
+      if (fs.existsSync(publicPath)) audioPath = publicPath;
+      else {
+        const songsPath = path.resolve(ROOT, "src", "songs", path.basename(audioPathParam));
+        if (fs.existsSync(songsPath)) audioPath = songsPath;
+        else {
+          send(res, 404, JSON.stringify({ error: "Audio file not found" }));
+          return;
+        }
+      }
+    }
+    if (!fs.statSync(audioPath).isFile()) {
+      send(res, 404, JSON.stringify({ error: "Not a file" }));
+      return;
+    }
+    const ext = path.extname(audioPath).toLowerCase();
+    const contentType =
+      ext === ".wav" ? "audio/wav" : ext === ".mp3" ? "audio/mpeg" : "application/octet-stream";
+    res.writeHead(200, { "Content-Type": contentType });
+    fs.createReadStream(audioPath).pipe(res);
     return;
   }
 
