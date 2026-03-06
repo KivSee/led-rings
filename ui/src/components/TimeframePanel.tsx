@@ -913,7 +913,11 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: Timefra
                                         value={kind}
                                         onChange={(e) => {
                                           const newKind = e.target.value as FloatFunctionKind
-                                          const nextF = defaultFloatFunction(newKind)
+                                          // For "Decrease" + "Steps", default to 1→0 so brightness steps down (not up)
+                                          const nextF =
+                                            newKind === 'steps' && currentKey === DECREASE_KEY
+                                              ? { steps: { num_steps: 4, diff_per_step: -0.25, first_step_value: 1 } }
+                                              : defaultFloatFunction(newKind)
                                           const nextParams = mergeParams({ [currentKey]: nextF }) as Record<string, number | boolean | FloatFunctionValue>
                                           if (entry.id === 'placeholder') return
                                           const next = effects.map((ex, i) => i === idx ? { ...ex, params: nextParams } : ex)
