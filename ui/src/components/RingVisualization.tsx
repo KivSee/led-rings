@@ -92,6 +92,14 @@ const RingVisualization = ({
     return segmentRelPosMap.get(mappingName)?.get(pixelIndex) ?? null
   }, [segmentRelPosMap])
 
+  /** relPos for effect evaluation. For mapping "ind" the runtime runs the effect per ring with 0–1 within each ring; segments.json "ind" is one value per ring (so preview would show one snake across rings). Use position-within-ring for "ind" so the preview matches. */
+  const getRelPosForEffect = React.useCallback((pixelIndex: number, mappingName: string): number => {
+    if (mappingName.toLowerCase() === 'ind') {
+      return (pixelIndex % 12) / 12
+    }
+    return getRelPosForMapping(pixelIndex, mappingName) ?? 0
+  }, [getRelPosForMapping])
+
   // Build a per-ring lookup: ringNumber (1-12) → all matching timeframes
   // With movement, a ring might be in tf.rings but not active at currentTime
   const ringToTimeframes: Map<number, Timeframe[]> = new Map()
@@ -214,10 +222,9 @@ const RingVisualization = ({
                       const tfWithT: Array<{ timeframe: Timeframe; t: number; relPos: number }> = []
                       for (const tf of ringTfs) {
                         const tfMapping = tf.mapping || 'all'
-                        const rp = getRelPosForMapping(pixel.index, tfMapping)
-                        if (rp == null) continue
                         const ringT = computeRingT(tf, currentTime!, ringNumber)
                         if (ringT == null) continue
+                        const rp = getRelPosForEffect(pixel.index, tfMapping)
                         tfWithT.push({ timeframe: tf, t: ringT, relPos: rp })
                       }
                       if (tfWithT.length === 0) return 'rgb(0, 0, 0)'
@@ -229,7 +236,7 @@ const RingVisualization = ({
                     // Single-timeframe mode (mapping preview in TimeframePanel)
                     if (singleTf) {
                       const tfMapping = singleTf.mapping || 'all'
-                      const tfRelPos = getRelPosForMapping(pixel.index, tfMapping) ?? pixel.relPos
+                      const tfRelPos = getRelPosForEffect(pixel.index, tfMapping)
                       const ringT = computeRingT(singleTf, currentTime!, ringNumber)
                       const { h, s, v } = getPixelColor(tfRelPos, ringT ?? t, singleTf, ringIndex)
                       return hsvToRgbString(h, s, v)
