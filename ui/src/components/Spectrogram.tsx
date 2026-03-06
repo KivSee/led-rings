@@ -192,7 +192,10 @@ export default function Spectrogram({
   const [rangeSelection, setRangeSelection] = useState<{ startSec: number; endSec: number } | null>(null)
   const rangeSelectRef = useRef<{ startSec: number; startClientX: number; active: boolean } | null>(null)
   const didRangeSelectRef = useRef(false)
-  const effectiveDuration = decodedDurationRef.current || durationSeconds || 1
+  /** Duration the spectrogram image covers (decoded audio length, or song length before decode). */
+  const imageDuration = decodedDurationRef.current || durationSeconds || 1
+  /** Scroll range: at least full song length so user can scroll to end even if audio file is shorter. */
+  const rangeDuration = Math.max(imageDuration, durationSeconds || 1)
 
   // View range directly from props (unified zoom/scroll)
   const viewStart = viewStartSeconds
@@ -251,10 +254,27 @@ export default function Spectrogram({
     setLoading(true)
     setError(null)
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const expectedDurationSec = durationSeconds > 0 ? durationSeconds : null
 
     fetch(audioSrc)
-      .then((r) => r.arrayBuffer())
-      .then((buf) => ctx.decodeAudioData(buf))
+      .then((r) => {
+        const contentLength = r.headers.get('Content-Length')
+        const expectedBytes = contentLength ? parseInt(contentLength, 10) : null
+        return r.arrayBuffer().then((buf) => ({ buf, expectedBytes }))
+      })
+      .then(({ buf, expectedBytes }) => {
+        if (cancelled) return Promise.reject(new Error('cancelled'))
+        if (expectedBytes != null && buf.byteLength !== expectedBytes) {
+          return Promise.reject(
+            new Error(
+              `File truncated: received ${buf.byteLength} of ${expectedBytes} bytes. Check network or try a shorter file.`
+            )
+          )
+        }
+        // Chrome workaround: decode can fail on large buffers; structuredClone sometimes fixes it
+        const toDecode = typeof structuredClone === 'function' ? structuredClone(buf) : buf
+        return ctx.decodeAudioData(toDecode)
+      })
       .then((buffer) => {
         if (cancelled) return
         const numChannels = buffer.numberOfChannels
@@ -313,6 +333,17 @@ export default function Spectrogram({
 
         decodedDurationRef.current = buffer.duration
         decodedSampleRateRef.current = sampleRate
+        if (
+          expectedDurationSec != null &&
+          buffer.duration < expectedDurationSec * 0.99
+        ) {
+          setError(
+            `Only ${buffer.duration.toFixed(1)}s decoded (expected ${expectedDurationSec}s). ` +
+              'Browsers often limit decodeAudioData for long files; try splitting the file or use a shorter clip.'
+          )
+          setLoading(false)
+          return
+        }
         const w = cols.length
         const h = SPECTROGRAM_HEIGHT
         const imageData = new ImageData(w, h)
@@ -482,9 +513,9 @@ export default function Spectrogram({
       const bounds = viewBoundsRef.current
       const x = e.clientX - rect.left - Y_AXIS_WIDTH
       const seconds = bounds.viewStart + (x / graphW) * bounds.viewDuration
-      onSeekToSeconds(Math.max(0, Math.min(effectiveDuration, seconds)))
+      onSeekToSeconds(Math.max(0, Math.min(rangeDuration, seconds)))
     }
-  }, [beatEditMode, isPlaying, onSeekToSeconds, effectiveDuration, getBeatEditStateAtClientX])
+  }, [beatEditMode, isPlaying, onSeekToSeconds, rangeDuration, getBeatEditStateAtClientX])
 
   const handleCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (e.button !== 0) return
@@ -654,10 +685,10 @@ export default function Spectrogram({
   }, [hasAudio])
 
   const scrollContentWidth = scrollViewWidth > 0 && viewDuration > 0
-    ? scrollViewWidth * (effectiveDuration / viewDuration)
+    ? scrollViewWidth * (rangeDuration / viewDuration)
     : scrollViewWidth
   const scrollMaxLeft = Math.max(0, scrollContentWidth - scrollViewWidth)
-  const scrollableDuration = Math.max(0, effectiveDuration - viewDuration)
+  const scrollableDuration = Math.max(0, rangeDuration - viewDuration)
 
   // Sync horizontal scroll position from unified view range
   useEffect(() => {
@@ -725,12 +756,28 @@ export default function Spectrogram({
     ctx.fillStyle = 'rgb(18, 22, 32)'
     ctx.fillRect(0, 0, graphLeft, height)
 
-    // Draw the slice that matches the visible view so spectrogram stays in sync with beat markers and playhead
-    const srcX = (viewStart / duration) * img.width
-    const srcW = (viewDuration / duration) * img.width
-    ctx.imageSmoothingEnabled = true
-    ctx.imageSmoothingQuality = 'high'
-    ctx.drawImage(offscreen, srcX, 0, srcW, img.height, graphLeft, 0, graphWidth, graphHeight)
+    // Draw the slice that matches the visible view; clamp to image bounds when view extends past decoded audio
+    const drawStart = Math.max(0, Math.min(viewStart, duration))
+    const drawEnd = Math.max(0, Math.min(viewEnd, duration))
+    if (drawStart < drawEnd) {
+      const srcX = (drawStart / duration) * img.width
+      const srcW = ((drawEnd - drawStart) / duration) * img.width
+      const destX = graphLeft + ((drawStart - viewStart) / viewDuration) * graphWidth
+      const destW = ((drawEnd - drawStart) / viewDuration) * graphWidth
+      ctx.imageSmoothingEnabled = true
+      ctx.imageSmoothingQuality = 'high'
+      ctx.drawImage(offscreen, srcX, 0, srcW, img.height, destX, 0, destW, graphHeight)
+    }
+    // Fill any part of the view that extends beyond the image (song longer than decoded audio)
+    if (viewStart < drawStart) {
+      ctx.fillStyle = 'rgb(18, 22, 32)'
+      ctx.fillRect(graphLeft, 0, ((drawStart - viewStart) / viewDuration) * graphWidth, graphHeight)
+    }
+    if (viewEnd > drawEnd) {
+      ctx.fillStyle = 'rgb(18, 22, 32)'
+      const fillLeft = graphLeft + ((drawEnd - viewStart) / viewDuration) * graphWidth
+      ctx.fillRect(fillLeft, 0, graphWidth - (fillLeft - graphLeft), graphHeight)
+    }
 
     let playheadX =
       viewDuration > 0

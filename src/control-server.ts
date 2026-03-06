@@ -377,7 +377,11 @@ const server = http.createServer(async (req, res) => {
     const ext = path.extname(audioPath).toLowerCase();
     const contentType =
       ext === ".wav" ? "audio/wav" : ext === ".mp3" ? "audio/mpeg" : "application/octet-stream";
-    res.writeHead(200, { "Content-Type": contentType });
+    const contentLength = fs.statSync(audioPath).size;
+    res.writeHead(200, {
+      "Content-Type": contentType,
+      "Content-Length": contentLength,
+    });
     fs.createReadStream(audioPath).pipe(res);
     return;
   }

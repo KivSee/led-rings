@@ -323,7 +323,11 @@ function App() {
   const savedDirHandleRef = React.useRef<any>(null)
   /** Effective audio URL for spectrogram fetch (path or blob URL). */
   const [effectiveAudioSrc, setEffectiveAudioSrc] = useState('')
-  const songLengthBeats = Math.max(1, (song.lengthSeconds * song.bpm) / 60)
+  const songLengthBeats = Math.max(1,
+    song.beatTimestampsMs && song.beatTimestampsMs.length > 0
+      ? audioSecToBeats(song.lengthSeconds, song)
+      : (song.lengthSeconds * song.bpm) / 60
+  )
   const [viewRange, viewActions] = useViewRange(songLengthBeats)
   const { startBeat: viewStartBeat, beatsPerScreen } = viewRange
   const viewEndBeat = viewStartBeat + beatsPerScreen
@@ -674,7 +678,7 @@ function App() {
         const data = await res.json().catch(() => ({}))
         if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
         if (data.beatTimestampsMs && Array.isArray(data.beatTimestampsMs)) {
-          handleSongChange({ beatTimestampsMs: data.beatTimestampsMs })
+          handleSongChange({ beatTimestampsMs: data.beatTimestampsMs.map((ms: number) => Math.round(ms)) })
         }
       } else if (detectBeatsScope === 'range') {
         const startSec = Math.max(0, Math.min(rangeStartSec, song.lengthSeconds - 0.1))
@@ -703,7 +707,8 @@ function App() {
         const data = await res.json().catch(() => ({}))
         if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
         if (data.beatTimestampsMs && Array.isArray(data.beatTimestampsMs)) {
-          const merged = mergeBeatTimestamps([kept, data.beatTimestampsMs])
+          const rounded = data.beatTimestampsMs.map((ms: number) => Math.round(ms))
+          const merged = mergeBeatTimestamps([kept, rounded])
           handleSongChange({ beatTimestampsMs: merged.length ? merged : undefined })
         }
       }
@@ -1190,7 +1195,8 @@ function App() {
   }
 
   const handleBeatAdd = useCallback((timeMs: number) => {
-    const next = [...(song.beatTimestampsMs ?? []), timeMs].sort((a, b) => a - b)
+    const rounded = Math.round(timeMs)
+    const next = [...(song.beatTimestampsMs ?? []), rounded].sort((a, b) => a - b)
     handleSongChange({ beatTimestampsMs: next })
   }, [song.beatTimestampsMs])
 
@@ -1205,7 +1211,7 @@ function App() {
     const cur = song.beatTimestampsMs
     if (!cur || beatIndex < 0 || beatIndex >= cur.length) return
     const next = [...cur]
-    next[beatIndex] = newTimeMs
+    next[beatIndex] = Math.round(newTimeMs)
     next.sort((a, b) => a - b)
     handleSongChange({ beatTimestampsMs: next })
   }, [song.beatTimestampsMs])
@@ -1374,7 +1380,11 @@ function App() {
             beatOffset={(song.startOffsetMs ?? 0) / 1000}
             beatTimestampsMs={song.beatTimestampsMs}
             viewStartSeconds={beatsToAudioSec(viewStartBeat, song)}
-            viewEndSeconds={beatsToAudioSec(viewEndBeat, song)}
+            viewEndSeconds={
+              viewEndBeat >= songLengthBeats - 0.01
+                ? Math.max(beatsToAudioSec(viewEndBeat, song), song.lengthSeconds)
+                : beatsToAudioSec(viewEndBeat, song)
+            }
             viewSpanBeats={beatsPerScreen}
             onScrollToSeconds={onScrollToSeconds}
             onZoomAtSeconds={onZoomAtSeconds}

@@ -94,8 +94,9 @@ def detect_beats_onset(audio_path, min_gap_ms=250.0, start_sec=None, end_sec=Non
             t += beat_interval_s
         beat_times_s = grid_times
 
+    # Whole milliseconds are enough for beat grid; sub-ms precision is redundant.
     return {
-        "beatTimestampsMs": [round(offset_ms + t * 1000, 1) for t in beat_times_s],
+        "beatTimestampsMs": [round(offset_ms + t * 1000) for t in beat_times_s],
         "estimatedBpm": round(estimated_bpm, 2),
     }
 
@@ -120,7 +121,8 @@ def detect_beats_beattrack(audio_path, bpm_hint=None, tightness=80, start_sec=No
     tempo, beat_frames = librosa.beat.beat_track(**kwargs)
     beat_times = librosa.frames_to_time(beat_frames, sr=sr, hop_length=HOP_LENGTH)
     offset_ms = (float(start_sec) * 1000) if start_sec is not None else 0
-    beat_timestamps_ms = [round(offset_ms + float(t) * 1000, 1) for t in beat_times]
+    # Whole milliseconds are enough for beat grid; sub-ms precision is redundant.
+    beat_timestamps_ms = [round(offset_ms + float(t) * 1000) for t in beat_times]
     estimated_bpm = float(np.median(tempo)) if hasattr(tempo, "__iter__") else float(tempo)
 
     return {
