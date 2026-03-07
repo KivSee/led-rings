@@ -401,6 +401,14 @@ const loop = async () => {
       });
     })
 
+    beats(36, 38, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          fadeIn()
+        });
+      });
+    })
+
     beats(6, 12, () => {
       elements([2], () => {
         segment(segment_all, () => {
@@ -489,6 +497,14 @@ const loop = async () => {
       });
     })
 
+    beats(36, 38, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          fadeIn()
+        });
+      });
+    })
+
     beats(68, 74, () => {
       elements([1], () => {
         segment(segment_all, () => {
@@ -537,7 +553,23 @@ const loop = async () => {
       });
     })
 
+    beats(74, 76, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
     beats(38, 44, () => {
+      elements([7], () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(74, 76, () => {
       elements([7], () => {
         segment(segment_all, () => {
           fadeOut()
@@ -593,7 +625,23 @@ const loop = async () => {
       });
     })
 
+    beats(112, 118, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          fadeIn()
+        });
+      });
+    })
+
     beats(82, 88, () => {
+      elements([2], () => {
+        segment(segment_all, () => {
+          fadeIn()
+        });
+      });
+    })
+
+    beats(118, 124, () => {
       elements([2], () => {
         segment(segment_all, () => {
           fadeIn()
@@ -673,7 +721,23 @@ const loop = async () => {
       });
     })
 
+    beats(118, 124, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          fadeIn()
+        });
+      });
+    })
+
     beats(76, 82, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          fadeIn()
+        });
+      });
+    })
+
+    beats(112, 118, () => {
       elements([12], () => {
         segment(segment_all, () => {
           fadeIn()
@@ -1005,7 +1069,23 @@ const loop = async () => {
       });
     })
 
+    beats(435, 439, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
     beats(395, 399, () => {
+      elements([2], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(443, 447, () => {
       elements([2], () => {
         segment(segment_all, () => {
           blink({ low: 0 })
@@ -1045,6 +1125,14 @@ const loop = async () => {
       });
     })
 
+    beats(447, 451, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
     beats(419, 423, () => {
       elements([7], () => {
         segment(segment_all, () => {
@@ -1077,6 +1165,14 @@ const loop = async () => {
       });
     })
 
+    beats(439, 443, () => {
+      elements([10], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
     beats(415, 419, () => {
       elements([11], () => {
         segment(segment_all, () => {
@@ -1101,7 +1197,55 @@ const loop = async () => {
       });
     })
 
+    beats(487, 490, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(523, 526, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(559, 562, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
     beats(457, 460, () => {
+      elements([2], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(493, 496, () => {
+      elements([2], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(529, 532, () => {
+      elements([2], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(565, 568, () => {
       elements([2], () => {
         segment(segment_all, () => {
           blink({ low: 0 })
@@ -1117,7 +1261,39 @@ const loop = async () => {
       });
     })
 
+    beats(520, 523, () => {
+      elements([3], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(556, 559, () => {
+      elements([3], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
     beats(481, 484, () => {
+      elements([4], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(517, 520, () => {
+      elements([4], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(553, 556, () => {
       elements([4], () => {
         segment(segment_all, () => {
           blink({ low: 0 })
@@ -1133,7 +1309,47 @@ const loop = async () => {
       });
     })
 
+    beats(505, 508, () => {
+      elements([5], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(541, 544, () => {
+      elements([5], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
     beats(460, 463, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(496, 499, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(532, 535, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(568, 571, () => {
       elements([6], () => {
         segment(segment_all, () => {
           blink({ low: 0 })
@@ -1149,7 +1365,47 @@ const loop = async () => {
       });
     })
 
+    beats(511, 514, () => {
+      elements([7], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(547, 550, () => {
+      elements([7], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
     beats(463, 466, () => {
+      elements([8], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(499, 502, () => {
+      elements([8], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(535, 538, () => {
+      elements([8], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(571, 572, () => {
       elements([8], () => {
         segment(segment_all, () => {
           blink({ low: 0 })
@@ -1165,7 +1421,47 @@ const loop = async () => {
       });
     })
 
+    beats(514, 517, () => {
+      elements([9], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(550, 553, () => {
+      elements([9], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
     beats(454, 457, () => {
+      elements([10], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(490, 493, () => {
+      elements([10], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(526, 529, () => {
+      elements([10], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(562, 565, () => {
       elements([10], () => {
         segment(segment_all, () => {
           blink({ low: 0 })
@@ -1181,7 +1477,39 @@ const loop = async () => {
       });
     })
 
+    beats(508, 511, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(544, 547, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
     beats(466, 469, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(502, 505, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(538, 541, () => {
       elements([12], () => {
         segment(segment_all, () => {
           blink({ low: 0 })

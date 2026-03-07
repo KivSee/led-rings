@@ -169,9 +169,46 @@ export function defaultBeatsPerRing(
 /** Window for a ring: start/end in beats; holdOff = apply brightness 0 to keep ring off after its turn. */
 export type MovementWindow = { start: number; end: number; holdOff?: boolean }
 
+/** Clip a window to [startTime, endTime] and add if non-empty. */
+function clipWindow(
+  w: MovementWindow,
+  startTime: number,
+  endTime: number,
+): MovementWindow | null {
+  const start = Math.max(w.start, startTime)
+  const end = Math.min(w.end, endTime)
+  if (start >= end) return null
+  return { ...w, start, end }
+}
+
+/** Tile one-cycle windows (relative to cycle start) repeatedly over [startTime, endTime]. */
+function tileCycleWindows(
+  oneCycleWindows: MovementWindow[],
+  cycleBeats: number,
+  startTime: number,
+  endTime: number,
+): MovementWindow[] {
+  const out: MovementWindow[] = []
+  for (let cycleIndex = 0; ; cycleIndex++) {
+    const cycleStart = startTime + cycleIndex * cycleBeats
+    if (cycleStart >= endTime) break
+    for (const w of oneCycleWindows) {
+      const shifted: MovementWindow = {
+        start: cycleStart + w.start,
+        end: cycleStart + w.end,
+        holdOff: w.holdOff,
+      }
+      const clipped = clipWindow(shifted, startTime, endTime)
+      if (clipped) out.push(clipped)
+    }
+  }
+  return out
+}
+
 /**
  * Returns all active windows (beat ranges) for a specific ring within a
- * movement-enabled timeframe.
+ * movement-enabled timeframe. Movement patterns repeat for the full timeframe
+ * (sweep/random restart when one pass finishes; spread/stagger unchanged).
  */
 export function getMovementRingWindows(
   startTime: number,
@@ -193,17 +230,22 @@ export function getMovementRingWindows(
 
   switch (movement.type) {
     case 'random': {
-      // One ring at a time, in random order (same as sweep but with shuffled steps)
+      // One ring at a time, in random order. Retire = one pass then holdOff; else repeat.
       const s = startTime + step * bpr
       const e = s + bpr
       if (s >= endTime) return []
       const fadeEnd = Math.min(e, endTime)
-      const windows: MovementWindow[] = [{ start: s, end: fadeEnd }]
-      // Retire: after this ring's fade, keep it off for the rest of the timeframe
       if (movement.retire && fadeEnd < endTime) {
-        windows.push({ start: fadeEnd, end: endTime, holdOff: true })
+        return [
+          { start: s, end: fadeEnd },
+          { start: fadeEnd, end: endTime, holdOff: true },
+        ]
       }
-      return windows
+      const cycleBeats = numSteps * bpr
+      const oneCycle: MovementWindow[] = [
+        { start: step * bpr, end: step * bpr + bpr },
+      ]
+      return tileCycleWindows(oneCycle, cycleBeats, startTime, endTime)
     }
     case 'spread': {
       const s = startTime + step * bpr
@@ -217,27 +259,22 @@ export function getMovementRingWindows(
     case 'sweep': {
       if (movement.bounce) {
         const totalSteps = Math.max(1, 2 * numSteps - 2)
-        const windows: Array<{ start: number; end: number }> = []
-        // Forward leg
-        const fwdStart = startTime + step * bpr
+        const cycleBeats = totalSteps * bpr
+        const oneCycle: MovementWindow[] = []
+        const fwdStart = step * bpr
         const fwdEnd = fwdStart + bpr
-        if (fwdStart < endTime) {
-          windows.push({ start: fwdStart, end: Math.min(fwdEnd, endTime) })
-        }
-        // Backward leg (endpoints only appear once)
+        oneCycle.push({ start: fwdStart, end: fwdEnd })
         if (step > 0 && step < numSteps - 1) {
           const bwdStep = totalSteps - step
-          const bwdStart = startTime + bwdStep * bpr
-          const bwdEnd = bwdStart + bpr
-          if (bwdStart < endTime) {
-            windows.push({ start: bwdStart, end: Math.min(bwdEnd, endTime) })
-          }
+          oneCycle.push({ start: bwdStep * bpr, end: bwdStep * bpr + bpr })
         }
-        return windows
+        return tileCycleWindows(oneCycle, cycleBeats, startTime, endTime)
       }
-      const s = startTime + step * bpr
-      const e = s + bpr
-      return s < endTime ? [{ start: s, end: Math.min(e, endTime) }] : []
+      const cycleBeats = numSteps * bpr
+      const oneCycle: MovementWindow[] = [
+        { start: step * bpr, end: step * bpr + bpr },
+      ]
+      return tileCycleWindows(oneCycle, cycleBeats, startTime, endTime)
     }
 
     case 'stagger': {
