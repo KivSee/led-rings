@@ -146,6 +146,8 @@ export interface SpectrogramProps {
   onBeatMove?: (beatIndex: number, newTimeMs: number) => void
   /** When in beat edit mode, this toolbar is shown in the spectrogram header (detect beats, scope, method, range, etc.). */
   beatDetectControls?: React.ReactNode
+  /** Called when the user changes the time-range selection (drag on spectrogram). Used so Play can start at selection start and stop at selection end. */
+  onRangeSelectionChange?: (range: { startSec: number; endSec: number } | null) => void
 }
 
 export default function Spectrogram({
@@ -171,11 +173,13 @@ export default function Spectrogram({
   onBeatRemove,
   onBeatMove,
   beatDetectControls,
+  onRangeSelectionChange,
 }: SpectrogramProps) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const scrollViewRef = useRef<HTMLDivElement>(null)
   const isProgrammaticScrollRef = useRef(false)
+  const scrollDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [scrollViewWidth, setScrollViewWidth] = useState(0)
   const paintRef = useRef<() => void>(() => {})
   const spectrogramImageRef = useRef<ImageData | null>(null)
@@ -640,6 +644,11 @@ export default function Spectrogram({
     }
   }, [])
 
+  // Notify parent when range selection changes (so Play can use it for section-only playback)
+  useEffect(() => {
+    onRangeSelectionChange?.(rangeSelection)
+  }, [rangeSelection, onRangeSelectionChange])
+
   // Clear selection when beats array shrinks (e.g. after remove)
   useEffect(() => {
     const len = beatTimestampsMs?.length ?? 0
@@ -706,11 +715,19 @@ export default function Spectrogram({
       isProgrammaticScrollRef.current = false
       return
     }
-    const el = scrollViewRef.current
-    if (!el || scrollableDuration <= 0 || scrollMaxLeft <= 0 || !onScrollToSeconds) return
-    const startSec = (el.scrollLeft / scrollMaxLeft) * scrollableDuration
-    onScrollToSeconds(Math.max(0, Math.min(scrollableDuration, startSec)))
+    if (scrollDebounceRef.current) clearTimeout(scrollDebounceRef.current)
+    scrollDebounceRef.current = setTimeout(() => {
+      scrollDebounceRef.current = null
+      const el = scrollViewRef.current
+      if (!el || scrollableDuration <= 0 || scrollMaxLeft <= 0 || !onScrollToSeconds) return
+      const startSec = (el.scrollLeft / scrollMaxLeft) * scrollableDuration
+      onScrollToSeconds(Math.max(0, Math.min(scrollableDuration, startSec)))
+    }, 80)
   }, [scrollableDuration, scrollMaxLeft, onScrollToSeconds])
+
+  useEffect(() => () => {
+    if (scrollDebounceRef.current) clearTimeout(scrollDebounceRef.current)
+  }, [])
 
   // Paint spectrogram + playhead + X-axis + Y-axis
   const paint = useCallback(() => {

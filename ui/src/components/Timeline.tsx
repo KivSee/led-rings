@@ -114,7 +114,8 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
     }
   }, [viewStartBeat, pxPerBeat])
 
-  // User scroll -> feed back to shared onScrollTo
+  // User scroll -> feed back to shared onScrollTo (debounced to avoid fighting momentum / runaway sync)
+  const scrollDebounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
     const scrollEl = timelineScrollViewRef.current
     if (!scrollEl || pxPerBeat <= 0) return
@@ -123,11 +124,18 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
         isProgrammaticScrollRef.current = false
         return
       }
-      const startBeat = scrollEl.scrollTop / pxPerBeat
-      onScrollTo(startBeat)
+      if (scrollDebounceRef.current) clearTimeout(scrollDebounceRef.current)
+      scrollDebounceRef.current = setTimeout(() => {
+        scrollDebounceRef.current = null
+        const startBeat = scrollEl.scrollTop / pxPerBeat
+        onScrollTo(startBeat)
+      }, 80)
     }
     scrollEl.addEventListener('scroll', handleScroll)
-    return () => scrollEl.removeEventListener('scroll', handleScroll)
+    return () => {
+      scrollEl.removeEventListener('scroll', handleScroll)
+      if (scrollDebounceRef.current) clearTimeout(scrollDebounceRef.current)
+    }
   }, [pxPerBeat, onScrollTo])
 
   // Ctrl+wheel zoom on timeline
