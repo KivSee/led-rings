@@ -471,7 +471,7 @@ export function presetToTimeframes(
     // Extract color from const_color effect in this segment group
     const colorEffect = effects.find(e => e.const_color)
     let color = '#3b82f6' // default blue
-    let hasExplicitColor: boolean | undefined = undefined
+    let hasExplicitColor: boolean | undefined = undefined // default when missing = has color (contribute color)
     let colorPhase: number | undefined = undefined
     if (colorEffect?.const_color?.color) {
       const { hue, sat, val } = colorEffect.const_color.color
@@ -481,9 +481,8 @@ export function presetToTimeframes(
         const intensity = detectPhaseIntensity(orderedRings, r => extractColorHue(r, segment))
         if (intensity !== 0) colorPhase = intensity
       }
-    } else {
-      hasExplicitColor = false
     }
+    // When segment has no const_color we leave hasExplicitColor undefined so timeframe defaults to "has color" (user can uncheck "No color" if they want modifiers-only).
 
     // Build effect entries from non-const_color, non-windowed-fade effects
     const effectEntries: TimeframeEffectEntry[] = []
@@ -526,7 +525,8 @@ export function presetToTimeframes(
       // Extract cycle info from repeat_num (use first one found)
       if (!cycles && effect.effect_config?.repeat_num && effect.effect_config.repeat_num > 1) {
         const repeatNum = effect.effect_config.repeat_num
-        const beatsInCycle = durationBeats / repeatNum
+        const raw = durationBeats / repeatNum
+        const beatsInCycle = Math.round(raw * 100) / 100 // 2 decimal places
         if (beatsInCycle > 0) {
           cycles = [{ type: 'cycle' as const, beatsInCycle }]
         }
