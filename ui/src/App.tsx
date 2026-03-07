@@ -316,6 +316,10 @@ function App() {
   /** When user is editing a numeric field, allow empty string; commit validated value on blur. */
   const [numericEdit, setNumericEdit] = useState<{ field: string; value: string } | null>(null)
   const playbackIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
+  /** Spectrogram time-range selection (drag on spectrogram). When set and user presses Play, only that section plays then stops. */
+  const spectrogramRangeRef = React.useRef<{ startSec: number; endSec: number } | null>(null)
+  /** When set, playback stops when reaching this time (seconds). Cleared on stop. */
+  const playbackRangeEndSecRef = React.useRef<number | null>(null)
   const appContentRef = React.useRef<HTMLDivElement>(null)
   const audioRef = React.useRef<HTMLAudioElement | null>(null)
   const audioBlobUrlRef = React.useRef<string | null>(null)
@@ -506,22 +510,31 @@ function App() {
       setNextRunFromStart(false)
       setIsPlaying(false)
     } else {
-      // Run: if nextRunFromStart, jump to runStartTimeSeconds; otherwise resume from currentTime
-      const startOffsetSeconds = nextRunFromStart
-        ? (song.runStartTimeSeconds ?? 0)
-        : beatsToAudioSec(currentTime, song)
-      if (nextRunFromStart) {
-        const startSec = song.runStartTimeSeconds ?? 0
+      // Run: if spectrogram range is selected, play only that section; else if nextRunFromStart, jump to runStartTimeSeconds; otherwise resume from currentTime
+      const range = spectrogramRangeRef.current
+      const useRange = range && range.startSec < range.endSec
+      let startSec: number
+      if (useRange) {
+        startSec = Math.max(0, range!.startSec)
+        playbackRangeEndSecRef.current = Math.max(startSec, range!.endSec)
         const startBeats = audioSecToBeats(startSec, song)
-        const clamped = Math.max(0, Math.min(songLengthBeats, startBeats))
-        setCurrentTime(clamped)
+        setCurrentTime(Math.max(0, Math.min(songLengthBeats, startBeats)))
+      } else {
+        playbackRangeEndSecRef.current = null
+        startSec = nextRunFromStart
+          ? (song.runStartTimeSeconds ?? 0)
+          : beatsToAudioSec(currentTime, song)
+      }
+      if (nextRunFromStart && !useRange) {
+        const start = song.runStartTimeSeconds ?? 0
+        const startBeats = audioSecToBeats(start, song)
+        setCurrentTime(Math.max(0, Math.min(songLengthBeats, startBeats)))
         if (isSongWithAudio) {
-          audio.currentTime = Math.max(0, startSec)
+          audio.currentTime = Math.max(0, start)
           audio.play().catch(() => {})
         }
         setNextRunFromStart(false)
       } else {
-        const startSec = beatsToAudioSec(currentTime, song)
         if (isSongWithAudio) {
           audio.currentTime = Math.max(0, startSec)
           audio.play().catch(() => {})
@@ -539,7 +552,7 @@ function App() {
           fetch(`${API_BASE}/api/start-song`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ songName: name, startOffsetSeconds }),
+            body: JSON.stringify({ songName: name, startOffsetSeconds: startSec }),
           }).catch((err) => console.error('Live start-song failed', err))
         }
       }
@@ -1085,7 +1098,7 @@ function App() {
   }, [song.animationType, song.audioFilePath])
 
   // Playback animation: use audio time when available (so Run from and timeline stay in sync), else use interval.
-  // Stop at song length (same as pressing Stop) instead of looping.
+  // Stop at song length (same as pressing Stop) or at spectrogram range end (section play).
   useEffect(() => {
     const audio = audioRef.current
     const useAudio = isPlaying && song.animationType === 'song' && song.audioFilePath && audio
@@ -1093,10 +1106,14 @@ function App() {
     const runStartBeats = audioSecToBeats(runStartSec, song)
     const maxTime = songLengthBeats
 
-    const performStop = () => {
+    const performStop = (finalBeat?: number) => {
       if (audio && song.animationType === 'song' && song.audioFilePath) {
         audio.pause()
-        audio.currentTime = Math.max(0, runStartSec)
+        if (finalBeat != null) {
+          audio.currentTime = Math.max(0, beatsToAudioSec(finalBeat, song))
+        } else {
+          audio.currentTime = Math.max(0, runStartSec)
+        }
       }
       if (liveMode && API_BASE) {
         fetch(`${API_BASE}/api/stop`, { method: 'POST' }).catch((err) =>
@@ -1105,7 +1122,8 @@ function App() {
       }
       setIsPlaying(false)
       setNextRunFromStart(true)
-      setCurrentTime(Math.max(0, Math.min(maxTime, runStartBeats)))
+      playbackRangeEndSecRef.current = null
+      setCurrentTime(finalBeat != null ? Math.max(0, Math.min(maxTime, finalBeat)) : Math.max(0, Math.min(maxTime, runStartBeats)))
     }
 
     if (useAudio) {
@@ -1113,6 +1131,13 @@ function App() {
       const syncFromAudio = () => {
         if (!audioRef.current) return
         const sec = audioRef.current.currentTime
+        const endSec = playbackRangeEndSecRef.current
+        if (endSec != null && sec >= endSec) {
+          cancelAnimationFrame(rafId)
+          const endBeat = audioSecToBeats(endSec, song)
+          performStop(Math.max(0, Math.min(maxTime, endBeat)))
+          return
+        }
         const beats = audioSecToBeats(sec, song)
         if (beats >= maxTime || audioRef.current.ended) {
           cancelAnimationFrame(rafId)
@@ -1130,6 +1155,18 @@ function App() {
       playbackIntervalRef.current = setInterval(() => {
         setCurrentTime(prev => {
           const next = prev + 0.1
+          const endSec = playbackRangeEndSecRef.current
+          if (endSec != null && beatsToAudioSec(next, song) >= endSec) {
+            const endBeat = audioSecToBeats(endSec, song)
+            queueMicrotask(() => {
+              if (playbackIntervalRef.current) {
+                clearInterval(playbackIntervalRef.current)
+                playbackIntervalRef.current = null
+              }
+              performStop(Math.max(0, Math.min(maxTime, endBeat)))
+            })
+            return Math.max(0, Math.min(maxTime, endBeat))
+          }
           if (next >= maxTime) {
             queueMicrotask(() => {
               if (playbackIntervalRef.current) {
@@ -1395,6 +1432,7 @@ function App() {
             onBeatAdd={handleBeatAdd}
             onBeatRemove={handleBeatRemove}
             onBeatMove={handleBeatMove}
+            onRangeSelectionChange={(r) => { spectrogramRangeRef.current = r }}
             beatDetectControls={(
               <div className="spectrogram-beat-detect-inner">
                 <button
