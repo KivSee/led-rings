@@ -481,12 +481,14 @@ export function hasMotionEffect(timeframe: Timeframe): boolean {
  * Compute final pixel color for playback preview.
  * relPos: position along ring 0–1, t: normalized time in segment 0–1.
  * ringIndex: 0-based ring index (0–11), used with timeframe.phase to compute per-ring phase offset.
+ * holdOff: when true (Random + retire), force brightness to 0 so the ring stays off in the preview.
  */
 export function getPixelColor(
   relPos: number,
   t: number,
   timeframe: Timeframe,
-  ringIndex: number = 0
+  ringIndex: number = 0,
+  holdOff: boolean = false
 ): HSV {
   // Color phase from timeframe level (offsets base hue per ring)
   const colorPhaseIntensity = timeframe.phase ?? 0
@@ -504,7 +506,7 @@ export function getPixelColor(
 
   s = s * getSaturationMult(relPos, t, timeframe, ringIndex)
 
-  const brightnessMult = getBrightnessMult(relPos, t, timeframe, ringIndex)
+  const brightnessMult = holdOff ? 0 : getBrightnessMult(relPos, t, timeframe, ringIndex)
   const snakeMask = hasMotionEffect(timeframe)
     ? getSnakeMask(relPos, t, 12, timeframe, ringIndex)
     : 1
@@ -517,10 +519,10 @@ export function getPixelColor(
  * Compose effects from multiple overlapping timeframes for a single pixel.
  * Each timeframe contributes independently: brightness & snake mask multiply,
  * hue offsets add, saturation multiplies.
- * Each entry includes its own relPos resolved from that timeframe's mapping segment.
+ * holdOff: when true for an entry (Random + retire), that layer contributes brightness 0.
  */
 export function getPixelColorMulti(
-  timeframesWithT: Array<{ timeframe: Timeframe; t: number; relPos: number }>,
+  timeframesWithT: Array<{ timeframe: Timeframe; t: number; relPos: number; holdOff?: boolean }>,
   ringIndex: number = 0
 ): HSV {
   if (timeframesWithT.length === 0) return { h: 0, s: 0, v: 0 }
@@ -536,11 +538,11 @@ export function getPixelColorMulti(
   }
   let { h, s, v } = getBaseColor(baseSource.relPos, baseSource.timeframe, colorPerRingPhase)
 
-  for (const { timeframe, t, relPos } of timeframesWithT) {
+  for (const { timeframe, t, relPos, holdOff } of timeframesWithT) {
     h = (h + getHueOffset(relPos, t, timeframe, ringIndex)) % 1
     if (h < 0) h += 1
     s *= getSaturationMult(relPos, t, timeframe, ringIndex)
-    v *= getBrightnessMult(relPos, t, timeframe, ringIndex)
+    v *= holdOff ? 0 : getBrightnessMult(relPos, t, timeframe, ringIndex)
     if (hasMotionEffect(timeframe)) {
       v *= getSnakeMask(relPos, t, 12, timeframe, ringIndex)
     }

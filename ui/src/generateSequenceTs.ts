@@ -4,7 +4,7 @@
  */
 
 import { getMovementCodeGenEntries } from './movementGenerators'
-import type { TimeframeMovement } from './movementGenerators'
+import type { TimeframeMovement, MovementWindow } from './movementGenerators'
 
 export type AnimationType = 'song' | 'trigger'
 
@@ -349,6 +349,21 @@ function emitTimeframeBody(tf: Timeframe, layer: EmitLayer): string | null {
     const blocks: string[] = []
     for (const entry of entries) {
       for (const w of entry.windows) {
+        const win = w as MovementWindow
+        // holdOff: keep ring off after its turn (Random + retire). Only modifiers layer; skip color/motion.
+        if (win.holdOff) {
+          if (layer !== 'modifiers') continue
+          const effectLines = 'addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })'
+          const core = `elements([${entry.ringNum}], () => {
+  segment(${segmentId}, () => {
+${indentBlock(effectLines, 4)}
+  });
+});`
+          blocks.push(`    beats(${w.start}, ${w.end}, () => {
+${indentBlock(core, 6)}
+    })`)
+          continue
+        }
         // When phase is set on a color layer, bake hue offset per ring
         const ringInner = phasePerRing
           ? emitInnerContent(tf, layer, (sortedRings.indexOf(entry.ringNum) / sortedRings.length) * tf.phase!)

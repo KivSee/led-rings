@@ -43,14 +43,16 @@ function computeT(tf: Timeframe, currentTime: number, windowOverride?: { start: 
 }
 
 /** Compute t for a specific ring, accounting for movement timing.
- *  Returns null if the ring is not active at currentTime per the movement. */
-function computeRingT(tf: Timeframe, currentTime: number, ringNumber: number): number | null {
+ *  Returns null if the ring is not active at currentTime per the movement.
+ *  When the ring is in a holdOff window (Random + retire), returns { t: 1, holdOff: true } so the preview applies brightness 0. */
+function computeRingT(tf: Timeframe, currentTime: number, ringNumber: number): number | { t: number; holdOff?: boolean } | null {
   if (!tf.movement) {
     if (!tf.rings.includes(ringNumber)) return null
     return computeT(tf, currentTime)
   }
   const mt = getMovementRingT(tf.startTime, tf.endTime, tf.rings, tf.movement, ringNumber, currentTime)
   if (!mt) return null
+  if (mt.holdOff) return { t: mt.t, holdOff: true }
   return computeT(tf, currentTime, { start: mt.windowStart, end: mt.windowEnd })
 }
 
@@ -219,13 +221,15 @@ const RingVisualization = ({
                     // Multi-timeframe mode: find all timeframes for this ring
                     const ringTfs = ringToTimeframes.get(ringNumber)
                     if (ringTfs && ringTfs.length > 0) {
-                      const tfWithT: Array<{ timeframe: Timeframe; t: number; relPos: number }> = []
+                      const tfWithT: Array<{ timeframe: Timeframe; t: number; relPos: number; holdOff?: boolean }> = []
                       for (const tf of ringTfs) {
                         const tfMapping = tf.mapping || 'all'
                         const ringT = computeRingT(tf, currentTime!, ringNumber)
                         if (ringT == null) continue
+                        const tVal = typeof ringT === 'number' ? ringT : ringT.t
+                        const holdOff = typeof ringT === 'object' && ringT.holdOff === true
                         const rp = getRelPosForEffect(pixel.index, tfMapping)
-                        tfWithT.push({ timeframe: tf, t: ringT, relPos: rp })
+                        tfWithT.push({ timeframe: tf, t: tVal, relPos: rp, holdOff })
                       }
                       if (tfWithT.length === 0) return 'rgb(0, 0, 0)'
                       const { h, s, v } = tfWithT.length === 1
@@ -238,7 +242,9 @@ const RingVisualization = ({
                       const tfMapping = singleTf.mapping || 'all'
                       const tfRelPos = getRelPosForEffect(pixel.index, tfMapping)
                       const ringT = computeRingT(singleTf, currentTime!, ringNumber)
-                      const { h, s, v } = getPixelColor(tfRelPos, ringT ?? t, singleTf, ringIndex)
+                      const tVal = ringT == null ? t : (typeof ringT === 'number' ? ringT : ringT.t)
+                      const holdOff = typeof ringT === 'object' && ringT?.holdOff === true
+                      const { h, s, v } = getPixelColor(tfRelPos, tVal, singleTf, ringIndex, holdOff)
                       return hsvToRgbString(h, s, v)
                     }
                     return 'rgb(0, 0, 0)'

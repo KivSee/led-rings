@@ -51,7 +51,9 @@ export const MOVEMENT_TYPES: MovementTypeDef[] = [
     id: 'random',
     label: 'Random',
     description: 'Rings activate in random order (one at a time, like sweep).',
-    extraParams: [],
+    extraParams: [
+      { key: 'retire', label: 'Retire (stay off after fade)' },
+    ],
   },
 ]
 
@@ -164,6 +166,9 @@ export function defaultBeatsPerRing(
 // Ring window computation
 // ---------------------------------------------------------------------------
 
+/** Window for a ring: start/end in beats; holdOff = apply brightness 0 to keep ring off after its turn. */
+export type MovementWindow = { start: number; end: number; holdOff?: boolean }
+
 /**
  * Returns all active windows (beat ranges) for a specific ring within a
  * movement-enabled timeframe.
@@ -174,7 +179,7 @@ export function getMovementRingWindows(
   rings: number[],
   movement: TimeframeMovement | undefined,
   ringNum: number,
-): Array<{ start: number; end: number }> {
+): MovementWindow[] {
   if (!movement) {
     return rings.includes(ringNum) ? [{ start: startTime, end: endTime }] : []
   }
@@ -191,7 +196,14 @@ export function getMovementRingWindows(
       // One ring at a time, in random order (same as sweep but with shuffled steps)
       const s = startTime + step * bpr
       const e = s + bpr
-      return s < endTime ? [{ start: s, end: Math.min(e, endTime) }] : []
+      if (s >= endTime) return []
+      const fadeEnd = Math.min(e, endTime)
+      const windows: MovementWindow[] = [{ start: s, end: fadeEnd }]
+      // Retire: after this ring's fade, keep it off for the rest of the timeframe
+      if (movement.retire && fadeEnd < endTime) {
+        windows.push({ start: fadeEnd, end: endTime, holdOff: true })
+      }
+      return windows
     }
     case 'spread': {
       const s = startTime + step * bpr
@@ -263,7 +275,7 @@ export function getMovementRingT(
   movement: TimeframeMovement | undefined,
   ringNum: number,
   currentBeat: number,
-): { t: number; windowStart: number; windowEnd: number } | null {
+): { t: number; windowStart: number; windowEnd: number; holdOff?: boolean } | null {
   if (!movement) {
     if (!rings.includes(ringNum)) return null
     if (currentBeat < startTime || currentBeat >= endTime) return null
@@ -275,9 +287,11 @@ export function getMovementRingT(
   const windows = getMovementRingWindows(startTime, endTime, rings, movement, ringNum)
   for (const w of windows) {
     if (currentBeat >= w.start && currentBeat < w.end) {
+      // holdOff window: ring stays off; caller should use t=1 and apply brightness 0 in preview
+      if (w.holdOff) return { t: 1, windowStart: w.start, windowEnd: w.end, holdOff: true }
       if (movement.type === 'stagger') {
         // For stagger, shift t by the ring's phase offset
-        const steps = getRingSteps(rings, movement.direction)
+        const steps = getRingSteps(rings, movement.direction, movement.type)
         const step = steps.get(ringNum) ?? 0
         const dur = w.end - w.start
         if (dur <= 0) return { t: 0, windowStart: w.start, windowEnd: w.end }
@@ -304,7 +318,7 @@ export function getMovementCodeGenEntries(
   endTime: number,
   rings: number[],
   movement: TimeframeMovement,
-): Array<{ ringNum: number; windows: Array<{ start: number; end: number }>; staggerOffset?: number }> {
+): Array<{ ringNum: number; windows: MovementWindow[]; staggerOffset?: number }> {
   const sorted = [...rings].sort((a, b) => a - b)
   const steps = getRingSteps(rings, movement.direction, movement.type)
   return sorted.map(ringNum => {
