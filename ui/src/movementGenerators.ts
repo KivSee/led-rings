@@ -4,7 +4,7 @@
  * to per-ring beats() blocks in the generated .ts output.
  */
 
-export type MovementType = 'spread' | 'sweep' | 'stagger'
+export type MovementType = 'spread' | 'sweep' | 'stagger' | 'random'
 export type MovementDirection = 'forward' | 'backward' | 'center-out' | 'edges-in'
 
 export interface TimeframeMovement {
@@ -47,6 +47,12 @@ export const MOVEMENT_TYPES: MovementTypeDef[] = [
     description: 'All rings play the same effect, wave-shifted in time.',
     extraParams: [],
   },
+  {
+    id: 'random',
+    label: 'Random',
+    description: 'Rings activate in random order (one at a time, like sweep).',
+    extraParams: [],
+  },
 ]
 
 export const MOVEMENT_DIRECTIONS: Array<{ id: MovementDirection; label: string }> = [
@@ -63,8 +69,25 @@ export const MOVEMENT_DIRECTIONS: Array<{ id: MovementDirection; label: string }
 
 const RING_CENTER = 6.5
 
-function getRingSteps(rings: number[], direction: MovementDirection): Map<number, number> {
+/** Deterministic shuffle (seeded by 0) so random movement order is stable per ring set. */
+function shuffledRingOrder(rings: number[]): number[] {
+  const arr = [...rings].sort((a, b) => a - b)
+  let seed = 0
+  const next = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 2 ** 32 }
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(next() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]]
+  }
+  return arr
+}
+
+function getRingSteps(rings: number[], direction: MovementDirection, type?: MovementType): Map<number, number> {
   const sorted = [...rings].sort((a, b) => a - b)
+
+  if (type === 'random') {
+    const order = shuffledRingOrder(rings)
+    return new Map(order.map((r, i) => [r, i]))
+  }
 
   switch (direction) {
     case 'forward':
@@ -104,10 +127,10 @@ function getRingSteps(rings: number[], direction: MovementDirection): Map<number
   }
 }
 
-/** Number of distinct steps for a given ring set and direction. */
-export function getNumSteps(rings: number[], direction: MovementDirection): number {
+/** Number of distinct steps for a given ring set and direction (and optional movement type for random). */
+export function getNumSteps(rings: number[], direction: MovementDirection, type?: MovementType): number {
   if (rings.length === 0) return 0
-  const steps = getRingSteps(rings, direction)
+  const steps = getRingSteps(rings, direction, type)
   return Math.max(...steps.values()) + 1
 }
 
@@ -121,9 +144,12 @@ export function defaultBeatsPerRing(
   retire?: boolean,
 ): number {
   const duration = endTime - startTime
-  const numSteps = getNumSteps(rings, direction)
+  const numSteps = getNumSteps(rings, direction, type)
   if (numSteps <= 0) return 1
 
+  if (type === 'random') {
+    return Math.round((duration / numSteps) * 100) / 100
+  }
   if (type === 'spread' && retire) {
     return Math.round((duration / (2 * numSteps)) * 100) / 100
   }
@@ -153,7 +179,7 @@ export function getMovementRingWindows(
     return rings.includes(ringNum) ? [{ start: startTime, end: endTime }] : []
   }
 
-  const steps = getRingSteps(rings, movement.direction)
+  const steps = getRingSteps(rings, movement.direction, movement.type)
   const step = steps.get(ringNum)
   if (step == null) return []
 
@@ -161,6 +187,12 @@ export function getMovementRingWindows(
   const numSteps = Math.max(...steps.values()) + 1
 
   switch (movement.type) {
+    case 'random': {
+      // One ring at a time, in random order (same as sweep but with shuffled steps)
+      const s = startTime + step * bpr
+      const e = s + bpr
+      return s < endTime ? [{ start: s, end: Math.min(e, endTime) }] : []
+    }
     case 'spread': {
       const s = startTime + step * bpr
       if (movement.retire) {
@@ -274,7 +306,7 @@ export function getMovementCodeGenEntries(
   movement: TimeframeMovement,
 ): Array<{ ringNum: number; windows: Array<{ start: number; end: number }>; staggerOffset?: number }> {
   const sorted = [...rings].sort((a, b) => a - b)
-  const steps = getRingSteps(rings, movement.direction)
+  const steps = getRingSteps(rings, movement.direction, movement.type)
   return sorted.map(ringNum => {
     const windows = getMovementRingWindows(startTime, endTime, rings, movement, ringNum)
     const step = steps.get(ringNum) ?? 0
@@ -292,7 +324,7 @@ export function getMovementCodeGenEntries(
 export function normalizeMovement(raw: unknown): TimeframeMovement | undefined {
   if (!raw || typeof raw !== 'object') return undefined
   const o = raw as Record<string, unknown>
-  const validTypes: MovementType[] = ['spread', 'sweep', 'stagger']
+  const validTypes: MovementType[] = ['spread', 'sweep', 'stagger', 'random']
   const validDirs: MovementDirection[] = ['forward', 'backward', 'center-out', 'edges-in']
   if (!validTypes.includes(o.type as MovementType)) return undefined
   if (!validDirs.includes(o.direction as MovementDirection)) return undefined

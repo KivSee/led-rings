@@ -644,7 +644,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
                 style={{
                   top: `${topPx}px`,
                   height: `${heightPx}px`,
-                  backgroundColor: timeframe.color,
+                  backgroundColor: timeframe.hasExplicitColor === false ? 'rgba(120, 120, 120, 0.85)' : timeframe.color,
                   left: leftPct > 0 ? `${leftPct}%` : undefined,
                   right: rightPct > 0 ? `${rightPct}%` : undefined,
                   zIndex: isFocused ? 10000 : 1 + index,

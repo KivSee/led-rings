@@ -617,6 +617,15 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: Timefra
               </>
             )}
           </div>
+          <label className="timeframe-panel-checkbox-label" title="When checked, this timeframe does not contribute color (no constColor). Only its effects (e.g. brightness, hue shift) apply on top of underlying layers. Timeline shows gray.">
+            <input
+              type="checkbox"
+              className="timeframe-panel-checkbox"
+              checked={timeframe.hasExplicitColor === false}
+              onChange={(e) => onUpdate({ hasExplicitColor: e.target.checked ? false : undefined })}
+            />
+            <span>No color (modifiers only)</span>
+          </label>
           <div className="timeframe-panel-phase-row">
             <label className="timeframe-panel-phase-label">Color Phase</label>
             <input
@@ -1112,24 +1121,26 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: Timefra
             return (
               <div className="timeframe-panel-movement-config">
                 <p className="timeframe-panel-movement-desc">{typeDef?.description}</p>
-                <div className="timeframe-panel-movement-param-row">
-                  <label className="timeframe-panel-effect-param-label">Direction</label>
-                  <select
-                    value={mv.direction}
-                    onChange={(e) => {
-                      const dir = e.target.value as MovementDirection
-                      const bpr = defaultBeatsPerRing(mv.type, timeframe.startTime, timeframe.endTime, timeframe.rings, dir, mv.bounce, mv.retire)
-                      onUpdate({
-                        movement: { ...mv, direction: dir, beatsPerRing: bpr },
-                      })
-                    }}
-                    className="timeframe-panel-select timeframe-panel-select-small"
-                  >
-                    {MOVEMENT_DIRECTIONS.map(d => (
-                      <option key={d.id} value={d.id}>{d.label}</option>
-                    ))}
-                  </select>
-                </div>
+                {mv.type !== 'random' && (
+                  <div className="timeframe-panel-movement-param-row">
+                    <label className="timeframe-panel-effect-param-label">Direction</label>
+                    <select
+                      value={mv.direction}
+                      onChange={(e) => {
+                        const dir = e.target.value as MovementDirection
+                        const bpr = defaultBeatsPerRing(mv.type, timeframe.startTime, timeframe.endTime, timeframe.rings, dir, mv.bounce, mv.retire)
+                        onUpdate({
+                          movement: { ...mv, direction: dir, beatsPerRing: bpr },
+                        })
+                      }}
+                      className="timeframe-panel-select timeframe-panel-select-small"
+                    >
+                      {MOVEMENT_DIRECTIONS.map(d => (
+                        <option key={d.id} value={d.id}>{d.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <div className="timeframe-panel-movement-param-row">
                   <label className="timeframe-panel-effect-param-label">Beats / ring</label>
                   <input

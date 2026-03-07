@@ -296,19 +296,11 @@ ${indentBlock(block, 2)}
 
 type EmitLayer = 'color' | 'modifiers' | 'motion'
 
-/** True if the timeframe only has brightness-style effects (fade, pulse, etc.) and no hue/color. Used so we do not emit constColor for it: the runtime can then treat the effect as a brightness multiplier on the accumulated result (preview behavior). */
-function isBrightnessOnlyTimeframe(tf: Timeframe): boolean {
-  const entries = getTimeframeEffects(tf)
-  if (entries.length === 0) return false
-  return entries.every((e) => BRIGHTNESS_KEYS.has(e.effectKey))
-}
-
 function emitInnerContent(tf: Timeframe, layer: EmitLayer, hueOffset?: number): string[] {
   const inner: string[] = []
   if (layer === 'color') {
+    // When user checks "No color (modifiers only)", do not emit constColor so the runtime treats this as modifiers on the accumulated result.
     if (tf.hasExplicitColor === false) return []
-    // Brightness-only timeframes (e.g. fadeOutIn over another effect): do not emit constColor so the runtime can treat them as multipliers on the current result (matches preview). If we emitted constColor we would get "timeframe color * fade" instead of "underlying * fade".
-    if (isBrightnessOnlyTimeframe(tf)) return []
     if (hueOffset != null) {
       // Phase baked into hue directly (used for movement per-ring blocks)
       inner.push(...emitColor(tf, hueOffset))

@@ -272,12 +272,16 @@ function hsvFromHex(hex: string): HSV {
   return { h, s, v: max }
 }
 
-/** Get base color for a pixel from timeframe. Phase offsets hue per ring. */
+/** Neutral base when a timeframe contributes no color (brightness-only). Preview shows only brightness modulation. */
+const NEUTRAL_BASE: HSV = { h: 0, s: 0, v: 1 }
+
+/** Get base color for a pixel from timeframe. Phase offsets hue per ring. When "No color" is checked, use neutral (modifiers only). */
 function getBaseColor(
   _relPos: number,
   timeframe: Timeframe,
   perRingPhase: number = 0
 ): HSV {
+  if (timeframe.hasExplicitColor === false) return { ...NEUTRAL_BASE }
   const { h, s, v } = hsvFromHex(timeframe.color || '#3b82f6')
   let baseHue = (h + perRingPhase) % 1
   if (baseHue < 0) baseHue += 1
@@ -521,15 +525,16 @@ export function getPixelColorMulti(
 ): HSV {
   if (timeframesWithT.length === 0) return { h: 0, s: 0, v: 0 }
 
-  // Base color from first timeframe
-  const first = timeframesWithT[0]
-  const colorPhaseIntensity = first.timeframe.phase ?? 0
+  // Base color from first timeframe that contributes color (hasExplicitColor !== false); else neutral
+  const firstWithColor = timeframesWithT.find(t => t.timeframe.hasExplicitColor !== false)
+  const baseSource = firstWithColor ?? timeframesWithT[0]
+  const colorPhaseIntensity = baseSource.timeframe.phase ?? 0
   let colorPerRingPhase = 0
   if (colorPhaseIntensity > 0) {
-    const elIdx = first.timeframe.rings.indexOf(ringIndex + 1)
-    if (elIdx >= 0 && first.timeframe.rings.length > 1) colorPerRingPhase = elIdx / first.timeframe.rings.length * colorPhaseIntensity
+    const elIdx = baseSource.timeframe.rings.indexOf(ringIndex + 1)
+    if (elIdx >= 0 && baseSource.timeframe.rings.length > 1) colorPerRingPhase = elIdx / baseSource.timeframe.rings.length * colorPhaseIntensity
   }
-  let { h, s, v } = getBaseColor(first.relPos, first.timeframe, colorPerRingPhase)
+  let { h, s, v } = getBaseColor(baseSource.relPos, baseSource.timeframe, colorPerRingPhase)
 
   for (const { timeframe, t, relPos } of timeframesWithT) {
     h = (h + getHueOffset(relPos, t, timeframe, ringIndex)) % 1

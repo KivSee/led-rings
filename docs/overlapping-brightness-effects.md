@@ -1,13 +1,23 @@
 # Overlapping brightness effects (fade over other effects)
 
+## No color vs color (user control)
+
+Each timeframe has a **Color** field and a checkbox **"No color (modifiers only)"**. When the checkbox is checked:
+
+- The timeframe does **not** contribute a base color (no `constColor` in the sequence).
+- Timeline shows the bar in gray.
+- Preview uses a neutral base; only this timeframe's effects (e.g. brightness, hue shift) apply on top of underlying layers.
+
+So you choose per timeframe whether it adds color or only modifiers, independent of which effects are in the slots.
+
 ## Expected behavior (UI preview)
 
-When a **brightness-only** timeframe (e.g. Fade Out In) overlaps another timeframe that has hue/color (e.g. Hue Shift Sin), the preview composes them as:
+When a **no-color** timeframe (checkbox checked) overlaps another timeframe that contributes color, the preview composes them as:
 
 - Base color and hue from the underlying timeframes.
 - Brightness from each timeframe **multiplied**: `v *= brightness1 * brightness2 * …`
 
-So the fade dims and restores **whatever color is already there** (the hue effect), not a separate layer color.
+So the fade dims and restores **whatever color is already there**, not a separate layer color.
 
 ## Why the device can show something different
 
@@ -20,7 +30,7 @@ So you see “red fading” instead of “underlying hue fading”.
 
 ## What we do in the generator
 
-For timeframes that have **only** brightness effects (fadeIn, fadeOut, fadeOutIn, blink, pulse, fade, brightness) and no hue/color effects, we **do not emit `constColor`** for that timeframe. So the sequence contains an effect with only `timed_brightness` (and `effect_config`), no `const_color`.
+For timeframes with **"No color (modifiers only)"** checked (`hasExplicitColor === false`), we **do not emit `constColor`**. The sequence contains the effect's modifiers (e.g. `timed_brightness`, `effect_config`) but no `const_color`.
 
 For the result to match the preview, the **renderer must**:
 
