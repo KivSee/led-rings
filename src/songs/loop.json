@@ -4,7 +4,7 @@
     "lengthSeconds": 245,
     "bpm": 300,
     "startOffsetMs": 0,
-    "runStartTimeSeconds": 0,
+    "runStartTimeSeconds": 101.922,
     "animationType": "song",
     "audioFilePath": "loop.wav",
     "beatTimestampsMs": [
@@ -1664,6 +1664,7 @@
       "endTime": 193,
       "label": "Twinkle Cascade",
       "color": "#a855f7",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1788,6 +1789,7 @@
       "endTime": 132,
       "label": "Fade Out In",
       "color": "#c71c0a",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1896,6 +1898,7 @@
       "endTime": 174,
       "label": "Fade Out In 2",
       "color": "#c71c0a",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1920,11 +1923,398 @@
           }
         }
       ]
+    },
+    {
+      "id": "preset-1772895058539-0-s3rh",
+      "startTime": 308,
+      "endTime": 356,
+      "label": "Hue Shift Cycle 6",
+      "color": "#ff2c00",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "phase": 6,
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "preset-1772895058539-oqur",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0,
+            "end": 1
+          }
+        },
+        {
+          "id": "preset-1772895058539-n1ep",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.6065404010035518,
+            "staticPhase": 0
+          },
+          "phase": 2
+        }
+      ]
+    },
+    {
+      "id": "preset-1772895058540-1-72j0",
+      "startTime": 308,
+      "endTime": 356,
+      "label": "Snake Head cycle 6",
+      "color": "#3b82f6",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "preset-1772895058540-xaqe",
+          "effectKey": "snakeHeadSteps",
+          "params": {
+            "steps": 6,
+            "tailLength": 0.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "1772897099795",
+      "startTime": 356,
+      "endTime": 382,
+      "label": "Blink Out Random",
+      "color": "#fc5c5e",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "random",
+        "direction": "forward",
+        "beatsPerRing": 2,
+        "retire": true
+      },
+      "effects": [
+        {
+          "id": "eff-1772897106816-5b1ms09423e",
+          "effectKey": "blink",
+          "params": {
+            "low": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "1772897356915",
+      "startTime": 356,
+      "endTime": 382,
+      "label": "Timed Hue Linear",
+      "color": "#973a1e",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1772897428911-3zp0ihykskf",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "1772899995794",
+      "startTime": 382,
+      "endTime": 386,
+      "label": "Pulse Accumulate Back",
+      "color": "#38ea0a",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "random",
+        "direction": "forward",
+        "beatsPerRing": 2,
+        "retire": true
+      },
+      "effects": [
+        {
+          "id": "eff-1772900127237-l5mzbp2my2j",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.5,
+            "staticPhase": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "1772900241772",
+      "startTime": 386,
+      "endTime": 387,
+      "label": "Vibrate Transition",
+      "color": "#5f0cb9",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 0.1
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1772900478357-54zs9a65neu",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.5,
+            "staticPhase": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1772901108613-u2mg",
+      "startTime": 387,
+      "endTime": 572,
+      "label": "Snake All Rings (copy)",
+      "color": "#a855f7",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "centric",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 8
+        }
+      ],
+      "effects": [
+        {
+          "id": "sc-s-all-qhga",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
+    },
+    {
+      "id": "dup-1772901137662-lcl0",
+      "startTime": 387,
+      "endTime": 572,
+      "label": "Hue Step All Rings (copy)",
+      "color": "#a855f7",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "sc-h-all-dpfn",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "steps": {
+                "num_steps": 7,
+                "diff_per_step": 0.143,
+                "first_step_value": 0
+              }
+            }
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "dup-1772901270713-kb4d",
+      "startTime": 387,
+      "endTime": 451,
+      "label": "Blink Out Random (copy)",
+      "color": "#fc5c5e",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "random",
+        "direction": "forward",
+        "beatsPerRing": 4
+      },
+      "effects": [
+        {
+          "id": "eff-1772897106816-5b1ms09423e-1rjo",
+          "effectKey": "blink",
+          "params": {
+            "low": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1772901470681-vbe4",
+      "startTime": 451,
+      "endTime": 572,
+      "label": "Blink Out Random Double",
+      "color": "#fc5c5e",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "random",
+        "direction": "forward",
+        "beatsPerRing": 3
+      },
+      "effects": [
+        {
+          "id": "eff-1772897106816-5b1ms09423e-1rjo-a918",
+          "effectKey": "blink",
+          "params": {
+            "low": 0
+          }
+        }
+      ]
     }
   ],
   "windowSizes": {
     "playbackPanelWidth": 380,
     "detailsPanelWidth": 350,
-    "spectrogramHeight": 500
+    "spectrogramHeight": 327
   }
 }
