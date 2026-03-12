@@ -1,10 +1,12 @@
 import { addEffect } from "./effect";
+import { tagEffect } from "../recorder/effect-key-map";
 
 // multiple the brightness by a constant value to decrease it.
 export const brightness = (opts: { value: number }) => {
+  tagEffect("brightness", opts);
   addEffect({
-    brightness: {
-      mult_factor: {
+    timed_brightness: {
+      mult_factor_decrease: {
         const_value: {
           value: opts.value,
         },
@@ -14,11 +16,11 @@ export const brightness = (opts: { value: number }) => {
 };
 
 // start with brightness 0.0, go up to 1.0
-// this effect does NOT honor phase and does not have configuration.
 export const fadeIn = () => {
+  tagEffect("fadeIn", {});
   addEffect({
-    brightness: {
-      mult_factor: {
+    timed_brightness: {
+      mult_factor_decrease: {
         linear: {
           start: 0.0,
           end: 1.0,
@@ -29,11 +31,11 @@ export const fadeIn = () => {
 };
 
 // start with brightness 1.0, go down to 0.0
-// this effect does NOT honor phase and does not have configuration.
 export const fadeOut = () => {
+  tagEffect("fadeOut", {});
   addEffect({
-    brightness: {
-      mult_factor: {
+    timed_brightness: {
+      mult_factor_decrease: {
         linear: {
           start: 1.0,
           end: 0.0,
@@ -45,13 +47,13 @@ export const fadeOut = () => {
 
 // start with brightness 0.0, go up to "high" brightness, then go back down to 0.0
 // the change is linear over the whole duration in a triangle shape
-// this effect does NOT honor phase
 export const fadeInOut = (opts?: { high?: number }) => {
+  tagEffect("fadeInOut", opts || {});
   const min = 0.0;
   const max = opts?.high ?? 1.0;
   addEffect({
-    brightness: {
-      mult_factor: {
+    timed_brightness: {
+      mult_factor_decrease: {
         half: {
           f1: {
             linear: {
@@ -73,13 +75,13 @@ export const fadeInOut = (opts?: { high?: number }) => {
 
 // start with brightness 1.0, go down to "low" brightness, then go back up to 1.0
 // the change is linear over the whole duration in a triangle shape
-// this effect does NOT honor phase
 export const fadeOutIn = (opts?: { low?: number }) => {
+  tagEffect("fadeOutIn", opts || {});
   const min = opts?.low ?? 0.0;
   const max = 1.0;
   addEffect({
-    brightness: {
-      mult_factor: {
+    timed_brightness: {
+      mult_factor_decrease: {
         half: {
           f1: {
             linear: {
@@ -101,13 +103,13 @@ export const fadeOutIn = (opts?: { low?: number }) => {
 
 // blink is a simple half the time low brightness, half the time high brightness
 // you can set the low brightness with the "low" option (default 0.5)
-// phase is NOT honored in this effect.
 export const blink = (opts?: { low?: number }) => {
+  tagEffect("blink", opts || {});
   const min = opts?.low ?? 0.5;
   const max = 1.0;
   addEffect({
-    brightness: {
-      mult_factor: {
+    timed_brightness: {
+      mult_factor_decrease: {
         half: {
           f1: {
             const_value: {
@@ -129,13 +131,14 @@ export const blink = (opts?: { low?: number }) => {
 // the "low" option controls how low the brightness goes (default 0.5)
 // this effect honors phase
 export const pulse = (opts?: { low?: number, staticPhase?: number }) => {
+  tagEffect("pulse", opts || {});
   const min = opts?.low ?? 0.5;
   const max = 1.0;
   const staticPhase = opts?.staticPhase ?? 0;
   addEffect((phase: number) => {
     return {
-      brightness: {
-        mult_factor: {
+      timed_brightness: {
+        mult_factor_decrease: {
           sin: {
             min: min,
             max: max,
@@ -150,9 +153,10 @@ export const pulse = (opts?: { low?: number, staticPhase?: number }) => {
 
 // change the brightness linearly from "start" to "end"
 export const fade = (opts: { start: number; end: number }) => {
+  tagEffect("fade", opts);
   addEffect({
-    brightness: {
-      mult_factor: {
+    timed_brightness: {
+      mult_factor_decrease: {
         linear: {
           start: opts.start,
           end: opts.end,
@@ -160,4 +164,54 @@ export const fade = (opts: { start: number; end: number }) => {
       },
     },
   });
-}
+};
+
+/** Brightness along snake (head to tail): one of mult_factor_increase or mult_factor_decrease by position in snake. */
+export const snakeBrightness = (opts: {
+  tailLength?: number;
+  cyclic?: boolean;
+  mult_factor_increase?: { start?: number; end?: number };
+  mult_factor_decrease?: { start?: number; end?: number };
+}) => {
+  tagEffect("snakeBrightness", opts);
+  const tailLength = opts.tailLength ?? 0.5;
+  const cyclic = opts.cyclic ?? false;
+  const hasIncrease = opts.mult_factor_increase != null;
+  const hasDecrease = opts.mult_factor_decrease != null;
+  if (!hasIncrease && !hasDecrease) {
+    addEffect({
+      snake_brightness: {
+        head: { linear: { start: 0, end: 1 } },
+        tail_length: { const_value: { value: tailLength } },
+        cyclic,
+        mult_factor_decrease: {
+          linear: { start: 1, end: 0 },
+        },
+      },
+    });
+    return;
+  }
+  addEffect({
+    snake_brightness: {
+      head: { linear: { start: 0, end: 1 } },
+      tail_length: { const_value: { value: tailLength } },
+      cyclic,
+      ...(hasIncrease && {
+        mult_factor_increase: {
+          linear: {
+            start: opts.mult_factor_increase!.start ?? 0,
+            end: opts.mult_factor_increase!.end ?? 1,
+          },
+        },
+      }),
+      ...(hasDecrease && {
+        mult_factor_decrease: {
+          linear: {
+            start: opts.mult_factor_decrease!.start ?? 1,
+            end: opts.mult_factor_decrease!.end ?? 0,
+          },
+        },
+      }),
+    },
+  });
+};

@@ -1,10 +1,10 @@
-import { Effect } from "./effects/types";
-import { sendSequence, SequencePerThing } from "./services/sequence";
-import { startSong, trigger } from "./services/trigger";
-import { Animation } from "./animation/animation";
-import { NUMBER_OF_RINGS } from "./sys-config/sys-config";
-import { beats, cycle, cycleBeats } from "./time/time";
-import { constColor, noColor, rainbow, vivid } from "./effects/coloring";
+import { Effect } from "../effects/types";
+import { sendSequence, SequencePerThing } from "../services/sequence";
+import { startSong, trigger } from "../services/trigger";
+import { Animation } from "../animation/animation";
+import { NUMBER_OF_RINGS } from "../sys-config/sys-config";
+import { beats, cycle, cycleBeats } from "../time/time";
+import { constColor, noColor, rainbow, vivid } from "../effects/coloring";
 import {
   blink,
   brightness,
@@ -14,8 +14,8 @@ import {
   fadeOut,
   fadeOutIn,
   pulse,
-} from "./effects/brightness";
-import { elements, segment } from "./objects/elements";
+} from "../effects/brightness";
+import { elements, segment } from "../objects/elements";
 import {
   all,
   center,
@@ -30,7 +30,7 @@ import {
   segment_ind,
   segment_rand,
   segment_updown,
-} from "./objects/ring-elements";
+} from "../objects/ring-elements";
 import {
   snake,
   snakeFillGrow,
@@ -38,10 +38,10 @@ import {
   snakeHeadSin,
   snakeInOut,
   staticSnake,
-} from "./effects/motion";
-import { phase } from "./phase/phase";
-import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "./effects/hue";
-import { addEffect } from "./effects/effect";
+} from "../effects/motion";
+import { phase } from "../phase/phase";
+import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "../effects/hue";
+import { addEffect } from "../effects/effect";
 
 function getRandomSubset(numberRingsOn: number): number[] {
   const numbers = Array.from({ length: 12 }, (_, i) => i + 1); // [1, 2, ..., 12]

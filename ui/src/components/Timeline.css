@@ -1,0 +1,415 @@
+/* Outer container: takes flex space, does not scroll */
+.timeline-container {
+  padding: 40px;
+  min-height: 0;
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.timeline-zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  margin-left: 80px;
+}
+
+.timeline-zoom-controls button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.timeline-zoom-controls button:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+.timeline-zoom-controls button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.timeline-zoom-label {
+  font-size: 12px;
+  color: #666;
+  min-width: 36px;
+  text-align: center;
+}
+
+/* Scroll viewport: fixed height (one "screen"), scrollbar when content is taller */
+.timeline-scroll-view {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Timeline content: fixed pixel height (64 beats = scroll view height; more beats = taller, scroll) */
+.timeline-wrapper {
+  position: relative;
+  margin-left: 80px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(to bottom, #667eea, #764ba2);
+  border-radius: 2px;
+}
+
+.timeframes {
+  position: relative;
+  height: 100%;
+  margin-left: 40px;
+  overflow: visible;
+}
+
+.timeframe {
+  position: absolute;
+  left: 0;
+  right: 0;
+  min-height: 60px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  padding: var(--tf-pad-y, 8px) var(--tf-pad-x, 12px);
+  margin-bottom: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s;
+  cursor: grab;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  margin-left: 0;
+  margin-right: 0;
+  overflow: hidden;
+}
+
+.timeframe:active {
+  cursor: grabbing;
+}
+
+.resize-handle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  cursor: ns-resize;
+  z-index: 30;
+  background: transparent;
+  transition: background 0.2s;
+}
+
+.resize-handle-top {
+  top: 0;
+  border-radius: 8px 8px 0 0;
+}
+
+.resize-handle-bottom {
+  bottom: 0;
+  border-radius: 0 0 8px 8px;
+}
+
+.resize-handle:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.timeframe:hover .resize-handle {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.timeframe:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.timeframe-focused {
+  z-index: 10000 !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+.timeframe-disabled {
+  opacity: 0.4;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 4px,
+    rgba(0, 0, 0, 0.15) 4px,
+    rgba(0, 0, 0, 0.15) 8px
+  ) !important;
+}
+
+.timeframe.ring-selector-open {
+  z-index: 1000 !important;
+}
+
+.timeframe-dragging {
+  pointer-events: none;
+  z-index: 100;
+  transition: none !important;
+}
+
+.timeframe-dragging:hover {
+  box-shadow: none;
+}
+
+.timeframe-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tf-gap, 3px);
+  color: white;
+  height: 100%;
+  pointer-events: auto;
+  position: relative;
+  z-index: 10;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+}
+
+.timeframe-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--tf-header-gap, 2px);
+  min-width: 0; /* allow flex children to shrink for ellipsis */
+}
+
+.timeframe-label {
+  font-weight: 600;
+  font-size: var(--tf-label-size, 14px);
+  line-height: 1.0;
+  cursor: text;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeframe-label:hover {
+  text-decoration: underline;
+}
+
+.timeframe-times {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--tf-times-size, 12px);
+  opacity: 0.9;
+}
+
+.timeframe-time {
+  cursor: text;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.timeframe-time:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.timeframe-separator {
+  opacity: 0.7;
+}
+
+.timeframe-rings-inline,
+.timeframe-mapping-inline,
+.timeframe-effects-inline,
+.timeframe-cycles-inline {
+  opacity: 0.9;
+  min-width: 0;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.timeframe-input {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  width: 100%;
+  outline: none;
+}
+
+.timeframe-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.timeframe-input-small {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  padding: 2px 6px;
+  color: white;
+  font-size: 14px;
+  width: 60px;
+  outline: none;
+}
+
+.copy-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  opacity: 0.7;
+  margin-right: 4px;
+}
+
+.copy-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.delete-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  opacity: 0.7;
+}
+
+.delete-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Axis column: extends left into margin so labels sit left of the vertical line; tick aligns at 20px */
+.time-marks {
+  position: absolute;
+  left: -80px;
+  top: 0;
+  bottom: 0;
+  width: 100px;
+}
+
+.time-mark {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+}
+
+.time-mark-line {
+  position: absolute;
+  left: 88px;
+  width: 12px;
+  height: 2px;
+  background: #667eea;
+  border-radius: 1px;
+}
+
+.time-mark-label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  text-align: left;
+  max-width: 84px;
+  padding-right: 4px;
+}
+
+.time-mark-sec {
+  font-size: 10px;
+  color: #999;
+  font-weight: 400;
+}
+
+.time-mark-large {
+  font-weight: 600;
+}
+
+.time-mark-line-large {
+  left: 84px;
+  width: 16px;
+  height: 3px;
+  background: #764ba2;
+}
+
+.time-mark-label-large {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+}
+
+.current-time-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.current-time-indicator-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ef4444;
+  box-shadow: 0 0 4px rgba(239, 68, 68, 0.6);
+  pointer-events: none;
+}
+
+.current-time-indicator-handle {
+  position: absolute;
+  left: -8px;
+  top: -8px;
+  width: 18px;
+  height: 18px;
+  background: #ef4444;
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  cursor: grab;
+  pointer-events: all;
+}
+
+.current-time-indicator-handle:active {
+  cursor: grabbing;
+}
+
+.current-time-indicator:hover .current-time-indicator-line {
+  height: 3px;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);
+}

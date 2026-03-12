@@ -5,9 +5,11 @@ import { addEffect } from "./effect";
 import { defaultHue, maxBrightness } from "./defaults";
 import { Effect } from "./types";
 import { brightness } from "./brightness";
+import { tagEffect } from "../recorder/effect-key-map";
 
 // effect that will override any coloring effect with no color (black, turned off)
 export const noColor = () => {
+  tagEffect("noColor", {});
   addEffect({
     constColor: {
       color: {
@@ -23,6 +25,7 @@ export const noColor = () => {
 // vivid color is maximum saturation
 // if phase is set, it will offset the hue
 export const vivid = (opts: { hue: number }) => {
+  tagEffect("vivid", opts);
   addEffect((phase: number) => {
     return {
       const_color: {
@@ -40,6 +43,7 @@ export const vivid = (opts: { hue: number }) => {
 // pastel color is 80% saturation
 // if phase is set, it will offset the hue
 export const pastel = (opts?: { hue?: number }) => {
+  tagEffect("pastel", opts || {});
   const hue = opts?.hue ?? defaultHue;
   addEffect((phase: number) => {
     return {
@@ -65,6 +69,7 @@ export const constColor = (opts?: {
   const hue = opts?.hue ?? defaultHue;
   const sat = opts?.sat ?? 1.0;
   const val = opts?.val ?? maxBrightness;
+  tagEffect("constColor", { hue, sat, val });
   addEffect((phase: number) => {
     return {
       const_color: {
@@ -92,7 +97,7 @@ export const rainbow = (opts?: {
 }) => {
   const startHue = opts?.startHue ?? 0.0;
   const endHue = opts?.endHue ?? 1.0;
-
+  tagEffect("rainbow", { startHue, endHue });
   addEffect((phase: number) => {
     return {
       rainbow: {
@@ -112,10 +117,12 @@ export const rainbow = (opts?: {
 };
 
 export const fullRainbow = () => {
+  tagEffect("fullRainbow", {});
   rainbow({ startHue: 0.0, endHue: 1.0 });
 }
 
 export const randomRangeColor = () => {
+  tagEffect("randomRangeColor", {});
   const randHue = Math.random();
   rainbow({ startHue: randHue - 0.1, endHue: randHue + 0.1 });
 }
@@ -134,6 +141,7 @@ export const dotted = (opts?: {
   hueDiff?: number;
   contrast?: number;
 }) => {
+  tagEffect("dotted", opts || {});
   const hue = opts?.hue ?? defaultHue;
   const hueDiff = opts?.hueDiff ?? 0.5;
   const contrast = opts?.contrast ?? 0.5;

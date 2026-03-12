@@ -1,0 +1,116 @@
+.ring-selector {
+  position: relative;
+  margin-top: 8px;
+  z-index: 50;
+}
+
+.ring-selector-toggle {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.ring-selector-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.ring-selector-arrow {
+  transition: transform 0.2s;
+  font-size: 10px;
+}
+
+.ring-selector-arrow.expanded {
+  transform: rotate(180deg);
+}
+
+.ring-selector-panel {
+  position: fixed;
+  background: rgba(0, 0, 0, 0.98);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  padding: 8px;
+  z-index: 99999;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+  max-height: 300px;
+  overflow-y: auto;
+  min-width: 180px;
+  width: max-content;
+  backdrop-filter: blur(10px);
+}
+
+.ring-quick-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ring-quick-select button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  padding: 2px 6px;
+  color: white;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  min-width: calc(50% - 1.5px);
+  line-height: 1.4;
+}
+
+.ring-quick-select button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.ring-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.ring-button {
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.ring-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.ring-button.active {
+  background: rgba(102, 126, 234, 0.8);
+  border-color: rgba(102, 126, 234, 1);
+  color: white;
+}
+
+.ring-button.active:hover {
+  background: rgba(102, 126, 234, 1);
+}

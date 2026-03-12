@@ -1,0 +1,3160 @@
+{
+  "song": {
+    "name": "aladdin",
+    "lengthSeconds": 79,
+    "bpm": 64.725,
+    "startOffsetMs": 3575,
+    "animationType": "song",
+    "audioFilePath": "aladdin.wav"
+  },
+  "timeframes": [
+    {
+      "id": "tf-0",
+      "startTime": 0,
+      "endTime": 16,
+      "label": "",
+      "color": "#ff4d00",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-0",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 0.05
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-1",
+      "startTime": 0,
+      "endTime": 16,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 12
+        }
+      ],
+      "effects": [
+        {
+          "id": "e-1",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.125,
+            "cyclic": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-2",
+      "startTime": 0,
+      "endTime": 1,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-2",
+          "effectKey": "fadeIn"
+        }
+      ]
+    },
+    {
+      "id": "tf-3",
+      "startTime": 8,
+      "endTime": 16,
+      "label": "",
+      "color": "#8000ff",
+      "rings": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-3",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 0.22999999999999998
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-4",
+      "startTime": 8,
+      "endTime": 16,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "mapping": "arc",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 8
+        }
+      ],
+      "effects": [
+        {
+          "id": "e-4",
+          "effectKey": "snakeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-5",
+      "startTime": 7,
+      "endTime": 9,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-5",
+          "effectKey": "fadeOutIn"
+        }
+      ]
+    },
+    {
+      "id": "tf-6",
+      "startTime": 15,
+      "endTime": 16,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-6",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-7",
+      "startTime": 16,
+      "endTime": 24,
+      "label": "",
+      "color": "#2c19ff",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-8",
+      "startTime": 16,
+      "endTime": 16,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-9",
+      "startTime": 16,
+      "endTime": 18,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-7",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0,
+            "end": 0.2
+          }
+        },
+        {
+          "id": "e-8",
+          "effectKey": "snakeFillGrow",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "tf-10",
+      "startTime": 18,
+      "endTime": 24,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-9",
+          "effectKey": "staticHueShift",
+          "params": {
+            "value": 0.2
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-11",
+      "startTime": 16,
+      "endTime": 17,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        2
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-12",
+      "startTime": 17,
+      "endTime": 19,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        2
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-10",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0.2,
+            "end": 0.4
+          }
+        },
+        {
+          "id": "e-11",
+          "effectKey": "snakeFillGrow",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "tf-13",
+      "startTime": 19,
+      "endTime": 24,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        2
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-12",
+          "effectKey": "staticHueShift",
+          "params": {
+            "value": 0.4
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-14",
+      "startTime": 16,
+      "endTime": 18,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        3
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-15",
+      "startTime": 18,
+      "endTime": 20,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        3
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-13",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0.4,
+            "end": 0.6000000000000001
+          }
+        },
+        {
+          "id": "e-14",
+          "effectKey": "snakeFillGrow",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "tf-16",
+      "startTime": 20,
+      "endTime": 24,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        3
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-15",
+          "effectKey": "staticHueShift",
+          "params": {
+            "value": 0.6000000000000001
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-17",
+      "startTime": 16,
+      "endTime": 19,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        4
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-18",
+      "startTime": 19,
+      "endTime": 21,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        4
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-16",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0.6000000000000001,
+            "end": 0.8
+          }
+        },
+        {
+          "id": "e-17",
+          "effectKey": "snakeFillGrow",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "tf-19",
+      "startTime": 21,
+      "endTime": 24,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        4
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-18",
+          "effectKey": "staticHueShift",
+          "params": {
+            "value": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-20",
+      "startTime": 16,
+      "endTime": 20,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        5
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-21",
+      "startTime": 20,
+      "endTime": 22,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        5
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-19",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0.8,
+            "end": 1
+          }
+        },
+        {
+          "id": "e-20",
+          "effectKey": "snakeFillGrow",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "tf-22",
+      "startTime": 22,
+      "endTime": 24,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        5
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-21",
+          "effectKey": "staticHueShift",
+          "params": {
+            "value": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-23",
+      "startTime": 16,
+      "endTime": 21,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        6
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-24",
+      "startTime": 21,
+      "endTime": 23,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        6
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-22",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 1,
+            "end": 1.2000000000000002
+          }
+        },
+        {
+          "id": "e-23",
+          "effectKey": "snakeFillGrow",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "tf-25",
+      "startTime": 23,
+      "endTime": 24,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        6
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-24",
+          "effectKey": "staticHueShift",
+          "params": {
+            "value": 1.2000000000000002
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-26",
+      "startTime": 24,
+      "endTime": 32,
+      "label": "",
+      "color": "#2c19ff",
+      "rings": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-27",
+      "startTime": 24,
+      "endTime": 24,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-28",
+      "startTime": 24,
+      "endTime": 26,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        12
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-25",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0,
+            "end": 0.2
+          }
+        },
+        {
+          "id": "e-26",
+          "effectKey": "snakeFillGrow",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "tf-29",
+      "startTime": 26,
+      "endTime": 32,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-27",
+          "effectKey": "staticHueShift",
+          "params": {
+            "value": 0.2
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-30",
+      "startTime": 24,
+      "endTime": 25,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        11
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-31",
+      "startTime": 25,
+      "endTime": 27,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        11
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-28",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0.2,
+            "end": 0.4
+          }
+        },
+        {
+          "id": "e-29",
+          "effectKey": "snakeFillGrow",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "tf-32",
+      "startTime": 27,
+      "endTime": 32,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        11
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-30",
+          "effectKey": "staticHueShift",
+          "params": {
+            "value": 0.4
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-33",
+      "startTime": 24,
+      "endTime": 26,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        10
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-34",
+      "startTime": 26,
+      "endTime": 28,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        10
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-31",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0.4,
+            "end": 0.6000000000000001
+          }
+        },
+        {
+          "id": "e-32",
+          "effectKey": "snakeFillGrow",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "tf-35",
+      "startTime": 28,
+      "endTime": 32,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        10
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-33",
+          "effectKey": "staticHueShift",
+          "params": {
+            "value": 0.6000000000000001
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-36",
+      "startTime": 24,
+      "endTime": 27,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        9
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-37",
+      "startTime": 27,
+      "endTime": 29,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        9
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-34",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0.6000000000000001,
+            "end": 0.8
+          }
+        },
+        {
+          "id": "e-35",
+          "effectKey": "snakeFillGrow",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "tf-38",
+      "startTime": 29,
+      "endTime": 32,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        9
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-36",
+          "effectKey": "staticHueShift",
+          "params": {
+            "value": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-39",
+      "startTime": 24,
+      "endTime": 28,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        8
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-40",
+      "startTime": 28,
+      "endTime": 30,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        8
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-37",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0.8,
+            "end": 1
+          }
+        },
+        {
+          "id": "e-38",
+          "effectKey": "snakeFillGrow",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "tf-41",
+      "startTime": 30,
+      "endTime": 32,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        8
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-39",
+          "effectKey": "staticHueShift",
+          "params": {
+            "value": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-42",
+      "startTime": 24,
+      "endTime": 29,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        7
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-43",
+      "startTime": 29,
+      "endTime": 31,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        7
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-40",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 1,
+            "end": 1.2000000000000002
+          }
+        },
+        {
+          "id": "e-41",
+          "effectKey": "snakeFillGrow",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "tf-44",
+      "startTime": 31,
+      "endTime": 32,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        7
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-42",
+          "effectKey": "staticHueShift",
+          "params": {
+            "value": 1.2000000000000002
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-45",
+      "startTime": 31,
+      "endTime": 32,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-43",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-46",
+      "startTime": 31.5,
+      "endTime": 32,
+      "label": "",
+      "color": "#2c19ff",
+      "rings": [
+        1
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-44",
+          "effectKey": "fadeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-47",
+      "startTime": 31.6,
+      "endTime": 32.1,
+      "label": "",
+      "color": "#2c19ff",
+      "rings": [
+        2
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-45",
+          "effectKey": "fadeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-48",
+      "startTime": 31.7,
+      "endTime": 32.3,
+      "label": "",
+      "color": "#2c19ff",
+      "rings": [
+        3
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-46",
+          "effectKey": "fadeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-49",
+      "startTime": 31.9,
+      "endTime": 32.4,
+      "label": "",
+      "color": "#2c19ff",
+      "rings": [
+        4
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-47",
+          "effectKey": "fadeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-50",
+      "startTime": 32,
+      "endTime": 32.5,
+      "label": "",
+      "color": "#2c19ff",
+      "rings": [
+        5
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-48",
+          "effectKey": "fadeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-51",
+      "startTime": 32.1,
+      "endTime": 32.6,
+      "label": "",
+      "color": "#2c19ff",
+      "rings": [
+        6
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-49",
+          "effectKey": "fadeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-52",
+      "startTime": 32.3,
+      "endTime": 32.7,
+      "label": "",
+      "color": "#2c19ff",
+      "rings": [
+        7
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-50",
+          "effectKey": "fadeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-53",
+      "startTime": 32.4,
+      "endTime": 32.9,
+      "label": "",
+      "color": "#2c19ff",
+      "rings": [
+        8
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-51",
+          "effectKey": "fadeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-54",
+      "startTime": 32.5,
+      "endTime": 33,
+      "label": "",
+      "color": "#2c19ff",
+      "rings": [
+        9
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-52",
+          "effectKey": "fadeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-55",
+      "startTime": 32.6,
+      "endTime": 33.1,
+      "label": "",
+      "color": "#2c19ff",
+      "rings": [
+        10
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-53",
+          "effectKey": "fadeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-56",
+      "startTime": 32.7,
+      "endTime": 33.3,
+      "label": "",
+      "color": "#2c19ff",
+      "rings": [
+        11
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-54",
+          "effectKey": "fadeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-57",
+      "startTime": 32.9,
+      "endTime": 33.4,
+      "label": "",
+      "color": "#2c19ff",
+      "rings": [
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-55",
+          "effectKey": "fadeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-58",
+      "startTime": 33.5,
+      "endTime": 34,
+      "label": "",
+      "color": "#ff550d",
+      "rings": [
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-56",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-59",
+      "startTime": 33.6,
+      "endTime": 34.1,
+      "label": "",
+      "color": "#ff550d",
+      "rings": [
+        11
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-57",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-60",
+      "startTime": 33.7,
+      "endTime": 34.3,
+      "label": "",
+      "color": "#ff550d",
+      "rings": [
+        10
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-58",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-61",
+      "startTime": 33.9,
+      "endTime": 34.4,
+      "label": "",
+      "color": "#ff550d",
+      "rings": [
+        9
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-59",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-62",
+      "startTime": 34,
+      "endTime": 34.5,
+      "label": "",
+      "color": "#ff550d",
+      "rings": [
+        8
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-60",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-63",
+      "startTime": 34.1,
+      "endTime": 34.6,
+      "label": "",
+      "color": "#ff550d",
+      "rings": [
+        7
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-61",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-64",
+      "startTime": 34.3,
+      "endTime": 34.7,
+      "label": "",
+      "color": "#ff550d",
+      "rings": [
+        6
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-62",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-65",
+      "startTime": 34.4,
+      "endTime": 34.9,
+      "label": "",
+      "color": "#ff550d",
+      "rings": [
+        5
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-63",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-66",
+      "startTime": 34.5,
+      "endTime": 35,
+      "label": "",
+      "color": "#ff550d",
+      "rings": [
+        4
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-64",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-67",
+      "startTime": 34.6,
+      "endTime": 35.1,
+      "label": "",
+      "color": "#ff550d",
+      "rings": [
+        3
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-65",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-68",
+      "startTime": 34.7,
+      "endTime": 35.3,
+      "label": "",
+      "color": "#ff550d",
+      "rings": [
+        2
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-66",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-69",
+      "startTime": 34.9,
+      "endTime": 35.4,
+      "label": "",
+      "color": "#ff550d",
+      "rings": [
+        1
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-67",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-70",
+      "startTime": 35.5,
+      "endTime": 38.5,
+      "label": "",
+      "color": "#ff4d00",
+      "rings": [
+        2,
+        4,
+        6,
+        8,
+        10,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-71",
+      "startTime": 35.5,
+      "endTime": 36.5,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        2,
+        4,
+        6,
+        8,
+        10,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-68",
+          "effectKey": "fadeIn"
+        }
+      ]
+    },
+    {
+      "id": "tf-72",
+      "startTime": 36.5,
+      "endTime": 38.5,
+      "label": "",
+      "color": "#8085ff",
+      "rings": [
+        1,
+        3,
+        5,
+        7,
+        9,
+        11
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-73",
+      "startTime": 36.5,
+      "endTime": 37.5,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        3,
+        5,
+        7,
+        9,
+        11
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-69",
+          "effectKey": "fadeIn"
+        }
+      ]
+    },
+    {
+      "id": "tf-74",
+      "startTime": 37.5,
+      "endTime": 38,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-70",
+          "effectKey": "fade",
+          "params": {
+            "start": 1,
+            "end": 0.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-75",
+      "startTime": 38,
+      "endTime": 38.5,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-71",
+          "effectKey": "brightness",
+          "params": {
+            "value": 0.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-76",
+      "startTime": 38.5,
+      "endTime": 48,
+      "label": "",
+      "color": "#ff0000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "tf-77",
+      "startTime": 38.5,
+      "endTime": 48,
+      "label": "",
+      "color": "#d633ff",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b2"
+    },
+    {
+      "id": "tf-78",
+      "startTime": 38.5,
+      "endTime": 39.5,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b2"
+    },
+    {
+      "id": "tf-79",
+      "startTime": 38.5,
+      "endTime": 39.5,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b1",
+      "effects": [
+        {
+          "id": "e-72",
+          "effectKey": "fadeIn"
+        }
+      ]
+    },
+    {
+      "id": "tf-80",
+      "startTime": 39.5,
+      "endTime": 40.5,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b2",
+      "effects": [
+        {
+          "id": "e-73",
+          "effectKey": "fadeIn"
+        }
+      ]
+    },
+    {
+      "id": "tf-81",
+      "startTime": 40.5,
+      "endTime": 41.5,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b1",
+      "effects": [
+        {
+          "id": "e-74",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-82",
+      "startTime": 41.5,
+      "endTime": 42.5,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b2",
+      "effects": [
+        {
+          "id": "e-75",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-83",
+      "startTime": 41.5,
+      "endTime": 42.5,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "tf-84",
+      "startTime": 42.5,
+      "endTime": 48,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-76",
+          "effectKey": "staticHueShift",
+          "params": {
+            "value": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-85",
+      "startTime": 42.5,
+      "endTime": 48,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "updown",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 0.25
+        }
+      ],
+      "effects": [
+        {
+          "id": "e-77",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 1,
+            "cyclic": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-86",
+      "startTime": 42.5,
+      "endTime": 43,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-78",
+          "effectKey": "fadeIn"
+        }
+      ]
+    },
+    {
+      "id": "tf-87",
+      "startTime": 43.5,
+      "endTime": 43.7,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-88",
+      "startTime": 43.7,
+      "endTime": 44,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-89",
+      "startTime": 44,
+      "endTime": 44.3,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-90",
+      "startTime": 44.3,
+      "endTime": 44.5,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-91",
+      "startTime": 44.5,
+      "endTime": 44.7,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-92",
+      "startTime": 44.7,
+      "endTime": 45,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        8,
+        9,
+        11,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-93",
+      "startTime": 45,
+      "endTime": 45.3,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        8,
+        9,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-94",
+      "startTime": 45.3,
+      "endTime": 45.5,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        8,
+        10,
+        11
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-95",
+      "startTime": 45.5,
+      "endTime": 45.7,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        7,
+        10,
+        11
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-96",
+      "startTime": 45.7,
+      "endTime": 46,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1,
+        4,
+        5,
+        6,
+        8,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-97",
+      "startTime": 46,
+      "endTime": 46.3,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        7,
+        8,
+        10
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-98",
+      "startTime": 46.3,
+      "endTime": 46.5,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1,
+        3,
+        4,
+        6,
+        9,
+        11,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-99",
+      "startTime": 46.5,
+      "endTime": 46.7,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        2,
+        3,
+        4,
+        6,
+        10,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-100",
+      "startTime": 46.7,
+      "endTime": 47,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1,
+        2,
+        5,
+        6,
+        7,
+        11
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-101",
+      "startTime": 47,
+      "endTime": 47.3,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        1,
+        3,
+        5,
+        7,
+        8
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-102",
+      "startTime": 47.3,
+      "endTime": 47.5,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        2,
+        3,
+        6,
+        11,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-103",
+      "startTime": 47.5,
+      "endTime": 47.7,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        2,
+        7,
+        9,
+        11
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-104",
+      "startTime": 47.7,
+      "endTime": 48,
+      "label": "",
+      "color": "#000000",
+      "rings": [
+        3,
+        7,
+        10,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-105",
+      "startTime": 48.5,
+      "endTime": 50,
+      "label": "",
+      "color": "#ff0000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-79",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "e-80",
+          "effectKey": "brightness",
+          "params": {
+            "value": 0.6
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-106",
+      "startTime": 49,
+      "endTime": 50,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-81",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-107",
+      "startTime": 49,
+      "endTime": 50,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 0.25
+        }
+      ],
+      "effects": [
+        {
+          "id": "e-82",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0,
+            "end": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-108",
+      "startTime": 50,
+      "endTime": 57,
+      "label": "",
+      "color": "#4d54ff",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-109",
+      "startTime": 50,
+      "endTime": 53,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "ind",
+      "effects": [
+        {
+          "id": "e-83",
+          "effectKey": "staticSnake",
+          "params": {
+            "start": 0.98,
+            "end": 0.4
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-110",
+      "startTime": 53,
+      "endTime": 54,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-84",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0,
+            "end": 0.4
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-111",
+      "startTime": 53,
+      "endTime": 54,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "ind",
+      "effects": [
+        {
+          "id": "e-85",
+          "effectKey": "snakeHeadMove",
+          "params": {
+            "start": 0.98,
+            "end": 0.4,
+            "tail": 0.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-112",
+      "startTime": 54,
+      "endTime": 57,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-86",
+          "effectKey": "staticHueShift",
+          "params": {
+            "value": 0.4
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-113",
+      "startTime": 54,
+      "endTime": 57,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "ind",
+      "effects": [
+        {
+          "id": "e-87",
+          "effectKey": "staticSnake",
+          "params": {
+            "start": 0.4,
+            "end": -0.2
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-114",
+      "startTime": 56,
+      "endTime": 57,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-88",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-115",
+      "startTime": 50,
+      "endTime": 57,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 0.6
+        }
+      ],
+      "effects": [
+        {
+          "id": "e-89",
+          "effectKey": "blink",
+          "params": {
+            "low": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-116",
+      "startTime": 57,
+      "endTime": 59,
+      "label": "",
+      "color": "#ffb84d",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-90",
+          "effectKey": "snakeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-117",
+      "startTime": 59,
+      "endTime": 64,
+      "label": "",
+      "color": "#ff0000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-91",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 0.05
+              }
+            }
+          }
+        },
+        {
+          "id": "e-92",
+          "effectKey": "snakeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-118",
+      "startTime": 60,
+      "endTime": 62,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-93",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.4
+          }
+        },
+        {
+          "id": "e-94",
+          "effectKey": "fadeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-119",
+      "startTime": 62,
+      "endTime": 64,
+      "label": "",
+      "color": "#802600",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 0.25
+        }
+      ],
+      "effects": [
+        {
+          "id": "e-95",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.3
+          }
+        },
+        {
+          "id": "e-96",
+          "effectKey": "fadeOutIn"
+        }
+      ]
+    },
+    {
+      "id": "tf-120",
+      "startTime": 64,
+      "endTime": 66,
+      "label": "",
+      "color": "#ff0000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-97",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "e-98",
+          "effectKey": "brightness",
+          "params": {
+            "value": 0.6
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-121",
+      "startTime": 64.5,
+      "endTime": 66,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-99",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-122",
+      "startTime": 64.5,
+      "endTime": 66,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 0.25
+        }
+      ],
+      "effects": [
+        {
+          "id": "e-100",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0,
+            "end": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-123",
+      "startTime": 66,
+      "endTime": 73,
+      "label": "",
+      "color": "#3d43cc",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-124",
+      "startTime": 66,
+      "endTime": 69,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "ind",
+      "effects": [
+        {
+          "id": "e-101",
+          "effectKey": "staticSnake",
+          "params": {
+            "start": 0.98,
+            "end": 0.4
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-125",
+      "startTime": 69,
+      "endTime": 70,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-102",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0,
+            "end": 0.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-126",
+      "startTime": 69,
+      "endTime": 70,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "ind",
+      "effects": [
+        {
+          "id": "e-103",
+          "effectKey": "snakeHeadMove",
+          "params": {
+            "start": 0.98,
+            "end": 0.4,
+            "tail": 0.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-127",
+      "startTime": 70,
+      "endTime": 73,
+      "label": "",
+      "color": "#cccccc",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "tf-128",
+      "startTime": 70,
+      "endTime": 73,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "ind",
+      "effects": [
+        {
+          "id": "e-104",
+          "effectKey": "staticSnake",
+          "params": {
+            "start": 0.4,
+            "end": -0.2
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-129",
+      "startTime": 72,
+      "endTime": 73,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-105",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-130",
+      "startTime": 65,
+      "endTime": 73,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 0.3
+        }
+      ],
+      "effects": [
+        {
+          "id": "e-106",
+          "effectKey": "blink",
+          "params": {
+            "low": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "id": "tf-131",
+      "startTime": 73,
+      "endTime": 75,
+      "label": "",
+      "color": "#ff0000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "e-107",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "e-108",
+          "effectKey": "snakeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-132",
+      "startTime": 75,
+      "endTime": 87,
+      "label": "",
+      "color": "#ff0000",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e-109",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "e-110",
+          "effectKey": "snakeInOut"
+        }
+      ]
+    },
+    {
+      "id": "tf-133",
+      "startTime": 81,
+      "endTime": 85,
+      "label": "",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e-111",
+          "effectKey": "fadeOut"
+        }
+      ]
+    }
+  ],
+  "windowSizes": {
+    "playbackPanelWidth": 380,
+    "detailsPanelWidth": 350,
+    "spectrogramHeight": 262
+  }
+}
