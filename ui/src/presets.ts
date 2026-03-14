@@ -441,7 +441,7 @@ function reverseMapSnake(snakeObj: NonNullable<PresetEffect['snake']>): MappedEf
 export function presetToTimeframes(
   preset: PresetMetadata,
   insertBeat: number,
-  bpm: number,
+  _bpm: number,
 ): Timeframe[] {
   // Get all rings in order for phase detection
   const orderedRings = getOrderedRings(preset.data)
@@ -459,7 +459,6 @@ export function presetToTimeframes(
     segmentGroups.get(seg)!.push(effect)
   }
 
-  const firstEffect = ring1.effects[0]
   const durationBeats = 16
 
   const timeframes: Timeframe[] = []

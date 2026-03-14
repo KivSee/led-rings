@@ -518,7 +518,9 @@ ${bodyBlocks}
 
   console.log("sending sequence");
   await sendSequence("${escapedName}", anim.getSequence());
-  ${runCall}
+  if (!process.env.SEND_ONLY) {
+    ${runCall}
+  }
 };
 
 (async () => {

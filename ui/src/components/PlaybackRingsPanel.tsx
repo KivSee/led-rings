@@ -74,9 +74,9 @@ const PlaybackRingsPanel = ({
             className="playback-ctrl-btn send"
             onClick={onSendSequence}
             disabled={sendSequenceLoading || !apiAvailable}
-            title={!apiAvailable ? 'Set VITE_API_URL and run control server' : 'Send current sequence to device'}
+            title={!apiAvailable ? 'Control server is not running' : 'Send current sequence to LEDs'}
           >
-            {sendSequenceLoading ? '…' : 'Send'}
+            {sendSequenceLoading ? '…' : 'Send to LEDs'}
           </button>
         </div>
       </div>

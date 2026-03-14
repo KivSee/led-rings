@@ -4,7 +4,7 @@ import TimeframePanel from './components/TimeframePanel'
 import PlaybackRingsPanel from './components/PlaybackRingsPanel'
 import Spectrogram from './components/Spectrogram'
 import { useViewRange } from './hooks/useViewRange'
-import { generateSequenceTs, generateSequenceRunnerTs } from './generateSequenceTs'
+import { generateSequenceTs } from './generateSequenceTs'
 import { presetToTimeframes } from './presets'
 import { normalizeMovement } from './movementGenerators'
 import type { TimeframeMovement } from './movementGenerators'
@@ -301,6 +301,7 @@ function App() {
   /** When true, next Run starts from runStartTimeSeconds; when false, next Run resumes from currentTime (after Pause). */
   const [nextRunFromStart, setNextRunFromStart] = useState(true)
   const [liveMode, setLiveMode] = useState(false)
+  const [controlServerAvailable, setControlServerAvailable] = useState(false)
   const [sendSequenceLoading, setSendSequenceLoading] = useState(false)
   const [detectBeatsLoading, setDetectBeatsLoading] = useState(false)
   const [detectBeatsProgress, setDetectBeatsProgress] = useState<string | null>(null)
@@ -342,6 +343,19 @@ function App() {
   const [spectrogramHeight, setSpectrogramHeight] = useState(180)
   const [resizing, setResizing] = useState<'playback' | 'details' | 'spectrogram' | null>(null)
   const spectrogramContainerRef = React.useRef<HTMLDivElement>(null)
+
+  // Periodically check if control server is reachable
+  useEffect(() => {
+    if (!API_BASE) return
+    const check = () => {
+      fetch(`${API_BASE}/api/audio?path=_ping`, { method: 'HEAD' })
+        .then(() => setControlServerAvailable(true))
+        .catch(() => setControlServerAvailable(false))
+    }
+    check()
+    const id = setInterval(check, 5000)
+    return () => clearInterval(id)
+  }, [])
 
   const songRef = useRef(song)
   songRef.current = song
@@ -614,13 +628,15 @@ function App() {
       return
     }
     setSendSequenceLoading(true)
-    handleSaveTimeframes()
     try {
-      const runnerCode = generateSequenceRunnerTs(song, timeframes)
+      // Save JSON + TS first, then execute the saved TS file
+      await handleSaveTimeframes()
+      const safeName = (song.name || 'song').trim() || 'song'
+      const filePath = `src/songs/${safeName}.ts`
       const res = await fetch(`${API_BASE}/api/send-sequence`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ runnerCode }),
+        body: JSON.stringify({ filePath, sendOnly: !liveMode }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
@@ -761,7 +777,6 @@ function App() {
         if ((parsed as { song?: unknown }).song && typeof (parsed as { song: unknown }).song === 'object') {
           const s = normalizeLoadedSong((parsed as { song: Record<string, unknown> }).song)
           setSong(s)
-          setEffectiveAudioSrc(s.audioFilePath ?? '')
         }
 
         if (Array.isArray(maybeArray)) {
@@ -866,7 +881,6 @@ function App() {
         if (data.song && typeof data.song === 'object') {
           const s = normalizeLoadedSong(data.song as Record<string, unknown>)
           setSong(s)
-          setEffectiveAudioSrc(s.audioFilePath ?? '')
         }
 
         if (Array.isArray(data.timeframes)) {
@@ -941,14 +955,12 @@ function App() {
       URL.revokeObjectURL(url)
     }
 
-    // Single save: pick folder (e.g. src/) and write both JSON and TS there
+    // Save JSON: let user pick folder (or download as fallback)
     const anyWindow = window as any
     if (anyWindow.showDirectoryPicker) {
       try {
-        // Reuse previously selected directory if available, otherwise prompt
         let dirHandle = savedDirHandleRef.current
         if (dirHandle) {
-          // Verify we still have write permission
           const perm = await dirHandle.queryPermission({ mode: 'readwrite' })
           if (perm !== 'granted') {
             const requested = await dirHandle.requestPermission({ mode: 'readwrite' })
@@ -956,39 +968,38 @@ function App() {
           }
         }
         if (!dirHandle) {
-          dirHandle = await anyWindow.showDirectoryPicker({
-            mode: 'readwrite',
-          })
+          dirHandle = await anyWindow.showDirectoryPicker({ mode: 'readwrite' })
         }
         savedDirHandleRef.current = dirHandle
-        // Determine import prefix by probing for the services/ directory.
-        // If it exists here, we're in src/ (./) — otherwise assume one level below (../).
-        let importPrefix = '..'
-        try {
-          await dirHandle.getDirectoryHandle('services')
-          importPrefix = '.'
-        } catch {}
-        const tsCode = generateSequenceTs(song, timeframes, importPrefix)
         const jsonFile = await dirHandle.getFileHandle(`${safeName}.json`, { create: true })
-        const tsFile = await dirHandle.getFileHandle(`${safeName}.ts`, { create: true })
         const jsonWritable = await jsonFile.createWritable()
-        const tsWritable = await tsFile.createWritable()
         await jsonWritable.write(dataStr)
-        await tsWritable.write(tsCode)
         await jsonWritable.close()
-        await tsWritable.close()
-        return
       } catch {
-        // User cancelled or error – fall back to downloads
+        // User cancelled or error – fall back to download
+        downloadFile(dataStr, `${safeName}.json`, 'application/json')
       }
+    } else {
+      downloadFile(dataStr, `${safeName}.json`, 'application/json')
     }
 
-    // Fallback: generate with default ../ prefix (assumes src/songs/)
-    const tsCode = generateSequenceTs(song, timeframes)
-
-    // Fallback: download both files (same song name, correct types)
-    downloadFile(dataStr, `${safeName}.json`, 'application/json')
-    downloadFile(tsCode, `${safeName}.ts`, 'text/typescript')
+    // Save TS to src/songs/ via control-server (always uses ../ import prefix)
+    if (API_BASE) {
+      const tsCode = generateSequenceTs(song, timeframes)
+      try {
+        const resp = await fetch(`${API_BASE}/api/save-file`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: `src/songs/${safeName}.ts`, content: tsCode }),
+        })
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}))
+          console.error('Failed to save TS file via server:', err)
+        }
+      } catch (e) {
+        console.warn('Control server unavailable, skipping TS save:', e)
+      }
+    }
   }
 
   // Normalize loaded song to use lengthSeconds/runStartTimeSeconds (support old lengthBeats/runStartTimeBeats)
@@ -1029,7 +1040,6 @@ function App() {
       if (parsed.song && typeof parsed.song === 'object') {
         const s = normalizeLoadedSong(parsed.song)
         setSong(s)
-        setEffectiveAudioSrc((s as Song).audioFilePath ?? '')
       }
       if (parsed.timeframes && Array.isArray(parsed.timeframes) && parsed.timeframes.length > 0) {
         setTimeframes(parsed.timeframes)
@@ -1070,13 +1080,74 @@ function App() {
     }
   }, [song, timeframes, playbackPanelWidth, detailsPanelWidth, spectrogramHeight])
 
-  // Keep spectrogram audio URL in sync: blob from Browse, or path from song (so Load JSON doesn't race)
-  useEffect(() => {
-    if (song.animationType !== 'song') setEffectiveAudioSrc('')
-    else setEffectiveAudioSrc(audioBlobUrlRef.current || song.audioFilePath?.trim() || '')
-  }, [song.animationType, song.audioFilePath])
+  // Layered audio resolution: Vite public → control-server → prompt user to upload
+  const resolveAudioSrc = React.useCallback(async (audioFilePath: string) => {
+    if (!audioFilePath) return ''
+    // If we have a blob URL, use it directly
+    if (audioBlobUrlRef.current) return audioBlobUrlRef.current
+    // 1. Try Vite public dir (no server needed — serves ui/public/ at root in dev)
+    try {
+      const publicResp = await fetch(`/${encodeURIComponent(audioFilePath)}`, { method: 'HEAD' })
+      if (publicResp.ok) return `/${encodeURIComponent(audioFilePath)}`
+    } catch {}
+    // 2. Try control-server
+    if (API_BASE) {
+      try {
+        const serverUrl = `${API_BASE}/api/audio?path=${encodeURIComponent(audioFilePath)}`
+        const serverResp = await fetch(serverUrl, { method: 'HEAD' })
+        if (serverResp.ok) return serverUrl
+      } catch {}
+    }
+    // 3. Prompt user to select the file
+    return new Promise<string>((resolve) => {
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = '.wav,.mp3,audio/*'
+      input.onchange = async () => {
+        const file = input.files?.[0]
+        if (!file) { resolve(''); return }
+        if (audioBlobUrlRef.current) URL.revokeObjectURL(audioBlobUrlRef.current)
+        const blobUrl = URL.createObjectURL(file)
+        audioBlobUrlRef.current = blobUrl
+        if (audioRef.current) audioRef.current.src = blobUrl
+        // Upload to ui/public/ via control-server if available
+        if (API_BASE) {
+          try {
+            const buf = await file.arrayBuffer()
+            const bytes = new Uint8Array(buf)
+            let binary = ''
+            for (let i = 0; i < bytes.length; i += 8192) {
+              binary += String.fromCharCode(...bytes.subarray(i, i + 8192))
+            }
+            const base64 = btoa(binary)
+            await fetch(`${API_BASE}/api/upload-audio`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ filename: audioFilePath, data: base64 }),
+            })
+          } catch (e) {
+            console.warn('Failed to upload audio to server:', e)
+          }
+        }
+        resolve(blobUrl)
+      }
+      input.oncancel = () => resolve('')
+      input.click()
+    })
+  }, [])
 
-  // Keep audio element src in sync with song (blob URL from Browse, or path/URL from field)
+  // Keep spectrogram audio URL in sync: blob from Browse, or resolved path from song
+  useEffect(() => {
+    if (song.animationType !== 'song') { setEffectiveAudioSrc(''); return }
+    const audioPath = song.audioFilePath?.trim()
+    if (!audioPath) { setEffectiveAudioSrc(''); return }
+    if (audioBlobUrlRef.current) { setEffectiveAudioSrc(audioBlobUrlRef.current); return }
+    let cancelled = false
+    resolveAudioSrc(audioPath).then((src) => { if (!cancelled) setEffectiveAudioSrc(src) })
+    return () => { cancelled = true }
+  }, [song.animationType, song.audioFilePath, resolveAudioSrc])
+
+  // Keep audio element src in sync with resolved audio URL
   useEffect(() => {
     if (song.animationType !== 'song') {
       if (audioRef.current) {
@@ -1085,17 +1156,16 @@ function App() {
       }
       return
     }
-    const effectiveSrc = audioBlobUrlRef.current || song.audioFilePath?.trim()
-    if (!effectiveSrc) {
+    if (!effectiveAudioSrc) {
       if (audioRef.current) audioRef.current.src = ''
       return
     }
     if (!audioRef.current) audioRef.current = new Audio()
-    if (audioRef.current.src !== effectiveSrc) {
-      audioRef.current.src = effectiveSrc
+    if (audioRef.current.src !== effectiveAudioSrc) {
+      audioRef.current.src = effectiveAudioSrc
     }
     audioRef.current.loop = false
-  }, [song.animationType, song.audioFilePath])
+  }, [song.animationType, effectiveAudioSrc])
 
   // Playback animation: use audio time when available (so Run from and timeline stay in sync), else use interval.
   // Stop at song length (same as pressing Stop) or at spectrogram range end (section play).
@@ -1258,7 +1328,6 @@ function App() {
       URL.revokeObjectURL(audioBlobUrlRef.current)
       audioBlobUrlRef.current = null
     }
-    setEffectiveAudioSrc(value || '')
     handleSongChange({ audioFilePath: value || undefined })
   }
 
@@ -1404,13 +1473,7 @@ function App() {
             audioRef={audioRef}
             isPlaying={isPlaying}
             hasAudio
-            audioSrc={
-              effectiveAudioSrc.startsWith('blob:')
-                ? effectiveAudioSrc
-                : API_BASE && effectiveAudioSrc
-                  ? `${API_BASE}/api/audio?path=${encodeURIComponent(effectiveAudioSrc)}`
-                  : effectiveAudioSrc
-            }
+            audioSrc={effectiveAudioSrc}
             currentTimeSeconds={beatsToAudioSec(currentTime, song)}
             durationSeconds={song.lengthSeconds}
             bpm={song.bpm}
@@ -1441,13 +1504,13 @@ function App() {
                   onClick={handleDetectBeats}
                   disabled={
                     detectBeatsLoading ||
-                    !API_BASE ||
+                    !controlServerAvailable ||
                     !song.audioFilePath?.trim() ||
                     (detectBeatsScope === 'range' && rangeStartSec >= rangeEndSec)
                   }
                   title={
-                    !API_BASE
-                      ? 'Set VITE_API_URL and run control server'
+                    !controlServerAvailable
+                      ? 'Control server is not running'
                       : !song.audioFilePath?.trim()
                         ? 'Set audio file path first'
                         : detectBeatsScope === 'range' && rangeStartSec >= rangeEndSec
@@ -1568,7 +1631,7 @@ function App() {
             isPlaying={isPlaying}
             liveMode={liveMode}
             sendSequenceLoading={sendSequenceLoading}
-            apiAvailable={!!API_BASE}
+            apiAvailable={controlServerAvailable}
             onPlayPause={handlePlayPause}
             onStop={handleStop}
             onSendSequence={handleSendSequence}
