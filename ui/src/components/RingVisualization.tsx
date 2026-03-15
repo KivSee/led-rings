@@ -236,7 +236,7 @@ const RingVisualization = ({
                     pixelColor = 'rgb(0, 0, 0)'
                   } else {
                     hsv = tfWithT.length === 1
-                      ? getPixelColor(tfWithT[0].relPos, tfWithT[0].t, tfWithT[0].timeframe, ringIndex)
+                      ? getPixelColor(tfWithT[0].relPos, tfWithT[0].t, tfWithT[0].timeframe, ringIndex, tfWithT[0].holdOff)
                       : getPixelColorMulti(tfWithT, ringIndex)
                     pixelColor = hsvToRgbString(hsv.h, hsv.s, hsv.v)
                   }

@@ -15,13 +15,15 @@ export interface TimeframeMovement {
   retire?: boolean
   /** Sweep: ping-pong back and forth. */
   bounce?: boolean
+  /** Random: each ring turns on at its step and stays on for the rest of the timeframe. */
+  accumulate?: boolean
 }
 
 export interface MovementTypeDef {
   id: MovementType
   label: string
   description: string
-  extraParams: Array<{ key: 'retire' | 'bounce'; label: string }>
+  extraParams: Array<{ key: 'retire' | 'bounce' | 'accumulate'; label: string }>
 }
 
 export const MOVEMENT_TYPES: MovementTypeDef[] = [
@@ -53,6 +55,7 @@ export const MOVEMENT_TYPES: MovementTypeDef[] = [
     description: 'Rings activate in random order (one at a time, like sweep).',
     extraParams: [
       { key: 'retire', label: 'Retire (stay off after fade)' },
+      { key: 'accumulate', label: 'Accumulate (stay on after fade)' },
     ],
   },
 ]
@@ -230,11 +233,16 @@ export function getMovementRingWindows(
 
   switch (movement.type) {
     case 'random': {
-      // One ring at a time, in random order. Retire = one pass then holdOff; else repeat.
+      // One ring at a time, in random order.
+      // Retire = one pass then holdOff; Accumulate = turn on and stay on; else repeat.
       const s = startTime + step * bpr
       const e = s + bpr
       if (s >= endTime) return []
       const fadeEnd = Math.min(e, endTime)
+      if (movement.accumulate) {
+        // Ring turns on at its step and stays on for the rest of the timeframe
+        return [{ start: s, end: endTime }]
+      }
       if (movement.retire && fadeEnd < endTime) {
         return [
           { start: s, end: fadeEnd },
@@ -387,5 +395,6 @@ export function normalizeMovement(raw: unknown): TimeframeMovement | undefined {
     beatsPerRing: bpr,
     retire: o.retire === true ? true : undefined,
     bounce: o.bounce === true ? true : undefined,
+    accumulate: o.accumulate === true ? true : undefined,
   }
 }

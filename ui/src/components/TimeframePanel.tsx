@@ -1168,12 +1168,17 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, songLengt
                         checked={mv[ep.key] === true}
                         onChange={(e) => {
                           const checked = e.target.checked
+                          // Retire and accumulate are mutually exclusive
+                          const updates: Record<string, boolean | undefined> = { [ep.key]: checked || undefined }
+                          if (checked && ep.key === 'retire') updates.accumulate = undefined
+                          if (checked && ep.key === 'accumulate') updates.retire = undefined
+                          const updated = { ...mv, ...updates }
                           const bpr = defaultBeatsPerRing(
                             mv.type, timeframe.startTime, timeframe.endTime, timeframe.rings, mv.direction,
-                            ep.key === 'bounce' ? checked : mv.bounce,
-                            ep.key === 'retire' ? checked : mv.retire,
+                            updated.bounce,
+                            updated.retire,
                           )
-                          onUpdate({ movement: { ...mv, [ep.key]: checked || undefined, beatsPerRing: bpr } })
+                          onUpdate({ movement: { ...updated, beatsPerRing: bpr } })
                         }}
                         className="timeframe-panel-checkbox"
                       />

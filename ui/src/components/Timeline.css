@@ -138,9 +138,19 @@
   z-index: 10;
 }
 
+.timeframe-selected {
+  outline: 2px dashed rgba(102, 126, 234, 0.8);
+  outline-offset: -2px;
+  z-index: 9999 !important;
+}
+
 .timeframe-focused {
   z-index: 10000 !important;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+.timeframe-selected.timeframe-focused {
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.8), 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
 .timeframe-disabled {

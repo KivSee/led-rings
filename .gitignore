@@ -1,3 +1,6 @@
+# Claude Code local settings
+.claude/
+
 # Control server temp files
 .tmp-sequence-out.json
 src/.tmp-sequence-runner.ts

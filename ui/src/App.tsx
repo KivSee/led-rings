@@ -299,6 +299,7 @@ function App() {
   ])
 
   const [focusedTimeframeId, setFocusedTimeframeId] = useState<string | null>(null)
+  const [selectedTimeframeIds, setSelectedTimeframeIds] = useState<Set<string>>(new Set())
   const [clipboardTimeframe, setClipboardTimeframe] = useState<Timeframe | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0) // Current time in beats
@@ -469,11 +470,31 @@ function App() {
     ))
   }
 
+  /** Batch silent update for multi-select drag/resize. */
+  const updateTimeframesSilentBatch = (batch: Map<string, Partial<Timeframe>>) => {
+    setTimeframesSilent(prev => prev.map(tf => {
+      const u = batch.get(tf.id)
+      return u ? { ...tf, ...clampTimeframeUpdates(u) } : tf
+    }))
+  }
+
   const deleteTimeframe = (id: string) => {
     setTimeframes(timeframes.filter(tf => tf.id !== id))
+    setSelectedTimeframeIds(prev => {
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
     if (focusedTimeframeId === id) {
       setFocusedTimeframeId(null)
     }
+  }
+
+  const deleteSelectedTimeframes = () => {
+    if (selectedTimeframeIds.size === 0) return
+    setTimeframes(timeframes.filter(tf => !selectedTimeframeIds.has(tf.id)))
+    setSelectedTimeframeIds(new Set())
+    setFocusedTimeframeId(null)
   }
 
   const copyTimeframe = (id: string) => {
@@ -635,6 +656,16 @@ function App() {
         pasteTimeframe(Math.round(currentTime))
         return
       }
+      if ((e.code === 'Delete' || e.code === 'Backspace') && !inInput && selectedTimeframeIds.size > 0) {
+        e.preventDefault()
+        deleteSelectedTimeframes()
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyA' && !inInput) {
+        e.preventDefault()
+        setSelectedTimeframeIds(new Set(timeframes.map(tf => tf.id)))
+        return
+      }
       if (e.code === 'Space' && !e.repeat) {
         if (inInput) return
         e.preventDefault()
@@ -644,6 +675,15 @@ function App() {
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   })
+
+  // Clean up stale selection IDs after undo/redo/load
+  useEffect(() => {
+    const ids = new Set(timeframes.map(tf => tf.id))
+    setSelectedTimeframeIds(prev => {
+      const next = new Set([...prev].filter(id => ids.has(id)))
+      return next.size === prev.size ? prev : next
+    })
+  }, [timeframes])
 
   const handleStop = () => {
     const audio = audioRef.current
@@ -678,7 +718,7 @@ function App() {
       const res = await fetch(`${API_BASE}/api/send-sequence`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filePath, sendOnly: !liveMode }),
+        body: JSON.stringify({ filePath, sendOnly: true }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
@@ -1693,6 +1733,7 @@ function App() {
               bpm={song.bpm}
               onUpdate={updateTimeframe}
               onUpdateSilent={updateTimeframeSilent}
+              onUpdateSilentBatch={updateTimeframesSilentBatch}
               onCheckpoint={checkpointTimeframes}
               onDelete={deleteTimeframe}
               onAdd={addTimeframeFromDrag}
@@ -1701,6 +1742,8 @@ function App() {
               hasClipboard={clipboardTimeframe !== null}
               focusedTimeframeId={focusedTimeframeId}
               onFocusedTimeframeChange={setFocusedTimeframeId}
+              selectedTimeframeIds={selectedTimeframeIds}
+              onSelectedTimeframeIdsChange={setSelectedTimeframeIds}
               currentTime={currentTime}
               onCurrentTimeChange={handleCurrentTimeChange}
               viewStartBeat={viewStartBeat}
