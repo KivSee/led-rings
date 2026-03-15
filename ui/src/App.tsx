@@ -163,16 +163,17 @@ function App() {
   const beatsToAudioSec = (beats: number, s: Song): number => {
     const ts = s.beatTimestampsMs
     if (ts && ts.length > 0) {
+      // Beat timestamps are absolute positions in the audio file — no offset needed
       const maxIdx = ts.length - 1
-      if (beats <= 0) return (ts[0] + (s.startOffsetMs ?? 0)) / 1000
+      if (beats <= 0) return ts[0] / 1000
       if (beats >= maxIdx) {
         const avgMs = maxIdx > 0 ? ts[maxIdx] / maxIdx : 60000 / s.bpm
-        return (ts[maxIdx] + (beats - maxIdx) * avgMs + (s.startOffsetMs ?? 0)) / 1000
+        return (ts[maxIdx] + (beats - maxIdx) * avgMs) / 1000
       }
       const floor = Math.floor(beats)
       const ceil = Math.ceil(beats)
       const ms = floor === ceil ? ts[floor] : ts[floor] + (beats - floor) * (ts[ceil] - ts[floor])
-      return (ms + (s.startOffsetMs ?? 0)) / 1000
+      return ms / 1000
     }
     return (beats / s.bpm) * 60 + (s.startOffsetMs ?? 0) / 1000
   }
@@ -180,8 +181,9 @@ function App() {
   /** Convert audio seconds to beat position (accounts for startOffsetMs and detected beats). */
   const audioSecToBeats = (sec: number, s: Song): number => {
     const ts = s.beatTimestampsMs
-    const ms = sec * 1000 - (s.startOffsetMs ?? 0)
     if (ts && ts.length > 0) {
+      // Beat timestamps are absolute positions in the audio file — no offset needed
+      const ms = sec * 1000
       if (ms <= ts[0]) return 0
       if (ms >= ts[ts.length - 1]) {
         const maxIdx = ts.length - 1

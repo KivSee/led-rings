@@ -33,8 +33,11 @@ const beatToMs = (beat: number, bpm: number, beatTimestampsMs?: number[]): numbe
 export const beats = (startBeat: number, endBeat: number, cb: Function) => {
     const store = als.getStore();
     const { bpm, startOffsetMs, beatTimestampsMs } = store.animation;
-    const startTime = Math.round(beatToMs(startBeat, bpm, beatTimestampsMs)) + startOffsetMs;
-    const endTime = Math.round(beatToMs(endBeat, bpm, beatTimestampsMs)) + startOffsetMs;
+    // When beatTimestampsMs is present, timestamps are absolute positions in the audio — no offset needed.
+    // startOffsetMs is only used for the BPM-based fallback in beatToMs.
+    const offset = (beatTimestampsMs && beatTimestampsMs.length > 0) ? 0 : startOffsetMs;
+    const startTime = Math.round(beatToMs(startBeat, bpm, beatTimestampsMs)) + offset;
+    const endTime = Math.round(beatToMs(endBeat, bpm, beatTimestampsMs)) + offset;
     const newStore = {
         ...store,
         effectConfig: {

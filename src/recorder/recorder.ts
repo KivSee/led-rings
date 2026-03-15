@@ -73,6 +73,7 @@ class Recorder {
   private effectCounter = 0;
   private bpm = 120;
   private startOffsetMs = 0;
+  private hasBeatTimestamps = false;
 
   reset() {
     this.timeframes = [];
@@ -81,9 +82,10 @@ class Recorder {
     this.effectCounter = 0;
   }
 
-  setBpm(bpm: number, startOffsetMs: number) {
+  setBpm(bpm: number, startOffsetMs: number, hasBeatTimestamps = false) {
     this.bpm = bpm;
     this.startOffsetMs = startOffsetMs;
+    this.hasBeatTimestamps = hasBeatTimestamps;
   }
 
   recordEffect(effectKey: string, params: Record<string, any>) {
@@ -91,8 +93,10 @@ class Recorder {
     if (!store) return;
 
     const effectConfig = store.effectConfig || {};
-    const startBeat = msToBeats((effectConfig.start_time ?? 0) - this.startOffsetMs, this.bpm);
-    const endBeat = msToBeats((effectConfig.end_time ?? 0) - this.startOffsetMs, this.bpm);
+    // When beat timestamps are present, times are already absolute — no offset to subtract
+    const offset = this.hasBeatTimestamps ? 0 : this.startOffsetMs;
+    const startBeat = msToBeats((effectConfig.start_time ?? 0) - offset, this.bpm);
+    const endBeat = msToBeats((effectConfig.end_time ?? 0) - offset, this.bpm);
     const rings: number[] = store.elements || [];
     const mapping: string = effectConfig.segments || "all";
     const phaseValue: number = store.phase || 0;
