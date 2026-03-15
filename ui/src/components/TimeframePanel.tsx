@@ -465,16 +465,19 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, songLengt
             <span className="timeframe-panel-duration">({duration}b)</span>
           </div>
 
-          {/* Cycles: cycle(beatsInCycle) and cycleBeats(beatsInCycle, startBeat, endBeat) — outermost first */}
+          {/* Cycles: only one cycle or cycleBeats per timeframe (hardware doesn't support nesting) */}
           <div className="timeframe-panel-cycles">
-            <label className="timeframe-panel-label">Cycles</label>
+            <label className="timeframe-panel-label" title="Repeat the effect within the timeframe. Only one cycle per timeframe is supported.">Cycle</label>
             <div className="timeframe-panel-cycles-list">
               {(timeframe.cycles ?? []).map((entry, idx) => (
                 <div key={idx} className="timeframe-panel-cycle-row">
-                  <span className="timeframe-panel-cycle-type">{entry.type === 'cycle' ? 'cycle' : 'cycleBeats'}</span>
+                  <span className="timeframe-panel-cycle-type" title={entry.type === 'cycle'
+                    ? 'Repeat the full effect every N beats'
+                    : 'Repeat the effect every N beats, but only play the window from startBeat to endBeat within each cycle'}
+                  >{entry.type === 'cycle' ? 'cycle' : 'cycleBeats'}</span>
                   {entry.type === 'cycle' ? (
                     <>
-                      <label className="timeframe-panel-cycle-param">
+                      <label className="timeframe-panel-cycle-param" title="Number of beats per repetition">
                         <span>beatsInCycle</span>
                         <input
                           type="number"
@@ -496,7 +499,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, songLengt
                     </>
                   ) : (
                     <>
-                      <label className="timeframe-panel-cycle-param">
+                      <label className="timeframe-panel-cycle-param" title="Number of beats per repetition">
                         <span>beatsInCycle</span>
                         <input
                           type="number"
@@ -515,8 +518,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, songLengt
                           className={'timeframe-panel-input-small' + (entry.beatsInCycle === 0 ? ' input-error' : '')}
                         />
                       </label>
-                      <label className="timeframe-panel-cycle-param">
-                        <span>startBeat</span>
+                      <label className="timeframe-panel-cycle-param" title="Start of the active window within each cycle (in beats)">
                         <input
                           type="number"
                           min={0}
@@ -533,7 +535,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, songLengt
                           className="timeframe-panel-input-small"
                         />
                       </label>
-                      <label className="timeframe-panel-cycle-param">
+                      <label className="timeframe-panel-cycle-param" title="End of the active window within each cycle (in beats)">
                         <span>endBeat</span>
                         <input
                           type="number"
@@ -567,28 +569,30 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, songLengt
                 </div>
               ))}
             </div>
-            <div className="timeframe-panel-cycles-actions">
-              <button
-                type="button"
-                className="timeframe-panel-cycle-add"
-                onClick={() => {
-                  const next = [...(timeframe.cycles ?? []), { type: 'cycle', beatsInCycle: 1 } as TimeframeCycleEntry]
-                  onUpdate({ cycles: next })
-                }}
-              >
-                + cycle
-              </button>
-              <button
-                type="button"
-                className="timeframe-panel-cycle-add"
-                onClick={() => {
-                  const next = [...(timeframe.cycles ?? []), { type: 'cycleBeats', beatsInCycle: 1, startBeat: 0, endBeat: 0.5 } as TimeframeCycleBeats]
-                  onUpdate({ cycles: next })
-                }}
-              >
-                + cycleBeats
-              </button>
-            </div>
+            {(timeframe.cycles ?? []).length === 0 && (
+              <div className="timeframe-panel-cycles-actions">
+                <button
+                  type="button"
+                  className="timeframe-panel-cycle-add"
+                  onClick={() => {
+                    onUpdate({ cycles: [{ type: 'cycle', beatsInCycle: 1 } as TimeframeCycleEntry] })
+                  }}
+                  title="Repeat the full effect every N beats"
+                >
+                  + cycle
+                </button>
+                <button
+                  type="button"
+                  className="timeframe-panel-cycle-add"
+                  onClick={() => {
+                    onUpdate({ cycles: [{ type: 'cycleBeats', beatsInCycle: 1, startBeat: 0, endBeat: 0.5 } as TimeframeCycleBeats] })
+                  }}
+                  title="Repeat every N beats, playing only a window within each cycle"
+                >
+                  + cycleBeats
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

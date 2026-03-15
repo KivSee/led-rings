@@ -94,12 +94,16 @@ const RingVisualization = ({
     return segmentRelPosMap.get(mappingName)?.get(pixelIndex) ?? null
   }, [segmentRelPosMap])
 
-  /** relPos for effect evaluation. For mapping "ind" the runtime runs the effect per ring with 0–1 within each ring; segments.json "ind" is one value per ring (so preview would show one snake across rings). Use position-within-ring for "ind" so the preview matches. */
-  const getRelPosForEffect = React.useCallback((pixelIndex: number, mappingName: string): number => {
+  /** relPos for effect evaluation. For mapping "ind" the runtime runs the effect per ring with 0–1 within each ring; segments.json "ind" is one value per ring (so preview would show one snake across rings). Use position-within-ring for "ind" so the preview matches.
+   *  Returns null if the pixel is not in the mapping segment (pixel should not be affected by this timeframe). */
+  const getRelPosForEffect = React.useCallback((pixelIndex: number, mappingName: string): number | null => {
     if (mappingName.toLowerCase() === 'ind') {
       return (pixelIndex % 12) / 12
     }
-    return getRelPosForMapping(pixelIndex, mappingName) ?? 0
+    if (mappingName.toLowerCase() === 'all') {
+      return getRelPosForMapping(pixelIndex, mappingName) ?? 0
+    }
+    return getRelPosForMapping(pixelIndex, mappingName)
   }, [getRelPosForMapping])
 
   // Build a per-ring lookup: ringNumber (1-12) → all matching timeframes
@@ -225,11 +229,12 @@ const RingVisualization = ({
                   const tfWithT: Array<{ timeframe: Timeframe; t: number; relPos: number; holdOff?: boolean }> = []
                   for (const tf of ringTfs) {
                     const tfMapping = tf.mapping || 'all'
+                    const rp = getRelPosForEffect(pixel.index, tfMapping)
+                    if (rp == null) continue  // pixel not in this timeframe's mapping segment
                     const ringT = computeRingT(tf, currentTime!, ringNumber)
                     if (ringT == null) continue
                     const tVal = typeof ringT === 'number' ? ringT : ringT.t
                     const holdOff = typeof ringT === 'object' && ringT.holdOff === true
-                    const rp = getRelPosForEffect(pixel.index, tfMapping)
                     tfWithT.push({ timeframe: tf, t: tVal, relPos: rp, holdOff })
                   }
                   if (tfWithT.length === 0) {
@@ -244,11 +249,15 @@ const RingVisualization = ({
                   // Single-timeframe mode (mapping preview in TimeframePanel)
                   const tfMapping = singleTf.mapping || 'all'
                   const tfRelPos = getRelPosForEffect(pixel.index, tfMapping)
-                  const ringT = computeRingT(singleTf, currentTime!, ringNumber)
-                  const tVal = ringT == null ? t : (typeof ringT === 'number' ? ringT : ringT.t)
-                  const holdOff = typeof ringT === 'object' && ringT?.holdOff === true
-                  hsv = getPixelColor(tfRelPos, tVal, singleTf, ringIndex, holdOff)
-                  pixelColor = hsvToRgbString(hsv.h, hsv.s, hsv.v)
+                  if (tfRelPos == null) {
+                    pixelColor = 'rgb(0, 0, 0)'
+                  } else {
+                    const ringT = computeRingT(singleTf, currentTime!, ringNumber)
+                    const tVal = ringT == null ? t : (typeof ringT === 'number' ? ringT : ringT.t)
+                    const holdOff = typeof ringT === 'object' && ringT?.holdOff === true
+                    hsv = getPixelColor(tfRelPos, tVal, singleTf, ringIndex, holdOff)
+                    pixelColor = hsvToRgbString(hsv.h, hsv.s, hsv.v)
+                  }
                 } else {
                   pixelColor = 'rgb(0, 0, 0)'
                 }
