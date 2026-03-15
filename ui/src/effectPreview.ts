@@ -550,24 +550,27 @@ export function getPixelColorMulti(
   return { h, s, v }
 }
 
-/** Convert HSV (0–1) to rgb() string. */
+/** Convert HSV (0–1) to rgb() string.
+ *  Applies gamma 2.2 correction to the V (brightness) channel only so the screen
+ *  preview matches LED perception without distorting hue or saturation. */
 export function hsvToRgbString(h: number, s: number, v: number): string {
+  const vGamma = Math.pow(Math.max(0, Math.min(1, v)), 1 / 2.2)
   let r: number, g: number, b: number
   if (s === 0) {
-    r = g = b = v
+    r = g = b = vGamma
   } else {
     const i = Math.floor(h * 6)
     const f = h * 6 - i
-    const p = v * (1 - s)
-    const q = v * (1 - s * f)
-    const t = v * (1 - s * (1 - f))
+    const p = vGamma * (1 - s)
+    const q = vGamma * (1 - s * f)
+    const t = vGamma * (1 - s * (1 - f))
     switch (i % 6) {
-      case 0: r = v; g = t; b = p; break
-      case 1: r = q; g = v; b = p; break
-      case 2: r = p; g = v; b = t; break
-      case 3: r = p; g = q; b = v; break
-      case 4: r = t; g = p; b = v; break
-      default: r = v; g = p; b = q; break
+      case 0: r = vGamma; g = t; b = p; break
+      case 1: r = q; g = vGamma; b = p; break
+      case 2: r = p; g = vGamma; b = t; break
+      case 3: r = p; g = q; b = vGamma; break
+      case 4: r = t; g = p; b = vGamma; break
+      default: r = vGamma; g = p; b = q; break
     }
   }
   return `rgb(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)})`

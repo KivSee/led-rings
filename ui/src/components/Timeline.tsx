@@ -18,6 +18,10 @@ interface TimelineProps {
   songLengthBeats: number
   bpm: number
   onUpdate: (id: string, updates: Partial<Timeframe>) => void
+  /** Update without pushing to undo stack (for real-time drag/resize). */
+  onUpdateSilent?: (id: string, updates: Partial<Timeframe>) => void
+  /** Save current state to undo stack (call once at drag/resize start). */
+  onCheckpoint?: () => void
   onDelete: (id: string) => void
   onAdd: (startTime: number, endTime: number) => void
   onCopy?: (id: string) => void
@@ -54,7 +58,7 @@ const beatToSeconds = (beat: number, bpm: number, beatTimestampsMs?: number[]): 
   return (beat / bpm) * 60
 }
 
-const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd, onCopy, onPaste, hasClipboard, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange, viewStartBeat, beatsPerScreen, onScrollTo, onZoomAt, onPanBy: _onPanBy, onSeekToBeat, beatTimestampsMs }: TimelineProps) => {
+const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onUpdateSilent, onCheckpoint, onDelete, onAdd, onCopy, onPaste, hasClipboard, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange, viewStartBeat, beatsPerScreen, onScrollTo, onZoomAt, onPanBy: _onPanBy, onSeekToBeat, beatTimestampsMs }: TimelineProps) => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -371,6 +375,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
         if (timeframeId) {
           e.preventDefault()
           e.stopPropagation()
+          onCheckpoint?.()
           setIsDragging(true)
           setResizingTimeframeId(timeframeId)
           setResizingEdge(edge)
@@ -395,6 +400,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
       if (timeframeId && timeframe) {
         e.preventDefault()
         e.stopPropagation()
+        onCheckpoint?.()
         const beat = yToBeat(e.clientY)
         setIsDragging(true)
         setMovingTimeframeId(timeframeId)
@@ -451,25 +457,24 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
       return
     }
 
+    const silentUpdate = onUpdateSilent ?? onUpdate
     if (movingTimeframeId && moveStartBeat !== null && moveOriginalStart !== null && moveOriginalEnd !== null && dragCurrent !== null) {
       const duration = moveOriginalEnd - moveOriginalStart
       const deltaBeat = dragCurrent - moveStartBeat
       let newStart = snapToBeat(moveOriginalStart + deltaBeat)
       newStart = Math.max(0, Math.min(maxTime - duration, newStart))
       const newEnd = newStart + duration
-      onUpdate(movingTimeframeId, { startTime: newStart, endTime: newEnd })
+      silentUpdate(movingTimeframeId, { startTime: newStart, endTime: newEnd })
     } else if (resizingTimeframeId && resizingEdge && dragCurrent !== null) {
       const timeframe = timeframes.find(tf => tf.id === resizingTimeframeId)
       if (timeframe) {
         const newBeat = dragCurrent
         if (resizingEdge === 'start') {
-          // Ensure start doesn't go past end, maintain at least 4 beats difference
           const newStart = Math.min(newBeat, timeframe.endTime - 1)
-          onUpdate(resizingTimeframeId, { startTime: newStart })
+          silentUpdate(resizingTimeframeId, { startTime: newStart })
         } else {
-          // Ensure end doesn't go before start, maintain at least 4 beats difference
           const newEnd = Math.max(newBeat, timeframe.startTime + 1)
-          onUpdate(resizingTimeframeId, { endTime: newEnd })
+          silentUpdate(resizingTimeframeId, { endTime: newEnd })
         }
       }
     } else if (dragStart !== null && dragCurrent !== null) {
@@ -511,18 +516,17 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
       const beat = yToBeat(e.clientY)
       setDragCurrent(beat)
 
-      // Update timeframe in real-time while resizing
+      // Update timeframe in real-time while resizing (silent — checkpoint was saved at drag start)
+      const silentUpdate = onUpdateSilent ?? onUpdate
       if (resizingTimeframeId && resizingEdge) {
         const timeframe = timeframes.find(tf => tf.id === resizingTimeframeId)
         if (timeframe) {
           if (resizingEdge === 'start') {
-            // Ensure start doesn't go past end, maintain at least 4 beats difference
             const newStart = Math.min(beat, timeframe.endTime - 1)
-            onUpdate(resizingTimeframeId, { startTime: newStart })
+            silentUpdate(resizingTimeframeId, { startTime: newStart })
           } else {
-            // Ensure end doesn't go before start, maintain at least 4 beats difference
             const newEnd = Math.max(beat, timeframe.startTime + 1)
-            onUpdate(resizingTimeframeId, { endTime: newEnd })
+            silentUpdate(resizingTimeframeId, { endTime: newEnd })
           }
         }
       }
@@ -534,7 +538,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
         let newStart = snapToBeat(moveOriginalStart + deltaBeat)
         newStart = Math.max(0, Math.min(maxTime - duration, newStart))
         const newEnd = newStart + duration
-        onUpdate(movingTimeframeId, { startTime: newStart, endTime: newEnd })
+        silentUpdate(movingTimeframeId, { startTime: newStart, endTime: newEnd })
       }
     }
 
@@ -556,25 +560,24 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
         return
       }
 
+      const silentUp = onUpdateSilent ?? onUpdate
       if (movingTimeframeId && moveStartBeat !== null && moveOriginalStart !== null && moveOriginalEnd !== null && dragCurrent !== null) {
         const duration = moveOriginalEnd - moveOriginalStart
         const deltaBeat = dragCurrent - moveStartBeat
         let newStart = snapToBeat(moveOriginalStart + deltaBeat)
         newStart = Math.max(0, Math.min(maxTime - duration, newStart))
         const newEnd = newStart + duration
-        onUpdate(movingTimeframeId, { startTime: newStart, endTime: newEnd })
+        silentUp(movingTimeframeId, { startTime: newStart, endTime: newEnd })
       } else if (resizingTimeframeId && resizingEdge && dragCurrent !== null) {
         const timeframe = timeframes.find(tf => tf.id === resizingTimeframeId)
         if (timeframe) {
           const newBeat = dragCurrent
           if (resizingEdge === 'start') {
-            // Ensure start doesn't go past end, maintain at least 4 beats difference
             const newStart = Math.min(newBeat, timeframe.endTime - 1)
-            onUpdate(resizingTimeframeId, { startTime: newStart })
+            silentUp(resizingTimeframeId, { startTime: newStart })
           } else {
-            // Ensure end doesn't go before start, maintain at least 4 beats difference
             const newEnd = Math.max(newBeat, timeframe.startTime + 1)
-            onUpdate(resizingTimeframeId, { endTime: newEnd })
+            silentUp(resizingTimeframeId, { endTime: newEnd })
           }
         }
       } else if (dragStart !== null && dragCurrent !== null) {
@@ -606,7 +609,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
         document.removeEventListener('mouseup', handleGlobalMouseUp)
       }
     }
-  }, [isDragging, isDraggingTimeIndicator, dragStart, dragCurrent, resizingTimeframeId, resizingEdge, movingTimeframeId, moveStartBeat, moveOriginalStart, moveOriginalEnd, timeframes, onAdd, onUpdate, maxTime, onCurrentTimeChange])
+  }, [isDragging, isDraggingTimeIndicator, dragStart, dragCurrent, resizingTimeframeId, resizingEdge, movingTimeframeId, moveStartBeat, moveOriginalStart, moveOriginalEnd, timeframes, onAdd, onUpdate, onUpdateSilent, maxTime, onCurrentTimeChange])
 
   const dragStartBeat = dragStart !== null ? dragStart : 0
   const dragEndBeat = dragCurrent !== null ? dragCurrent : dragStartBeat

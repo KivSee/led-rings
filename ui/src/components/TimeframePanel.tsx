@@ -284,9 +284,10 @@ interface TimeframePanelProps {
   onUpdate: (updates: Partial<Timeframe>) => void
   onClose: () => void
   onApplyPreset?: (preset: PresetMetadata) => void
+  songLengthBeats?: number
 }
 
-const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: TimeframePanelProps) => {
+const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, songLengthBeats }: TimeframePanelProps) => {
   const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | 'color' | null>(null)
   const [tempStartTime, setTempStartTime] = useState<string>('')
   const [tempEndTime, setTempEndTime] = useState<string>('')
@@ -341,7 +342,8 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: Timefra
       setTempStartTime('')
     } else if (editingField === 'endTime' && tempEndTime !== '') {
       const numValue = parseFloat(tempEndTime)
-      if (!isNaN(numValue) && numValue > timeframe.startTime) {
+      const maxEnd = songLengthBeats ?? Infinity
+      if (!isNaN(numValue) && numValue > timeframe.startTime && numValue <= maxEnd) {
         onUpdate({ endTime: numValue })
       }
       setTempEndTime('')
@@ -450,6 +452,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: Timefra
                 autoFocus
                 step="1"
                 min={timeframe.startTime + 4}
+                max={songLengthBeats}
               />
             ) : (
               <div

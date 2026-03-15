@@ -216,40 +216,48 @@ const RingVisualization = ({
           >
             {ringPixels.map((pixel, positionInRing) => {
               if (!pixel) return null
-              const pixelColor = useEffectPreview
-                ? (() => {
-                    // Multi-timeframe mode: find all timeframes for this ring
-                    const ringTfs = ringToTimeframes.get(ringNumber)
-                    if (ringTfs && ringTfs.length > 0) {
-                      const tfWithT: Array<{ timeframe: Timeframe; t: number; relPos: number; holdOff?: boolean }> = []
-                      for (const tf of ringTfs) {
-                        const tfMapping = tf.mapping || 'all'
-                        const ringT = computeRingT(tf, currentTime!, ringNumber)
-                        if (ringT == null) continue
-                        const tVal = typeof ringT === 'number' ? ringT : ringT.t
-                        const holdOff = typeof ringT === 'object' && ringT.holdOff === true
-                        const rp = getRelPosForEffect(pixel.index, tfMapping)
-                        tfWithT.push({ timeframe: tf, t: tVal, relPos: rp, holdOff })
-                      }
-                      if (tfWithT.length === 0) return 'rgb(0, 0, 0)'
-                      const { h, s, v } = tfWithT.length === 1
-                        ? getPixelColor(tfWithT[0].relPos, tfWithT[0].t, tfWithT[0].timeframe, ringIndex)
-                        : getPixelColorMulti(tfWithT, ringIndex)
-                      return hsvToRgbString(h, s, v)
-                    }
-                    // Single-timeframe mode (mapping preview in TimeframePanel)
-                    if (singleTf) {
-                      const tfMapping = singleTf.mapping || 'all'
-                      const tfRelPos = getRelPosForEffect(pixel.index, tfMapping)
-                      const ringT = computeRingT(singleTf, currentTime!, ringNumber)
-                      const tVal = ringT == null ? t : (typeof ringT === 'number' ? ringT : ringT.t)
-                      const holdOff = typeof ringT === 'object' && ringT?.holdOff === true
-                      const { h, s, v } = getPixelColor(tfRelPos, tVal, singleTf, ringIndex, holdOff)
-                      return hsvToRgbString(h, s, v)
-                    }
-                    return 'rgb(0, 0, 0)'
-                  })()
-                : relPosToColor(pixel.relPos)
+              let pixelColor: string
+              let hsv: { h: number; s: number; v: number } | null = null
+              if (useEffectPreview) {
+                // Multi-timeframe mode: find all timeframes for this ring
+                const ringTfs = ringToTimeframes.get(ringNumber)
+                if (ringTfs && ringTfs.length > 0) {
+                  const tfWithT: Array<{ timeframe: Timeframe; t: number; relPos: number; holdOff?: boolean }> = []
+                  for (const tf of ringTfs) {
+                    const tfMapping = tf.mapping || 'all'
+                    const ringT = computeRingT(tf, currentTime!, ringNumber)
+                    if (ringT == null) continue
+                    const tVal = typeof ringT === 'number' ? ringT : ringT.t
+                    const holdOff = typeof ringT === 'object' && ringT.holdOff === true
+                    const rp = getRelPosForEffect(pixel.index, tfMapping)
+                    tfWithT.push({ timeframe: tf, t: tVal, relPos: rp, holdOff })
+                  }
+                  if (tfWithT.length === 0) {
+                    pixelColor = 'rgb(0, 0, 0)'
+                  } else {
+                    hsv = tfWithT.length === 1
+                      ? getPixelColor(tfWithT[0].relPos, tfWithT[0].t, tfWithT[0].timeframe, ringIndex)
+                      : getPixelColorMulti(tfWithT, ringIndex)
+                    pixelColor = hsvToRgbString(hsv.h, hsv.s, hsv.v)
+                  }
+                } else if (singleTf) {
+                  // Single-timeframe mode (mapping preview in TimeframePanel)
+                  const tfMapping = singleTf.mapping || 'all'
+                  const tfRelPos = getRelPosForEffect(pixel.index, tfMapping)
+                  const ringT = computeRingT(singleTf, currentTime!, ringNumber)
+                  const tVal = ringT == null ? t : (typeof ringT === 'number' ? ringT : ringT.t)
+                  const holdOff = typeof ringT === 'object' && ringT?.holdOff === true
+                  hsv = getPixelColor(tfRelPos, tVal, singleTf, ringIndex, holdOff)
+                  pixelColor = hsvToRgbString(hsv.h, hsv.s, hsv.v)
+                } else {
+                  pixelColor = 'rgb(0, 0, 0)'
+                }
+              } else {
+                pixelColor = relPosToColor(pixel.relPos)
+              }
+              const hsvStr = hsv
+                ? `\nH: ${(hsv.h * 360).toFixed(0)}° S: ${(hsv.s * 100).toFixed(0)}% V: ${(hsv.v * 100).toFixed(0)}%`
+                : ''
               return (
                 <div
                   key={pixel.index}
@@ -260,7 +268,7 @@ const RingVisualization = ({
                     '--pixel-index': positionInRing,
                     '--ring-index': ringIndex,
                   } as React.CSSProperties}
-                  title={`Ring ${ringIndex + 1}, Position ${positionInRing}, Index ${pixel.index}, Pos ${pixel.relPos.toFixed(3)}`}
+                  title={`Ring ${ringIndex + 1}, Position ${positionInRing}, Index ${pixel.index}, Pos ${pixel.relPos.toFixed(3)}${hsvStr}`}
                 />
               )
             })}

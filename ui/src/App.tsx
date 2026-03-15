@@ -4,6 +4,7 @@ import TimeframePanel from './components/TimeframePanel'
 import PlaybackRingsPanel from './components/PlaybackRingsPanel'
 import Spectrogram from './components/Spectrogram'
 import { useViewRange } from './hooks/useViewRange'
+import { useUndoHistory } from './hooks/useUndoHistory'
 import { generateSequenceTs } from './generateSequenceTs'
 import { presetToTimeframes } from './presets'
 import { normalizeMovement } from './movementGenerators'
@@ -210,7 +211,10 @@ function App() {
     animationType: 'song',
   })
 
-  const [timeframes, setTimeframes] = useState<Timeframe[]>([
+  const {
+    value: timeframes, setValue: setTimeframes, setValueSilent: setTimeframesSilent,
+    checkpoint: checkpointTimeframes, undo: undoTimeframes, redo: redoTimeframes,
+  } = useUndoHistory<Timeframe[]>([
     {
       id: '1',
       startTime: 0,
@@ -425,13 +429,13 @@ function App() {
   }, [resizing])
 
   const addTimeframe = () => {
-    const lastEndTime = timeframes.length > 0
-      ? Math.max(...timeframes.map(t => t.endTime))
-      : 0
+    const start = snapToBeat(currentTime)
+    const end = Math.min(snapToBeat(start + 4), songLengthBeats)
+    if (end <= start) return
     const newTimeframe: Timeframe = {
       id: Date.now().toString(),
-      startTime: snapToBeat(lastEndTime),
-      endTime: snapToBeat(lastEndTime + 4),
+      startTime: start,
+      endTime: end,
       label: `Timeframe ${timeframes.length + 1}`,
       color: `#${Math.floor(Math.random()*16777215).toString(16)}`,
       rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -440,9 +444,28 @@ function App() {
     setTimeframes([...timeframes, newTimeframe])
   }
 
+  const clampTimeframeUpdates = (updates: Partial<Timeframe>) => {
+    if (updates.endTime !== undefined) {
+      updates.endTime = Math.min(updates.endTime, songLengthBeats)
+    }
+    if (updates.startTime !== undefined) {
+      updates.startTime = Math.max(0, updates.startTime)
+    }
+    return updates
+  }
+
   const updateTimeframe = (id: string, updates: Partial<Timeframe>) => {
+    const clamped = clampTimeframeUpdates(updates)
     setTimeframes(timeframes.map(tf =>
-      tf.id === id ? { ...tf, ...updates } : tf
+      tf.id === id ? { ...tf, ...clamped } : tf
+    ))
+  }
+
+  /** Update without pushing to undo stack — for real-time drag/resize. */
+  const updateTimeframeSilent = (id: string, updates: Partial<Timeframe>) => {
+    const clamped = clampTimeframeUpdates(updates)
+    setTimeframesSilent(prev => prev.map(tf =>
+      tf.id === id ? { ...tf, ...clamped } : tf
     ))
   }
 
@@ -462,6 +485,7 @@ function App() {
   const pasteTimeframe = (beatPosition: number) => {
     if (!clipboardTimeframe) return
     const duration = clipboardTimeframe.endTime - clipboardTimeframe.startTime
+    if (beatPosition + duration > songLengthBeats) return  // would exceed song length
     const cloned: Timeframe = JSON.parse(JSON.stringify(clipboardTimeframe))
     cloned.id = `dup-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
     cloned.startTime = beatPosition
@@ -479,10 +503,13 @@ function App() {
   }
 
   const addTimeframeFromDrag = (startTime: number, endTime: number) => {
+    const clampedStart = Math.max(0, Math.min(startTime, endTime))
+    const clampedEnd = Math.min(songLengthBeats, Math.max(startTime, endTime))
+    if (clampedEnd <= clampedStart) return
     const newTimeframe: Timeframe = {
       id: Date.now().toString(),
-      startTime: Math.min(startTime, endTime),
-      endTime: Math.max(startTime, endTime),
+      startTime: clampedStart,
+      endTime: clampedEnd,
       label: `Timeframe ${timeframes.length + 1}`,
       color: `#${Math.floor(Math.random()*16777215).toString(16)}`,
       rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -494,6 +521,7 @@ function App() {
   const addTimeframesFromPreset = (preset: PresetMetadata) => {
     const snappedBeat = Math.round(currentTime)
     const newTimeframes = presetToTimeframes(preset, snappedBeat, song.bpm)
+      .filter(tf => tf.endTime <= songLengthBeats)
     if (newTimeframes.length > 0) {
       setTimeframes(prev => [...prev, ...newTimeframes])
       setFocusedTimeframeId(newTimeframes[0].id)
@@ -581,6 +609,20 @@ function App() {
       const inInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
       if (e.code === 'Escape') {
         setClipboardTimeframe(null)
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ' && !inInput) {
+        e.preventDefault()
+        if (e.shiftKey) {
+          redoTimeframes()
+        } else {
+          undoTimeframes()
+        }
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyY' && !inInput) {
+        e.preventDefault()
+        redoTimeframes()
         return
       }
       if ((e.ctrlKey || e.metaKey) && e.code === 'KeyC' && !inInput && focusedTimeframeId) {
@@ -1650,6 +1692,8 @@ function App() {
               songLengthBeats={songLengthBeats}
               bpm={song.bpm}
               onUpdate={updateTimeframe}
+              onUpdateSilent={updateTimeframeSilent}
+              onCheckpoint={checkpointTimeframes}
               onDelete={deleteTimeframe}
               onAdd={addTimeframeFromDrag}
               onCopy={copyTimeframe}
@@ -1683,6 +1727,7 @@ function App() {
             onUpdate={handlePanelUpdate}
             onClose={() => setFocusedTimeframeId(null)}
             onApplyPreset={addTimeframesFromPreset}
+            songLengthBeats={songLengthBeats}
           />
         </div>
       </div>
