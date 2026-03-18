@@ -19,7 +19,6 @@ export interface ViewRangeActions {
 }
 
 const MIN_BEATS_PER_SCREEN = 4
-const MAX_BEATS_PER_SCREEN = 256
 const ZOOM_FACTOR = 2
 
 export function useViewRange(songLengthBeats: number): [ViewRangeState, ViewRangeActions] {
@@ -49,7 +48,7 @@ export function useViewRange(songLengthBeats: number): [ViewRangeState, ViewRang
     setState(prev => {
       const newBps = direction === 'in'
         ? Math.max(MIN_BEATS_PER_SCREEN, prev.beatsPerScreen / ZOOM_FACTOR)
-        : Math.min(MAX_BEATS_PER_SCREEN, prev.beatsPerScreen * ZOOM_FACTOR)
+        : Math.min(maxBeatRef.current, prev.beatsPerScreen * ZOOM_FACTOR)
       if (newBps === prev.beatsPerScreen) return prev
       const newStart = anchorBeat - anchorFraction * newBps
       return { beatsPerScreen: newBps, startBeat: clampStart(newStart, newBps) }
