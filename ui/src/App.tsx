@@ -308,6 +308,7 @@ function App() {
   /** When true, next Run starts from runStartTimeSeconds; when false, next Run resumes from currentTime (after Pause). */
   const [nextRunFromStart, setNextRunFromStart] = useState(true)
   const [liveMode, setLiveMode] = useState(false)
+  const [muteAudio, setMuteAudio] = useState(false)
   const [controlServerAvailable, setControlServerAvailable] = useState(false)
   const [sendSequenceLoading, setSendSequenceLoading] = useState(false)
   const [detectBeatsLoading, setDetectBeatsLoading] = useState(false)
@@ -678,6 +679,11 @@ function App() {
     return () => document.removeEventListener('keydown', onKeyDown)
   })
 
+  // Sync mute state to audio element
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.muted = muteAudio
+  }, [muteAudio])
+
   // Clean up stale selection IDs after undo/redo/load
   useEffect(() => {
     const ids = new Set(timeframes.map(tf => tf.id))
@@ -961,6 +967,16 @@ function App() {
         })
         const data = await res.json()
         if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+
+        // Save a backup of the original .ts before it gets overwritten on next save
+        if (API_BASE) {
+          const baseName = file.name.replace(/\.ts$/, '')
+          fetch(`${API_BASE}/api/save-file`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: `src/songs/${baseName}.original.ts`, content: songCode }),
+          }).catch(() => {})
+        }
 
         if (data.song && typeof data.song === 'object') {
           const s = normalizeLoadedSong(data.song as Record<string, unknown>)
@@ -1720,6 +1736,8 @@ function App() {
             onStop={handleStop}
             onSendSequence={handleSendSequence}
             onLiveModeChange={setLiveMode}
+            muteAudio={muteAudio}
+            onMuteAudioChange={setMuteAudio}
           />
         </div>
         <div

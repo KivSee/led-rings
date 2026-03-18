@@ -1,5 +1,6 @@
-# Claude Code local settings
-.claude/
+# Claude Code local settings (personal overrides only)
+.claude/*
+!.claude/settings.json
 
 # Control server temp files
 .tmp-sequence-out.json

@@ -14,6 +14,8 @@ interface PlaybackRingsPanelProps {
   onStop: () => void
   onSendSequence: () => void
   onLiveModeChange: (value: boolean) => void
+  muteAudio?: boolean
+  onMuteAudioChange?: (value: boolean) => void
 }
 
 function getActiveTimeframesAt(time: number, timeframes: Timeframe[]): Timeframe[] {
@@ -33,6 +35,8 @@ const PlaybackRingsPanel = ({
   onStop,
   onSendSequence,
   onLiveModeChange,
+  muteAudio,
+  onMuteAudioChange,
 }: PlaybackRingsPanelProps) => {
   const activeTimeframes = getActiveTimeframesAt(currentTime, timeframes)
   const activeRings = Array.from(new Set(
@@ -60,6 +64,14 @@ const PlaybackRingsPanel = ({
               onChange={(e) => onLiveModeChange(e.target.checked)}
             />
             <span>Live</span>
+          </label>
+          <label className="playback-live-mode" title="Mute simulator audio (useful in Live mode to avoid echo from device)">
+            <input
+              type="checkbox"
+              checked={muteAudio ?? false}
+              onChange={(e) => onMuteAudioChange?.(e.target.checked)}
+            />
+            <span>Mute</span>
           </label>
           <button
             className={`playback-ctrl-btn ${isPlaying ? 'playing' : ''}`}
