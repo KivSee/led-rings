@@ -284,10 +284,11 @@ interface TimeframePanelProps {
   onUpdate: (updates: Partial<Timeframe>) => void
   onClose: () => void
   onApplyPreset?: (preset: PresetMetadata) => void
+  onLoadCategoryPreview?: (payload: { song: Record<string, unknown>; timeframes: unknown[] }) => void
   songLengthBeats?: number
 }
 
-const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, songLengthBeats }: TimeframePanelProps) => {
+const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCategoryPreview, songLengthBeats }: TimeframePanelProps) => {
   const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | 'color' | null>(null)
   const [tempStartTime, setTempStartTime] = useState<string>('')
   const [tempEndTime, setTempEndTime] = useState<string>('')
@@ -307,7 +308,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, songLengt
     return (
       <div className="timeframe-panel">
         {onApplyPreset ? (
-          <PresetBrowser onApplyPreset={onApplyPreset} />
+          <PresetBrowser onApplyPreset={onApplyPreset} onLoadCategoryPreview={onLoadCategoryPreview} />
         ) : (
           <div className="timeframe-panel-empty">
             <p>Select a timeframe to view and edit its properties</p>

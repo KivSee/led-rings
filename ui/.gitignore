@@ -10,8 +10,14 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
-public
 *.local
+
+# Large audio assets in public/
+public/*.wav
+public/*.mp3
+public/*.ogg
+public/*.flac
+public/*.aac
 
 # Editor directories and files
 .vscode/*

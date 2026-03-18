@@ -3,6 +3,9 @@
     "allow": [
       "Read(**)",
       "Bash(git *)",
+      "Bash(cd c:/repos/led-rings && git *)",
+      "Bash(yarn *)",
+      "Bash(cd c:/repos/led-rings && yarn *)",
       "Bash(npm *)",
       "Bash(npx *)",
       "Bash(node *)",

@@ -1127,6 +1127,49 @@ function App() {
     }
   }
 
+  const loadCategoryPreview = (payload: { song: Record<string, unknown>; timeframes: unknown[] }) => {
+    const s = normalizeLoadedSong(payload.song)
+    setSong(s)
+    const mapped: Timeframe[] = (payload.timeframes as any[])
+      .filter((item: any) => item && typeof item === 'object')
+      .map((item: any, idx: number) => {
+        const effects = Array.isArray(item.effects)
+          ? item.effects
+              .filter((e: any) => e && typeof e === 'object' && typeof e.effectKey === 'string')
+              .map((e: any) => ({
+                id: e.id && typeof e.id === 'string' ? e.id : `eff-${Date.now()}-${idx}-${Math.random().toString(36).slice(2)}`,
+                effectKey: e.effectKey,
+                params: e.params && typeof e.params === 'object' ? e.params as Record<string, number | boolean | object> : undefined,
+                phase: typeof e.phase === 'number' ? e.phase : undefined,
+              }))
+          : undefined
+        let startTime = Number(item.startTime)
+        let endTime = Number(item.endTime)
+        if (!Number.isFinite(startTime)) startTime = 0
+        if (!Number.isFinite(endTime)) endTime = startTime + 4
+        if (endTime <= startTime) endTime = startTime + 4
+        let rings = Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n) && n >= 1 && n <= 12) : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        if (rings.length === 0) rings = [1]
+        return {
+          id: item.id?.toString() ?? `tf-${Date.now()}-${idx}`,
+          startTime,
+          endTime,
+          label: typeof item.label === 'string' ? item.label : `Timeframe ${idx + 1}`,
+          color: typeof item.color === 'string' ? item.color : '#3b82f6',
+          hasExplicitColor: item.hasExplicitColor !== false ? undefined : false,
+          rings,
+          mapping: item.mapping,
+          phase: typeof item.phase === 'number' ? item.phase : undefined,
+          movement: normalizeMovement(item.movement),
+          cycles: normalizeCycles(item.cycles),
+          ...(effects && effects.length > 0 ? { effects } : {}),
+        } as Timeframe
+      })
+    setTimeframes(mapped)
+    setFocusedTimeframeId(null)
+    setCurrentTime(0)
+  }
+
   // Autoload last song and window sizes on startup
   useEffect(() => {
     try {
@@ -1790,6 +1833,7 @@ function App() {
             onUpdate={handlePanelUpdate}
             onClose={() => setFocusedTimeframeId(null)}
             onApplyPreset={addTimeframesFromPreset}
+            onLoadCategoryPreview={loadCategoryPreview}
             songLengthBeats={songLengthBeats}
           />
         </div>
