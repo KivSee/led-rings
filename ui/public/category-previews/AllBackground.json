@@ -1,6 +1,6 @@
 {
   "song": {
-    "name": "All Background",
+    "name": "AllBackground",
     "lengthSeconds": 300,
     "bpm": 120,
     "animationType": "trigger"
@@ -51,6 +51,7 @@
       "endTime": 60,
       "label": "4ktr (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -110,6 +111,7 @@
       "endTime": 120,
       "label": "90y0 (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -196,6 +198,7 @@
       "endTime": 180,
       "label": "dqb4 (centric)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -236,6 +239,7 @@
       "endTime": 180,
       "label": "dqb4 (arc)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -314,6 +318,7 @@
       "endTime": 240,
       "label": "eabx (arc)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -374,6 +379,7 @@
       "endTime": 300,
       "label": "elgd (updown)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -451,6 +457,7 @@
       "endTime": 360,
       "label": "green (arc)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -537,6 +544,7 @@
       "endTime": 420,
       "label": "ie78 (updown)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -615,6 +623,7 @@
       "endTime": 480,
       "label": "ntgt (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -652,6 +661,7 @@
       "endTime": 480,
       "label": "ntgt (updown)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -713,6 +723,7 @@
       "endTime": 540,
       "label": "r0nn (arc)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -806,6 +817,7 @@
       "endTime": 600,
       "label": "u7nc (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,

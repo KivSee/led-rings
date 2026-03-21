@@ -1,6 +1,6 @@
 {
   "song": {
-    "name": "All Mystery",
+    "name": "AllMystery",
     "lengthSeconds": 750,
     "bpm": 120,
     "animationType": "trigger"
@@ -51,6 +51,7 @@
       "endTime": 60,
       "label": "0k2s (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -89,6 +90,7 @@
       "endTime": 60,
       "label": "0k2s (arc)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -174,6 +176,7 @@
       "endTime": 120,
       "label": "3z6q (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -220,6 +223,7 @@
       "endTime": 120,
       "label": "3z6q (centric)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -258,6 +262,7 @@
       "endTime": 120,
       "label": "3z6q (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -342,6 +347,7 @@
       "endTime": 180,
       "label": "4n38 (updown)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -380,6 +386,7 @@
       "endTime": 180,
       "label": "4n38 (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -456,6 +463,7 @@
       "endTime": 240,
       "label": "5fft (b1)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -495,6 +503,7 @@
       "endTime": 240,
       "label": "5fft (b2)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -534,6 +543,7 @@
       "endTime": 240,
       "label": "5fft (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -574,6 +584,7 @@
       "endTime": 240,
       "label": "5fft (ind)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -634,6 +645,7 @@
       "endTime": 300,
       "label": "8df7 (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -673,6 +685,7 @@
       "endTime": 300,
       "label": "8df7 (updown)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -711,7 +724,7 @@
       "startTime": 300,
       "endTime": 360,
       "label": "9vxg (arc)",
-      "color": "#3b82f6",
+      "color": "#00ff89",
       "rings": [
         1,
         2,
@@ -726,7 +739,22 @@
         11,
         12
       ],
-      "mapping": "arc"
+      "mapping": "arc",
+      "phase": 0.5,
+      "effects": [
+        {
+          "id": "gen-0-0",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
     },
     {
       "id": "gen-9vxg-1",
@@ -734,6 +762,7 @@
       "endTime": 360,
       "label": "9vxg (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -771,6 +800,7 @@
       "endTime": 360,
       "label": "9vxg (b1)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -810,6 +840,7 @@
       "endTime": 360,
       "label": "9vxg (b2)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -849,6 +880,7 @@
       "endTime": 360,
       "label": "9vxg (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -887,6 +919,7 @@
       "endTime": 360,
       "label": "9vxg (centric)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1005,6 +1038,7 @@
       "endTime": 420,
       "label": "apbs (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1042,6 +1076,7 @@
       "endTime": 420,
       "label": "apbs (ind)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1082,6 +1117,7 @@
       "endTime": 420,
       "label": "apbs (updown)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1200,6 +1236,7 @@
       "endTime": 480,
       "label": "c0b3 (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1236,6 +1273,7 @@
       "endTime": 480,
       "label": "c0b3 (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1322,6 +1360,7 @@
       "endTime": 540,
       "label": "c8q5 (centric)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1360,6 +1399,7 @@
       "endTime": 540,
       "label": "c8q5 (updown)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1446,6 +1486,7 @@
       "endTime": 600,
       "label": "dxwd (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1491,6 +1532,7 @@
       "endTime": 600,
       "label": "dxwd (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1551,6 +1593,7 @@
       "endTime": 660,
       "label": "ef5d (b1)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1590,6 +1633,7 @@
       "endTime": 660,
       "label": "ef5d (b2)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1629,6 +1673,7 @@
       "endTime": 660,
       "label": "ef5d (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1668,6 +1713,7 @@
       "endTime": 660,
       "label": "ef5d (arc)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1753,6 +1799,7 @@
       "endTime": 720,
       "label": "j4hj (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1790,6 +1837,7 @@
       "endTime": 720,
       "label": "j4hj (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1830,6 +1878,7 @@
       "endTime": 720,
       "label": "j4hj (arc)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1890,6 +1939,7 @@
       "endTime": 780,
       "label": "jg7k (b1)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1929,6 +1979,7 @@
       "endTime": 780,
       "label": "jg7k (b2)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1968,6 +2019,7 @@
       "endTime": 780,
       "label": "jg7k (ind)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2006,6 +2058,7 @@
       "endTime": 780,
       "label": "jg7k (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2091,6 +2144,7 @@
       "endTime": 840,
       "label": "jkn5 (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2137,6 +2191,7 @@
       "endTime": 840,
       "label": "jkn5 (ind)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2232,6 +2287,7 @@
       "endTime": 900,
       "label": "kq27 (updown)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2282,6 +2338,7 @@
       "endTime": 900,
       "label": "kq27 (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2349,6 +2406,7 @@
       "endTime": 960,
       "label": "ll5x (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2394,6 +2452,7 @@
       "endTime": 960,
       "label": "ll5x (updown)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2489,6 +2548,7 @@
       "endTime": 1020,
       "label": "m9ah (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2526,6 +2586,7 @@
       "endTime": 1020,
       "label": "m9ah (ind)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2566,6 +2627,7 @@
       "endTime": 1020,
       "label": "m9ah (centric)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2604,7 +2666,7 @@
       "startTime": 1020,
       "endTime": 1080,
       "label": "m9l6 (ind)",
-      "color": "#3b82f6",
+      "color": "#ff001e",
       "rings": [
         1,
         2,
@@ -2619,7 +2681,22 @@
         11,
         12
       ],
-      "mapping": "ind"
+      "mapping": "ind",
+      "phase": 0.25,
+      "effects": [
+        {
+          "id": "gen-0-0",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 4
+              }
+            }
+          }
+        }
+      ]
     },
     {
       "id": "gen-m9l6-1",
@@ -2627,6 +2704,7 @@
       "endTime": 1080,
       "label": "m9l6 (b1)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2666,6 +2744,7 @@
       "endTime": 1080,
       "label": "m9l6 (b2)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2705,6 +2784,7 @@
       "endTime": 1080,
       "label": "m9l6 (arc)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2743,6 +2823,7 @@
       "endTime": 1080,
       "label": "m9l6 (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2783,6 +2864,7 @@
       "endTime": 1080,
       "label": "m9l6 (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2850,6 +2932,7 @@
       "endTime": 1140,
       "label": "orus (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2888,6 +2971,7 @@
       "endTime": 1140,
       "label": "orus (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3018,6 +3102,7 @@
       "endTime": 1200,
       "label": "pqsw (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3055,6 +3140,7 @@
       "endTime": 1200,
       "label": "pqsw (ind)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3095,6 +3181,7 @@
       "endTime": 1200,
       "label": "pqsw (updown)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3213,6 +3300,7 @@
       "endTime": 1260,
       "label": "rwvm (ind)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3251,6 +3339,7 @@
       "endTime": 1260,
       "label": "rwvm (updown)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3290,6 +3379,7 @@
       "endTime": 1260,
       "label": "rwvm (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3310,7 +3400,7 @@
       "startTime": 1260,
       "endTime": 1320,
       "label": "s1g1 (rand)",
-      "color": "#3b82f6",
+      "color": "#ffa000",
       "rings": [
         1,
         2,
@@ -3326,6 +3416,7 @@
         12
       ],
       "mapping": "rand",
+      "phase": 2,
       "cycles": [
         {
           "type": "cycle",
@@ -3335,6 +3426,18 @@
       "effects": [
         {
           "id": "gen-0-0",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 0.5
+              }
+            }
+          }
+        },
+        {
+          "id": "gen-0-1",
           "effectKey": "snakeHeadSin",
           "params": {
             "tailLength": 0.1,
@@ -3350,6 +3453,7 @@
       "endTime": 1320,
       "label": "s1g1 (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3396,6 +3500,7 @@
       "endTime": 1320,
       "label": "s1g1 (centric)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3482,6 +3587,7 @@
       "endTime": 1380,
       "label": "utf7 (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3520,6 +3626,7 @@
       "endTime": 1380,
       "label": "utf7 (ind)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3558,6 +3665,7 @@
       "endTime": 1380,
       "label": "utf7 (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3676,6 +3784,7 @@
       "endTime": 1440,
       "label": "uwlo (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3713,6 +3822,7 @@
       "endTime": 1440,
       "label": "uwlo (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3783,6 +3893,7 @@
       "endTime": 1500,
       "label": "y8th (b1)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3822,6 +3933,7 @@
       "endTime": 1500,
       "label": "y8th (b2)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3861,6 +3973,7 @@
       "endTime": 1500,
       "label": "y8th (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -3900,6 +4013,7 @@
       "endTime": 1500,
       "label": "y8th (updown)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,

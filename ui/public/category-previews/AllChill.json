@@ -1,6 +1,6 @@
 {
   "song": {
-    "name": "All Chill",
+    "name": "AllChill",
     "lengthSeconds": 510,
     "bpm": 120,
     "animationType": "trigger"
@@ -50,6 +50,7 @@
       "endTime": 60,
       "label": "0fim (ind)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -88,6 +89,7 @@
       "endTime": 60,
       "label": "0fim (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -174,6 +176,7 @@
       "endTime": 120,
       "label": "40ht (centric)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -213,6 +216,7 @@
       "endTime": 120,
       "label": "40ht (updown)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -298,6 +302,7 @@
       "endTime": 180,
       "label": "8uix (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -358,6 +363,7 @@
       "endTime": 240,
       "label": "92l0 (b1)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -397,6 +403,7 @@
       "endTime": 240,
       "label": "92l0 (b2)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -436,6 +443,7 @@
       "endTime": 240,
       "label": "92l0 (updown)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -475,6 +483,7 @@
       "endTime": 240,
       "label": "92l0 (centric)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -551,6 +560,7 @@
       "endTime": 300,
       "label": "d982 (arc)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -589,6 +599,7 @@
       "endTime": 300,
       "label": "d982 (ind)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -674,6 +685,7 @@
       "endTime": 360,
       "label": "empr (centric)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -713,6 +725,7 @@
       "endTime": 360,
       "label": "empr (ind)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -798,6 +811,7 @@
       "endTime": 420,
       "label": "gnre (arc)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -837,6 +851,7 @@
       "endTime": 420,
       "label": "gnre (centric)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -915,6 +930,7 @@
       "endTime": 480,
       "label": "ks5n (arc)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -986,6 +1002,7 @@
       "endTime": 540,
       "label": "lfkv (b1)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1025,6 +1042,7 @@
       "endTime": 540,
       "label": "lfkv (b2)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1064,6 +1082,7 @@
       "endTime": 540,
       "label": "lfkv (ind)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1103,6 +1122,7 @@
       "endTime": 540,
       "label": "lfkv (centric)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1178,6 +1198,7 @@
       "endTime": 600,
       "label": "nn4a (arc)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1217,6 +1238,7 @@
       "endTime": 600,
       "label": "nn4a (updown)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1302,6 +1324,7 @@
       "endTime": 660,
       "label": "q28r (arc)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1342,6 +1365,7 @@
       "endTime": 660,
       "label": "q28r (centric)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1428,6 +1452,7 @@
       "endTime": 720,
       "label": "q9qz (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1466,6 +1491,7 @@
       "endTime": 720,
       "label": "q9qz (ind)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1544,6 +1570,7 @@
       "endTime": 780,
       "label": "ring color spin (ind)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1584,6 +1611,7 @@
       "endTime": 780,
       "label": "ring color spin (arc)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1668,6 +1696,7 @@
       "endTime": 840,
       "label": "scep (updown)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1707,6 +1736,7 @@
       "endTime": 840,
       "label": "scep (rand)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1747,6 +1777,7 @@
       "endTime": 840,
       "label": "scep (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1767,7 +1798,7 @@
       "startTime": 840,
       "endTime": 900,
       "label": "v9qm (arc)",
-      "color": "#3b82f6",
+      "color": "#ffc000",
       "rings": [
         1,
         2,
@@ -1782,7 +1813,22 @@
         11,
         12
       ],
-      "mapping": "arc"
+      "mapping": "arc",
+      "phase": 0.25,
+      "effects": [
+        {
+          "id": "gen-0-0",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
     },
     {
       "id": "gen-v9qm-1",
@@ -1790,6 +1836,7 @@
       "endTime": 900,
       "label": "v9qm (centric)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1828,6 +1875,7 @@
       "endTime": 900,
       "label": "v9qm (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1895,6 +1943,7 @@
       "endTime": 960,
       "label": "vsx4 (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1940,6 +1989,7 @@
       "endTime": 960,
       "label": "vsx4 (ind)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2025,6 +2075,7 @@
       "endTime": 1020,
       "label": "y8xt (all)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -2071,6 +2122,7 @@
       "endTime": 1020,
       "label": "y8xt (ind)",
       "color": "#3b82f6",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
