@@ -612,7 +612,7 @@ function App() {
           fetch(`${API_BASE}/api/trigger`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ triggerName: name }),
+            body: JSON.stringify({ triggerName: name, startOffsetSeconds: startSec }),
           }).catch((err) => console.error('Live trigger failed', err))
         } else {
           fetch(`${API_BASE}/api/start-song`, {

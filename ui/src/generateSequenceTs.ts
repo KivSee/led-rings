@@ -454,11 +454,9 @@ export function generateSequenceTs(song: Song, timeframes: Timeframe[], importPr
   const beatTimestampsArg = !isTrigger && song.beatTimestampsMs && song.beatTimestampsMs.length > 0
     ? `, ${JSON.stringify(song.beatTimestampsMs)}`
     : ''
-  const animationCtor = isTrigger
-    ? `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)})`
-    : `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)}, ${startOffsetMs}${beatTimestampsArg})`
+  const animationCtor = `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)}, ${startOffsetMs}${beatTimestampsArg})`
   const runCall = isTrigger
-    ? `await trigger("${escapedName}");`
+    ? `await trigger("${escapedName}"${startOffsetMs > 0 ? `, ${startOffsetMs / 1000}` : ''});`
     : `await startSong("${startSongName}", 0);`
   const fnName = toIdentifier(safeName)
 
@@ -551,9 +549,7 @@ export function generateSequenceRunnerTs(song: Song, timeframes: Timeframe[]): s
   const beatTimestampsArg = !isTrigger && song.beatTimestampsMs && song.beatTimestampsMs.length > 0
     ? `, ${JSON.stringify(song.beatTimestampsMs)}`
     : ''
-  const animationCtor = isTrigger
-    ? `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)})`
-    : `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)}, ${startOffsetMs}${beatTimestampsArg})`
+  const animationCtor = `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)}, ${startOffsetMs}${beatTimestampsArg})`
   const fnName = toIdentifier(safeName)
   return `// Runner: builds sequence and writes to TMP_SEQUENCE_OUT.
 import * as fs from "fs";

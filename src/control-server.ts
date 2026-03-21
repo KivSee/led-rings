@@ -260,7 +260,7 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "POST" && pathname === "/api/trigger") {
     const body = await parseBody(req);
-    let payload: { triggerName?: string };
+    let payload: { triggerName?: string; startOffsetSeconds?: number };
     try {
       payload = JSON.parse(body);
     } catch {
@@ -272,7 +272,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     try {
-      await trigger(payload.triggerName);
+      await trigger(payload.triggerName, payload.startOffsetSeconds);
       send(res, 200, JSON.stringify({ ok: true }));
     } catch (e) {
       console.error("trigger failed", e);
