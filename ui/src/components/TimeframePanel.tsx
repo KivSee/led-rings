@@ -520,6 +520,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
                         />
                       </label>
                       <label className="timeframe-panel-cycle-param" title="Start of the active window within each cycle (in beats)">
+                        <span>startBeat</span>
                         <input
                           type="number"
                           min={0}

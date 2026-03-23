@@ -20,7 +20,7 @@ interface RingVisualizationProps {
 
 /** Compute normalized time t in [0,1] for a timeframe at a given currentTime in beats.
  *  When windowOverride is provided, t is computed within that window instead of the full timeframe. */
-function computeT(tf: Timeframe, currentTime: number, windowOverride?: { start: number; end: number }): number {
+function computeT(tf: Timeframe, currentTime: number, windowOverride?: { start: number; end: number }): number | null {
   const start = windowOverride ? windowOverride.start : tf.startTime
   const end = windowOverride ? windowOverride.end : tf.endTime
   const duration = end - start
@@ -39,7 +39,8 @@ function computeT(tf: Timeframe, currentTime: number, windowOverride?: { start: 
   const windowEnd = c.endBeat / c.beatsInCycle
   const windowLen = windowEnd - windowStart
   if (windowLen <= 0) return 0
-  return Math.max(0, Math.min(1, (phase - windowStart) / windowLen))
+  if (phase < windowStart || phase > windowEnd) return null
+  return (phase - windowStart) / windowLen
 }
 
 /** Compute t for a specific ring, accounting for movement timing.
@@ -72,7 +73,7 @@ const RingVisualization = ({
       (timeframes && timeframes.length > 0)
     )
   )
-  const t = singleTf && currentTime !== undefined ? computeT(singleTf, currentTime) : 0
+  const t = singleTf && currentTime !== undefined ? (computeT(singleTf, currentTime) ?? 0) : 0
 
   // Pre-build per-segment relPos lookup: segmentName → Map<pixelIndex, relPos>
   // Each timeframe may use a different mapping, so effects must be evaluated
