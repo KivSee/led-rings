@@ -4,7 +4,7 @@
     "lengthSeconds": 245,
     "bpm": 300,
     "startOffsetMs": 3000,
-    "runStartTimeSeconds": 0,
+    "runStartTimeSeconds": 158.016,
     "animationType": "song",
     "audioFilePath": "loop.wav",
     "beatTimestampsMs": [
@@ -840,7 +840,7 @@
       151782,
       151898,
       152026,
-      152711,
+      152384,
       158016,
       159247,
       159630,
@@ -2089,7 +2089,7 @@
     {
       "id": "dup-1772901108613-u2mg",
       "startTime": 387,
-      "endTime": 576,
+      "endTime": 832,
       "label": "Snake All Rings Centric",
       "color": "#a855f7",
       "rings": [
@@ -2128,7 +2128,7 @@
     {
       "id": "dup-1772901137662-lcl0",
       "startTime": 387,
-      "endTime": 576,
+      "endTime": 832,
       "label": "Hue Step All Rings Long",
       "color": "#a855f7",
       "rings": [
@@ -2202,8 +2202,8 @@
     },
     {
       "id": "dup-1772901470681-vbe4",
-      "startTime": 456,
-      "endTime": 576,
+      "startTime": 454,
+      "endTime": 832,
       "label": "Blink Out Random Faster",
       "color": "#fc5c5e",
       "hasExplicitColor": false,
@@ -2223,10 +2223,19 @@
       ],
       "mapping": "all",
       "movement": {
-        "type": "random",
+        "type": "spread",
         "direction": "forward",
-        "beatsPerRing": 5
+        "beatsPerRing": 16,
+        "retire": true
       },
+      "cycles": [
+        {
+          "type": "cycleBeats",
+          "beatsInCycle": 16,
+          "startBeat": 2,
+          "endBeat": 8
+        }
+      ],
       "effects": [
         {
           "id": "eff-1772897106816-5b1ms09423e-1rjo-a918",
@@ -2337,7 +2346,7 @@
     {
       "id": "dup-1773582517120-5bpa",
       "startTime": 452,
-      "endTime": 456,
+      "endTime": 454,
       "label": "Vibrate Transition",
       "color": "#5f0cb9",
       "hasExplicitColor": false,
@@ -2413,11 +2422,76 @@
           }
         }
       ]
+    },
+    {
+      "id": "dup-1774287887885-u4rf",
+      "startTime": 832,
+      "endTime": 833,
+      "label": "Twinkle Cascade (copy)",
+      "color": "#a855f7",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "phase": 1,
+      "effects": [
+        {
+          "id": "tc-pulse-bm5j",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "const_value": {
+                "value": 0.5
+              }
+            }
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "1774287906119",
+      "startTime": 840,
+      "endTime": 844,
+      "label": "Timeframe 29",
+      "color": "#34897f",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "effects": [
+        {
+          "id": "eff-1774288225853-j2pzv4vqzb",
+          "effectKey": "fadeIn"
+        }
+      ]
     }
   ],
   "windowSizes": {
     "playbackPanelWidth": 423,
-    "detailsPanelWidth": 350,
+    "detailsPanelWidth": 361,
     "spectrogramHeight": 327
   }
 }
