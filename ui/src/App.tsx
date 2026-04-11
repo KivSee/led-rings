@@ -349,7 +349,9 @@ function App() {
   const [playbackPanelWidth, setPlaybackPanelWidth] = useState(720)
   const [detailsPanelWidth, setDetailsPanelWidth] = useState(350)
   const [spectrogramHeight, setSpectrogramHeight] = useState(180)
-  const [resizing, setResizing] = useState<'playback' | 'details' | 'spectrogram' | null>(null)
+  const [headerHeight, setHeaderHeight] = useState(56)
+  const [resizing, setResizing] = useState<'playback' | 'details' | 'spectrogram' | 'header' | null>(null)
+  const headerRef = React.useRef<HTMLDivElement>(null)
   const spectrogramContainerRef = React.useRef<HTMLDivElement>(null)
 
   // Periodically check if control server is reachable
@@ -402,6 +404,14 @@ function App() {
     const minSpectrogram = 80
     const maxSpectrogram = 500
     const onMove = (e: MouseEvent) => {
+      if (resizing === 'header') {
+        const el = headerRef.current
+        if (!el) return
+        const rect = el.getBoundingClientRect()
+        const h = e.clientY - rect.top
+        setHeaderHeight(Math.round(Math.min(120, Math.max(40, h))))
+        return
+      }
       if (resizing === 'spectrogram') {
         const el = spectrogramContainerRef.current
         if (!el) return
@@ -931,7 +941,7 @@ function App() {
         const maxDetails = 600
         const minSpectrogram = 80
         const maxSpectrogram = 500
-        const ws = (parsed as { windowSizes?: { playbackPanelWidth?: number; detailsPanelWidth?: number; spectrogramHeight?: number } }).windowSizes
+        const ws = (parsed as { windowSizes?: { playbackPanelWidth?: number; detailsPanelWidth?: number; spectrogramHeight?: number; headerHeight?: number } }).windowSizes
         if (ws && typeof ws === 'object') {
           if (typeof ws.playbackPanelWidth === 'number') {
             setPlaybackPanelWidth(Math.round(Math.min(maxPlayback, Math.max(minPlayback, ws.playbackPanelWidth))))
@@ -941,6 +951,9 @@ function App() {
           }
           if (typeof ws.spectrogramHeight === 'number') {
             setSpectrogramHeight(Math.round(Math.min(maxSpectrogram, Math.max(minSpectrogram, ws.spectrogramHeight))))
+          }
+          if (typeof ws.headerHeight === 'number') {
+            setHeaderHeight(Math.round(Math.min(120, Math.max(40, ws.headerHeight))))
           }
         }
       } catch (err) {
@@ -1038,6 +1051,7 @@ function App() {
         playbackPanelWidth,
         detailsPanelWidth,
         spectrogramHeight,
+        headerHeight,
       },
     }
     const dataStr = JSON.stringify(payload, null, 2)
@@ -1196,6 +1210,9 @@ function App() {
         if (typeof ws.detailsPanelWidth === 'number') {
           setDetailsPanelWidth(Math.round(Math.min(maxDetails, Math.max(minDetails, ws.detailsPanelWidth))))
         }
+        if (typeof (ws as Record<string, unknown>).headerHeight === 'number') {
+          setHeaderHeight(Math.round(Math.min(120, Math.max(40, (ws as Record<string, unknown>).headerHeight as number))))
+        }
         if (typeof ws.spectrogramHeight === 'number') {
           setSpectrogramHeight(Math.round(Math.min(maxSpectrogram, Math.max(minSpectrogram, ws.spectrogramHeight))))
         }
@@ -1215,13 +1232,13 @@ function App() {
       const payload = JSON.stringify({
         song,
         timeframes,
-        windowSizes: { playbackPanelWidth, detailsPanelWidth, spectrogramHeight },
+        windowSizes: { playbackPanelWidth, detailsPanelWidth, spectrogramHeight, headerHeight },
       })
       window.localStorage.setItem(LAST_SONG_STORAGE_KEY, payload)
     } catch {
       // Ignore persistence errors
     }
-  }, [song, timeframes, playbackPanelWidth, detailsPanelWidth, spectrogramHeight])
+  }, [song, timeframes, playbackPanelWidth, detailsPanelWidth, spectrogramHeight, headerHeight])
 
   // Layered audio resolution: Vite public → control-server → prompt user to upload
   const resolveAudioSrc = React.useCallback(async (audioFilePath: string) => {
@@ -1491,121 +1508,108 @@ function App() {
   }
 
   return (
-    <div className={`app${resizing ? ' app-resizing' : ''}${resizing === 'spectrogram' ? ' app-resizing-spectrogram' : ''}`}>
-      <div className="app-header">
-        <div className="app-header-title">
-          <h1>KivSee Time Simulator</h1>
-          <div className="song-meta">
-            <div className="song-meta-row song-meta-row-name">
-              <input
-                type="text"
-                className="song-name-input"
-                value={song.name}
-                onChange={(e) => handleSongChange({ name: e.target.value })}
-                placeholder="Song name"
-              />
-              {song.animationType === 'song' && (
-                <>
-                  <label className="song-meta-field song-meta-field-audio" title="Browsers cannot read full disk paths (e.g. C:\...). Use a path relative to the app (e.g. /audio/song.wav with file in ui/public/audio/) or pick a file with Browse.">
-                    <span>Audio file</span>
-                    <input
-                      type="text"
-                      className="song-meta-input song-meta-input-audio"
-                      value={song.audioFilePath ?? ''}
-                      onChange={(e) => handleAudioFilePathChange(e.target.value)}
-                      placeholder="e.g. /audio/song.wav (file in public folder) or Browse"
-                    />
-                  </label>
-                  <input
-                    ref={audioFileInputRef}
-                    type="file"
-                    accept="audio/*,.wav,.mp3,.ogg,.m4a"
-                    className="song-audio-file-input"
-                    onChange={handleAudioFileSelected}
-                  />
-                  <button
-                    type="button"
-                    className="secondary-button song-browse-button"
-                    onClick={handleBrowseAudio}
-                  >
-                    Browse…
-                  </button>
-                </>
-              )}
-            </div>
-            <div className="song-meta-fields">
-              <label className="song-meta-field" title="Song = startSong() with offset; Trigger = one-shot trigger()">
-                <span>Type</span>
-                <select
-                  className="song-meta-input"
-                  value={song.animationType ?? 'song'}
-                  onChange={(e) => handleSongChange({ animationType: e.target.value === 'trigger' ? 'trigger' : 'song' })}
-                >
-                  <option value="song">Song</option>
-                  <option value="trigger">Trigger</option>
-                </select>
-              </label>
-              <label className="song-meta-field">
-                <span>Length</span>
-                <input
-                  type="number"
-                  min={0.1}
-                  step={0.1}
-                  className="song-meta-input"
-                  {...numericInputProps('lengthSeconds', song.lengthSeconds, 1, 0.1, 'float', (n) => handleSongChange({ lengthSeconds: n }))}
-                />
-                <span className="song-meta-suffix">sec</span>
-              </label>
-              <label className="song-meta-field">
-                <span>BPM</span>
-                <input
-                  type="number"
-                  min={1}
-                  step={1}
-                  className="song-meta-input"
-                  {...numericInputProps('bpm', song.bpm, 120, 1, 'int', (n) => handleSongChange({ bpm: n }))}
-                />
-              </label>
-              <label className="song-meta-field">
-                <span>Start offset</span>
-                <input
-                  type="number"
-                  min={0}
-                  step={1}
-                  className="song-meta-input"
-                  {...numericInputProps('startOffsetMs', song.startOffsetMs ?? 0, 0, 0, 'int', (n) => handleSongChange({ startOffsetMs: n }))}
-                />
-                <span className="song-meta-suffix">ms</span>
-              </label>
-              <label className="song-meta-field" title="Timeline position when you press Run">
-                <span>Run from</span>
-                <input
-                  type="number"
-                  min={0}
-                  step={0.1}
-                  className="song-meta-input"
-                  {...numericInputProps('runStartTimeSeconds', song.runStartTimeSeconds ?? 0, 0, 0, 'float', (n) => handleSongChange({ runStartTimeSeconds: n }))}
-                />
-                <span className="song-meta-suffix">sec</span>
-              </label>
-            </div>
-          </div>
-        </div>
+    <div className={`app${resizing ? ' app-resizing' : ''}${resizing === 'spectrogram' ? ' app-resizing-spectrogram' : ''}${resizing === 'header' ? ' app-resizing-header' : ''}`}>
+      <div className="app-header" ref={headerRef} style={{ height: headerHeight }}>
+        <h1 className="app-header-title">KivSee Time Simulator</h1>
+        <input
+          type="text"
+          className="song-name-input"
+          value={song.name}
+          onChange={(e) => handleSongChange({ name: e.target.value })}
+          placeholder="Song name"
+        />
+        <label className="song-meta-field" title="Song = startSong() with offset; Trigger = one-shot trigger()">
+          <span>Type</span>
+          <select
+            className="song-meta-input"
+            value={song.animationType ?? 'song'}
+            onChange={(e) => handleSongChange({ animationType: e.target.value === 'trigger' ? 'trigger' : 'song' })}
+          >
+            <option value="song">Song</option>
+            <option value="trigger">Trigger</option>
+          </select>
+        </label>
+        {song.animationType === 'song' && (
+          <label className="song-meta-field song-meta-field-audio" title="Browsers cannot read full disk paths. Use a path relative to the app (e.g. /audio/song.wav) or Browse.">
+            <span>Audio</span>
+            <input
+              type="text"
+              className="song-meta-input song-meta-input-audio"
+              value={song.audioFilePath ?? ''}
+              onChange={(e) => handleAudioFilePathChange(e.target.value)}
+              placeholder="/audio/song.wav"
+            />
+            <input
+              ref={audioFileInputRef}
+              type="file"
+              accept="audio/*,.wav,.mp3,.ogg,.m4a"
+              className="song-audio-file-input"
+              onChange={handleAudioFileSelected}
+            />
+            <button
+              type="button"
+              className="secondary-button song-browse-button"
+              onClick={handleBrowseAudio}
+            >
+              Browse…
+            </button>
+          </label>
+        )}
+        <label className="song-meta-field">
+          <span>Length</span>
+          <input
+            type="number"
+            min={0.1}
+            step={0.1}
+            className="song-meta-input"
+            {...numericInputProps('lengthSeconds', song.lengthSeconds, 1, 0.1, 'float', (n) => handleSongChange({ lengthSeconds: n }))}
+          />
+          <span className="song-meta-suffix">sec</span>
+        </label>
+        <label className="song-meta-field">
+          <span>BPM</span>
+          <input
+            type="number"
+            min={1}
+            step={1}
+            className="song-meta-input song-meta-input-short"
+            {...numericInputProps('bpm', song.bpm, 120, 1, 'int', (n) => handleSongChange({ bpm: n }))}
+          />
+        </label>
+        <label className="song-meta-field">
+          <span>Offset</span>
+          <input
+            type="number"
+            min={0}
+            step={1}
+            className="song-meta-input song-meta-input-short"
+            {...numericInputProps('startOffsetMs', song.startOffsetMs ?? 0, 0, 0, 'int', (n) => handleSongChange({ startOffsetMs: n }))}
+          />
+          <span className="song-meta-suffix">ms</span>
+        </label>
+        <label className="song-meta-field" title="Timeline position when you press Run">
+          <span>Run from</span>
+          <input
+            type="number"
+            min={0}
+            step={0.1}
+            className="song-meta-input song-meta-input-short"
+            {...numericInputProps('runStartTimeSeconds', song.runStartTimeSeconds ?? 0, 0, 0, 'float', (n) => handleSongChange({ runStartTimeSeconds: n }))}
+          />
+          <span className="song-meta-suffix">sec</span>
+        </label>
         <div className="app-header-actions">
-          <button className="secondary-button" onClick={addTimeframe}>
-            + Add Timeframe
-          </button>
-          <button className="secondary-button" onClick={handleLoadTimeframes}>
-            Load JSON
-          </button>
-          <button className="secondary-button" onClick={handleImportTs} disabled={!API_BASE} title={!API_BASE ? 'Set VITE_API_URL and run control server' : 'Import a .ts song file'}>
-            Import .ts
-          </button>
-          <button className="secondary-button" onClick={handleSaveTimeframes}>
-            Save Changes
-          </button>
+          <button className="secondary-button" onClick={addTimeframe}>+ Add</button>
+          <button className="secondary-button" onClick={handleLoadTimeframes}>Load</button>
+          <button className="secondary-button" onClick={handleImportTs} disabled={!API_BASE} title={!API_BASE ? 'Set VITE_API_URL and run control server' : 'Import a .ts song file'}>Import .ts</button>
+          <button className="secondary-button" onClick={handleSaveTimeframes}>Save</button>
         </div>
       </div>
+      <div
+        className="app-resize-handle app-resize-handle-header"
+        onMouseDown={() => setResizing('header')}
+        title="Drag to resize header"
+      />
       {song.animationType === 'song' && !!(song.audioFilePath?.trim()) && (
         <div
           className="app-spectrogram-full"
