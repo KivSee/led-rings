@@ -123,6 +123,14 @@ const RingVisualizationCanvas = ({ colors, activeRings, zoom = 1, onZoomChange, 
     const pixelRadius = (BASE_PIX_SIZE * scale) / 2
     ctx.clearRect(0, 0, size, size)
 
+    // Detect theme by reading --text CSS variable from the wrapper element
+    const textColor = wrapperRef.current
+      ? getComputedStyle(wrapperRef.current).getPropertyValue('--text').trim()
+      : ''
+    const isLightTheme = textColor.startsWith('#1') // dark text = light theme
+    const activeStroke = isLightTheme ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.6)'
+    const inactiveStroke = isLightTheme ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.25)'
+
     ctx.save()
     // zoom towards center of canvas, then apply pan
     ctx.translate(size / 2 + pan.x, size / 2 + pan.y)
@@ -135,13 +143,13 @@ const RingVisualizationCanvas = ({ colors, activeRings, zoom = 1, onZoomChange, 
       ctx.beginPath()
       ctx.arc(pos.cx, pos.cy, pixelRadius, 0, Math.PI * 2)
       if (isActive) {
-        ctx.strokeStyle = 'rgba(255,255,255,0.6)'
+        ctx.strokeStyle = activeStroke
         ctx.lineWidth = 1
         ctx.stroke()
         ctx.fillStyle = colors.get(ringNumber)?.[pos.pixelIndex] ?? 'rgb(0,0,0)'
         ctx.fill()
       } else {
-        ctx.strokeStyle = 'rgba(255,255,255,0.25)'
+        ctx.strokeStyle = inactiveStroke
         ctx.lineWidth = 1
         ctx.stroke()
       }
