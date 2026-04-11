@@ -243,6 +243,51 @@ function legacyMotionToSnakeParams(
 }
 
 // ---------------------------------------------------------------------------
+// Effect lookup cache — avoids repeated getTimeframeEffects().find() per pixel
+// ---------------------------------------------------------------------------
+
+interface EffectLookup {
+  legacyBrightness?: TimeframeEffectEntry
+  timedBrightness?: TimeframeEffectEntry
+  posBrightness?: TimeframeEffectEntry
+  snakeBrightness?: TimeframeEffectEntry
+  legacyHue?: TimeframeEffectEntry
+  timedHue?: TimeframeEffectEntry
+  posHue?: TimeframeEffectEntry
+  snakeHue?: TimeframeEffectEntry
+  timedSaturation?: TimeframeEffectEntry
+  posSaturation?: TimeframeEffectEntry
+  snakeSaturation?: TimeframeEffectEntry
+  motion?: TimeframeEffectEntry
+}
+
+/** Cache keyed by the effects array reference — invalidates automatically when timeframe changes. */
+const effectLookupCache = new WeakMap<TimeframeEffectEntry[], EffectLookup>()
+
+function getEffectLookup(timeframe: Timeframe): EffectLookup {
+  const effects = getTimeframeEffects(timeframe)
+  const cached = effectLookupCache.get(effects)
+  if (cached) return cached
+  const lookup: EffectLookup = {}
+  for (const e of effects) {
+    if (!lookup.legacyBrightness && BRIGHTNESS_KEYS.has(e.effectKey)) lookup.legacyBrightness = e
+    else if (!lookup.timedBrightness && TIMED_BRIGHTNESS_KEYS.has(e.effectKey)) lookup.timedBrightness = e
+    else if (!lookup.posBrightness && POSITION_BRIGHTNESS_KEYS.has(e.effectKey)) lookup.posBrightness = e
+    else if (!lookup.snakeBrightness && SNAKE_BRIGHTNESS_KEYS.has(e.effectKey)) lookup.snakeBrightness = e
+    else if (!lookup.legacyHue && HUE_KEYS.has(e.effectKey)) lookup.legacyHue = e
+    else if (!lookup.timedHue && TIMED_HUE_KEYS.has(e.effectKey)) lookup.timedHue = e
+    else if (!lookup.posHue && POSITION_HUE_KEYS.has(e.effectKey)) lookup.posHue = e
+    else if (!lookup.snakeHue && SNAKE_HUE_KEYS.has(e.effectKey)) lookup.snakeHue = e
+    else if (!lookup.timedSaturation && TIMED_SATURATION_KEYS.has(e.effectKey)) lookup.timedSaturation = e
+    else if (!lookup.posSaturation && POSITION_SATURATION_KEYS.has(e.effectKey)) lookup.posSaturation = e
+    else if (!lookup.snakeSaturation && SNAKE_SATURATION_KEYS.has(e.effectKey)) lookup.snakeSaturation = e
+    else if (!lookup.motion && MOTION_KEYS.has(e.effectKey)) lookup.motion = e
+  }
+  effectLookupCache.set(effects, lookup)
+  return lookup
+}
+
+// ---------------------------------------------------------------------------
 // Evaluation functions
 // ---------------------------------------------------------------------------
 
@@ -253,8 +298,11 @@ export interface HSV {
   v: number
 }
 
-/** Extract HSV from a hex color string. */
+/** Extract HSV from a hex color string. Cached per hex value. */
+const hsvFromHexCache = new Map<string, HSV>()
 function hsvFromHex(hex: string): HSV {
+  const cached = hsvFromHexCache.get(hex)
+  if (cached) return cached
   const r = parseInt(hex.slice(1, 3), 16) / 255
   const g = parseInt(hex.slice(3, 5), 16) / 255
   const b = parseInt(hex.slice(5, 7), 16) / 255
@@ -269,7 +317,9 @@ function hsvFromHex(hex: string): HSV {
   h = h / 6
   if (h < 0) h += 1
   const s = max === 0 ? 0 : (max - min) / max
-  return { h, s, v: max }
+  const result = { h, s, v: max }
+  hsvFromHexCache.set(hex, result)
+  return result
 }
 
 /** Neutral base when a timeframe contributes no color (brightness-only). Preview shows only brightness modulation. */
@@ -322,28 +372,29 @@ function computeSnakeMask(relPos: number, head: number, tail: number, cyclic: bo
 /** Brightness mult from timeframe: legacy + timed + position + snake_brightness. */
 function getBrightnessMult(relPos: number, t: number, timeframe: Timeframe, ringIndex: number = 0): number {
   let mult = 1
+  const lk = getEffectLookup(timeframe)
 
   // Legacy brightness → FloatFunc conversion
-  const legacy = getTimeframeEffects(timeframe).find(e => BRIGHTNESS_KEYS.has(e.effectKey))
+  const legacy = lk.legacyBrightness
   if (legacy) {
     const func = legacyBrightnessToFloatFunc(legacy, entryPhase(legacy, ringIndex, timeframe.rings))
     if (func) mult *= evalFloat(t, func)
   }
 
   // Timed brightness — value offset matches C++ applyPhaseToEffect
-  const timedB = getTimeframeEffects(timeframe).find(e => TIMED_BRIGHTNESS_KEYS.has(e.effectKey))
+  const timedB = lk.timedBrightness
   if (timedB?.params) {
     const par = timedB.params as Record<string, unknown>
     mult = evalBrightnessMult(mult, t, par, entryPhase(timedB, ringIndex, timeframe.rings))
   }
   // Position brightness — value offset matches C++ applyPhaseToEffect
-  const posB = getTimeframeEffects(timeframe).find(e => POSITION_BRIGHTNESS_KEYS.has(e.effectKey))
+  const posB = lk.posBrightness
   if (posB?.params) {
     const par = posB.params as Record<string, unknown>
     mult = evalBrightnessMult(mult, relPos, par, entryPhase(posB, ringIndex, timeframe.rings))
   }
   // Snake brightness
-  const snakeB = getTimeframeEffects(timeframe).find(e => SNAKE_BRIGHTNESS_KEYS.has(e.effectKey))
+  const snakeB = lk.snakeBrightness
   if (snakeB?.params) {
     const par = snakeB.params as Record<string, unknown>
     const snakeBPhase = entryPhase(snakeB, ringIndex, timeframe.rings)
@@ -370,30 +421,31 @@ function getBrightnessMult(relPos: number, t: number, timeframe: Timeframe, ring
 /** Hue offset from timeframe: legacy + timed + position + snake_hue. */
 function getHueOffset(relPos: number, t: number, timeframe: Timeframe, ringIndex: number = 0): number {
   let offset = 0
+  const lk = getEffectLookup(timeframe)
 
   // Legacy hue → FloatFunc conversion
-  const legacy = getTimeframeEffects(timeframe).find(e => HUE_KEYS.has(e.effectKey))
+  const legacy = lk.legacyHue
   if (legacy) {
     const func = legacyHueToFloatFunc(legacy, entryPhase(legacy, ringIndex, timeframe.rings))
     if (func) offset += evalFloat(t, func)
   }
 
   // Timed hue — use value offset (matching C++ applyPhaseToEffect)
-  const timedH = getTimeframeEffects(timeframe).find(e => TIMED_HUE_KEYS.has(e.effectKey))
+  const timedH = lk.timedHue
   if (timedH?.params) {
     const par = timedH.params as Record<string, unknown>
     const huePhaseOffset = entryPhase(timedH, ringIndex, timeframe.rings)
     if (par.offset_factor != null) offset += evalFloat(t, par.offset_factor as FloatFunc) + huePhaseOffset
   }
   // Position hue
-  const posH = getTimeframeEffects(timeframe).find(e => POSITION_HUE_KEYS.has(e.effectKey))
+  const posH = lk.posHue
   if (posH?.params) {
     const par = posH.params as Record<string, unknown>
     const relPosShifted = ((relPos + entryPhase(posH, ringIndex, timeframe.rings)) % 1 + 1) % 1
     if (par.offset_factor != null) offset += evalFloat(relPosShifted, par.offset_factor as FloatFunc)
   }
   // Snake hue
-  const snakeH = getTimeframeEffects(timeframe).find(e => SNAKE_HUE_KEYS.has(e.effectKey))
+  const snakeH = lk.snakeHue
   if (snakeH?.params) {
     const par = snakeH.params as Record<string, unknown>
     const snakeHPhase = entryPhase(snakeH, ringIndex, timeframe.rings)
@@ -418,20 +470,21 @@ function getHueOffset(relPos: number, t: number, timeframe: Timeframe, ringIndex
 /** Saturation mult from timeframe: timed + position + snake_saturation. */
 function getSaturationMult(relPos: number, t: number, timeframe: Timeframe, ringIndex: number = 0): number {
   let mult = 1
+  const lk = getEffectLookup(timeframe)
 
-  const timedS = getTimeframeEffects(timeframe).find(e => TIMED_SATURATION_KEYS.has(e.effectKey))
+  const timedS = lk.timedSaturation
   if (timedS?.params) {
     const par = timedS.params as Record<string, unknown>
     const tShifted = ((t + entryPhase(timedS, ringIndex, timeframe.rings)) % 1 + 1) % 1
     mult = evalBrightnessMult(mult, tShifted, par)
   }
-  const posS = getTimeframeEffects(timeframe).find(e => POSITION_SATURATION_KEYS.has(e.effectKey))
+  const posS = lk.posSaturation
   if (posS?.params) {
     const par = posS.params as Record<string, unknown>
     const relPosShifted = ((relPos + entryPhase(posS, ringIndex, timeframe.rings)) % 1 + 1) % 1
     mult = evalBrightnessMult(mult, relPosShifted, par)
   }
-  const snakeS = getTimeframeEffects(timeframe).find(e => SNAKE_SATURATION_KEYS.has(e.effectKey))
+  const snakeS = lk.snakeSaturation
   if (snakeS?.params) {
     const par = snakeS.params as Record<string, unknown>
     const snakeSPhase = entryPhase(snakeS, ringIndex, timeframe.rings)
@@ -463,7 +516,7 @@ function getSnakeMask(
   timeframe: Timeframe,
   ringIndex: number = 0
 ): number {
-  const entry = getTimeframeEffects(timeframe).find(e => MOTION_KEYS.has(e.effectKey))
+  const entry = getEffectLookup(timeframe).motion
   if (!entry) return 1
   const params = legacyMotionToSnakeParams(entry, entryPhase(entry, ringIndex, timeframe.rings))
   if (!params) return 1
@@ -474,7 +527,7 @@ function getSnakeMask(
 
 /** Whether the timeframe has any motion (snake) effect. */
 export function hasMotionEffect(timeframe: Timeframe): boolean {
-  return getTimeframeEffects(timeframe).some(e => MOTION_KEYS.has(e.effectKey))
+  return getEffectLookup(timeframe).motion != null
 }
 
 /**

@@ -1,3 +1,4 @@
+import React from 'react'
 import { Timeframe } from '../App'
 import { isRingActiveAtBeat } from '../movementGenerators'
 import RingVisualization from './RingVisualization'
@@ -38,6 +39,20 @@ const PlaybackRingsPanel = ({
   muteAudio,
   onMuteAudioChange,
 }: PlaybackRingsPanelProps) => {
+  // FPS counter: measure time between renders, keep a rolling window of 30 samples
+  const fpsRef = React.useRef<number>(0)
+  const lastFrameTime = React.useRef<number>(0)
+  const frameTimes = React.useRef<number[]>([])
+  const now = performance.now()
+  if (lastFrameTime.current > 0) {
+    const delta = now - lastFrameTime.current
+    frameTimes.current.push(delta)
+    if (frameTimes.current.length > 30) frameTimes.current.shift()
+    const avg = frameTimes.current.reduce((a, b) => a + b, 0) / frameTimes.current.length
+    fpsRef.current = Math.round(1000 / avg)
+  }
+  lastFrameTime.current = now
+
   const activeTimeframes = getActiveTimeframesAt(currentTime, timeframes)
   const activeRings = Array.from(new Set(
     activeTimeframes.flatMap(tf =>
@@ -54,6 +69,9 @@ const PlaybackRingsPanel = ({
           <h2>Playback</h2>
           <div className="playback-rings-panel-time">
             Time: {currentTime.toFixed(1)}b
+          </div>
+          <div className="playback-rings-panel-fps">
+            {fpsRef.current > 0 ? `${fpsRef.current} fps` : '—'}
           </div>
         </div>
         <div className="playback-rings-panel-controls">
