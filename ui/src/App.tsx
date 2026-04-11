@@ -309,6 +309,11 @@ function App() {
   const [nextRunFromStart, setNextRunFromStart] = useState(true)
   const [liveMode, setLiveMode] = useState(false)
   const [muteAudio, setMuteAudio] = useState(false)
+  const [playbackSpeed, setPlaybackSpeed] = useState(1.0)
+  /** When true, playback uses playbackSpeed (sim speed button); when false (regular Run), always 1×. */
+  const [useSimSpeed, setUseSimSpeed] = useState(false)
+  const useSimSpeedRef = useRef(false)
+  const playbackSpeedRef = useRef(1.0)
   const [controlServerAvailable, setControlServerAvailable] = useState(false)
   const [sendSequenceLoading, setSendSequenceLoading] = useState(false)
   const [detectBeatsLoading, setDetectBeatsLoading] = useState(false)
@@ -369,6 +374,14 @@ function App() {
 
   const songRef = useRef(song)
   songRef.current = song
+  useSimSpeedRef.current = useSimSpeed
+  playbackSpeedRef.current = playbackSpeed
+
+  // Apply playback speed to audio element whenever speed or play state changes
+  useEffect(() => {
+    if (!audioRef.current) return
+    audioRef.current.playbackRate = (isPlaying && useSimSpeed) ? playbackSpeed : 1.0
+  }, [isPlaying, useSimSpeed, playbackSpeed])
 
   // Unified auto-scroll during playback
   useEffect(() => {
@@ -636,6 +649,13 @@ function App() {
     }
   }
 
+  /** Sim-speed play/pause: same as handlePlayPause but marks useSimSpeed = true so speed applies. */
+  const handleSimPlayPause = () => {
+    if (!isPlaying) setUseSimSpeed(true)
+    else if (useSimSpeed) setUseSimSpeed(false) // pausing sim play → clear flag
+    handlePlayPause()
+  }
+
   // Space bar toggles Run / Pause, Escape clears clipboard
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -716,6 +736,7 @@ function App() {
       )
     }
     setIsPlaying(false)
+    setUseSimSpeed(false)
     setNextRunFromStart(true) // Next Run will start from runStartTimeSeconds
     const startBeats = audioSecToBeats(song.runStartTimeSeconds ?? 0, song)
     const clamped = Math.max(0, Math.min(songLengthBeats, startBeats))
@@ -1384,7 +1405,8 @@ function App() {
     if (isPlaying) {
       playbackIntervalRef.current = setInterval(() => {
         setCurrentTime(prev => {
-          const next = prev + 0.1
+          const speed = useSimSpeedRef.current ? playbackSpeedRef.current : 1.0
+          const next = prev + 0.1 * speed
           const endSec = playbackRangeEndSecRef.current
           if (endSec != null && beatsToAudioSec(next, song) >= endSec) {
             const endBeat = audioSecToBeats(endSec, song)
@@ -1587,17 +1609,6 @@ function App() {
           />
           <span className="song-meta-suffix">ms</span>
         </label>
-        <label className="song-meta-field" title="Timeline position when you press Run">
-          <span>Run from</span>
-          <input
-            type="number"
-            min={0}
-            step={0.1}
-            className="song-meta-input song-meta-input-short"
-            {...numericInputProps('runStartTimeSeconds', song.runStartTimeSeconds ?? 0, 0, 0, 'float', (n) => handleSongChange({ runStartTimeSeconds: n }))}
-          />
-          <span className="song-meta-suffix">sec</span>
-        </label>
         <div className="app-header-actions">
           <button className="secondary-button" onClick={addTimeframe}>+ Add</button>
           <button className="secondary-button" onClick={handleLoadTimeframes}>Load</button>
@@ -1785,6 +1796,12 @@ function App() {
             onLiveModeChange={setLiveMode}
             muteAudio={muteAudio}
             onMuteAudioChange={setMuteAudio}
+            playbackSpeed={playbackSpeed}
+            onPlaybackSpeedChange={setPlaybackSpeed}
+            useSimSpeed={useSimSpeed}
+            onSimPlayPause={handleSimPlayPause}
+            runFromSeconds={song.runStartTimeSeconds ?? 0}
+            onRunFromChange={(n) => handleSongChange({ runStartTimeSeconds: n })}
           />
         </div>
         <div

@@ -12,8 +12,8 @@
 .playback-rings-panel-header {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px 20px;
+  gap: 8px;
+  padding: 10px 14px;
   border-bottom: 1px solid #e5e7eb;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -37,6 +37,41 @@
   background: rgba(255, 255, 255, 0.2);
   padding: 5px 12px;
   border-radius: 6px;
+}
+
+.playback-run-from {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: white;
+  white-space: nowrap;
+}
+
+.playback-run-from-input {
+  width: 44px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 4px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 1px 4px;
+  text-align: right;
+  outline: none;
+}
+
+.playback-run-from-input::-webkit-inner-spin-button,
+.playback-run-from-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+.playback-run-from-input[type='number'] {
+  -moz-appearance: textfield;
 }
 
 .playback-rings-panel-fps {
@@ -118,6 +153,129 @@
   cursor: not-allowed;
 }
 
+/* Speed controls — inline group that wraps as one unit */
+.playback-speed-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.playback-speed-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.playback-speed-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.playback-speed-btn {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  padding: 0;
+}
+
+.playback-speed-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.playback-speed-btn.playing {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+.playback-speed-slider-wrap {
+  width: 100px;
+  flex-shrink: 0;
+  position: relative;
+  padding-bottom: 6px;
+}
+
+.playback-speed-slider {
+  width: 100%;
+  cursor: pointer;
+  accent-color: white;
+  height: 3px;
+  margin: 0;
+  /* Remove default padding so we can control thumb travel precisely */
+  padding: 0;
+}
+
+/* Chrome/Safari thumb is 16px wide, so usable track = width - 16px, offset by 8px on each side */
+.playback-speed-ticks {
+  position: absolute;
+  bottom: 0;
+  left: 8px;
+  right: 8px;
+  height: 6px;
+  pointer-events: none;
+}
+
+.playback-speed-tick {
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+.playback-speed-tick-mark {
+  width: 1px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.playback-speed-tick.playback-speed-tick-one .playback-speed-tick-mark {
+  background: white;
+  width: 2px;
+  height: 5px;
+}
+
+.playback-speed-value {
+  width: 42px;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  padding: 1px 4px;
+  outline: none;
+}
+
+.playback-speed-value::-webkit-inner-spin-button,
+.playback-speed-value::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+.playback-speed-value[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.playback-speed-value:focus {
+  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.25);
+}
+
 .playback-rings-panel-content {
   flex: 1;
   overflow-y: auto;
@@ -155,8 +313,7 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  flex: 1;
-  min-height: 680px;
+  align-items: flex-start;
 }
 
 .playback-rings-panel-empty {

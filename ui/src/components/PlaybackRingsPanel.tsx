@@ -17,6 +17,12 @@ interface PlaybackRingsPanelProps {
   onLiveModeChange: (value: boolean) => void
   muteAudio?: boolean
   onMuteAudioChange?: (value: boolean) => void
+  playbackSpeed: number
+  onPlaybackSpeedChange: (speed: number) => void
+  useSimSpeed: boolean
+  onSimPlayPause: () => void
+  runFromSeconds: number
+  onRunFromChange: (n: number) => void
 }
 
 function getActiveTimeframesAt(time: number, timeframes: Timeframe[]): Timeframe[] {
@@ -24,6 +30,11 @@ function getActiveTimeframesAt(time: number, timeframes: Timeframe[]): Timeframe
     (tf) => !tf.disabled && time >= tf.startTime && time < tf.endTime
   )
 }
+
+const SPEED_MIN = 0.1
+const SPEED_MAX = 4.0
+const SPEED_STEP = 0.1
+const SPEED_TICKS = [0.5, 1.0, 2.0, 3.0, 4.0]
 
 const PlaybackRingsPanel = ({
   currentTime,
@@ -38,6 +49,12 @@ const PlaybackRingsPanel = ({
   onLiveModeChange,
   muteAudio,
   onMuteAudioChange,
+  playbackSpeed,
+  onPlaybackSpeedChange,
+  useSimSpeed,
+  onSimPlayPause,
+  runFromSeconds,
+  onRunFromChange,
 }: PlaybackRingsPanelProps) => {
   // FPS counter: measure time between renders, keep a rolling window of 30 samples
   const fpsRef = React.useRef<number>(0)
@@ -70,6 +87,18 @@ const PlaybackRingsPanel = ({
           <div className="playback-rings-panel-time">
             Time: {currentTime.toFixed(1)}b
           </div>
+          <label className="playback-run-from" title="Timeline position when you press Run">
+            <span>Run from</span>
+            <input
+              type="number"
+              min={0}
+              step={0.1}
+              value={runFromSeconds}
+              onChange={(e) => { const n = parseFloat(e.target.value); if (!isNaN(n) && n >= 0) onRunFromChange(n) }}
+              className="playback-run-from-input"
+            />
+            <span>sec</span>
+          </label>
           <div className="playback-rings-panel-fps">
             {fpsRef.current > 0 ? `${fpsRef.current} fps` : '—'}
           </div>
@@ -92,10 +121,10 @@ const PlaybackRingsPanel = ({
             <span>Mute</span>
           </label>
           <button
-            className={`playback-ctrl-btn ${isPlaying ? 'playing' : ''}`}
+            className={`playback-ctrl-btn ${isPlaying && !useSimSpeed ? 'playing' : ''}`}
             onClick={onPlayPause}
           >
-            {isPlaying ? '⏸ Pause' : '▶ Run'}
+            {isPlaying && !useSimSpeed ? '⏸ Pause' : '▶ Run'}
           </button>
           <button className="playback-ctrl-btn stop" onClick={onStop}>
             ⏹ Stop
@@ -108,6 +137,54 @@ const PlaybackRingsPanel = ({
           >
             {sendSequenceLoading ? '…' : 'Send to LEDs'}
           </button>
+          {!liveMode && (
+            <div className="playback-speed-group">
+              <div className="playback-speed-divider" />
+              <span className="playback-speed-label">Speed</span>
+              <button
+                className={`playback-speed-btn ${isPlaying && useSimSpeed ? 'playing' : ''}`}
+                onClick={onSimPlayPause}
+                title="Play/pause at sim speed"
+              >
+                {isPlaying && useSimSpeed ? '⏸' : '▶'}
+              </button>
+              <div className="playback-speed-slider-wrap">
+                <input
+                  type="range"
+                  className="playback-speed-slider"
+                  min={SPEED_MIN}
+                  max={SPEED_MAX}
+                  step={SPEED_STEP}
+                  value={playbackSpeed}
+                  onChange={(e) => onPlaybackSpeedChange(parseFloat(e.target.value))}
+                />
+                <div className="playback-speed-ticks">
+                  {SPEED_TICKS.map(t => (
+                    <div
+                      key={t}
+                      className={`playback-speed-tick ${t === 1.0 ? 'playback-speed-tick-one' : ''}`}
+                      style={{ left: `${((t - SPEED_MIN) / (SPEED_MAX - SPEED_MIN)) * 100}%` }}
+                    >
+                      <div className="playback-speed-tick-mark" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <input
+                type="number"
+                className="playback-speed-value"
+                min={SPEED_MIN}
+                max={SPEED_MAX}
+                step={SPEED_STEP}
+                value={playbackSpeed.toFixed(1)}
+                onChange={(e) => {
+                  const n = parseFloat(e.target.value)
+                  if (!isNaN(n)) onPlaybackSpeedChange(Math.max(SPEED_MIN, Math.min(SPEED_MAX, Math.round(n * 10) / 10)))
+                }}
+                title="Playback speed"
+              />
+            </div>
+          )}
         </div>
       </div>
       <div className="playback-rings-panel-content">
