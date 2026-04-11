@@ -2,7 +2,7 @@
   max-width: 100%;
   width: 100%;
   margin: 0 auto;
-  background: white;
+  background: #0d0d14;
   border-radius: 12px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   overflow: hidden;
@@ -51,7 +51,7 @@
 .app-resize-handle {
   width: 6px;
   flex-shrink: 0;
-  background: #e5e7eb;
+  background: #1e1e2e;
   cursor: col-resize;
   transition: background 0.15s;
 }
@@ -62,11 +62,11 @@
 }
 
 .app-resize-handle-playback {
-  border-left: 1px solid #e5e7eb;
+  border-left: 1px solid #1e1e2e;
 }
 
 .app-resize-handle-details {
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid #1e1e2e;
 }
 
 /* Full-width spectrogram above the three panels (resizable height) */
@@ -84,7 +84,7 @@
   height: 6px;
   cursor: row-resize;
   border-left: none;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #1e1e2e;
 }
 
 .app-resize-handle-header {

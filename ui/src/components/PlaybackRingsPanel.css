@@ -14,7 +14,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 10px 14px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #1e1e2e;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }

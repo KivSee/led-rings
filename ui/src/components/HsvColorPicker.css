@@ -71,12 +71,12 @@
   gap: 3px;
   font-size: 12px;
   font-weight: 600;
-  color: #374151;
+  color: #e2e8f0;
   flex: 1;
 }
 
 .hsv-picker-input-group span:first-child {
-  color: #9ca3af;
+  color: #8b92a5;
   font-size: 11px;
   text-transform: uppercase;
   min-width: 10px;
@@ -86,12 +86,13 @@
   width: 100%;
   min-width: 0;
   padding: 3px 4px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #2e2e42;
   border-radius: 4px;
   font-size: 12px;
   font-weight: 600;
   text-align: right;
-  color: #111827;
+  color: #e2e8f0;
+  background: #1a1a2a;
 }
 
 .hsv-picker-input-group input:focus {
@@ -100,6 +101,6 @@
 }
 
 .hsv-picker-unit {
-  color: #9ca3af;
+  color: #8b92a5;
   font-size: 11px;
 }
