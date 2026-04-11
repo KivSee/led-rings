@@ -31,6 +31,10 @@ function getActiveTimeframesAt(time: number, timeframes: Timeframe[]): Timeframe
   )
 }
 
+const ZOOM_STEP = 0.25
+const ZOOM_MIN = 0.25
+const ZOOM_MAX = 10
+
 const SPEED_MIN = 0.1
 const SPEED_MAX = 4.0
 const SPEED_STEP = 0.1
@@ -69,6 +73,10 @@ const PlaybackRingsPanel = ({
     fpsRef.current = Math.round(1000 / avg)
   }
   lastFrameTime.current = now
+
+  const [zoom, setZoom] = React.useState(1.0)
+  const [resetPanToken, setResetPanToken] = React.useState(0)
+  const clampZoom = (z: number) => Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Math.round(z * 100) / 100))
 
   const activeTimeframes = getActiveTimeframesAt(currentTime, timeframes)
   const activeRings = Array.from(new Set(
@@ -193,6 +201,13 @@ const PlaybackRingsPanel = ({
             <div className="playback-rings-panel-segment">
               <span className="playback-rings-panel-segment-label">{activeTimeframes.length} active segment{activeTimeframes.length > 1 ? 's' : ''}</span>
               <span className="playback-rings-panel-segment-range">{activeRings.length} active ring{activeRings.length > 1 ? 's' : ''}</span>
+              <div className="playback-zoom-controls">
+                <span className="playback-zoom-label">Zoom</span>
+                <button className="playback-zoom-btn" onClick={() => setZoom(z => clampZoom(z - ZOOM_STEP))} disabled={zoom <= ZOOM_MIN} title="Zoom out">−</button>
+                <span className="playback-zoom-value" title="Ctrl+scroll over visualizer to zoom">{Math.round(zoom * 100)}%</span>
+                <button className="playback-zoom-btn" onClick={() => setZoom(z => clampZoom(z + ZOOM_STEP))} disabled={zoom >= ZOOM_MAX} title="Zoom in">+</button>
+                <button className="playback-zoom-btn" onClick={() => { setZoom(1.0); setResetPanToken(t => t + 1) }} title="Reset zoom" style={{ fontSize: 10 }}>1:1</button>
+              </div>
             </div>
             <div className="playback-rings-panel-visualization">
               <RingVisualization
@@ -200,6 +215,9 @@ const PlaybackRingsPanel = ({
                 activeRings={activeRings}
                 timeframes={activeTimeframes}
                 currentTime={currentTime}
+                zoom={zoom}
+                onZoomChange={z => setZoom(clampZoom(z))}
+                resetPanToken={resetPanToken}
               />
             </div>
           </>

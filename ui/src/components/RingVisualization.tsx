@@ -18,6 +18,12 @@ interface RingVisualizationProps {
   timeframes?: Timeframe[]
   /** Current time in beats; with timeframes, used to compute effect phase t in [0,1]. */
   currentTime?: number
+  /** Zoom level passed through to RingVisualizationCanvas. */
+  zoom?: number
+  /** Called when ctrl+wheel changes zoom */
+  onZoomChange?: (zoom: number) => void
+  /** Bumping this counter tells the canvas to reset its pan to center */
+  resetPanToken?: number
 }
 
 /** Compute normalized time t in [0,1] for a timeframe at a given currentTime in beats.
@@ -135,6 +141,9 @@ const RingVisualization = ({
   timeframe,
   timeframes,
   currentTime,
+  zoom,
+  onZoomChange,
+  resetPanToken,
 }: RingVisualizationProps) => {
   // Multi-big-ring playback mode when a timeframes array is provided.
   const multiMode = Boolean(timeframes && currentTime !== undefined)
@@ -244,6 +253,9 @@ const RingVisualization = ({
         <RingVisualizationCanvas
           colors={precomputedColors ?? new Map()}
           activeRings={activeRings}
+          zoom={zoom}
+          onZoomChange={onZoomChange}
+          resetPanToken={resetPanToken}
         />
       </div>
     )
