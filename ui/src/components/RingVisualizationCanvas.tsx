@@ -5,60 +5,55 @@ interface RingVisualizationCanvasProps {
   colors: Map<number, string[]>
   /** Big-ring numbers (1-12) that are active; others are dimmed */
   activeRings?: number[]
-  size: number         // canvas size in px (square)
-  outerR: number       // radius of big-ring constellation
-  ringSize: number     // diameter of one big ring
-  subR: number         // sub-ring orbit radius
-  subSize: number      // sub-ring diameter (unused visually, just for spacing)
-  pixR: number         // pixel orbit radius inside sub-ring
-  pixSize: number      // pixel dot diameter
 }
 
-// Parse 'rgb(r, g, b)' → [r, g, b]
-function parseRgb(s: string): [number, number, number] {
-  const m = s.match(/(\d+),\s*(\d+),\s*(\d+)/)
-  if (!m) return [0, 0, 0]
-  return [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])]
-}
+// Base geometry at 680px — all values scale linearly with available size
+const BASE = 680
+const BASE_OUTER_R = 268
+const BASE_PIX_R = 11
+const BASE_SUB_R = 57
+const BASE_PIX_SIZE = 6
 
-const RingVisualizationCanvas = ({
-  colors,
-  activeRings,
-  size,
-  outerR,
-  ringSize,
-  subR,
-  pixR,
-  pixSize,
-}: RingVisualizationCanvasProps) => {
+const RingVisualizationCanvas = ({ colors, activeRings }: RingVisualizationCanvasProps) => {
+  const wrapperRef = React.useRef<HTMLDivElement>(null)
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
+  const [size, setSize] = React.useState(BASE)
 
-  // Pre-compute pixel center positions once (geometry never changes)
-  // Returns flat array of {cx, cy} for each of 12 big rings × 144 pixels
+  // Observe wrapper width and update size
+  React.useEffect(() => {
+    const el = wrapperRef.current
+    if (!el) return
+    const ro = new ResizeObserver(entries => {
+      const w = entries[0]?.contentRect.width
+      if (w && w > 0) setSize(Math.floor(w))
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const scale = size / BASE
+
+  // Pre-compute pixel center positions — recompute when size changes
   const pixelPositions = React.useMemo(() => {
+    const outerR = BASE_OUTER_R * scale
+    const subR = BASE_SUB_R * scale
+    const pixR = BASE_PIX_R * scale
     const center = size / 2
-    // positions[bigRingIdx][pixelIndex] = {cx, cy} in canvas coords
     const positions: Array<Array<{ cx: number; cy: number }>> = []
 
     for (let bigRingIdx = 0; bigRingIdx < 12; bigRingIdx++) {
-      // Big ring center on the outer constellation circle
-      // Ring 0 at top, stepping 30deg clockwise
       const bigAngle = (bigRingIdx * 30 - 90) * (Math.PI / 180)
       const bigCx = center + outerR * Math.cos(bigAngle)
       const bigCy = center + outerR * Math.sin(bigAngle)
-
       const ringPositions: Array<{ cx: number; cy: number }> = new Array(144)
 
       for (let subRingIdx = 0; subRingIdx < 12; subRingIdx++) {
-        // Sub-ring center inside the big ring
-        // CSS: rotate(subRingIdx*30deg - 60deg) translateX(subR) — so angle = subRingIdx*30 - 60
         const subAngle = (subRingIdx * 30 - 60) * (Math.PI / 180)
         const subCx = bigCx + subR * Math.cos(subAngle)
         const subCy = bigCy + subR * Math.sin(subAngle)
 
         for (let posIdx = 0; posIdx < 12; posIdx++) {
           const pixelIndex = subRingIdx * 12 + posIdx
-          // CSS: rotate(120 + subRingIdx*30 + posIdx*30 deg) translateX(pixR)
           const pixAngle = (120 + subRingIdx * 30 + posIdx * 30) * (Math.PI / 180)
           ringPositions[pixelIndex] = {
             cx: subCx + pixR * Math.cos(pixAngle),
@@ -69,18 +64,17 @@ const RingVisualizationCanvas = ({
       positions.push(ringPositions)
     }
     return positions
-  }, [size, outerR, subR, pixR])
+  }, [size, scale])
 
-  // Draw whenever colors or activeRings change
+  // Draw whenever colors, activeRings, or size changes
   React.useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
+    const pixelRadius = (BASE_PIX_SIZE * scale) / 2
     ctx.clearRect(0, 0, size, size)
-
-    const pixelRadius = pixSize / 2
 
     for (let bigRingIdx = 0; bigRingIdx < 12; bigRingIdx++) {
       const ringNumber = bigRingIdx + 1
@@ -89,26 +83,26 @@ const RingVisualizationCanvas = ({
       const ringPos = pixelPositions[bigRingIdx]
 
       ctx.globalAlpha = isActive ? 1 : 0.2
-
       for (let pixelIndex = 0; pixelIndex < 144; pixelIndex++) {
         const pos = ringPos[pixelIndex]
-        const color = ringColors?.[pixelIndex] ?? 'rgb(0,0,0)'
-        ctx.fillStyle = color
+        ctx.fillStyle = ringColors?.[pixelIndex] ?? 'rgb(0,0,0)'
         ctx.beginPath()
         ctx.arc(pos.cx, pos.cy, pixelRadius, 0, Math.PI * 2)
         ctx.fill()
       }
     }
     ctx.globalAlpha = 1
-  }, [colors, activeRings, pixelPositions, size, pixSize])
+  }, [colors, activeRings, pixelPositions, size, scale])
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={size}
-      height={size}
-      style={{ display: 'block', maxWidth: '100%' }}
-    />
+    <div ref={wrapperRef} style={{ width: '100%', aspectRatio: '1' }}>
+      <canvas
+        ref={canvasRef}
+        width={size}
+        height={size}
+        style={{ display: 'block', width: '100%', height: '100%' }}
+      />
+    </div>
   )
 }
 

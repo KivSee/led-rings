@@ -244,13 +244,6 @@ const RingVisualization = ({
         <RingVisualizationCanvas
           colors={precomputedColors ?? new Map()}
           activeRings={activeRings}
-          size={680}
-          outerR={268}
-          ringSize={140}
-          subR={57}
-          subSize={30}
-          pixR={11}
-          pixSize={6}
         />
       </div>
     )
