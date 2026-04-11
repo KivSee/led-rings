@@ -125,13 +125,58 @@
   transform: scale(1.05);
 }
 
-.timeframe-panel-color-input {
-  width: 60px;
-  height: 40px;
-  border: 2px solid #667eea;
-  border-radius: 6px;
+.timeframe-panel-color-picker-anchor {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.timeframe-panel-color-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 100;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  padding: 12px;
+}
+
+.timeframe-panel-color-hsv {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   cursor: pointer;
-  padding: 0;
+  user-select: none;
+  flex-wrap: wrap;
+}
+
+.timeframe-panel-color-hsv:hover .timeframe-panel-color-hsv-item,
+.timeframe-panel-color-hsv:hover .timeframe-panel-color-hsv-hex {
+  color: #667eea;
+}
+
+.timeframe-panel-color-hsv-item {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.15s;
+}
+
+.timeframe-panel-color-hsv-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ca3af;
+  margin-right: 2px;
+  text-transform: uppercase;
+}
+
+.timeframe-panel-color-hsv-hex {
+  font-size: 12px;
+  color: #9ca3af;
+  font-family: monospace;
+  transition: color 0.15s;
 }
 
 .timeframe-panel-time-row {

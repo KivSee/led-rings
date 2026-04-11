@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import { Timeframe, TimeframeCycleEntry, TimeframeCycleBeats, getTimeframeEffects, TimeframeEffectEntry } from '../App'
 import type { PresetMetadata } from '../presets'
 import { MOVEMENT_TYPES, MOVEMENT_DIRECTIONS, defaultBeatsPerRing } from '../movementGenerators'
@@ -6,6 +6,7 @@ import type { MovementType, MovementDirection } from '../movementGenerators'
 import segmentsData from '../segments.json'
 import RingVisualization from './RingVisualization'
 import PresetBrowser from './PresetBrowser'
+import HsvColorPicker from './HsvColorPicker'
 import './TimeframePanel.css'
 
 // Effect options by category (brightness.ts, hue.ts, motion.ts — coloring removed)
@@ -279,6 +280,25 @@ const EFFECT_PARAM_SCHEMAS: Record<string, EffectParamDef[]> = {
 
 
 
+/** Convert hex color to HSV. Returns h in [0,360], s and v in [0,100]. */
+function hexToHsv(hex: string): { h: number; s: number; v: number } {
+  const r = parseInt(hex.slice(1, 3), 16) / 255
+  const g = parseInt(hex.slice(3, 5), 16) / 255
+  const b = parseInt(hex.slice(5, 7), 16) / 255
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min
+  let h = 0
+  if (d > 0) {
+    if (max === r) h = ((g - b) / d + 6) % 6
+    else if (max === g) h = (b - r) / d + 2
+    else h = (r - g) / d + 4
+  }
+  return {
+    h: Math.round(h * 60),
+    s: Math.round(max === 0 ? 0 : (d / max) * 100),
+    v: Math.round(max * 100),
+  }
+}
+
 interface TimeframePanelProps {
   timeframe: Timeframe | null
   onUpdate: (updates: Partial<Timeframe>) => void
@@ -289,7 +309,22 @@ interface TimeframePanelProps {
 }
 
 const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCategoryPreview, songLengthBeats }: TimeframePanelProps) => {
-  const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | 'color' | null>(null)
+  const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | null>(null)
+  const [colorPickerOpen, setColorPickerOpen] = useState(false)
+  const colorPickerRef = React.useRef<HTMLDivElement>(null)
+  const openColorPicker = useCallback(() => setColorPickerOpen(true), [])
+
+  // Close picker when clicking outside
+  useEffect(() => {
+    if (!colorPickerOpen) return
+    const onDown = (e: MouseEvent) => {
+      if (colorPickerRef.current && !colorPickerRef.current.contains(e.target as Node)) {
+        setColorPickerOpen(false)
+      }
+    }
+    window.addEventListener('mousedown', onDown)
+    return () => window.removeEventListener('mousedown', onDown)
+  }, [colorPickerOpen])
   const [tempStartTime, setTempStartTime] = useState<string>('')
   const [tempEndTime, setTempEndTime] = useState<string>('')
 
@@ -320,7 +355,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
 
   const handleInputChange = (
     field: 'label' | 'startTime' | 'endTime' | 'color',
-    value: string | number
+    value: string | number,
   ) => {
     if (field === 'label' || field === 'color') {
       onUpdate({ [field]: value as string })
@@ -601,30 +636,31 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
         <div className="timeframe-panel-section">
           <label className="timeframe-panel-label">Color</label>
           <div className="timeframe-panel-color-row">
-            {editingField === 'color' ? (
-              <input
-                type="color"
-                value={timeframe.color}
-                onChange={(e) => handleInputChange('color', e.target.value)}
-                onBlur={handleBlur}
-                className="timeframe-panel-color-input"
-                autoFocus
+            <div className="timeframe-panel-color-picker-anchor" ref={colorPickerRef}>
+              <div
+                className="timeframe-panel-color-preview"
+                style={{ backgroundColor: timeframe.color }}
+                onClick={openColorPicker}
               />
-            ) : (
-              <>
-                <div
-                  className="timeframe-panel-color-preview"
-                  style={{ backgroundColor: timeframe.color }}
-                  onClick={() => setEditingField('color')}
-                />
-                <div
-                  className="timeframe-panel-value editable"
-                  onClick={() => setEditingField('color')}
-                >
-                  {timeframe.color}
+              {colorPickerOpen && (
+                <div className="timeframe-panel-color-popover">
+                  <HsvColorPicker
+                    value={timeframe.color || '#3b82f6'}
+                    onChange={(hex) => onUpdate({ color: hex })}
+                  />
                 </div>
-              </>
-            )}
+              )}
+            </div>
+            {(() => {
+              const { h, s, v } = hexToHsv(timeframe.color || '#000000')
+              return (
+                <div className="timeframe-panel-color-hsv" onClick={openColorPicker}>
+                  <span className="timeframe-panel-color-hsv-item"><span className="timeframe-panel-color-hsv-label">H</span>{h}°</span>
+                  <span className="timeframe-panel-color-hsv-item"><span className="timeframe-panel-color-hsv-label">S</span>{s}%</span>
+                  <span className="timeframe-panel-color-hsv-item"><span className="timeframe-panel-color-hsv-label">V</span>{v}%</span>
+                </div>
+              )
+            })()}
           </div>
           <label className="timeframe-panel-checkbox-label" title="When checked, this timeframe does not contribute color (no constColor). Only its effects (e.g. brightness, hue shift) apply on top of underlying layers. Timeline shows gray.">
             <input
