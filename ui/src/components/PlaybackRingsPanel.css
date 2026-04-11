@@ -21,8 +21,9 @@
 
 .playback-rings-panel-header-top {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
+  gap: 8px;
 }
 
 .playback-rings-panel-header h2 {
@@ -32,6 +33,7 @@
 }
 
 .playback-rings-panel-time {
+  margin-left: auto;
   font-size: 15px;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.2);
@@ -74,16 +76,6 @@
   -moz-appearance: textfield;
 }
 
-.playback-rings-panel-fps {
-  font-size: 12px;
-  font-weight: 500;
-  background: rgba(0, 0, 0, 0.25);
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-variant-numeric: tabular-nums;
-  min-width: 52px;
-  text-align: center;
-}
 
 .playback-rings-panel-controls {
   display: flex;

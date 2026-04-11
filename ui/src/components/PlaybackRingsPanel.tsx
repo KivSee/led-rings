@@ -100,9 +100,6 @@ const PlaybackRingsPanel = ({
       <div className="playback-rings-panel-header">
         <div className="playback-rings-panel-header-top">
           <h2>Playback</h2>
-          <div className="playback-rings-panel-time">
-            Time: {currentTime.toFixed(1)}b
-          </div>
           <label className="playback-run-from" title="Timeline position when you press Run">
             <span>Run from</span>
             <input
@@ -149,8 +146,8 @@ const PlaybackRingsPanel = ({
               title="Global brightness"
             />
           </div>
-          <div className="playback-rings-panel-fps">
-            {fpsRef.current > 0 ? `${fpsRef.current} fps` : '—'}
+          <div className="playback-rings-panel-time">
+            Time: {currentTime.toFixed(1)}b
           </div>
         </div>
         <div className="playback-rings-panel-controls">
