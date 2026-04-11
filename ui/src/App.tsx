@@ -316,6 +316,8 @@ function App() {
   const playbackSpeedRef = useRef(1.0)
   const [controlServerAvailable, setControlServerAvailable] = useState(false)
   const [sendSequenceLoading, setSendSequenceLoading] = useState(false)
+  const [brightness, setBrightnessState] = useState(1.0)
+  const [brightnessConnected, setBrightnessConnected] = useState(false)
   const [detectBeatsLoading, setDetectBeatsLoading] = useState(false)
   const [detectBeatsProgress, setDetectBeatsProgress] = useState<string | null>(null)
   const [detectBeatsScope, setDetectBeatsScope] = useState<'full' | 'range'>('full')
@@ -372,6 +374,31 @@ function App() {
     const id = setInterval(check, 5000)
     return () => clearInterval(id)
   }, [])
+
+  // Poll brightness from control server every 2 s; reset to defaults when server is down
+  useEffect(() => {
+    if (!API_BASE) return
+    const poll = () => {
+      if (!controlServerAvailable) {
+        setBrightnessConnected(false)
+        setBrightnessState(1.0)
+        return
+      }
+      fetch(`${API_BASE}/api/brightness`)
+        .then(r => r.json())
+        .then((data: { value: number; connected: boolean }) => {
+          setBrightnessState(data.value)
+          setBrightnessConnected(data.connected)
+        })
+        .catch(() => {
+          setBrightnessConnected(false)
+          setBrightnessState(1.0)
+        })
+    }
+    poll()
+    const id = setInterval(poll, 2000)
+    return () => clearInterval(id)
+  }, [controlServerAvailable])
 
   const songRef = useRef(song)
   songRef.current = song
@@ -1823,6 +1850,16 @@ function App() {
             onSimPlayPause={handleSimPlayPause}
             runFromSeconds={song.runStartTimeSeconds ?? 0}
             onRunFromChange={(n) => handleSongChange({ runStartTimeSeconds: n })}
+            brightness={brightness}
+            brightnessConnected={brightnessConnected}
+            onBrightnessChange={(v) => {
+              setBrightnessState(v)
+              fetch(`${API_BASE}/api/brightness`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ value: v }),
+              }).catch(() => {})
+            }}
           />
         </div>
         <div

@@ -24,6 +24,8 @@ interface RingVisualizationProps {
   onZoomChange?: (zoom: number) => void
   /** Bumping this counter tells the canvas to reset its pan to center */
   resetPanToken?: number
+  /** Global brightness multiplier 0–1, applied to all rendered pixel values */
+  globalBrightness?: number
 }
 
 /** Compute normalized time t in [0,1] for a timeframe at a given currentTime in beats.
@@ -144,6 +146,7 @@ const RingVisualization = ({
   zoom,
   onZoomChange,
   resetPanToken,
+  globalBrightness = 1,
 }: RingVisualizationProps) => {
   // Multi-big-ring playback mode when a timeframes array is provided.
   const multiMode = Boolean(timeframes && currentTime !== undefined)
@@ -222,13 +225,13 @@ const RingVisualization = ({
           const hsv = tfWithT.length === 1
             ? getPixelColor(tfWithT[0].relPos, tfWithT[0].t, tfWithT[0].timeframe, bigRingIdx, tfWithT[0].holdOff)
             : getPixelColorMulti(tfWithT, bigRingIdx)
-          colors[pixelIndex] = hsvToRgbString(hsv.h, hsv.s, hsv.v)
+          colors[pixelIndex] = hsvToRgbString(hsv.h, hsv.s, hsv.v * globalBrightness)
         }
       }
       pixelColors.set(ringNumber, colors)
     }
     return pixelColors
-  }, [multiMode, ringToTimeframes, currentTime, getRelPosForMapping])
+  }, [multiMode, ringToTimeframes, currentTime, getRelPosForMapping, globalBrightness])
 
   // Build the 12x12 pixel slot grid for single-mode CSS layout.
   // sub-ring i, position j → pixel index i*12 + j, only pixels in the chosen mapping segment.

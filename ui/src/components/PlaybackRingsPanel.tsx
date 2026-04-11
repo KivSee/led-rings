@@ -23,6 +23,9 @@ interface PlaybackRingsPanelProps {
   onSimPlayPause: () => void
   runFromSeconds: number
   onRunFromChange: (n: number) => void
+  brightness: number
+  brightnessConnected: boolean
+  onBrightnessChange: (v: number) => void
 }
 
 function getActiveTimeframesAt(time: number, timeframes: Timeframe[]): Timeframe[] {
@@ -59,6 +62,9 @@ const PlaybackRingsPanel = ({
   onSimPlayPause,
   runFromSeconds,
   onRunFromChange,
+  brightness,
+  brightnessConnected,
+  onBrightnessChange,
 }: PlaybackRingsPanelProps) => {
   // FPS counter: measure time between renders, keep a rolling window of 30 samples
   const fpsRef = React.useRef<number>(0)
@@ -77,6 +83,8 @@ const PlaybackRingsPanel = ({
   const [zoom, setZoom] = React.useState(1.0)
   const [resetPanToken, setResetPanToken] = React.useState(0)
   const clampZoom = (z: number) => Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Math.round(z * 100) / 100))
+  const [brightnessInput, setBrightnessInput] = React.useState<string | null>(null)
+  React.useEffect(() => { setBrightnessInput(null) }, [brightness])
 
   const activeTimeframes = getActiveTimeframesAt(currentTime, timeframes)
   const activeRings = Array.from(new Set(
@@ -107,27 +115,64 @@ const PlaybackRingsPanel = ({
             />
             <span>sec</span>
           </label>
+          <div className="playback-brightness-group">
+            <span className={`playback-brightness-dot${brightnessConnected ? ' connected' : ''}`} title={brightnessConnected ? 'MQTT broker connected' : 'MQTT broker not connected'} />
+            <span className="playback-brightness-label">Brightness</span>
+            <input
+              type="range"
+              className="playback-brightness-slider"
+              min={0}
+              max={1}
+              step={0.01}
+              value={brightness}
+              disabled={!brightnessConnected}
+              onChange={(e) => onBrightnessChange(parseFloat(e.target.value))}
+            />
+            <input
+              type="number"
+              className="playback-brightness-value"
+              min={0}
+              max={1}
+              step={0.01}
+              value={brightnessInput ?? brightness.toFixed(2)}
+              disabled={!brightnessConnected}
+              onChange={(e) => setBrightnessInput(e.target.value)}
+              onBlur={() => {
+                const n = parseFloat(brightnessInput ?? '')
+                if (!isNaN(n)) onBrightnessChange(Math.max(0, Math.min(1, n)))
+                setBrightnessInput(null)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
+                if (e.key === 'Escape') setBrightnessInput(null)
+              }}
+              title="Global brightness"
+            />
+          </div>
           <div className="playback-rings-panel-fps">
             {fpsRef.current > 0 ? `${fpsRef.current} fps` : '—'}
           </div>
         </div>
         <div className="playback-rings-panel-controls">
-          <label className="playback-live-mode" title="When on, Run also starts the song on the device; Stop sends stop.">
-            <input
-              type="checkbox"
-              checked={liveMode}
-              onChange={(e) => onLiveModeChange(e.target.checked)}
-            />
-            <span>Live</span>
-          </label>
-          <label className="playback-live-mode" title="Mute simulator audio (useful in Live mode to avoid echo from device)">
-            <input
-              type="checkbox"
-              checked={muteAudio ?? false}
-              onChange={(e) => onMuteAudioChange?.(e.target.checked)}
-            />
-            <span>Mute</span>
-          </label>
+          <button
+            className={`playback-mute-btn${muteAudio ? ' muted' : ''}`}
+            onClick={() => onMuteAudioChange?.(!muteAudio)}
+            title={muteAudio ? 'Unmute simulator audio' : 'Mute simulator audio (useful in Live mode to avoid echo from device)'}
+          >
+            {muteAudio ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <line x1="23" y1="9" x2="17" y2="15"/>
+                <line x1="17" y1="9" x2="23" y2="15"/>
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+              </svg>
+            )}
+          </button>
           <button
             className={`playback-ctrl-btn ${isPlaying && !useSimSpeed ? 'playing' : ''}`}
             onClick={onPlayPause}
@@ -137,6 +182,14 @@ const PlaybackRingsPanel = ({
           <button className="playback-ctrl-btn stop" onClick={onStop}>
             ⏹ Stop
           </button>
+          <label className="playback-live-mode" title="When on, Run also starts the song on the device; Stop sends stop.">
+            <input
+              type="checkbox"
+              checked={liveMode}
+              onChange={(e) => onLiveModeChange(e.target.checked)}
+            />
+            <span>Live</span>
+          </label>
           <button
             className="playback-ctrl-btn send"
             onClick={onSendSequence}
@@ -218,6 +271,7 @@ const PlaybackRingsPanel = ({
                 zoom={zoom}
                 onZoomChange={z => setZoom(clampZoom(z))}
                 resetPanToken={resetPanToken}
+                globalBrightness={brightness}
               />
             </div>
           </>
