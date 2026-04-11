@@ -4,6 +4,32 @@
   box-sizing: border-box;
 }
 
+/* ── Theme variables ─────────────────────────────────────────── */
+:root {
+  /* Dark theme (default) */
+  --bg:          #0d0d14;
+  --surface:     #1a1a2a;
+  --surface2:    #13131f;
+  --border:      #1e1e2e;
+  --border2:     #2e2e42;
+  --text:        #e2e8f0;
+  --text-muted:  #8b92a5;
+  --text-faint:  #5a6070;
+  --hover-bg:    #22223a;
+}
+
+.theme-light {
+  --bg:          #ffffff;
+  --surface:     #f9fafb;
+  --surface2:    #f3f4f6;
+  --border:      #e5e7eb;
+  --border2:     #d1d5db;
+  --text:        #111827;
+  --text-muted:  #6b7280;
+  --text-faint:  #9ca3af;
+  --hover-bg:    #f3f4f6;
+}
+
 html, body {
   height: 100%;
   margin: 0;

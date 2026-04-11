@@ -71,12 +71,12 @@
   gap: 3px;
   font-size: 12px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text);
   flex: 1;
 }
 
 .hsv-picker-input-group span:first-child {
-  color: #8b92a5;
+  color: var(--text-muted);
   font-size: 11px;
   text-transform: uppercase;
   min-width: 10px;
@@ -86,13 +86,13 @@
   width: 100%;
   min-width: 0;
   padding: 3px 4px;
-  border: 1px solid #2e2e42;
+  border: 1px solid var(--border2);
   border-radius: 4px;
   font-size: 12px;
   font-weight: 600;
   text-align: right;
-  color: #e2e8f0;
-  background: #1a1a2a;
+  color: var(--text);
+  background: var(--surface);
 }
 
 .hsv-picker-input-group input:focus {
@@ -101,6 +101,6 @@
 }
 
 .hsv-picker-unit {
-  color: #8b92a5;
+  color: var(--text-muted);
   font-size: 11px;
 }

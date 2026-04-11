@@ -1,7 +1,7 @@
 .timeframe-panel {
   width: 350px;
-  background: #0d0d14;
-  border-left: 1px solid #1e1e2e;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -11,7 +11,7 @@
 .timeframe-panel-empty {
   padding: 40px 24px;
   text-align: center;
-  color: #8b92a5;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
@@ -20,7 +20,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #1e1e2e;
+  border-bottom: 1px solid var(--border);
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }
@@ -68,18 +68,18 @@
 .timeframe-panel-label {
   font-size: 12px;
   font-weight: 600;
-  color: #8b92a5;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .timeframe-panel-value {
   font-size: 16px;
-  color: #e2e8f0;
+  color: var(--text);
   padding: 8px 12px;
   border-radius: 6px;
-  background: #1a1a2a;
-  border: 1px solid #1e1e2e;
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
 
 .timeframe-panel-value.editable {
@@ -88,14 +88,14 @@
 }
 
 .timeframe-panel-value.editable:hover {
-  background: #22223a;
+  background: var(--hover-bg);
   border-color: #667eea;
 }
 
 .timeframe-panel-input {
   font-size: 16px;
-  color: #e2e8f0;
-  background: #1a1a2a;
+  color: var(--text);
+  background: var(--surface);
   padding: 8px 12px;
   border-radius: 6px;
   border: 2px solid #667eea;
@@ -114,7 +114,7 @@
   width: 40px;
   height: 40px;
   border-radius: 6px;
-  border: 2px solid #2e2e42;
+  border: 2px solid var(--border2);
   cursor: pointer;
   transition: all 0.2s;
   flex-shrink: 0;
@@ -135,8 +135,8 @@
   top: calc(100% + 8px);
   left: 0;
   z-index: 100;
-  background: #13131f;
-  border: 1px solid #2e2e42;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.5);
   padding: 12px;
@@ -159,7 +159,7 @@
 .timeframe-panel-color-hsv-item {
   font-size: 14px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text);
   font-variant-numeric: tabular-nums;
   transition: color 0.15s;
 }
@@ -167,14 +167,14 @@
 .timeframe-panel-color-hsv-label {
   font-size: 11px;
   font-weight: 700;
-  color: #8b92a5;
+  color: var(--text-muted);
   margin-right: 2px;
   text-transform: uppercase;
 }
 
 .timeframe-panel-color-hsv-hex {
   font-size: 12px;
-  color: #8b92a5;
+  color: var(--text-muted);
   font-family: monospace;
   transition: color 0.15s;
 }
@@ -187,11 +187,11 @@
 
 .timeframe-panel-time-value {
   font-size: 14px;
-  color: #e2e8f0;
+  color: var(--text);
   padding: 6px 10px;
   border-radius: 6px;
-  background: #1a1a2a;
-  border: 1px solid #1e1e2e;
+  background: var(--surface);
+  border: 1px solid var(--border);
   flex: 1;
   text-align: center;
   min-width: 0;
@@ -203,19 +203,19 @@
 }
 
 .timeframe-panel-time-value.editable:hover {
-  background: #22223a;
+  background: var(--hover-bg);
   border-color: #667eea;
 }
 
 .timeframe-panel-time-separator {
-  color: #8b92a5;
+  color: var(--text-muted);
   font-size: 16px;
   font-weight: 600;
   flex-shrink: 0;
 }
 
 .timeframe-panel-duration {
-  color: #8b92a5;
+  color: var(--text-muted);
   font-size: 13px;
   flex-shrink: 0;
   padding: 0 4px;
@@ -224,7 +224,7 @@
 .timeframe-panel-cycles {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid #1e1e2e;
+  border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -242,9 +242,9 @@
   flex-wrap: wrap;
   gap: 12px 16px;
   padding: 10px 12px;
-  background: #1a1a2a;
+  background: var(--surface);
   border-radius: 6px;
-  border: 1px solid #1e1e2e;
+  border: 1px solid var(--border);
 }
 
 .timeframe-panel-cycle-type {
@@ -268,7 +268,7 @@
 
 .timeframe-panel-cycle-param span {
   font-size: 11px;
-  color: #8b92a5;
+  color: var(--text-muted);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -336,8 +336,8 @@
 
 .timeframe-panel-input-small {
   font-size: 14px;
-  color: #e2e8f0;
-  background: #1a1a2a;
+  color: var(--text);
+  background: var(--surface);
   padding: 6px 10px;
   border-radius: 6px;
   border: 2px solid #667eea;
@@ -368,9 +368,9 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  border: 1.5px solid #2e2e42;
-  background: #1a1a2a;
-  color: #8b92a5;
+  border: 1.5px solid var(--border2);
+  background: var(--surface);
+  color: var(--text-muted);
   font-size: 10px;
   font-weight: 600;
   cursor: pointer;
@@ -383,8 +383,8 @@
 }
 
 .timeframe-panel-ring-button:hover {
-  background: #22223a;
-  border-color: #8b92a5;
+  background: var(--hover-bg);
+  border-color: var(--text-muted);
   transform: scale(1.05);
 }
 
@@ -409,9 +409,9 @@
   min-width: calc(33.333% - 4px);
   padding: 6px 8px;
   border-radius: 4px;
-  border: 1px solid #2e2e42;
-  background: #1a1a2a;
-  color: #e2e8f0;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--text);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -419,17 +419,17 @@
 }
 
 .timeframe-panel-rings-quick-select button:hover {
-  background: #22223a;
+  background: var(--hover-bg);
   border-color: #667eea;
 }
 
 .timeframe-panel-select {
   font-size: 16px;
-  color: #e2e8f0;
-  background: #1a1a2a;
+  color: var(--text);
+  background: var(--surface);
   padding: 8px 12px;
   border-radius: 6px;
-  border: 1px solid #2e2e42;
+  border: 1px solid var(--border2);
   outline: none;
   width: 100%;
   box-sizing: border-box;
@@ -462,9 +462,9 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  background: #1a1a2a;
+  background: var(--surface);
   border-radius: 8px;
-  border: 1px solid #1e1e2e;
+  border: 1px solid var(--border);
 }
 
 .timeframe-panel-effect-row-head {
@@ -512,7 +512,7 @@
 
 .timeframe-panel-effect-phase-label {
   font-size: 11px;
-  color: #8b92a5;
+  color: var(--text-muted);
   white-space: nowrap;
 }
 
@@ -520,10 +520,10 @@
   width: 52px;
   font-size: 13px;
   padding: 2px 4px;
-  border: 1px solid #2e2e42;
+  border: 1px solid var(--border2);
   border-radius: 4px;
-  color: #e2e8f0;
-  background: #13131f;
+  color: var(--text);
+  background: var(--surface2);
 }
 
 .timeframe-panel-effect-phase-input:focus {
@@ -540,13 +540,13 @@
 
 .timeframe-panel-phase-label {
   font-size: 12px;
-  color: #8b92a5;
+  color: var(--text-muted);
   white-space: nowrap;
 }
 
 .timeframe-panel-phase-hint {
   font-size: 11px;
-  color: #5a6070;
+  color: var(--text-faint);
 }
 
 .timeframe-panel-effect-add {
@@ -569,9 +569,9 @@
 .timeframe-panel-effect-params {
   margin-top: 10px;
   padding: 12px;
-  background: #13131f;
+  background: var(--surface2);
   border-radius: 8px;
-  border: 1px solid #1e1e2e;
+  border: 1px solid var(--border);
 }
 
 .timeframe-panel-effect-param-row {
@@ -588,18 +588,18 @@
 
 .timeframe-panel-effect-param-label {
   font-size: 13px;
-  color: #8b92a5;
+  color: var(--text-muted);
   flex-shrink: 0;
   min-width: 80px;
 }
 
 .timeframe-panel-effect-param-input {
   font-size: 14px;
-  color: #e2e8f0;
-  background: #1a1a2a;
+  color: var(--text);
+  background: var(--surface);
   padding: 6px 10px;
   border-radius: 6px;
-  border: 1px solid #2e2e42;
+  border: 1px solid var(--border2);
   outline: none;
   width: 100px;
   flex-shrink: 0;
@@ -611,7 +611,7 @@
 
 .timeframe-panel-float-function-block {
   padding: 8px 0;
-  border-bottom: 1px solid #1e1e2e;
+  border-bottom: 1px solid var(--border);
 }
 .timeframe-panel-float-function-block:last-child {
   border-bottom: none;
@@ -641,7 +641,7 @@
   gap: 8px;
   cursor: pointer;
   font-size: 14px;
-  color: #e2e8f0;
+  color: var(--text);
 }
 
 .timeframe-panel-checkbox {
@@ -658,7 +658,7 @@
 
 .timeframe-panel-movement-desc {
   font-size: 12px;
-  color: #8b92a5;
+  color: var(--text-muted);
   margin: 0 0 10px;
   line-height: 1.4;
   font-style: italic;

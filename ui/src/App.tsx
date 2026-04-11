@@ -355,6 +355,7 @@ function App() {
   const [detailsPanelWidth, setDetailsPanelWidth] = useState(350)
   const [spectrogramHeight, setSpectrogramHeight] = useState(180)
   const [headerHeight, setHeaderHeight] = useState(56)
+  const [lightTheme, setLightTheme] = useState(() => localStorage.getItem('kivsee-theme') === 'light')
   const [resizing, setResizing] = useState<'playback' | 'details' | 'spectrogram' | 'header' | null>(null)
   const headerRef = React.useRef<HTMLDivElement>(null)
   const spectrogramContainerRef = React.useRef<HTMLDivElement>(null)
@@ -977,6 +978,13 @@ function App() {
             setHeaderHeight(Math.round(Math.min(120, Math.max(40, ws.headerHeight))))
           }
         }
+
+        const theme = (parsed as { theme?: unknown }).theme
+        if (theme === 'light' || theme === 'dark') {
+          setLightTheme(theme === 'light')
+        } else {
+          setLightTheme(false)
+        }
       } catch (err) {
         console.error('Failed to load file', err)
         alert(`Failed to load file: ${err instanceof Error ? err.message : String(err)}`)
@@ -1074,6 +1082,7 @@ function App() {
         spectrogramHeight,
         headerHeight,
       },
+      theme: lightTheme ? 'light' : 'dark',
     }
     const dataStr = JSON.stringify(payload, null, 2)
     const safeName = (song.name || 'song').trim() || 'song'
@@ -1530,7 +1539,7 @@ function App() {
   }
 
   return (
-    <div className={`app${resizing ? ' app-resizing' : ''}${resizing === 'spectrogram' ? ' app-resizing-spectrogram' : ''}${resizing === 'header' ? ' app-resizing-header' : ''}`}>
+    <div className={`app${resizing ? ' app-resizing' : ''}${resizing === 'spectrogram' ? ' app-resizing-spectrogram' : ''}${resizing === 'header' ? ' app-resizing-header' : ''}${lightTheme ? ' theme-light' : ''}`}>
       <div className="app-header" ref={headerRef} style={{ height: headerHeight }}>
         <h1 className="app-header-title">KivSee Time Simulator</h1>
         <input
@@ -1610,6 +1619,18 @@ function App() {
           <span className="song-meta-suffix">ms</span>
         </label>
         <div className="app-header-actions">
+          <label className="app-theme-toggle" title={lightTheme ? 'Switch to dark theme' : 'Switch to light theme'}>
+            <input
+              type="checkbox"
+              checked={lightTheme}
+              onChange={(e) => {
+                const next = e.target.checked
+                setLightTheme(next)
+                localStorage.setItem('kivsee-theme', next ? 'light' : 'dark')
+              }}
+            />
+            <span>{lightTheme ? 'Light theme' : 'Dark theme'}</span>
+          </label>
           <button className="secondary-button" onClick={addTimeframe}>+ Add</button>
           <button className="secondary-button" onClick={handleLoadTimeframes}>Load</button>
           <button className="secondary-button" onClick={handleImportTs} disabled={!API_BASE} title={!API_BASE ? 'Set VITE_API_URL and run control server' : 'Import a .ts song file'}>Import .ts</button>

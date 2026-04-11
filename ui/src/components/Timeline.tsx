@@ -695,10 +695,14 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onUpdateSilent, 
 
   return (
     <div className="timeline-container">
-      <div className="timeline-zoom-controls">
-        <button onClick={handleZoomIn} disabled={beatsPerScreen <= 4} title="Zoom in">+</button>
-        <span className="timeline-zoom-label">{beatsPerScreen}b</span>
-        <button onClick={handleZoomOut} disabled={beatsPerScreen >= songLengthBeats} title="Zoom out">-</button>
+      <div className="timeline-header">
+        <h2 className="timeline-header-title">Timeline</h2>
+        <div className="timeline-zoom-controls">
+          <span className="timeline-zoom-label">Zoom</span>
+          <button onClick={handleZoomIn} disabled={beatsPerScreen <= 4} title="Zoom in">+</button>
+          <span className="timeline-zoom-beats">{beatsPerScreen}b</span>
+          <button onClick={handleZoomOut} disabled={beatsPerScreen >= songLengthBeats} title="Zoom out">−</button>
+        </div>
       </div>
       <div className="timeline-scroll-view" ref={timelineScrollViewRef}>
         <div 
