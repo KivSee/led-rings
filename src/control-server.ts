@@ -9,6 +9,7 @@ import fs from "fs";
 import { spawn, execSync } from "child_process";
 import { sendSequence } from "./services/sequence";
 import { startSong, stop, trigger } from "./services/trigger";
+import { initMqttBrightness, getBrightnessState, setBrightness } from "./mqtt-brightness";
 
 const PORT = parseInt(process.env.CONTROL_SERVER_PORT || "3080", 10);
 const ROOT = process.cwd();
@@ -475,8 +476,35 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // GET /api/brightness — returns current brightness value and MQTT connection state
+  if (req.method === "GET" && pathname === "/api/brightness") {
+    send(res, 200, JSON.stringify(getBrightnessState()));
+    return;
+  }
+
+  // POST /api/brightness — set brightness, publishes to MQTT with retain
+  if (req.method === "POST" && pathname === "/api/brightness") {
+    const body = await parseBody(req);
+    let payload: { value?: number };
+    try {
+      payload = JSON.parse(body);
+    } catch {
+      send(res, 400, JSON.stringify({ error: "Invalid JSON" }));
+      return;
+    }
+    if (typeof payload.value !== "number" || isNaN(payload.value)) {
+      send(res, 400, JSON.stringify({ error: "Missing or invalid value" }));
+      return;
+    }
+    const value = setBrightness(payload.value);
+    send(res, 200, JSON.stringify({ value, connected: getBrightnessState().connected }));
+    return;
+  }
+
   send(res, 404, JSON.stringify({ error: "Not found" }));
 });
+
+initMqttBrightness();
 
 server.listen(PORT, () => {
   console.log(`Control server listening on http://localhost:${PORT}`);
