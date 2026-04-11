@@ -346,7 +346,7 @@ function App() {
   const viewEndBeat = viewStartBeat + beatsPerScreen
 
   // Resizable panel widths (px)
-  const [playbackPanelWidth, setPlaybackPanelWidth] = useState(440)
+  const [playbackPanelWidth, setPlaybackPanelWidth] = useState(720)
   const [detailsPanelWidth, setDetailsPanelWidth] = useState(350)
   const [spectrogramHeight, setSpectrogramHeight] = useState(180)
   const [resizing, setResizing] = useState<'playback' | 'details' | 'spectrogram' | null>(null)
@@ -396,7 +396,7 @@ function App() {
   useEffect(() => {
     if (!resizing) return
     const minPlayback = 240
-    const maxPlayback = 600
+    const maxPlayback = 900
     const minDetails = 240
     const maxDetails = 600
     const minSpectrogram = 80
@@ -926,7 +926,7 @@ function App() {
 
         // Restore window sizes if present (same min/max as resize logic)
         const minPlayback = 240
-        const maxPlayback = 600
+        const maxPlayback = 900
         const minDetails = 240
         const maxDetails = 600
         const minSpectrogram = 80
@@ -1187,7 +1187,7 @@ function App() {
       if (parsed.timeframes && Array.isArray(parsed.timeframes) && parsed.timeframes.length > 0) {
         setTimeframes(parsed.timeframes)
       }
-      const minPlayback = 240, maxPlayback = 600, minDetails = 240, maxDetails = 600, minSpectrogram = 80, maxSpectrogram = 500
+      const minPlayback = 240, maxPlayback = 900, minDetails = 240, maxDetails = 600, minSpectrogram = 80, maxSpectrogram = 500
       const ws = parsed.windowSizes
       if (ws && typeof ws === 'object') {
         if (typeof ws.playbackPanelWidth === 'number') {
