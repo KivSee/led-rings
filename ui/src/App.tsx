@@ -1422,7 +1422,9 @@ function App() {
 
     if (useAudio) {
       let rafId: number
-      const syncFromAudio = () => {
+      let lastUpdateMs = 0
+      const FRAME_MS = 1000 / 30  // 30 fps cap
+      const syncFromAudio = (nowMs: number) => {
         if (!audioRef.current) return
         const sec = audioRef.current.currentTime
         const endSec = playbackRangeEndSecRef.current
@@ -1438,7 +1440,10 @@ function App() {
           performStop()
           return
         }
-        setCurrentTime(beats)
+        if (nowMs - lastUpdateMs >= FRAME_MS) {
+          lastUpdateMs = nowMs
+          setCurrentTime(beats)
+        }
         rafId = requestAnimationFrame(syncFromAudio)
       }
       rafId = requestAnimationFrame(syncFromAudio)
