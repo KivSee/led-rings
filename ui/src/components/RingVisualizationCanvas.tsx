@@ -85,9 +85,12 @@ const RingVisualizationCanvas = ({ colors, activeRings }: RingVisualizationCanva
       ctx.globalAlpha = isActive ? 1 : 0.2
       for (let pixelIndex = 0; pixelIndex < 144; pixelIndex++) {
         const pos = ringPos[pixelIndex]
-        ctx.fillStyle = ringColors?.[pixelIndex] ?? 'rgb(0,0,0)'
         ctx.beginPath()
         ctx.arc(pos.cx, pos.cy, pixelRadius, 0, Math.PI * 2)
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)'
+        ctx.lineWidth = 1
+        ctx.stroke()
+        ctx.fillStyle = ringColors?.[pixelIndex] ?? 'rgb(0,0,0)'
         ctx.fill()
       }
     }
