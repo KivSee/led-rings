@@ -114,12 +114,8 @@ const PlaybackRingsPanel = ({
         {activeTimeframes.length > 0 ? (
           <>
             <div className="playback-rings-panel-segment">
-              <span className="playback-rings-panel-segment-label">
-                {activeTimeframes.length} active segment{activeTimeframes.length > 1 ? 's' : ''}
-              </span>
-              <span className="playback-rings-panel-segment-range">
-                {activeRings.length} ring{activeRings.length > 1 ? 's' : ''}
-              </span>
+              <span className="playback-rings-panel-segment-label">{activeTimeframes.length} active segment{activeTimeframes.length > 1 ? 's' : ''}</span>
+              <span className="playback-rings-panel-segment-range">{activeRings.length} active ring{activeRings.length > 1 ? 's' : ''}</span>
             </div>
             <div className="playback-rings-panel-visualization">
               <RingVisualization

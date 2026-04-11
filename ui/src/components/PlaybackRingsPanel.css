@@ -130,25 +130,24 @@
 
 .playback-rings-panel-segment {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
   width: 100%;
-  max-width: 340px;
-  padding: 12px 16px;
+  padding: 4px 12px;
   background: white;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .playback-rings-panel-segment-label {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   color: #111827;
 }
 
 .playback-rings-panel-segment-range {
-  font-size: 13px;
+  font-size: 12px;
   color: #6b7280;
 }
 
