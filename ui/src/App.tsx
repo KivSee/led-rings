@@ -163,9 +163,11 @@ function App() {
   const beatsToAudioSec = (beats: number, s: Song): number => {
     const ts = s.beatTimestampsMs
     if (ts && ts.length > 0) {
-      // Beat timestamps are absolute positions in the audio file — no offset needed
       const maxIdx = ts.length - 1
-      if (beats <= 0) return ts[0] / 1000
+      // Average ms per beat from first few intervals, fallback to bpm
+      const sampleCount = Math.min(8, maxIdx)
+      const beatMs = sampleCount > 0 ? ts[sampleCount] / sampleCount : 60000 / s.bpm
+      if (beats <= 0) return Math.max(0, (ts[0] + beats * beatMs) / 1000)
       if (beats >= maxIdx) {
         const avgMs = maxIdx > 0 ? ts[maxIdx] / maxIdx : 60000 / s.bpm
         return (ts[maxIdx] + (beats - maxIdx) * avgMs) / 1000
@@ -182,9 +184,13 @@ function App() {
   const audioSecToBeats = (sec: number, s: Song): number => {
     const ts = s.beatTimestampsMs
     if (ts && ts.length > 0) {
-      // Beat timestamps are absolute positions in the audio file — no offset needed
       const ms = sec * 1000
-      if (ms <= ts[0]) return 0
+      if (ms <= ts[0]) {
+        // Extrapolate before first beat using average of first few intervals
+        const sampleCount = Math.min(8, ts.length - 1)
+        const beatMs = sampleCount > 0 ? ts[sampleCount] / sampleCount : 60000 / s.bpm
+        return (ms - ts[0]) / beatMs  // negative when ms < ts[0]
+      }
       if (ms >= ts[ts.length - 1]) {
         const maxIdx = ts.length - 1
         const avgMs = maxIdx > 0 ? ts[maxIdx] / maxIdx : 60000 / s.bpm
@@ -356,6 +362,7 @@ function App() {
   const [playbackPanelWidth, setPlaybackPanelWidth] = useState(720)
   const [detailsPanelWidth, setDetailsPanelWidth] = useState(350)
   const [spectrogramHeight, setSpectrogramHeight] = useState(180)
+  const [spectrogramOpen, setSpectrogramOpen] = useState(true)
   const [headerHeight, setHeaderHeight] = useState(56)
   const [lightTheme, setLightTheme] = useState(() => localStorage.getItem('kivsee-theme') === 'light')
   const [resizing, setResizing] = useState<'playback' | 'details' | 'spectrogram' | 'header' | null>(null)
@@ -1670,10 +1677,21 @@ function App() {
         title="Drag to resize header"
       />
       {song.animationType === 'song' && !!(song.audioFilePath?.trim()) && (
+        <div className="app-spectrogram-bar">
+          <button
+            className="app-spectrogram-toggle"
+            onClick={() => setSpectrogramOpen(o => !o)}
+            title={spectrogramOpen ? 'Collapse spectrogram' : 'Expand spectrogram'}
+          >
+            {spectrogramOpen ? '▾ Spectrogram' : '▸ Spectrogram'}
+          </button>
+        </div>
+      )}
+      {song.animationType === 'song' && !!(song.audioFilePath?.trim()) && (
         <div
           className="app-spectrogram-full"
           ref={spectrogramContainerRef}
-          style={{ height: spectrogramHeight }}
+          style={{ height: spectrogramHeight, display: spectrogramOpen ? undefined : 'none' }}
         >
           <Spectrogram
             audioRef={audioRef}
@@ -1819,12 +1837,8 @@ function App() {
           />
         </div>
       )}
-      {song.animationType === 'song' && !!(song.audioFilePath?.trim()) && (
-        <div
-          className="app-resize-handle app-resize-handle-spectrogram"
-          onMouseDown={() => setResizing('spectrogram')}
-          title="Drag to resize spectrogram"
-        />
+      {song.animationType === 'song' && !!(song.audioFilePath?.trim()) && spectrogramOpen && (
+        <div className="app-resize-handle app-resize-handle-spectrogram" onMouseDown={() => setResizing('spectrogram')} title="Drag to resize spectrogram" />
       )}
       <div className="app-content" ref={appContentRef}>
         <div
