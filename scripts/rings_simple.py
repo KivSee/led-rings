@@ -11,6 +11,8 @@ MQTT_BROKER = "localhost"
 MQTT_TRIGGER_TOPIC = "trigger"
 MQTT_BRIGHTNESS_TOPIC = "brightness"
 MQTT_BRIGHTNESS_FIELD = "global_brightness"
+MQTT_MANUAL_BRIGHTNESS_TOPIC = "manual_brightness"
+MQTT_MANUAL_BRIGHTNESS_FIELD = "global_brightness"
 
 TRIGGER_URL_BASE = f"http://{TRIGGER_SERVICE_IP}:{TRIGGER_SERVICE_PORT}"
 
@@ -24,6 +26,7 @@ last_trigger_change = time.time()
 global_trigger_status = ""
 brightness = 0.25  # Start at baseline, updated by MQTT
 brightness_received = False  # Whether we got a retained value from MQTT
+manual_brightness_received = False  # Whether we got a retained manual_brightness from MQTT
 stdscr = None  # Global reference to curses screen
 
 
@@ -54,6 +57,24 @@ def on_brightness_message(client, userdata, msg):
         pass
 
 
+def on_manual_brightness_message(client, userdata, msg):
+    """Handle incoming manual brightness MQTT messages — update brightness accordingly."""
+    global brightness, manual_brightness_received, stdscr
+    try:
+        payload = json.loads(msg.payload.decode("utf-8"))
+        new_manual_brightness = float(payload.get(MQTT_MANUAL_BRIGHTNESS_FIELD, 0.0))
+        manual_brightness_received = True
+        brightness = new_manual_brightness
+        publish_brightness()
+        if stdscr:
+            stdscr.addstr(f"\nManual brightness changed to {new_manual_brightness}, updating brightness")
+            stdscr.refresh()
+    except (json.JSONDecodeError, ValueError) as e:
+        if stdscr:
+            stdscr.addstr(f"\nFailed to parse manual brightness: {e}")
+            stdscr.refresh()
+
+
 client = mqtt.Client()
 
 
@@ -72,6 +93,12 @@ def publish_brightness():
     """Publish the current brightness value to MQTT (retained)."""
     payload = json.dumps({MQTT_BRIGHTNESS_FIELD: brightness})
     client.publish(MQTT_BRIGHTNESS_TOPIC, payload, retain=True)
+
+
+def publish_manual_brightness():
+    """Publish the current brightness value as manual_brightness to MQTT (retained)."""
+    payload = json.dumps({MQTT_MANUAL_BRIGHTNESS_FIELD: brightness})
+    client.publish(MQTT_MANUAL_BRIGHTNESS_TOPIC, payload, retain=True)
 
 
 def setup_mqtt():
@@ -95,6 +122,9 @@ def on_connect(client, userdata, flags, rc):
 
     client.message_callback_add(MQTT_BRIGHTNESS_TOPIC, on_brightness_message)
     client.subscribe(MQTT_BRIGHTNESS_TOPIC)
+
+    client.message_callback_add(MQTT_MANUAL_BRIGHTNESS_TOPIC, on_manual_brightness_message)
+    client.subscribe(MQTT_MANUAL_BRIGHTNESS_TOPIC)
 
 
 def trigger(stdscr, trigger_name: str):
@@ -132,13 +162,11 @@ def main(screen):
 
     setup_mqtt()
 
-    # Wait briefly for a retained brightness value; if none arrives, publish default
+    # Wait briefly for retained values; then set both brightness and manual_brightness
     time.sleep(1)
-    if not brightness_received:
-        publish_brightness()
-        stdscr.addstr(f"No brightness topic found, setting default: {brightness}\n")
-    else:
-        stdscr.addstr(f"Starting with brightness from MQTT: {brightness}\n")
+    publish_brightness()
+    publish_manual_brightness()
+    stdscr.addstr(f"Brightness and manual_brightness set to {brightness}\n")
     stdscr.addstr(f"Triggers will cycle every {TRIGGER_CYCLE_INTERVAL // 60} minutes.\n")
     stdscr.refresh()
 

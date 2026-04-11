@@ -7,11 +7,14 @@ import time
 MQTT_BROKER = "localhost"
 MQTT_TOPIC = "brightness"
 MQTT_FIELD = "global_brightness"
+MQTT_MANUAL_BRIGHTNESS_TOPIC = "manual_brightness"
+MQTT_MANUAL_BRIGHTNESS_FIELD = "global_brightness"
 
 # Global variables
-brightness = None
+brightness = 0.25
 last_input_time = time.monotonic()  # Tracks last valid key press
 last_brightness_update = last_input_time  # Tracks last auto-dim step
+stdscr_ref = None  # Global reference to curses screen
 
 # Function to handle incoming MQTT messages
 def on_message(client, userdata, msg):
@@ -21,6 +24,22 @@ def on_message(client, userdata, msg):
         brightness = float(payload.get(MQTT_FIELD, 0.0))  # Default to 0.0 if missing
     except (json.JSONDecodeError, ValueError):
         brightness = 0.0  # Fallback value
+
+def on_manual_brightness_message(client, userdata, msg):
+    """Handle incoming manual brightness MQTT messages — update brightness accordingly."""
+    global brightness, stdscr_ref
+    try:
+        payload = json.loads(msg.payload.decode("utf-8"))
+        new_manual_brightness = float(payload.get(MQTT_MANUAL_BRIGHTNESS_FIELD, 0.0))
+        brightness = new_manual_brightness
+        publish_brightness()
+        if stdscr_ref:
+            stdscr_ref.addstr(f"\nManual brightness changed to {new_manual_brightness}, updating brightness")
+            stdscr_ref.refresh()
+    except (json.JSONDecodeError, ValueError) as e:
+        if stdscr_ref:
+            stdscr_ref.addstr(f"\nFailed to parse manual brightness: {e}")
+            stdscr_ref.refresh()
 
 # MQTT client setup
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)  # Use latest API
@@ -42,9 +61,11 @@ while not is_mqtt_available():
 print("MQTT broker is up! Starting script...")
 
 client.on_message = on_message
+client.message_callback_add(MQTT_MANUAL_BRIGHTNESS_TOPIC, on_manual_brightness_message)
 client.connect(MQTT_BROKER)
 client.loop_start()
 client.subscribe(MQTT_TOPIC)  # Subscribe initially
+client.subscribe(MQTT_MANUAL_BRIGHTNESS_TOPIC)
 
 # Function to get the latest retained brightness
 def get_latest_brightness():
@@ -67,9 +88,15 @@ def publish_brightness():
     updated_payload = json.dumps({MQTT_FIELD: brightness})
     client.publish(MQTT_TOPIC, updated_payload, retain=True)
 
+def publish_manual_brightness():
+    """Publish the current brightness value as manual_brightness to MQTT (retained)."""
+    payload = json.dumps({MQTT_MANUAL_BRIGHTNESS_FIELD: brightness})
+    client.publish(MQTT_MANUAL_BRIGHTNESS_TOPIC, payload, retain=True)
+
 # Function to listen for keypresses and handle brightness changes
 def main(stdscr):
-    global brightness, last_input_time, last_brightness_update
+    global brightness, last_input_time, last_brightness_update, stdscr_ref
+    stdscr_ref = stdscr
 
     stdscr.nodelay(True)  # Makes getch() non-blocking
     stdscr.clear()
@@ -77,8 +104,9 @@ def main(stdscr):
     stdscr.addstr("Rings automation brightness control\n")
     stdscr.addstr("Pressing SPACE increases brightness\n")
 
-    get_latest_brightness()
     publish_brightness()
+    publish_manual_brightness()
+    stdscr.addstr(f"Brightness and manual_brightness set to {brightness}\n")
 
     while True:
         key = stdscr.getch()
