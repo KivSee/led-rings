@@ -98,6 +98,17 @@ const RingVisualizationCanvas = ({ colors, activeRings, zoom = 1, onZoomChange, 
     if (resetPanToken !== undefined) setPan({ x: 0, y: 0 })
   }, [resetPanToken])
 
+  // Clamp pan so the content can never be dragged fully off-screen.
+  // At zoom level z, the scaled canvas is size*z. Half the excess is (size*(z-1))/2.
+  // We allow panning up to that amount in each direction, plus a small margin.
+  function clampPan(x: number, y: number, z: number): { x: number; y: number } {
+    const margin = (size * Math.max(0, z - 1)) / 2
+    return {
+      x: Math.max(-margin, Math.min(margin, x)),
+      y: Math.max(-margin, Math.min(margin, y)),
+    }
+  }
+
   const scale = size / BASE
 
   const pixelPositions = React.useMemo(() => buildPixelPositions(size, scale), [size, scale])
@@ -153,10 +164,11 @@ const RingVisualizationCanvas = ({ colors, activeRings, zoom = 1, onZoomChange, 
       const newZoom = Math.max(0.25, Math.min(10, zoom * factor))
       // adjust pan so the point under cursor stays fixed:
       // newPan = mouse - (mouse - pan) * (newZoom / zoom)
-      setPan(prev => ({
-        x: mx - (mx - prev.x) * (newZoom / zoom),
-        y: my - (my - prev.y) * (newZoom / zoom),
-      }))
+      setPan(prev => {
+        const nx = mx - (mx - prev.x) * (newZoom / zoom)
+        const ny = my - (my - prev.y) * (newZoom / zoom)
+        return clampPan(nx, ny, newZoom)
+      })
       onZoomChange?.(newZoom)
     }
     el.addEventListener('wheel', handler, { passive: false })
@@ -184,7 +196,9 @@ const RingVisualizationCanvas = ({ colors, activeRings, zoom = 1, onZoomChange, 
       const canvas = canvasRef.current
       const rect = canvas?.getBoundingClientRect()
       const ratio = rect ? size / rect.width : 1
-      setPan({ x: dragRef.current.panX + dx * ratio, y: dragRef.current.panY + dy * ratio })
+      const nx = dragRef.current.panX + dx * ratio
+      const ny = dragRef.current.panY + dy * ratio
+      setPan(clampPan(nx, ny, zoom))
       setTooltip(null)
       return
     }
