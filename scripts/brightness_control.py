@@ -107,6 +107,8 @@ def main(stdscr):
     publish_brightness()
     publish_manual_brightness()
     stdscr.addstr(f"Brightness and manual_brightness set to {brightness}\n")
+    last_input_time = time.monotonic()
+    last_brightness_update = last_input_time
 
     while True:
         key = stdscr.getch()
@@ -115,11 +117,10 @@ def main(stdscr):
         # Space key press handling (prevents spamming)
         if key == ord(' '):
             if current_time - last_input_time >= 0.5:  # Only process input every 2 seconds
-                get_latest_brightness()
-
                 if brightness < 1.0:
                     brightness = round(brightness + 0.2, 1)
                     publish_brightness()
+                    publish_manual_brightness()
                     stdscr.addstr(f"\nUpdated brightness to {brightness}")
                     stdscr.refresh()
 
@@ -127,11 +128,10 @@ def main(stdscr):
 
         # Auto-dimming if inactive for 5 seconds
         if current_time - last_input_time >= 0.5 and current_time - last_brightness_update >= 0.5:
-            get_latest_brightness()
-
             if brightness > 0.0:
                 brightness = round(brightness - 0.2, 1)
                 publish_brightness()
+                publish_manual_brightness()
                 stdscr.addstr(f"\nAuto-dimming: brightness now {brightness}")
                 stdscr.refresh()
 
