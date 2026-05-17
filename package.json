@@ -10,6 +10,7 @@
     "playground": "ts-node-dev --respawn src/playground.ts",
     "idle": "ts-node-dev --respawn src/idle.ts",
     "stop": "ts-node-dev --respawn src/stop.ts",
+    "clock": "ts-node src/clock.ts",
     "random": "ts-node-dev --respawn src/random.ts",
     "index-trigger": "ts-node-dev --respawn src/index-trigger.ts",
     "preset": "ts-node src/preset-runner.ts",
