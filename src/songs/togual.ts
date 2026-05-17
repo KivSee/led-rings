@@ -83,10 +83,26 @@ const togual = async () => {
       });
     })
 
-    beats(0, 16, () => {
+    beats(4, 6, () => {
       elements(all, () => {
-        segment(segment_ind, () => {
-          constColor({ hue: 0.4063, sat: 0.7160, val: 0.6627 })
+        segment(segment_rand, () => {
+          constColor({ hue: 0.1584, sat: 0.8245, val: 0.9608 })
+        });
+      });
+    })
+
+    beats(0, 6, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.1591, sat: 0.8156, val: 0.9569 })
+        });
+      });
+    })
+
+    beats(6, 12, () => {
+      elements(all, () => {
+        segment(segment_rand, () => {
+          constColor({ hue: 0.5691, sat: 0.8103, val: 0.9098 })
         });
       });
     })
@@ -111,6 +127,31 @@ const togual = async () => {
       elements(all, () => {
         segment(segment_updown, () => {
           hueShiftStartToEnd({ start: 0, end: 1 })
+        });
+      });
+    })
+
+    beats(4, 6, () => {
+      elements(all, () => {
+        segment(segment_rand, () => {
+          addEffect({ snake_brightness: { head: { linear: { start: 0, end: 1 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: false, mult_factor_decrease: { linear: { start: 1, end: 0 } } } })
+        });
+      });
+    })
+
+    beats(0, 6, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          fadeInOut({ high: 1 })
+        });
+      });
+    })
+
+    beats(6, 12, () => {
+      elements(all, () => {
+        segment(segment_rand, () => {
+          addEffect({ snake_brightness: { head: { linear: { start: 0, end: 1 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: false, mult_factor_decrease: { linear: { start: 1, end: 0 } } } })
+          fadeIn()
         });
       });
     })
@@ -143,14 +184,6 @@ const togual = async () => {
       elements(all, () => {
         segment(segment_updown, () => {
           snakeHeadSin({ tailLength: 0.6, cyclic: true })
-        });
-      });
-    })
-
-    beats(0, 16, () => {
-      elements(all, () => {
-        segment(segment_ind, () => {
-          snakeHeadMove({ start: 0, end: 1, tail: 0.5 })
         });
       });
     })

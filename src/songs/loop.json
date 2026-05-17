@@ -1,10 +1,10 @@
 {
   "song": {
     "name": "loop",
-    "lengthSeconds": 245,
+    "lengthSeconds": 248.7,
     "bpm": 300,
     "startOffsetMs": 3000,
-    "runStartTimeSeconds": 158.016,
+    "runStartTimeSeconds": 242.92,
     "animationType": "song",
     "audioFilePath": "loop.wav",
     "beatTimestampsMs": [
@@ -2089,7 +2089,7 @@
     {
       "id": "dup-1772901108613-u2mg",
       "startTime": 387,
-      "endTime": 832,
+      "endTime": 831,
       "label": "Snake All Rings Centric",
       "color": "#a855f7",
       "rings": [
@@ -2128,7 +2128,7 @@
     {
       "id": "dup-1772901137662-lcl0",
       "startTime": 387,
-      "endTime": 832,
+      "endTime": 831,
       "label": "Hue Step All Rings Long",
       "color": "#a855f7",
       "rings": [
@@ -2203,7 +2203,7 @@
     {
       "id": "dup-1772901470681-vbe4",
       "startTime": 454,
-      "endTime": 832,
+      "endTime": 831,
       "label": "Blink Out Random Faster",
       "color": "#fc5c5e",
       "hasExplicitColor": false,
@@ -2425,9 +2425,9 @@
     },
     {
       "id": "dup-1774287887885-u4rf",
-      "startTime": 832,
+      "startTime": 831,
       "endTime": 833,
-      "label": "Twinkle Cascade (copy)",
+      "label": "Twinkle Cascade Fade",
       "color": "#a855f7",
       "rings": [
         1,
@@ -2448,24 +2448,26 @@
       "effects": [
         {
           "id": "tc-pulse-bm5j",
-          "effectKey": "position_hue",
+          "effectKey": "snake",
           "params": {
-            "offset_factor": {
-              "const_value": {
-                "value": 0.5
-              }
-            }
+            "tailLength": 0.5,
+            "cyclic": false,
+            "reverse": false
           },
           "phase": 1
+        },
+        {
+          "id": "eff-1775909918634-f8pn8cnsfr",
+          "effectKey": "fadeOut"
         }
       ]
     },
     {
       "id": "1774287906119",
-      "startTime": 840,
-      "endTime": 844,
-      "label": "Timeframe 29",
-      "color": "#34897f",
+      "startTime": 833,
+      "endTime": 925,
+      "label": "Fade Back In",
+      "color": "#7aa0f5",
       "rings": [
         1,
         2,
@@ -2490,8 +2492,10 @@
     }
   ],
   "windowSizes": {
-    "playbackPanelWidth": 423,
+    "playbackPanelWidth": 900,
     "detailsPanelWidth": 361,
-    "spectrogramHeight": 327
-  }
+    "spectrogramHeight": 188,
+    "headerHeight": 56
+  },
+  "theme": "dark"
 }

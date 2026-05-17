@@ -158,11 +158,11 @@
       ]
     },
     {
-      "id": "1775582069007",
-      "startTime": 0,
-      "endTime": 16,
-      "label": "Timeframe 5",
-      "color": "#30a965",
+      "id": "1776179347666",
+      "startTime": 4,
+      "endTime": 6,
+      "label": "Start Rain",
+      "color": "#f5eb2b",
       "rings": [
         1,
         2,
@@ -177,26 +177,124 @@
         11,
         12
       ],
-      "mapping": "ind",
+      "mapping": "rand",
       "effects": [
         {
-          "id": "eff-1775825193938-51iadjdgee7",
-          "effectKey": "position_brightness",
+          "id": "eff-1776181442205-5rvjo1rsudv",
+          "effectKey": "snake_brightness",
           "params": {
-            "mult_factor_increase": {
+            "head": {
               "linear": {
                 "start": 0,
                 "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.5
+              }
+            },
+            "cyclic": false,
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 1,
+                "end": 0
               }
             }
           }
         }
       ]
+    },
+    {
+      "id": "1776179556476",
+      "startTime": 0,
+      "endTime": 6,
+      "label": "Fade In Out Yellow",
+      "color": "#f4eb2d",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1776179803753-by0aqjfj7fj",
+          "effectKey": "fadeInOut",
+          "params": {
+            "high": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "1776180043541",
+      "startTime": 6,
+      "endTime": 12,
+      "label": "Blue Rain",
+      "color": "#2c9ae8",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "effects": [
+        {
+          "id": "eff-1776180184575-4zhh7breh49",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.5
+              }
+            },
+            "cyclic": false,
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 1,
+                "end": 0
+              }
+            }
+          },
+          "phase": 0
+        },
+        {
+          "id": "eff-1776181466580-ehz7wy0wrjc",
+          "effectKey": "fadeIn"
+        }
+      ]
     }
   ],
   "windowSizes": {
-    "playbackPanelWidth": 440,
+    "playbackPanelWidth": 894,
     "detailsPanelWidth": 350,
-    "spectrogramHeight": 289
-  }
+    "spectrogramHeight": 151,
+    "headerHeight": 56
+  },
+  "theme": "dark"
 }
