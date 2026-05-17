@@ -1,3 +1,7 @@
+# Claude Code local settings (personal overrides only)
+.claude/*
+!.claude/settings.json
+
 # Control server temp files
 .tmp-sequence-out.json
 src/.tmp-sequence-runner.ts
@@ -75,6 +79,9 @@ web_modules/
 
 # Yarn Integrity file
 .yarn-integrity
+
+# npm lock file — this project uses yarn
+package-lock.json
 
 # dotenv environment variable files
 .env

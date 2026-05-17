@@ -73,6 +73,7 @@ class Recorder {
   private effectCounter = 0;
   private bpm = 120;
   private startOffsetMs = 0;
+  private hasBeatTimestamps = false;
 
   reset() {
     this.timeframes = [];
@@ -81,9 +82,10 @@ class Recorder {
     this.effectCounter = 0;
   }
 
-  setBpm(bpm: number, startOffsetMs: number) {
+  setBpm(bpm: number, startOffsetMs: number, hasBeatTimestamps = false) {
     this.bpm = bpm;
     this.startOffsetMs = startOffsetMs;
+    this.hasBeatTimestamps = hasBeatTimestamps;
   }
 
   recordEffect(effectKey: string, params: Record<string, any>) {
@@ -91,8 +93,10 @@ class Recorder {
     if (!store) return;
 
     const effectConfig = store.effectConfig || {};
-    const startBeat = msToBeats((effectConfig.start_time ?? 0) - this.startOffsetMs, this.bpm);
-    const endBeat = msToBeats((effectConfig.end_time ?? 0) - this.startOffsetMs, this.bpm);
+    // When beat timestamps are present, times are already absolute — no offset to subtract
+    const offset = this.hasBeatTimestamps ? 0 : this.startOffsetMs;
+    const startBeat = msToBeats((effectConfig.start_time ?? 0) - offset, this.bpm);
+    const endBeat = msToBeats((effectConfig.end_time ?? 0) - offset, this.bpm);
     const rings: number[] = store.elements || [];
     const mapping: string = effectConfig.segments || "all";
     const phaseValue: number = store.phase || 0;
@@ -210,7 +214,8 @@ class Recorder {
     for (const tf of this.timeframes) {
       if (!tf.hasExplicitColor) tf.hasExplicitColor = false;
     }
-    const collapsed = detectMovementPatterns(this.timeframes);
+    const ringsMerged = mergeIdenticalRings(this.timeframes);
+    const collapsed = detectMovementPatterns(ringsMerged);
     return {
       song: {
         ...songMeta,
@@ -222,6 +227,58 @@ class Recorder {
 }
 
 export const recorder = new Recorder();
+
+// ---------------------------------------------------------------------------
+// Ring merging — combines timeframes with identical time range, mapping,
+// effects, and color into a single timeframe with a combined ring list.
+// This handles cases like per-ring code that applies the same effect to
+// groups of rings (e.g. ringParty with (e + i) % 4 grouping).
+// ---------------------------------------------------------------------------
+
+/** Key that identifies timeframes eligible for ring merging (same time range + same shape). */
+function ringMergeKey(tf: RecordedTimeframe): string {
+  const efx = tf.effects.map(e => ({
+    effectKey: e.effectKey,
+    params: e.params,
+    phase: e.phase,
+  }));
+  return JSON.stringify({
+    startTime: Math.round(tf.startTime * 100) / 100,
+    endTime: Math.round(tf.endTime * 100) / 100,
+    mapping: tf.mapping,
+    cycles: tf.cycles ?? [],
+    effects: efx,
+    hasExplicitColor: tf.hasExplicitColor,
+    color: tf.color,
+  });
+}
+
+function mergeIdenticalRings(timeframes: RecordedTimeframe[]): RecordedTimeframe[] {
+  const groups = new Map<string, RecordedTimeframe[]>();
+  for (const tf of timeframes) {
+    const key = ringMergeKey(tf);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(tf);
+  }
+
+  const result: RecordedTimeframe[] = [];
+  for (const [, group] of groups) {
+    if (group.length === 1) {
+      result.push(group[0]);
+      continue;
+    }
+    // Merge ring lists
+    const allRings = [...new Set(group.flatMap(tf => tf.rings))].sort((a, b) => a - b);
+    const merged: RecordedTimeframe = {
+      ...group[0],
+      rings: allRings,
+    };
+    result.push(merged);
+  }
+
+  result.sort((a, b) => a.startTime - b.startTime || a.id.localeCompare(b.id));
+  return result;
+}
 
 // ---------------------------------------------------------------------------
 // Movement pattern detection — collapses per-ring timeframes back into

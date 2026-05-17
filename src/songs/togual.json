@@ -1,0 +1,300 @@
+{
+  "song": {
+    "name": "togual",
+    "lengthSeconds": 360,
+    "bpm": 86,
+    "startOffsetMs": 0,
+    "runStartTimeSeconds": 0,
+    "animationType": "song",
+    "audioFilePath": "togual.mp3"
+  },
+  "timeframes": [
+    {
+      "id": "4",
+      "startTime": 32,
+      "endTime": 44,
+      "label": "Hue Wave",
+      "color": "#f59e0b",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "effects": [
+        {
+          "id": "e4a",
+          "effectKey": "snakeInOut",
+          "params": {
+            "start": 0,
+            "end": 1
+          }
+        },
+        {
+          "id": "e4b",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0,
+            "end": 0.7
+          }
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "startTime": 44,
+      "endTime": 52,
+      "label": "Fill Grow",
+      "color": "#ec4899",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "phase": 0.3,
+      "effects": [
+        {
+          "id": "e5",
+          "effectKey": "snakeFillGrow"
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "startTime": 52,
+      "endTime": 60,
+      "label": "Slow Fade",
+      "color": "#ef4444",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "e6a",
+          "effectKey": "snakeSlowFast",
+          "params": {
+            "tailLength": 0.6
+          }
+        },
+        {
+          "id": "e6b",
+          "effectKey": "fade",
+          "params": {
+            "start": 1,
+            "end": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "7",
+      "startTime": 60,
+      "endTime": 64,
+      "label": "Final Sweep",
+      "color": "#06b6d4",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "updown",
+      "effects": [
+        {
+          "id": "e7a",
+          "effectKey": "snakeHeadSin",
+          "params": {
+            "tailLength": 0.6,
+            "cyclic": true
+          }
+        },
+        {
+          "id": "e7b",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0,
+            "end": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "1776179347666",
+      "startTime": 4,
+      "endTime": 6,
+      "label": "Start Rain",
+      "color": "#f5eb2b",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "effects": [
+        {
+          "id": "eff-1776181442205-5rvjo1rsudv",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.5
+              }
+            },
+            "cyclic": false,
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 1,
+                "end": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "1776179556476",
+      "startTime": 0,
+      "endTime": 6,
+      "label": "Fade In Out Yellow",
+      "color": "#f4eb2d",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1776179803753-by0aqjfj7fj",
+          "effectKey": "fadeInOut",
+          "params": {
+            "high": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "1776180043541",
+      "startTime": 6,
+      "endTime": 12,
+      "label": "Blue Rain",
+      "color": "#2c9ae8",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "effects": [
+        {
+          "id": "eff-1776180184575-4zhh7breh49",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.5
+              }
+            },
+            "cyclic": false,
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 1,
+                "end": 0
+              }
+            }
+          },
+          "phase": 0
+        },
+        {
+          "id": "eff-1776181466580-ehz7wy0wrjc",
+          "effectKey": "fadeIn"
+        }
+      ]
+    }
+  ],
+  "windowSizes": {
+    "playbackPanelWidth": 894,
+    "detailsPanelWidth": 350,
+    "spectrogramHeight": 151,
+    "headerHeight": 56
+  },
+  "theme": "dark"
+}

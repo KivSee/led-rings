@@ -1,0 +1,837 @@
+{
+  "song": {
+    "name": "AllBackground",
+    "lengthSeconds": 300,
+    "bpm": 120,
+    "animationType": "trigger"
+  },
+  "timeframes": [
+    {
+      "id": "gen-4ktr-0",
+      "startTime": 0,
+      "endTime": 60,
+      "label": "4ktr (all)",
+      "color": "#ff33d3",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "phase": 1,
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-0-0",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.20848038075666658,
+            "staticPhase": 0
+          },
+          "phase": 3
+        }
+      ]
+    },
+    {
+      "id": "gen-4ktr-1",
+      "startTime": 0,
+      "endTime": 60,
+      "label": "4ktr (rand)",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-1-0",
+          "effectKey": "snakeSlowFast",
+          "params": {
+            "tailLength": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "gen-90y0-0",
+      "startTime": 60,
+      "endTime": 120,
+      "label": "90y0 (all)",
+      "color": "#ff00ad",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "phase": 6
+    },
+    {
+      "id": "gen-90y0-1",
+      "startTime": 60,
+      "endTime": 120,
+      "label": "90y0 (rand)",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 8
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-1-0",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 1,
+            "cyclic": true,
+            "reverse": false
+          },
+          "phase": 0.5
+        },
+        {
+          "id": "gen-1-1",
+          "effectKey": "snakeSlowFast",
+          "params": {
+            "tailLength": 1
+          },
+          "phase": 0.5
+        }
+      ]
+    },
+    {
+      "id": "gen-dqb4-0",
+      "startTime": 120,
+      "endTime": 180,
+      "label": "dqb4 (all)",
+      "color": "#ff00d5",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "phase": 1,
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 8
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-0-0",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0,
+            "end": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "gen-dqb4-1",
+      "startTime": 120,
+      "endTime": 180,
+      "label": "dqb4 (centric)",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "centric",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 8
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-1-0",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 2,
+            "cyclic": true,
+            "reverse": false
+          },
+          "phase": 0.5
+        }
+      ]
+    },
+    {
+      "id": "gen-dqb4-2",
+      "startTime": 120,
+      "endTime": 180,
+      "label": "dqb4 (arc)",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 16
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-2-0",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 1,
+            "cyclic": true,
+            "reverse": false
+          },
+          "phase": 0.25
+        }
+      ]
+    },
+    {
+      "id": "gen-eabx-0",
+      "startTime": 180,
+      "endTime": 240,
+      "label": "eabx (all)",
+      "color": "#88ff00",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "phase": 1,
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 8
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-0-0",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0,
+            "end": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "gen-eabx-1",
+      "startTime": 180,
+      "endTime": 240,
+      "label": "eabx (arc)",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 4
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-1-0",
+          "effectKey": "snakeHeadSin",
+          "params": {
+            "tailLength": 2,
+            "cyclic": false
+          },
+          "phase": 4
+        }
+      ]
+    },
+    {
+      "id": "gen-elgd-0",
+      "startTime": 240,
+      "endTime": 300,
+      "label": "elgd (all)",
+      "color": "#33ff86",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "id": "gen-elgd-1",
+      "startTime": 240,
+      "endTime": 300,
+      "label": "elgd (updown)",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "updown",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-1-0",
+          "effectKey": "snakeHeadSin",
+          "params": {
+            "tailLength": 2,
+            "cyclic": false
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "gen-green-0",
+      "startTime": 300,
+      "endTime": 360,
+      "label": "green (all)",
+      "color": "#45ff33",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-0-0",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.6127967864699162,
+            "staticPhase": 0
+          },
+          "phase": 3
+        }
+      ]
+    },
+    {
+      "id": "gen-green-1",
+      "startTime": 300,
+      "endTime": 360,
+      "label": "green (arc)",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 8
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-1-0",
+          "effectKey": "snakeHeadSin",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": false
+          },
+          "phase": 2
+        }
+      ]
+    },
+    {
+      "id": "gen-ie78-0",
+      "startTime": 360,
+      "endTime": 420,
+      "label": "ie78 (all)",
+      "color": "#33ff67",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "phase": 8.8,
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 16
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-0-0",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0,
+            "end": 1
+          }
+        },
+        {
+          "id": "gen-0-1",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.5508587128267204,
+            "staticPhase": 0
+          },
+          "phase": 2
+        }
+      ]
+    },
+    {
+      "id": "gen-ie78-1",
+      "startTime": 360,
+      "endTime": 420,
+      "label": "ie78 (updown)",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "updown",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 16
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-1-0",
+          "effectKey": "snakeHeadSin",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": false
+          },
+          "phase": 8.8
+        }
+      ]
+    },
+    {
+      "id": "gen-ntgt-0",
+      "startTime": 420,
+      "endTime": 480,
+      "label": "ntgt (all)",
+      "color": "#ff4e33",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "phase": 0.25,
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-0-0",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.5230004583240828,
+            "staticPhase": 0
+          },
+          "phase": 2
+        }
+      ]
+    },
+    {
+      "id": "gen-ntgt-1",
+      "startTime": 420,
+      "endTime": 480,
+      "label": "ntgt (rand)",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-1-0",
+          "effectKey": "snakeSlowFast",
+          "params": {
+            "tailLength": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "gen-ntgt-2",
+      "startTime": 420,
+      "endTime": 480,
+      "label": "ntgt (updown)",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "updown",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 4
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-2-0",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 2,
+            "cyclic": true,
+            "reverse": false
+          },
+          "phase": 4
+        }
+      ]
+    },
+    {
+      "id": "gen-r0nn-0",
+      "startTime": 480,
+      "endTime": 540,
+      "label": "r0nn (all)",
+      "color": "#45ff00",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "id": "gen-r0nn-1",
+      "startTime": 480,
+      "endTime": 540,
+      "label": "r0nn (arc)",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 16
+        }
+      ],
+      "effects": [
+        {
+          "id": "gen-1-0",
+          "effectKey": "snakeHeadSin",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": false
+          }
+        },
+        {
+          "id": "gen-1-1",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 2,
+            "cyclic": true,
+            "reverse": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "gen-u7nc-0",
+      "startTime": 540,
+      "endTime": 600,
+      "label": "u7nc (b1)",
+      "color": "#00ff62",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b1",
+      "phase": 1
+    },
+    {
+      "id": "gen-u7nc-1",
+      "startTime": 540,
+      "endTime": 600,
+      "label": "u7nc (b2)",
+      "color": "#37000c",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b2",
+      "phase": 1
+    },
+    {
+      "id": "gen-u7nc-2",
+      "startTime": 540,
+      "endTime": 600,
+      "label": "u7nc (all)",
+      "color": "#3b82f6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    }
+  ]
+}

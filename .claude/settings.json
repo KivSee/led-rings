@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(**)",
+      "Bash(git *)",
+      "Bash(cd c:/repos/led-rings && git *)",
+      "Bash(yarn *)",
+      "Bash(cd c:/repos/led-rings && yarn *)",
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(node *)",
+      "Bash(python *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Bash(xargs *)",
+      "Bash(xxd *)",
+      "Bash(netstat *)",
+      "Bash(tasklist *)",
+      "Bash(findstr *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:pypi.org)",
+      "WebSearch"
+    ]
+  }
+}

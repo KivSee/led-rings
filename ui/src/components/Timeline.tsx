@@ -18,6 +18,12 @@ interface TimelineProps {
   songLengthBeats: number
   bpm: number
   onUpdate: (id: string, updates: Partial<Timeframe>) => void
+  /** Update without pushing to undo stack (for real-time drag/resize). */
+  onUpdateSilent?: (id: string, updates: Partial<Timeframe>) => void
+  /** Batch silent update for multi-select drag/resize. */
+  onUpdateSilentBatch?: (batch: Map<string, Partial<Timeframe>>) => void
+  /** Save current state to undo stack (call once at drag/resize start). */
+  onCheckpoint?: () => void
   onDelete: (id: string) => void
   onAdd: (startTime: number, endTime: number) => void
   onCopy?: (id: string) => void
@@ -25,6 +31,8 @@ interface TimelineProps {
   hasClipboard?: boolean
   focusedTimeframeId: string | null
   onFocusedTimeframeChange: (id: string | null) => void
+  selectedTimeframeIds?: Set<string>
+  onSelectedTimeframeIdsChange?: (ids: Set<string>) => void
   currentTime: number
   onCurrentTimeChange: (time: number) => void
   /** First visible beat (from unified view range). */
@@ -54,7 +62,7 @@ const beatToSeconds = (beat: number, bpm: number, beatTimestampsMs?: number[]): 
   return (beat / bpm) * 60
 }
 
-const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd, onCopy, onPaste, hasClipboard, focusedTimeframeId, onFocusedTimeframeChange, currentTime, onCurrentTimeChange, viewStartBeat, beatsPerScreen, onScrollTo, onZoomAt, onPanBy: _onPanBy, onSeekToBeat, beatTimestampsMs }: TimelineProps) => {
+const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onUpdateSilent, onUpdateSilentBatch, onCheckpoint, onDelete, onAdd, onCopy, onPaste, hasClipboard, focusedTimeframeId, onFocusedTimeframeChange, selectedTimeframeIds, onSelectedTimeframeIdsChange, currentTime, onCurrentTimeChange, viewStartBeat, beatsPerScreen, onScrollTo, onZoomAt, onPanBy: _onPanBy, onSeekToBeat, beatTimestampsMs }: TimelineProps) => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -66,6 +74,8 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
   const [moveStartBeat, setMoveStartBeat] = useState<number | null>(null)
   const [moveOriginalStart, setMoveOriginalStart] = useState<number | null>(null)
   const [moveOriginalEnd, setMoveOriginalEnd] = useState<number | null>(null)
+  /** Original positions of all selected timeframes at drag start (for multi-select move/resize). */
+  const [dragOriginals, setDragOriginals] = useState<Map<string, { startTime: number; endTime: number }> | null>(null)
   const [isDraggingTimeIndicator, setIsDraggingTimeIndicator] = useState(false)
   const timelineScrollViewRef = React.useRef<HTMLDivElement>(null)
   const timelineWrapperRef = React.useRef<HTMLDivElement>(null)
@@ -337,15 +347,23 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
     return snapToBeat(beat)
   }
 
+  const selected = selectedTimeframeIds ?? new Set<string>()
+  const setSelected = onSelectedTimeframeIdsChange ?? (() => {})
+
   const handleTimeframeFocus = (timeframeId: string, e: React.MouseEvent) => {
     // Don't focus if clicking on interactive elements
     const target = e.target as HTMLElement
-    if (target.closest('.resize-handle') || 
-        target.closest('input') || 
+    if (target.closest('.resize-handle') ||
+        target.closest('input') ||
         target.closest('button')) {
       return
     }
-    onFocusedTimeframeChange(timeframeId)
+    // Ctrl+click selection is handled in handleMouseDown; this handles
+    // the focus/selection for plain clicks that didn't start a drag
+    if (!(e.ctrlKey || e.metaKey)) {
+      setSelected(new Set([timeframeId]))
+      onFocusedTimeframeChange(timeframeId)
+    }
   }
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -371,18 +389,29 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
         if (timeframeId) {
           e.preventDefault()
           e.stopPropagation()
+          onCheckpoint?.()
+          const beat = yToBeat(e.clientY)
           setIsDragging(true)
           setResizingTimeframeId(timeframeId)
           setResizingEdge(edge)
-          setDragStart(yToBeat(e.clientY))
-          setDragCurrent(yToBeat(e.clientY))
+          setDragStart(beat)
+          setDragCurrent(beat)
+          // Capture originals for all selected (or just this one if not in selection)
+          const idsToResize = selected.has(timeframeId) ? selected : new Set([timeframeId])
+          const originals = new Map<string, { startTime: number; endTime: number }>()
+          for (const id of idsToResize) {
+            const tf = timeframes.find(t => t.id === id)
+            if (tf) originals.set(id, { startTime: tf.startTime, endTime: tf.endTime })
+          }
+          setDragOriginals(originals)
           onFocusedTimeframeChange(timeframeId)
+          if (!selected.has(timeframeId)) setSelected(new Set([timeframeId]))
           return
         }
       }
     }
 
-    // Check if clicking on a timeframe body (not resize handle, input, button) -> start move
+    // Check if clicking on a timeframe body (not resize handle, input, button) -> start move or Ctrl+select
     const timeframeElement = target.closest('.timeframe') as HTMLElement
     if (
       timeframeElement &&
@@ -393,8 +422,28 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
       const timeframeId = timeframeElement.dataset.timeframeId
       const timeframe = timeframeId ? timeframes.find(tf => tf.id === timeframeId) : null
       if (timeframeId && timeframe) {
+        // Ctrl/Meta+click: toggle selection, don't start move
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault()
+          e.stopPropagation()
+          const next = new Set(selected)
+          if (next.has(timeframeId)) {
+            next.delete(timeframeId)
+            if (focusedTimeframeId === timeframeId) {
+              const remaining = [...next]
+              onFocusedTimeframeChange(remaining.length > 0 ? remaining[remaining.length - 1] : null)
+            }
+          } else {
+            next.add(timeframeId)
+            onFocusedTimeframeChange(timeframeId)
+          }
+          setSelected(next)
+          return
+        }
+        // Plain click: start move
         e.preventDefault()
         e.stopPropagation()
+        onCheckpoint?.()
         const beat = yToBeat(e.clientY)
         setIsDragging(true)
         setMovingTimeframeId(timeframeId)
@@ -402,7 +451,16 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
         setMoveOriginalStart(timeframe.startTime)
         setMoveOriginalEnd(timeframe.endTime)
         setDragCurrent(beat)
+        // If clicking on a selected timeframe, move all selected; otherwise single-select this one
+        const idsToMove = selected.has(timeframeId) ? selected : new Set([timeframeId])
+        const originals = new Map<string, { startTime: number; endTime: number }>()
+        for (const id of idsToMove) {
+          const tf = timeframes.find(t => t.id === id)
+          if (tf) originals.set(id, { startTime: tf.startTime, endTime: tf.endTime })
+        }
+        setDragOriginals(originals)
         onFocusedTimeframeChange(timeframeId)
+        if (!selected.has(timeframeId)) setSelected(new Set([timeframeId]))
         return
       }
     }
@@ -413,9 +471,10 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
       return
     }
 
-    // Unfocus if clicking on empty space
+    // Unfocus and deselect if clicking on empty space
     if (!target.closest('.timeframe')) {
       onFocusedTimeframeChange(null)
+      setSelected(new Set())
     }
 
     // Create new segment
@@ -451,27 +510,33 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
       return
     }
 
-    if (movingTimeframeId && moveStartBeat !== null && moveOriginalStart !== null && moveOriginalEnd !== null && dragCurrent !== null) {
-      const duration = moveOriginalEnd - moveOriginalStart
+    const batchSilent = onUpdateSilentBatch ?? ((batch: Map<string, Partial<Timeframe>>) => {
+      const silentUpdate = onUpdateSilent ?? onUpdate
+      for (const [id, u] of batch) silentUpdate(id, u)
+    })
+    if (movingTimeframeId && moveStartBeat !== null && dragCurrent !== null && dragOriginals) {
       const deltaBeat = dragCurrent - moveStartBeat
-      let newStart = snapToBeat(moveOriginalStart + deltaBeat)
-      newStart = Math.max(0, Math.min(maxTime - duration, newStart))
-      const newEnd = newStart + duration
-      onUpdate(movingTimeframeId, { startTime: newStart, endTime: newEnd })
-    } else if (resizingTimeframeId && resizingEdge && dragCurrent !== null) {
-      const timeframe = timeframes.find(tf => tf.id === resizingTimeframeId)
-      if (timeframe) {
-        const newBeat = dragCurrent
+      const batch = new Map<string, Partial<Timeframe>>()
+      for (const [id, orig] of dragOriginals) {
+        const duration = orig.endTime - orig.startTime
+        let newStart = snapToBeat(orig.startTime + deltaBeat)
+        newStart = Math.max(0, Math.min(maxTime - duration, newStart))
+        batch.set(id, { startTime: newStart, endTime: newStart + duration })
+      }
+      batchSilent(batch)
+    } else if (resizingTimeframeId && resizingEdge && dragStart !== null && dragCurrent !== null && dragOriginals) {
+      const deltaBeat = dragCurrent - dragStart
+      const batch = new Map<string, Partial<Timeframe>>()
+      for (const [id, orig] of dragOriginals) {
         if (resizingEdge === 'start') {
-          // Ensure start doesn't go past end, maintain at least 4 beats difference
-          const newStart = Math.min(newBeat, timeframe.endTime - 1)
-          onUpdate(resizingTimeframeId, { startTime: newStart })
+          const newStart = Math.min(orig.startTime + deltaBeat, orig.endTime - 1)
+          batch.set(id, { startTime: newStart })
         } else {
-          // Ensure end doesn't go before start, maintain at least 4 beats difference
-          const newEnd = Math.max(newBeat, timeframe.startTime + 1)
-          onUpdate(resizingTimeframeId, { endTime: newEnd })
+          const newEnd = Math.max(orig.endTime + deltaBeat, orig.startTime + 1)
+          batch.set(id, { endTime: newEnd })
         }
       }
+      batchSilent(batch)
     } else if (dragStart !== null && dragCurrent !== null) {
       // Creating new segment
       const startBeat = Math.min(dragStart, dragCurrent)
@@ -495,6 +560,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
     setMoveStartBeat(null)
     setMoveOriginalStart(null)
     setMoveOriginalEnd(null)
+    setDragOriginals(null)
   }
 
   useEffect(() => {
@@ -511,30 +577,37 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
       const beat = yToBeat(e.clientY)
       setDragCurrent(beat)
 
-      // Update timeframe in real-time while resizing
-      if (resizingTimeframeId && resizingEdge) {
-        const timeframe = timeframes.find(tf => tf.id === resizingTimeframeId)
-        if (timeframe) {
+      // Update timeframes in real-time (silent — checkpoint was saved at drag start)
+      const batchSilent = onUpdateSilentBatch ?? ((batch: Map<string, Partial<Timeframe>>) => {
+        const su = onUpdateSilent ?? onUpdate
+        for (const [id, u] of batch) su(id, u)
+      })
+      if (resizingTimeframeId && resizingEdge && dragStart !== null && dragOriginals) {
+        const deltaBeat = beat - dragStart
+        const batch = new Map<string, Partial<Timeframe>>()
+        for (const [id, orig] of dragOriginals) {
           if (resizingEdge === 'start') {
-            // Ensure start doesn't go past end, maintain at least 4 beats difference
-            const newStart = Math.min(beat, timeframe.endTime - 1)
-            onUpdate(resizingTimeframeId, { startTime: newStart })
+            const newStart = Math.min(orig.startTime + deltaBeat, orig.endTime - 1)
+            batch.set(id, { startTime: newStart })
           } else {
-            // Ensure end doesn't go before start, maintain at least 4 beats difference
-            const newEnd = Math.max(beat, timeframe.startTime + 1)
-            onUpdate(resizingTimeframeId, { endTime: newEnd })
+            const newEnd = Math.max(orig.endTime + deltaBeat, orig.startTime + 1)
+            batch.set(id, { endTime: newEnd })
           }
         }
+        batchSilent(batch)
       }
 
-      // Update timeframe position in real-time while moving
-      if (movingTimeframeId && moveStartBeat !== null && moveOriginalStart !== null && moveOriginalEnd !== null) {
-        const duration = moveOriginalEnd - moveOriginalStart
+      // Update timeframe positions in real-time while moving
+      if (movingTimeframeId && moveStartBeat !== null && dragOriginals) {
         const deltaBeat = beat - moveStartBeat
-        let newStart = snapToBeat(moveOriginalStart + deltaBeat)
-        newStart = Math.max(0, Math.min(maxTime - duration, newStart))
-        const newEnd = newStart + duration
-        onUpdate(movingTimeframeId, { startTime: newStart, endTime: newEnd })
+        const batch = new Map<string, Partial<Timeframe>>()
+        for (const [id, orig] of dragOriginals) {
+          const duration = orig.endTime - orig.startTime
+          let newStart = snapToBeat(orig.startTime + deltaBeat)
+          newStart = Math.max(0, Math.min(maxTime - duration, newStart))
+          batch.set(id, { startTime: newStart, endTime: newStart + duration })
+        }
+        batchSilent(batch)
       }
     }
 
@@ -553,35 +626,41 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
         setMoveStartBeat(null)
         setMoveOriginalStart(null)
         setMoveOriginalEnd(null)
+        setDragOriginals(null)
         return
       }
 
-      if (movingTimeframeId && moveStartBeat !== null && moveOriginalStart !== null && moveOriginalEnd !== null && dragCurrent !== null) {
-        const duration = moveOriginalEnd - moveOriginalStart
+      const batchSilentUp = onUpdateSilentBatch ?? ((batch: Map<string, Partial<Timeframe>>) => {
+        const su = onUpdateSilent ?? onUpdate
+        for (const [id, u] of batch) su(id, u)
+      })
+      if (movingTimeframeId && moveStartBeat !== null && dragCurrent !== null && dragOriginals) {
         const deltaBeat = dragCurrent - moveStartBeat
-        let newStart = snapToBeat(moveOriginalStart + deltaBeat)
-        newStart = Math.max(0, Math.min(maxTime - duration, newStart))
-        const newEnd = newStart + duration
-        onUpdate(movingTimeframeId, { startTime: newStart, endTime: newEnd })
-      } else if (resizingTimeframeId && resizingEdge && dragCurrent !== null) {
-        const timeframe = timeframes.find(tf => tf.id === resizingTimeframeId)
-        if (timeframe) {
-          const newBeat = dragCurrent
+        const batch = new Map<string, Partial<Timeframe>>()
+        for (const [id, orig] of dragOriginals) {
+          const duration = orig.endTime - orig.startTime
+          let newStart = snapToBeat(orig.startTime + deltaBeat)
+          newStart = Math.max(0, Math.min(maxTime - duration, newStart))
+          batch.set(id, { startTime: newStart, endTime: newStart + duration })
+        }
+        batchSilentUp(batch)
+      } else if (resizingTimeframeId && resizingEdge && dragStart !== null && dragCurrent !== null && dragOriginals) {
+        const deltaBeat = dragCurrent - dragStart
+        const batch = new Map<string, Partial<Timeframe>>()
+        for (const [id, orig] of dragOriginals) {
           if (resizingEdge === 'start') {
-            // Ensure start doesn't go past end, maintain at least 4 beats difference
-            const newStart = Math.min(newBeat, timeframe.endTime - 1)
-            onUpdate(resizingTimeframeId, { startTime: newStart })
+            const newStart = Math.min(orig.startTime + deltaBeat, orig.endTime - 1)
+            batch.set(id, { startTime: newStart })
           } else {
-            // Ensure end doesn't go before start, maintain at least 4 beats difference
-            const newEnd = Math.max(newBeat, timeframe.startTime + 1)
-            onUpdate(resizingTimeframeId, { endTime: newEnd })
+            const newEnd = Math.max(orig.endTime + deltaBeat, orig.startTime + 1)
+            batch.set(id, { endTime: newEnd })
           }
         }
+        batchSilentUp(batch)
       } else if (dragStart !== null && dragCurrent !== null) {
         const startBeat = Math.min(dragStart, dragCurrent)
         const endBeat = Math.max(dragStart, dragCurrent)
 
-        // Only create if there's at least 4 beats difference
         if (Math.abs(endBeat - startBeat) >= 1) {
           onAdd(startBeat, endBeat)
         }
@@ -596,6 +675,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
       setMoveStartBeat(null)
       setMoveOriginalStart(null)
       setMoveOriginalEnd(null)
+      setDragOriginals(null)
     }
 
     if (isDragging || isDraggingTimeIndicator) {
@@ -606,7 +686,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
         document.removeEventListener('mouseup', handleGlobalMouseUp)
       }
     }
-  }, [isDragging, isDraggingTimeIndicator, dragStart, dragCurrent, resizingTimeframeId, resizingEdge, movingTimeframeId, moveStartBeat, moveOriginalStart, moveOriginalEnd, timeframes, onAdd, onUpdate, maxTime, onCurrentTimeChange])
+  }, [isDragging, isDraggingTimeIndicator, dragStart, dragCurrent, resizingTimeframeId, resizingEdge, movingTimeframeId, moveStartBeat, moveOriginalStart, moveOriginalEnd, dragOriginals, timeframes, onAdd, onUpdate, onUpdateSilent, onUpdateSilentBatch, maxTime, onCurrentTimeChange])
 
   const dragStartBeat = dragStart !== null ? dragStart : 0
   const dragEndBeat = dragCurrent !== null ? dragCurrent : dragStartBeat
@@ -615,10 +695,14 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
 
   return (
     <div className="timeline-container">
-      <div className="timeline-zoom-controls">
-        <button onClick={handleZoomIn} disabled={beatsPerScreen <= 4} title="Zoom in">+</button>
-        <span className="timeline-zoom-label">{beatsPerScreen}b</span>
-        <button onClick={handleZoomOut} disabled={beatsPerScreen >= 256} title="Zoom out">-</button>
+      <div className="timeline-header">
+        <h2 className="timeline-header-title">Timeline</h2>
+        <div className="timeline-zoom-controls">
+          <span className="timeline-zoom-label">Zoom</span>
+          <button onClick={handleZoomIn} disabled={beatsPerScreen <= 4} title="Zoom in">+</button>
+          <span className="timeline-zoom-beats">{beatsPerScreen}b</span>
+          <button onClick={handleZoomOut} disabled={beatsPerScreen >= songLengthBeats} title="Zoom out">−</button>
+        </div>
       </div>
       <div className="timeline-scroll-view" ref={timelineScrollViewRef}>
         <div 
@@ -646,7 +730,7 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
             return (
               <div
                 key={timeframe.id}
-                className={`timeframe ${isFocused ? 'timeframe-focused' : ''} ${timeframe.disabled ? 'timeframe-disabled' : ''}`}
+                className={`timeframe ${isFocused ? 'timeframe-focused' : ''} ${selected.has(timeframe.id) ? 'timeframe-selected' : ''} ${timeframe.disabled ? 'timeframe-disabled' : ''}`}
                 data-timeframe-id={timeframe.id}
                 onClick={(e) => handleTimeframeFocus(timeframe.id, e)}
                 style={{
@@ -749,6 +833,11 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onDelete, onAdd,
                     <span className="timeframe-mapping-inline">
                       , Mapping: {timeframe.mapping ?? 'all'}
                     </span>
+                    {timeframe.movement && (
+                      <span className="timeframe-movement-inline">
+                        , Movement: {timeframe.movement.type} {timeframe.movement.direction}
+                      </span>
+                    )}
                     <span className="timeframe-effects-inline">
                       , Effects: {getTimeframeEffects(timeframe).map(e => e.effectKey).join(', ') || '—'}
                     </span>

@@ -4,7 +4,8 @@ import TimeframePanel from './components/TimeframePanel'
 import PlaybackRingsPanel from './components/PlaybackRingsPanel'
 import Spectrogram from './components/Spectrogram'
 import { useViewRange } from './hooks/useViewRange'
-import { generateSequenceTs, generateSequenceRunnerTs } from './generateSequenceTs'
+import { useUndoHistory } from './hooks/useUndoHistory'
+import { generateSequenceTs } from './generateSequenceTs'
 import { presetToTimeframes } from './presets'
 import { normalizeMovement } from './movementGenerators'
 import type { TimeframeMovement } from './movementGenerators'
@@ -163,15 +164,18 @@ function App() {
     const ts = s.beatTimestampsMs
     if (ts && ts.length > 0) {
       const maxIdx = ts.length - 1
-      if (beats <= 0) return (ts[0] + (s.startOffsetMs ?? 0)) / 1000
+      // Average ms per beat from first few intervals, fallback to bpm
+      const sampleCount = Math.min(8, maxIdx)
+      const beatMs = sampleCount > 0 ? ts[sampleCount] / sampleCount : 60000 / s.bpm
+      if (beats <= 0) return Math.max(0, (ts[0] + beats * beatMs) / 1000)
       if (beats >= maxIdx) {
         const avgMs = maxIdx > 0 ? ts[maxIdx] / maxIdx : 60000 / s.bpm
-        return (ts[maxIdx] + (beats - maxIdx) * avgMs + (s.startOffsetMs ?? 0)) / 1000
+        return (ts[maxIdx] + (beats - maxIdx) * avgMs) / 1000
       }
       const floor = Math.floor(beats)
       const ceil = Math.ceil(beats)
       const ms = floor === ceil ? ts[floor] : ts[floor] + (beats - floor) * (ts[ceil] - ts[floor])
-      return (ms + (s.startOffsetMs ?? 0)) / 1000
+      return ms / 1000
     }
     return (beats / s.bpm) * 60 + (s.startOffsetMs ?? 0) / 1000
   }
@@ -179,9 +183,14 @@ function App() {
   /** Convert audio seconds to beat position (accounts for startOffsetMs and detected beats). */
   const audioSecToBeats = (sec: number, s: Song): number => {
     const ts = s.beatTimestampsMs
-    const ms = sec * 1000 - (s.startOffsetMs ?? 0)
     if (ts && ts.length > 0) {
-      if (ms <= ts[0]) return 0
+      const ms = sec * 1000
+      if (ms <= ts[0]) {
+        // Extrapolate before first beat using average of first few intervals
+        const sampleCount = Math.min(8, ts.length - 1)
+        const beatMs = sampleCount > 0 ? ts[sampleCount] / sampleCount : 60000 / s.bpm
+        return (ms - ts[0]) / beatMs  // negative when ms < ts[0]
+      }
       if (ms >= ts[ts.length - 1]) {
         const maxIdx = ts.length - 1
         const avgMs = maxIdx > 0 ? ts[maxIdx] / maxIdx : 60000 / s.bpm
@@ -210,7 +219,10 @@ function App() {
     animationType: 'song',
   })
 
-  const [timeframes, setTimeframes] = useState<Timeframe[]>([
+  const {
+    value: timeframes, setValue: setTimeframes, setValueSilent: setTimeframesSilent,
+    checkpoint: checkpointTimeframes, undo: undoTimeframes, redo: redoTimeframes,
+  } = useUndoHistory<Timeframe[]>([
     {
       id: '1',
       startTime: 0,
@@ -295,13 +307,23 @@ function App() {
   ])
 
   const [focusedTimeframeId, setFocusedTimeframeId] = useState<string | null>(null)
+  const [selectedTimeframeIds, setSelectedTimeframeIds] = useState<Set<string>>(new Set())
   const [clipboardTimeframe, setClipboardTimeframe] = useState<Timeframe | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0) // Current time in beats
   /** When true, next Run starts from runStartTimeSeconds; when false, next Run resumes from currentTime (after Pause). */
   const [nextRunFromStart, setNextRunFromStart] = useState(true)
   const [liveMode, setLiveMode] = useState(false)
+  const [muteAudio, setMuteAudio] = useState(false)
+  const [playbackSpeed, setPlaybackSpeed] = useState(1.0)
+  /** When true, playback uses playbackSpeed (sim speed button); when false (regular Run), always 1×. */
+  const [useSimSpeed, setUseSimSpeed] = useState(false)
+  const useSimSpeedRef = useRef(false)
+  const playbackSpeedRef = useRef(1.0)
+  const [controlServerAvailable, setControlServerAvailable] = useState(false)
   const [sendSequenceLoading, setSendSequenceLoading] = useState(false)
+  const [brightness, setBrightnessState] = useState(1.0)
+  const [brightnessConnected, setBrightnessConnected] = useState(false)
   const [detectBeatsLoading, setDetectBeatsLoading] = useState(false)
   const [detectBeatsProgress, setDetectBeatsProgress] = useState<string | null>(null)
   const [detectBeatsScope, setDetectBeatsScope] = useState<'full' | 'range'>('full')
@@ -337,14 +359,64 @@ function App() {
   const viewEndBeat = viewStartBeat + beatsPerScreen
 
   // Resizable panel widths (px)
-  const [playbackPanelWidth, setPlaybackPanelWidth] = useState(440)
+  const [playbackPanelWidth, setPlaybackPanelWidth] = useState(720)
   const [detailsPanelWidth, setDetailsPanelWidth] = useState(350)
   const [spectrogramHeight, setSpectrogramHeight] = useState(180)
-  const [resizing, setResizing] = useState<'playback' | 'details' | 'spectrogram' | null>(null)
+  const [spectrogramOpen, setSpectrogramOpen] = useState(true)
+  const [headerHeight, setHeaderHeight] = useState(56)
+  const [lightTheme, setLightTheme] = useState(() => localStorage.getItem('kivsee-theme') === 'light')
+  const [resizing, setResizing] = useState<'playback' | 'details' | 'spectrogram' | 'header' | null>(null)
+  const headerRef = React.useRef<HTMLDivElement>(null)
   const spectrogramContainerRef = React.useRef<HTMLDivElement>(null)
+
+  // Periodically check if control server is reachable
+  useEffect(() => {
+    if (!API_BASE) return
+    const check = () => {
+      fetch(`${API_BASE}/api/audio?path=_ping`, { method: 'HEAD' })
+        .then(() => setControlServerAvailable(true))
+        .catch(() => setControlServerAvailable(false))
+    }
+    check()
+    const id = setInterval(check, 5000)
+    return () => clearInterval(id)
+  }, [])
+
+  // Poll brightness from control server every 2 s; reset to defaults when server is down
+  useEffect(() => {
+    if (!API_BASE) return
+    const poll = () => {
+      if (!controlServerAvailable) {
+        setBrightnessConnected(false)
+        setBrightnessState(1.0)
+        return
+      }
+      fetch(`${API_BASE}/api/brightness`)
+        .then(r => r.json())
+        .then((data: { value: number; connected: boolean }) => {
+          setBrightnessState(data.value)
+          setBrightnessConnected(data.connected)
+        })
+        .catch(() => {
+          setBrightnessConnected(false)
+          setBrightnessState(1.0)
+        })
+    }
+    poll()
+    const id = setInterval(poll, 2000)
+    return () => clearInterval(id)
+  }, [controlServerAvailable])
 
   const songRef = useRef(song)
   songRef.current = song
+  useSimSpeedRef.current = useSimSpeed
+  playbackSpeedRef.current = playbackSpeed
+
+  // Apply playback speed to audio element whenever speed or play state changes
+  useEffect(() => {
+    if (!audioRef.current) return
+    audioRef.current.playbackRate = (isPlaying && useSimSpeed) ? playbackSpeed : 1.0
+  }, [isPlaying, useSimSpeed, playbackSpeed])
 
   // Unified auto-scroll during playback
   useEffect(() => {
@@ -374,12 +446,20 @@ function App() {
   useEffect(() => {
     if (!resizing) return
     const minPlayback = 240
-    const maxPlayback = 600
+    const maxPlayback = 900
     const minDetails = 240
     const maxDetails = 600
     const minSpectrogram = 80
     const maxSpectrogram = 500
     const onMove = (e: MouseEvent) => {
+      if (resizing === 'header') {
+        const el = headerRef.current
+        if (!el) return
+        const rect = el.getBoundingClientRect()
+        const h = e.clientY - rect.top
+        setHeaderHeight(Math.round(Math.min(120, Math.max(40, h))))
+        return
+      }
       if (resizing === 'spectrogram') {
         const el = spectrogramContainerRef.current
         if (!el) return
@@ -411,13 +491,13 @@ function App() {
   }, [resizing])
 
   const addTimeframe = () => {
-    const lastEndTime = timeframes.length > 0
-      ? Math.max(...timeframes.map(t => t.endTime))
-      : 0
+    const start = snapToBeat(currentTime)
+    const end = Math.min(snapToBeat(start + 4), songLengthBeats)
+    if (end <= start) return
     const newTimeframe: Timeframe = {
       id: Date.now().toString(),
-      startTime: snapToBeat(lastEndTime),
-      endTime: snapToBeat(lastEndTime + 4),
+      startTime: start,
+      endTime: end,
       label: `Timeframe ${timeframes.length + 1}`,
       color: `#${Math.floor(Math.random()*16777215).toString(16)}`,
       rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -426,17 +506,56 @@ function App() {
     setTimeframes([...timeframes, newTimeframe])
   }
 
+  const clampTimeframeUpdates = (updates: Partial<Timeframe>) => {
+    if (updates.endTime !== undefined) {
+      updates.endTime = Math.min(updates.endTime, songLengthBeats)
+    }
+    if (updates.startTime !== undefined) {
+      updates.startTime = Math.max(0, updates.startTime)
+    }
+    return updates
+  }
+
   const updateTimeframe = (id: string, updates: Partial<Timeframe>) => {
+    const clamped = clampTimeframeUpdates(updates)
     setTimeframes(timeframes.map(tf =>
-      tf.id === id ? { ...tf, ...updates } : tf
+      tf.id === id ? { ...tf, ...clamped } : tf
     ))
+  }
+
+  /** Update without pushing to undo stack — for real-time drag/resize. */
+  const updateTimeframeSilent = (id: string, updates: Partial<Timeframe>) => {
+    const clamped = clampTimeframeUpdates(updates)
+    setTimeframesSilent(prev => prev.map(tf =>
+      tf.id === id ? { ...tf, ...clamped } : tf
+    ))
+  }
+
+  /** Batch silent update for multi-select drag/resize. */
+  const updateTimeframesSilentBatch = (batch: Map<string, Partial<Timeframe>>) => {
+    setTimeframesSilent(prev => prev.map(tf => {
+      const u = batch.get(tf.id)
+      return u ? { ...tf, ...clampTimeframeUpdates(u) } : tf
+    }))
   }
 
   const deleteTimeframe = (id: string) => {
     setTimeframes(timeframes.filter(tf => tf.id !== id))
+    setSelectedTimeframeIds(prev => {
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
     if (focusedTimeframeId === id) {
       setFocusedTimeframeId(null)
     }
+  }
+
+  const deleteSelectedTimeframes = () => {
+    if (selectedTimeframeIds.size === 0) return
+    setTimeframes(timeframes.filter(tf => !selectedTimeframeIds.has(tf.id)))
+    setSelectedTimeframeIds(new Set())
+    setFocusedTimeframeId(null)
   }
 
   const copyTimeframe = (id: string) => {
@@ -448,6 +567,7 @@ function App() {
   const pasteTimeframe = (beatPosition: number) => {
     if (!clipboardTimeframe) return
     const duration = clipboardTimeframe.endTime - clipboardTimeframe.startTime
+    if (beatPosition + duration > songLengthBeats) return  // would exceed song length
     const cloned: Timeframe = JSON.parse(JSON.stringify(clipboardTimeframe))
     cloned.id = `dup-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
     cloned.startTime = beatPosition
@@ -465,10 +585,13 @@ function App() {
   }
 
   const addTimeframeFromDrag = (startTime: number, endTime: number) => {
+    const clampedStart = Math.max(0, Math.min(startTime, endTime))
+    const clampedEnd = Math.min(songLengthBeats, Math.max(startTime, endTime))
+    if (clampedEnd <= clampedStart) return
     const newTimeframe: Timeframe = {
       id: Date.now().toString(),
-      startTime: Math.min(startTime, endTime),
-      endTime: Math.max(startTime, endTime),
+      startTime: clampedStart,
+      endTime: clampedEnd,
       label: `Timeframe ${timeframes.length + 1}`,
       color: `#${Math.floor(Math.random()*16777215).toString(16)}`,
       rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -480,6 +603,7 @@ function App() {
   const addTimeframesFromPreset = (preset: PresetMetadata) => {
     const snappedBeat = Math.round(currentTime)
     const newTimeframes = presetToTimeframes(preset, snappedBeat, song.bpm)
+      .filter(tf => tf.endTime <= songLengthBeats)
     if (newTimeframes.length > 0) {
       setTimeframes(prev => [...prev, ...newTimeframes])
       setFocusedTimeframeId(newTimeframes[0].id)
@@ -546,7 +670,7 @@ function App() {
           fetch(`${API_BASE}/api/trigger`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ triggerName: name }),
+            body: JSON.stringify({ triggerName: name, startOffsetSeconds: startSec }),
           }).catch((err) => console.error('Live trigger failed', err))
         } else {
           fetch(`${API_BASE}/api/start-song`, {
@@ -560,6 +684,13 @@ function App() {
     }
   }
 
+  /** Sim-speed play/pause: same as handlePlayPause but marks useSimSpeed = true so speed applies. */
+  const handleSimPlayPause = () => {
+    if (!isPlaying) setUseSimSpeed(true)
+    else if (useSimSpeed) setUseSimSpeed(false) // pausing sim play → clear flag
+    handlePlayPause()
+  }
+
   // Space bar toggles Run / Pause, Escape clears clipboard
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -567,6 +698,20 @@ function App() {
       const inInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
       if (e.code === 'Escape') {
         setClipboardTimeframe(null)
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ' && !inInput) {
+        e.preventDefault()
+        if (e.shiftKey) {
+          redoTimeframes()
+        } else {
+          undoTimeframes()
+        }
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyY' && !inInput) {
+        e.preventDefault()
+        redoTimeframes()
         return
       }
       if ((e.ctrlKey || e.metaKey) && e.code === 'KeyC' && !inInput && focusedTimeframeId) {
@@ -579,6 +724,16 @@ function App() {
         pasteTimeframe(Math.round(currentTime))
         return
       }
+      if ((e.code === 'Delete' || e.code === 'Backspace') && !inInput && selectedTimeframeIds.size > 0) {
+        e.preventDefault()
+        deleteSelectedTimeframes()
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyA' && !inInput) {
+        e.preventDefault()
+        setSelectedTimeframeIds(new Set(timeframes.map(tf => tf.id)))
+        return
+      }
       if (e.code === 'Space' && !e.repeat) {
         if (inInput) return
         e.preventDefault()
@@ -588,6 +743,20 @@ function App() {
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   })
+
+  // Sync mute state to audio element
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.muted = muteAudio
+  }, [muteAudio])
+
+  // Clean up stale selection IDs after undo/redo/load
+  useEffect(() => {
+    const ids = new Set(timeframes.map(tf => tf.id))
+    setSelectedTimeframeIds(prev => {
+      const next = new Set([...prev].filter(id => ids.has(id)))
+      return next.size === prev.size ? prev : next
+    })
+  }, [timeframes])
 
   const handleStop = () => {
     const audio = audioRef.current
@@ -602,6 +771,7 @@ function App() {
       )
     }
     setIsPlaying(false)
+    setUseSimSpeed(false)
     setNextRunFromStart(true) // Next Run will start from runStartTimeSeconds
     const startBeats = audioSecToBeats(song.runStartTimeSeconds ?? 0, song)
     const clamped = Math.max(0, Math.min(songLengthBeats, startBeats))
@@ -614,13 +784,15 @@ function App() {
       return
     }
     setSendSequenceLoading(true)
-    handleSaveTimeframes()
     try {
-      const runnerCode = generateSequenceRunnerTs(song, timeframes)
+      // Save JSON + TS first, then execute the saved TS file
+      await handleSaveTimeframes()
+      const safeName = (song.name || 'song').trim() || 'song'
+      const filePath = `src/songs/${safeName}.ts`
       const res = await fetch(`${API_BASE}/api/send-sequence`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ runnerCode }),
+        body: JSON.stringify({ filePath, sendOnly: true }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
@@ -761,7 +933,6 @@ function App() {
         if ((parsed as { song?: unknown }).song && typeof (parsed as { song: unknown }).song === 'object') {
           const s = normalizeLoadedSong((parsed as { song: Record<string, unknown> }).song)
           setSong(s)
-          setEffectiveAudioSrc(s.audioFilePath ?? '')
         }
 
         if (Array.isArray(maybeArray)) {
@@ -821,12 +992,12 @@ function App() {
 
         // Restore window sizes if present (same min/max as resize logic)
         const minPlayback = 240
-        const maxPlayback = 600
+        const maxPlayback = 900
         const minDetails = 240
         const maxDetails = 600
         const minSpectrogram = 80
         const maxSpectrogram = 500
-        const ws = (parsed as { windowSizes?: { playbackPanelWidth?: number; detailsPanelWidth?: number; spectrogramHeight?: number } }).windowSizes
+        const ws = (parsed as { windowSizes?: { playbackPanelWidth?: number; detailsPanelWidth?: number; spectrogramHeight?: number; headerHeight?: number } }).windowSizes
         if (ws && typeof ws === 'object') {
           if (typeof ws.playbackPanelWidth === 'number') {
             setPlaybackPanelWidth(Math.round(Math.min(maxPlayback, Math.max(minPlayback, ws.playbackPanelWidth))))
@@ -837,6 +1008,16 @@ function App() {
           if (typeof ws.spectrogramHeight === 'number') {
             setSpectrogramHeight(Math.round(Math.min(maxSpectrogram, Math.max(minSpectrogram, ws.spectrogramHeight))))
           }
+          if (typeof ws.headerHeight === 'number') {
+            setHeaderHeight(Math.round(Math.min(120, Math.max(40, ws.headerHeight))))
+          }
+        }
+
+        const theme = (parsed as { theme?: unknown }).theme
+        if (theme === 'light' || theme === 'dark') {
+          setLightTheme(theme === 'light')
+        } else {
+          setLightTheme(false)
         }
       } catch (err) {
         console.error('Failed to load file', err)
@@ -863,10 +1044,19 @@ function App() {
         const data = await res.json()
         if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
 
+        // Save a backup of the original .ts before it gets overwritten on next save
+        if (API_BASE) {
+          const baseName = file.name.replace(/\.ts$/, '')
+          fetch(`${API_BASE}/api/save-file`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: `src/songs/${baseName}.original.ts`, content: songCode }),
+          }).catch(() => {})
+        }
+
         if (data.song && typeof data.song === 'object') {
           const s = normalizeLoadedSong(data.song as Record<string, unknown>)
           setSong(s)
-          setEffectiveAudioSrc(s.audioFilePath ?? '')
         }
 
         if (Array.isArray(data.timeframes)) {
@@ -924,7 +1114,9 @@ function App() {
         playbackPanelWidth,
         detailsPanelWidth,
         spectrogramHeight,
+        headerHeight,
       },
+      theme: lightTheme ? 'light' : 'dark',
     }
     const dataStr = JSON.stringify(payload, null, 2)
     const safeName = (song.name || 'song').trim() || 'song'
@@ -941,14 +1133,12 @@ function App() {
       URL.revokeObjectURL(url)
     }
 
-    // Single save: pick folder (e.g. src/) and write both JSON and TS there
+    // Save JSON: let user pick folder (or download as fallback)
     const anyWindow = window as any
     if (anyWindow.showDirectoryPicker) {
       try {
-        // Reuse previously selected directory if available, otherwise prompt
         let dirHandle = savedDirHandleRef.current
         if (dirHandle) {
-          // Verify we still have write permission
           const perm = await dirHandle.queryPermission({ mode: 'readwrite' })
           if (perm !== 'granted') {
             const requested = await dirHandle.requestPermission({ mode: 'readwrite' })
@@ -956,39 +1146,38 @@ function App() {
           }
         }
         if (!dirHandle) {
-          dirHandle = await anyWindow.showDirectoryPicker({
-            mode: 'readwrite',
-          })
+          dirHandle = await anyWindow.showDirectoryPicker({ mode: 'readwrite' })
         }
         savedDirHandleRef.current = dirHandle
-        // Determine import prefix by probing for the services/ directory.
-        // If it exists here, we're in src/ (./) — otherwise assume one level below (../).
-        let importPrefix = '..'
-        try {
-          await dirHandle.getDirectoryHandle('services')
-          importPrefix = '.'
-        } catch {}
-        const tsCode = generateSequenceTs(song, timeframes, importPrefix)
         const jsonFile = await dirHandle.getFileHandle(`${safeName}.json`, { create: true })
-        const tsFile = await dirHandle.getFileHandle(`${safeName}.ts`, { create: true })
         const jsonWritable = await jsonFile.createWritable()
-        const tsWritable = await tsFile.createWritable()
         await jsonWritable.write(dataStr)
-        await tsWritable.write(tsCode)
         await jsonWritable.close()
-        await tsWritable.close()
-        return
       } catch {
-        // User cancelled or error – fall back to downloads
+        // User cancelled or error – fall back to download
+        downloadFile(dataStr, `${safeName}.json`, 'application/json')
       }
+    } else {
+      downloadFile(dataStr, `${safeName}.json`, 'application/json')
     }
 
-    // Fallback: generate with default ../ prefix (assumes src/songs/)
-    const tsCode = generateSequenceTs(song, timeframes)
-
-    // Fallback: download both files (same song name, correct types)
-    downloadFile(dataStr, `${safeName}.json`, 'application/json')
-    downloadFile(tsCode, `${safeName}.ts`, 'text/typescript')
+    // Save TS to src/songs/ via control-server (always uses ../ import prefix)
+    if (API_BASE) {
+      const tsCode = generateSequenceTs(song, timeframes)
+      try {
+        const resp = await fetch(`${API_BASE}/api/save-file`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: `src/songs/${safeName}.ts`, content: tsCode }),
+        })
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}))
+          console.error('Failed to save TS file via server:', err)
+        }
+      } catch (e) {
+        console.warn('Control server unavailable, skipping TS save:', e)
+      }
+    }
   }
 
   // Normalize loaded song to use lengthSeconds/runStartTimeSeconds (support old lengthBeats/runStartTimeBeats)
@@ -1016,6 +1205,49 @@ function App() {
     }
   }
 
+  const loadCategoryPreview = (payload: { song: Record<string, unknown>; timeframes: unknown[] }) => {
+    const s = normalizeLoadedSong(payload.song)
+    setSong(s)
+    const mapped: Timeframe[] = (payload.timeframes as any[])
+      .filter((item: any) => item && typeof item === 'object')
+      .map((item: any, idx: number) => {
+        const effects = Array.isArray(item.effects)
+          ? item.effects
+              .filter((e: any) => e && typeof e === 'object' && typeof e.effectKey === 'string')
+              .map((e: any) => ({
+                id: e.id && typeof e.id === 'string' ? e.id : `eff-${Date.now()}-${idx}-${Math.random().toString(36).slice(2)}`,
+                effectKey: e.effectKey,
+                params: e.params && typeof e.params === 'object' ? e.params as Record<string, number | boolean | object> : undefined,
+                phase: typeof e.phase === 'number' ? e.phase : undefined,
+              }))
+          : undefined
+        let startTime = Number(item.startTime)
+        let endTime = Number(item.endTime)
+        if (!Number.isFinite(startTime)) startTime = 0
+        if (!Number.isFinite(endTime)) endTime = startTime + 4
+        if (endTime <= startTime) endTime = startTime + 4
+        let rings = Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n) && n >= 1 && n <= 12) : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        if (rings.length === 0) rings = [1]
+        return {
+          id: item.id?.toString() ?? `tf-${Date.now()}-${idx}`,
+          startTime,
+          endTime,
+          label: typeof item.label === 'string' ? item.label : `Timeframe ${idx + 1}`,
+          color: typeof item.color === 'string' ? item.color : '#3b82f6',
+          hasExplicitColor: item.hasExplicitColor !== false ? undefined : false,
+          rings,
+          mapping: item.mapping,
+          phase: typeof item.phase === 'number' ? item.phase : undefined,
+          movement: normalizeMovement(item.movement),
+          cycles: normalizeCycles(item.cycles),
+          ...(effects && effects.length > 0 ? { effects } : {}),
+        } as Timeframe
+      })
+    setTimeframes(mapped)
+    setFocusedTimeframeId(null)
+    setCurrentTime(0)
+  }
+
   // Autoload last song and window sizes on startup
   useEffect(() => {
     try {
@@ -1029,12 +1261,11 @@ function App() {
       if (parsed.song && typeof parsed.song === 'object') {
         const s = normalizeLoadedSong(parsed.song)
         setSong(s)
-        setEffectiveAudioSrc((s as Song).audioFilePath ?? '')
       }
       if (parsed.timeframes && Array.isArray(parsed.timeframes) && parsed.timeframes.length > 0) {
         setTimeframes(parsed.timeframes)
       }
-      const minPlayback = 240, maxPlayback = 600, minDetails = 240, maxDetails = 600, minSpectrogram = 80, maxSpectrogram = 500
+      const minPlayback = 240, maxPlayback = 900, minDetails = 240, maxDetails = 600, minSpectrogram = 80, maxSpectrogram = 500
       const ws = parsed.windowSizes
       if (ws && typeof ws === 'object') {
         if (typeof ws.playbackPanelWidth === 'number') {
@@ -1042,6 +1273,9 @@ function App() {
         }
         if (typeof ws.detailsPanelWidth === 'number') {
           setDetailsPanelWidth(Math.round(Math.min(maxDetails, Math.max(minDetails, ws.detailsPanelWidth))))
+        }
+        if (typeof (ws as Record<string, unknown>).headerHeight === 'number') {
+          setHeaderHeight(Math.round(Math.min(120, Math.max(40, (ws as Record<string, unknown>).headerHeight as number))))
         }
         if (typeof ws.spectrogramHeight === 'number') {
           setSpectrogramHeight(Math.round(Math.min(maxSpectrogram, Math.max(minSpectrogram, ws.spectrogramHeight))))
@@ -1062,21 +1296,82 @@ function App() {
       const payload = JSON.stringify({
         song,
         timeframes,
-        windowSizes: { playbackPanelWidth, detailsPanelWidth, spectrogramHeight },
+        windowSizes: { playbackPanelWidth, detailsPanelWidth, spectrogramHeight, headerHeight },
       })
       window.localStorage.setItem(LAST_SONG_STORAGE_KEY, payload)
     } catch {
       // Ignore persistence errors
     }
-  }, [song, timeframes, playbackPanelWidth, detailsPanelWidth, spectrogramHeight])
+  }, [song, timeframes, playbackPanelWidth, detailsPanelWidth, spectrogramHeight, headerHeight])
 
-  // Keep spectrogram audio URL in sync: blob from Browse, or path from song (so Load JSON doesn't race)
+  // Layered audio resolution: Vite public → control-server → prompt user to upload
+  const resolveAudioSrc = React.useCallback(async (audioFilePath: string) => {
+    if (!audioFilePath) return ''
+    // If we have a blob URL, use it directly
+    if (audioBlobUrlRef.current) return audioBlobUrlRef.current
+    // 1. Try Vite public dir (no server needed — serves ui/public/ at root in dev)
+    try {
+      const publicResp = await fetch(`/${encodeURIComponent(audioFilePath)}`, { method: 'HEAD' })
+      if (publicResp.ok) return `/${encodeURIComponent(audioFilePath)}`
+    } catch {}
+    // 2. Try control-server
+    if (API_BASE) {
+      try {
+        const serverUrl = `${API_BASE}/api/audio?path=${encodeURIComponent(audioFilePath)}`
+        const serverResp = await fetch(serverUrl, { method: 'HEAD' })
+        if (serverResp.ok) return serverUrl
+      } catch {}
+    }
+    // 3. Prompt user to select the file
+    return new Promise<string>((resolve) => {
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = '.wav,.mp3,audio/*'
+      input.onchange = async () => {
+        const file = input.files?.[0]
+        if (!file) { resolve(''); return }
+        if (audioBlobUrlRef.current) URL.revokeObjectURL(audioBlobUrlRef.current)
+        const blobUrl = URL.createObjectURL(file)
+        audioBlobUrlRef.current = blobUrl
+        if (audioRef.current) audioRef.current.src = blobUrl
+        // Upload to ui/public/ via control-server if available
+        if (API_BASE) {
+          try {
+            const buf = await file.arrayBuffer()
+            const bytes = new Uint8Array(buf)
+            let binary = ''
+            for (let i = 0; i < bytes.length; i += 8192) {
+              binary += String.fromCharCode(...bytes.subarray(i, i + 8192))
+            }
+            const base64 = btoa(binary)
+            await fetch(`${API_BASE}/api/upload-audio`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ filename: audioFilePath, data: base64 }),
+            })
+          } catch (e) {
+            console.warn('Failed to upload audio to server:', e)
+          }
+        }
+        resolve(blobUrl)
+      }
+      input.oncancel = () => resolve('')
+      input.click()
+    })
+  }, [])
+
+  // Keep spectrogram audio URL in sync: blob from Browse, or resolved path from song
   useEffect(() => {
-    if (song.animationType !== 'song') setEffectiveAudioSrc('')
-    else setEffectiveAudioSrc(audioBlobUrlRef.current || song.audioFilePath?.trim() || '')
-  }, [song.animationType, song.audioFilePath])
+    if (song.animationType !== 'song') { setEffectiveAudioSrc(''); return }
+    const audioPath = song.audioFilePath?.trim()
+    if (!audioPath) { setEffectiveAudioSrc(''); return }
+    if (audioBlobUrlRef.current) { setEffectiveAudioSrc(audioBlobUrlRef.current); return }
+    let cancelled = false
+    resolveAudioSrc(audioPath).then((src) => { if (!cancelled) setEffectiveAudioSrc(src) })
+    return () => { cancelled = true }
+  }, [song.animationType, song.audioFilePath, resolveAudioSrc])
 
-  // Keep audio element src in sync with song (blob URL from Browse, or path/URL from field)
+  // Keep audio element src in sync with resolved audio URL
   useEffect(() => {
     if (song.animationType !== 'song') {
       if (audioRef.current) {
@@ -1085,17 +1380,16 @@ function App() {
       }
       return
     }
-    const effectiveSrc = audioBlobUrlRef.current || song.audioFilePath?.trim()
-    if (!effectiveSrc) {
+    if (!effectiveAudioSrc) {
       if (audioRef.current) audioRef.current.src = ''
       return
     }
     if (!audioRef.current) audioRef.current = new Audio()
-    if (audioRef.current.src !== effectiveSrc) {
-      audioRef.current.src = effectiveSrc
+    if (audioRef.current.src !== effectiveAudioSrc) {
+      audioRef.current.src = effectiveAudioSrc
     }
     audioRef.current.loop = false
-  }, [song.animationType, song.audioFilePath])
+  }, [song.animationType, effectiveAudioSrc])
 
   // Playback animation: use audio time when available (so Run from and timeline stay in sync), else use interval.
   // Stop at song length (same as pressing Stop) or at spectrogram range end (section play).
@@ -1128,7 +1422,9 @@ function App() {
 
     if (useAudio) {
       let rafId: number
-      const syncFromAudio = () => {
+      let lastUpdateMs = 0
+      const FRAME_MS = 1000 / 30  // 30 fps cap
+      const syncFromAudio = (nowMs: number) => {
         if (!audioRef.current) return
         const sec = audioRef.current.currentTime
         const endSec = playbackRangeEndSecRef.current
@@ -1144,7 +1440,10 @@ function App() {
           performStop()
           return
         }
-        setCurrentTime(beats)
+        if (nowMs - lastUpdateMs >= FRAME_MS) {
+          lastUpdateMs = nowMs
+          setCurrentTime(beats)
+        }
         rafId = requestAnimationFrame(syncFromAudio)
       }
       rafId = requestAnimationFrame(syncFromAudio)
@@ -1154,7 +1453,8 @@ function App() {
     if (isPlaying) {
       playbackIntervalRef.current = setInterval(() => {
         setCurrentTime(prev => {
-          const next = prev + 0.1
+          const speed = useSimSpeedRef.current ? playbackSpeedRef.current : 1.0
+          const next = prev + 0.1 * speed
           const endSec = playbackRangeEndSecRef.current
           if (endSec != null && beatsToAudioSec(next, song) >= endSec) {
             const endBeat = audioSecToBeats(endSec, song)
@@ -1258,7 +1558,6 @@ function App() {
       URL.revokeObjectURL(audioBlobUrlRef.current)
       audioBlobUrlRef.current = null
     }
-    setEffectiveAudioSrc(value || '')
     handleSongChange({ audioFilePath: value || undefined })
   }
 
@@ -1279,138 +1578,131 @@ function App() {
   }
 
   return (
-    <div className={`app${resizing ? ' app-resizing' : ''}${resizing === 'spectrogram' ? ' app-resizing-spectrogram' : ''}`}>
-      <div className="app-header">
-        <div className="app-header-title">
-          <h1>KivSee Time Simulator</h1>
-          <div className="song-meta">
-            <div className="song-meta-row song-meta-row-name">
-              <input
-                type="text"
-                className="song-name-input"
-                value={song.name}
-                onChange={(e) => handleSongChange({ name: e.target.value })}
-                placeholder="Song name"
-              />
-              {song.animationType === 'song' && (
-                <>
-                  <label className="song-meta-field song-meta-field-audio" title="Browsers cannot read full disk paths (e.g. C:\...). Use a path relative to the app (e.g. /audio/song.wav with file in ui/public/audio/) or pick a file with Browse.">
-                    <span>Audio file</span>
-                    <input
-                      type="text"
-                      className="song-meta-input song-meta-input-audio"
-                      value={song.audioFilePath ?? ''}
-                      onChange={(e) => handleAudioFilePathChange(e.target.value)}
-                      placeholder="e.g. /audio/song.wav (file in public folder) or Browse"
-                    />
-                  </label>
-                  <input
-                    ref={audioFileInputRef}
-                    type="file"
-                    accept="audio/*,.wav,.mp3,.ogg,.m4a"
-                    className="song-audio-file-input"
-                    onChange={handleAudioFileSelected}
-                  />
-                  <button
-                    type="button"
-                    className="secondary-button song-browse-button"
-                    onClick={handleBrowseAudio}
-                  >
-                    Browse…
-                  </button>
-                </>
-              )}
-            </div>
-            <div className="song-meta-fields">
-              <label className="song-meta-field" title="Song = startSong() with offset; Trigger = one-shot trigger()">
-                <span>Type</span>
-                <select
-                  className="song-meta-input"
-                  value={song.animationType ?? 'song'}
-                  onChange={(e) => handleSongChange({ animationType: e.target.value === 'trigger' ? 'trigger' : 'song' })}
-                >
-                  <option value="song">Song</option>
-                  <option value="trigger">Trigger</option>
-                </select>
-              </label>
-              <label className="song-meta-field">
-                <span>Length</span>
-                <input
-                  type="number"
-                  min={0.1}
-                  step={0.1}
-                  className="song-meta-input"
-                  {...numericInputProps('lengthSeconds', song.lengthSeconds, 1, 0.1, 'float', (n) => handleSongChange({ lengthSeconds: n }))}
-                />
-                <span className="song-meta-suffix">sec</span>
-              </label>
-              <label className="song-meta-field">
-                <span>BPM</span>
-                <input
-                  type="number"
-                  min={1}
-                  step={1}
-                  className="song-meta-input"
-                  {...numericInputProps('bpm', song.bpm, 120, 1, 'int', (n) => handleSongChange({ bpm: n }))}
-                />
-              </label>
-              <label className="song-meta-field">
-                <span>Start offset</span>
-                <input
-                  type="number"
-                  min={0}
-                  step={1}
-                  className="song-meta-input"
-                  {...numericInputProps('startOffsetMs', song.startOffsetMs ?? 0, 0, 0, 'int', (n) => handleSongChange({ startOffsetMs: n }))}
-                />
-                <span className="song-meta-suffix">ms</span>
-              </label>
-              <label className="song-meta-field" title="Timeline position when you press Run">
-                <span>Run from</span>
-                <input
-                  type="number"
-                  min={0}
-                  step={0.1}
-                  className="song-meta-input"
-                  {...numericInputProps('runStartTimeSeconds', song.runStartTimeSeconds ?? 0, 0, 0, 'float', (n) => handleSongChange({ runStartTimeSeconds: n }))}
-                />
-                <span className="song-meta-suffix">sec</span>
-              </label>
-            </div>
-          </div>
-        </div>
+    <div className={`app${resizing ? ' app-resizing' : ''}${resizing === 'spectrogram' ? ' app-resizing-spectrogram' : ''}${resizing === 'header' ? ' app-resizing-header' : ''}${lightTheme ? ' theme-light' : ''}`}>
+      <div className="app-header" ref={headerRef} style={{ height: headerHeight }}>
+        <h1 className="app-header-title">KivSee Time Simulator</h1>
+        <input
+          type="text"
+          className="song-name-input"
+          value={song.name}
+          onChange={(e) => handleSongChange({ name: e.target.value })}
+          placeholder="Song name"
+        />
+        <label className="song-meta-field" title="Song = startSong() with offset; Trigger = one-shot trigger()">
+          <span>Type</span>
+          <select
+            className="song-meta-input"
+            value={song.animationType ?? 'song'}
+            onChange={(e) => handleSongChange({ animationType: e.target.value === 'trigger' ? 'trigger' : 'song' })}
+          >
+            <option value="song">Song</option>
+            <option value="trigger">Trigger</option>
+          </select>
+        </label>
+        {song.animationType === 'song' && (
+          <label className="song-meta-field song-meta-field-audio" title="Browsers cannot read full disk paths. Use a path relative to the app (e.g. /audio/song.wav) or Browse.">
+            <span>Audio</span>
+            <input
+              type="text"
+              className="song-meta-input song-meta-input-audio"
+              value={song.audioFilePath ?? ''}
+              onChange={(e) => handleAudioFilePathChange(e.target.value)}
+              placeholder="/audio/song.wav"
+            />
+            <input
+              ref={audioFileInputRef}
+              type="file"
+              accept="audio/*,.wav,.mp3,.ogg,.m4a"
+              className="song-audio-file-input"
+              onChange={handleAudioFileSelected}
+            />
+            <button
+              type="button"
+              className="secondary-button song-browse-button"
+              onClick={handleBrowseAudio}
+            >
+              Browse…
+            </button>
+          </label>
+        )}
+        <label className="song-meta-field">
+          <span>Length</span>
+          <input
+            type="number"
+            min={0.1}
+            step={0.1}
+            className="song-meta-input"
+            {...numericInputProps('lengthSeconds', song.lengthSeconds, 1, 0.1, 'float', (n) => handleSongChange({ lengthSeconds: n }))}
+          />
+          <span className="song-meta-suffix">sec</span>
+        </label>
+        <label className="song-meta-field">
+          <span>BPM</span>
+          <input
+            type="number"
+            min={1}
+            step={1}
+            className="song-meta-input song-meta-input-short"
+            {...numericInputProps('bpm', song.bpm, 120, 1, 'int', (n) => handleSongChange({ bpm: n }))}
+          />
+        </label>
+        <label className="song-meta-field">
+          <span>Offset</span>
+          <input
+            type="number"
+            min={0}
+            step={1}
+            className="song-meta-input song-meta-input-short"
+            {...numericInputProps('startOffsetMs', song.startOffsetMs ?? 0, 0, 0, 'int', (n) => handleSongChange({ startOffsetMs: n }))}
+          />
+          <span className="song-meta-suffix">ms</span>
+        </label>
         <div className="app-header-actions">
-          <button className="secondary-button" onClick={addTimeframe}>
-            + Add Timeframe
-          </button>
-          <button className="secondary-button" onClick={handleLoadTimeframes}>
-            Load JSON
-          </button>
-          <button className="secondary-button" onClick={handleImportTs} disabled={!API_BASE} title={!API_BASE ? 'Set VITE_API_URL and run control server' : 'Import a .ts song file'}>
-            Import .ts
-          </button>
-          <button className="secondary-button" onClick={handleSaveTimeframes}>
-            Save Changes
-          </button>
+          <label className="app-theme-toggle" title={lightTheme ? 'Switch to dark theme' : 'Switch to light theme'}>
+            <input
+              type="checkbox"
+              checked={lightTheme}
+              onChange={(e) => {
+                const next = e.target.checked
+                setLightTheme(next)
+                localStorage.setItem('kivsee-theme', next ? 'light' : 'dark')
+              }}
+            />
+            <span>{lightTheme ? 'Light theme' : 'Dark theme'}</span>
+          </label>
+          <button className="secondary-button" onClick={addTimeframe}>+ Add</button>
+          <button className="secondary-button" onClick={handleLoadTimeframes}>Load</button>
+          <button className="secondary-button" onClick={handleImportTs} disabled={!API_BASE} title={!API_BASE ? 'Set VITE_API_URL and run control server' : 'Import a .ts song file'}>Import .ts</button>
+          <button className="secondary-button" onClick={handleSaveTimeframes}>Save</button>
         </div>
       </div>
+      <div
+        className="app-resize-handle app-resize-handle-header"
+        onMouseDown={() => setResizing('header')}
+        title="Drag to resize header"
+      />
+      {song.animationType === 'song' && !!(song.audioFilePath?.trim()) && (
+        <div className="app-spectrogram-bar">
+          <button
+            className="app-spectrogram-toggle"
+            onClick={() => setSpectrogramOpen(o => !o)}
+            title={spectrogramOpen ? 'Collapse spectrogram' : 'Expand spectrogram'}
+          >
+            {spectrogramOpen ? '▾ Spectrogram' : '▸ Spectrogram'}
+          </button>
+        </div>
+      )}
       {song.animationType === 'song' && !!(song.audioFilePath?.trim()) && (
         <div
           className="app-spectrogram-full"
           ref={spectrogramContainerRef}
-          style={{ height: spectrogramHeight }}
+          style={{ height: spectrogramHeight, display: spectrogramOpen ? undefined : 'none' }}
         >
           <Spectrogram
             audioRef={audioRef}
             isPlaying={isPlaying}
             hasAudio
-            audioSrc={
-              effectiveAudioSrc.startsWith('blob:')
-                ? effectiveAudioSrc
-                : API_BASE && effectiveAudioSrc
-                  ? `${API_BASE}/api/audio?path=${encodeURIComponent(effectiveAudioSrc)}`
-                  : effectiveAudioSrc
-            }
+            audioSrc={effectiveAudioSrc}
             currentTimeSeconds={beatsToAudioSec(currentTime, song)}
             durationSeconds={song.lengthSeconds}
             bpm={song.bpm}
@@ -1441,13 +1733,13 @@ function App() {
                   onClick={handleDetectBeats}
                   disabled={
                     detectBeatsLoading ||
-                    !API_BASE ||
+                    !controlServerAvailable ||
                     !song.audioFilePath?.trim() ||
                     (detectBeatsScope === 'range' && rangeStartSec >= rangeEndSec)
                   }
                   title={
-                    !API_BASE
-                      ? 'Set VITE_API_URL and run control server'
+                    !controlServerAvailable
+                      ? 'Control server is not running'
                       : !song.audioFilePath?.trim()
                         ? 'Set audio file path first'
                         : detectBeatsScope === 'range' && rangeStartSec >= rangeEndSec
@@ -1550,12 +1842,8 @@ function App() {
           />
         </div>
       )}
-      {song.animationType === 'song' && !!(song.audioFilePath?.trim()) && (
-        <div
-          className="app-resize-handle app-resize-handle-spectrogram"
-          onMouseDown={() => setResizing('spectrogram')}
-          title="Drag to resize spectrogram"
-        />
+      {song.animationType === 'song' && !!(song.audioFilePath?.trim()) && spectrogramOpen && (
+        <div className="app-resize-handle app-resize-handle-spectrogram" onMouseDown={() => setResizing('spectrogram')} title="Drag to resize spectrogram" />
       )}
       <div className="app-content" ref={appContentRef}>
         <div
@@ -1568,11 +1856,29 @@ function App() {
             isPlaying={isPlaying}
             liveMode={liveMode}
             sendSequenceLoading={sendSequenceLoading}
-            apiAvailable={!!API_BASE}
+            apiAvailable={controlServerAvailable}
             onPlayPause={handlePlayPause}
             onStop={handleStop}
             onSendSequence={handleSendSequence}
             onLiveModeChange={setLiveMode}
+            muteAudio={muteAudio}
+            onMuteAudioChange={setMuteAudio}
+            playbackSpeed={playbackSpeed}
+            onPlaybackSpeedChange={setPlaybackSpeed}
+            useSimSpeed={useSimSpeed}
+            onSimPlayPause={handleSimPlayPause}
+            runFromSeconds={song.runStartTimeSeconds ?? 0}
+            onRunFromChange={(n) => handleSongChange({ runStartTimeSeconds: n })}
+            brightness={brightness}
+            brightnessConnected={brightnessConnected}
+            onBrightnessChange={(v) => {
+              setBrightnessState(v)
+              fetch(`${API_BASE}/api/brightness`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ value: v }),
+              }).catch(() => {})
+            }}
           />
         </div>
         <div
@@ -1587,6 +1893,9 @@ function App() {
               songLengthBeats={songLengthBeats}
               bpm={song.bpm}
               onUpdate={updateTimeframe}
+              onUpdateSilent={updateTimeframeSilent}
+              onUpdateSilentBatch={updateTimeframesSilentBatch}
+              onCheckpoint={checkpointTimeframes}
               onDelete={deleteTimeframe}
               onAdd={addTimeframeFromDrag}
               onCopy={copyTimeframe}
@@ -1594,6 +1903,8 @@ function App() {
               hasClipboard={clipboardTimeframe !== null}
               focusedTimeframeId={focusedTimeframeId}
               onFocusedTimeframeChange={setFocusedTimeframeId}
+              selectedTimeframeIds={selectedTimeframeIds}
+              onSelectedTimeframeIdsChange={setSelectedTimeframeIds}
               currentTime={currentTime}
               onCurrentTimeChange={handleCurrentTimeChange}
               viewStartBeat={viewStartBeat}
@@ -1620,6 +1931,8 @@ function App() {
             onUpdate={handlePanelUpdate}
             onClose={() => setFocusedTimeframeId(null)}
             onApplyPreset={addTimeframesFromPreset}
+            onLoadCategoryPreview={loadCategoryPreview}
+            songLengthBeats={songLengthBeats}
           />
         </div>
       </div>

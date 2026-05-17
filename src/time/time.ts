@@ -33,15 +33,19 @@ const beatToMs = (beat: number, bpm: number, beatTimestampsMs?: number[]): numbe
 export const beats = (startBeat: number, endBeat: number, cb: Function) => {
     const store = als.getStore();
     const { bpm, startOffsetMs, beatTimestampsMs } = store.animation;
-    const startTime = Math.round(beatToMs(startBeat, bpm, beatTimestampsMs)) + startOffsetMs;
-    const endTime = Math.round(beatToMs(endBeat, bpm, beatTimestampsMs)) + startOffsetMs;
+    // When beatTimestampsMs is present, timestamps are absolute positions in the audio — no offset needed.
+    // startOffsetMs is only used for the BPM-based fallback in beatToMs.
+    const offset = (beatTimestampsMs && beatTimestampsMs.length > 0) ? 0 : startOffsetMs;
+    const startTime = Math.round(beatToMs(startBeat, bpm, beatTimestampsMs)) + offset;
+    const endTime = Math.round(beatToMs(endBeat, bpm, beatTimestampsMs)) + offset;
     const newStore = {
         ...store,
         effectConfig: {
             ...store.effectConfig,
             start_time: startTime,
             end_time: endTime,
-        }
+        },
+        sectionBeats: endBeat - startBeat,
     }
     als.run(newStore, cb);
 }
@@ -52,8 +56,8 @@ export const cycle = (beatsInCycle: number, cb: Function) => {
 
 export const cycleBeats = (beatsInCycle: number, startBeat: number, endBeat: number, cb: Function) => {
     const store = als.getStore();
-    const { bpm } = store.animation;
-    const totalBeats = (store.effectConfig.end_time - store.effectConfig.start_time) / 1000 / 60 * bpm;
+    const totalBeats = store.sectionBeats ??
+        ((store.effectConfig.end_time - store.effectConfig.start_time) / 1000 / 60 * store.animation.bpm);
     const repeatNum = totalBeats / beatsInCycle;
 
     const newStore = {

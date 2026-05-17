@@ -9,6 +9,7 @@ import fs from "fs";
 import { spawn, execSync } from "child_process";
 import { sendSequence } from "./services/sequence";
 import { startSong, stop, trigger } from "./services/trigger";
+import { initMqttBrightness, getBrightnessState, setBrightness } from "./mqtt-brightness";
 
 const PORT = parseInt(process.env.CONTROL_SERVER_PORT || "3080", 10);
 const ROOT = process.cwd();
@@ -51,6 +52,17 @@ function send(res: http.ServerResponse, status: number, body: string, contentTyp
   res.end(body);
 }
 
+/** Resolve an audio file path, checking multiple known locations. */
+function resolveAudioPath(rawPath: string): string | null {
+  const asIs = path.resolve(ROOT, rawPath);
+  if (fs.existsSync(asIs) && fs.statSync(asIs).isFile()) return asIs;
+  const publicPath = path.resolve(ROOT, "ui", "public", rawPath);
+  if (fs.existsSync(publicPath) && fs.statSync(publicPath).isFile()) return publicPath;
+  const songsPath = path.resolve(ROOT, "src", "songs", path.basename(rawPath));
+  if (fs.existsSync(songsPath) && fs.statSync(songsPath).isFile()) return songsPath;
+  return null;
+}
+
 function cors(res: http.ServerResponse) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -66,6 +78,35 @@ function parseBody(req: http.IncomingMessage): Promise<string> {
   });
 }
 
+/** Execute a TS file directly (it calls sendSequence/startSong itself). */
+async function handleRunFile(filePath: string, res: http.ServerResponse, sendOnly = false) {
+  const resolved = path.resolve(ROOT, filePath);
+  if (!resolved.startsWith(ROOT) || !fs.existsSync(resolved)) {
+    send(res, 400, JSON.stringify({ error: "File not found: " + filePath }));
+    return;
+  }
+  const env = { ...process.env, ...(sendOnly ? { SEND_ONLY: "1" } : {}) };
+  const child = spawn(process.execPath, ["-r", "ts-node/register", filePath], {
+    cwd: ROOT,
+    env,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  let stderr = "";
+  child.stderr?.on("data", (d) => { stderr += d.toString(); });
+  child.stdout?.on("data", () => {});
+
+  await new Promise<void>((resolve) => child.on("close", () => resolve()));
+
+  if (child.exitCode !== 0) {
+    console.error("Run file failed", stderr);
+    send(res, 500, JSON.stringify({ error: "Run file failed", stderr: stderr.slice(0, 500) }));
+    return;
+  }
+  send(res, 200, JSON.stringify({ ok: true }));
+}
+
+/** Legacy: execute inline runner code via temp file + JSON output. */
 async function handleSendSequence(runnerCode: string, res: http.ServerResponse) {
   const runnerPath = path.join(ROOT, "src", ".tmp-sequence-runner.ts");
   const outPath = path.join(ROOT, ".tmp-sequence-out.json");
@@ -178,18 +219,20 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "POST" && pathname === "/api/send-sequence") {
     const body = await parseBody(req);
-    let payload: { runnerCode?: string };
+    let payload: { runnerCode?: string; filePath?: string; sendOnly?: boolean };
     try {
       payload = JSON.parse(body);
     } catch {
       send(res, 400, JSON.stringify({ error: "Invalid JSON" }));
       return;
     }
-    if (typeof payload.runnerCode !== "string") {
-      send(res, 400, JSON.stringify({ error: "Missing runnerCode" }));
-      return;
+    if (typeof payload.filePath === "string") {
+      await handleRunFile(payload.filePath, res, !!payload.sendOnly);
+    } else if (typeof payload.runnerCode === "string") {
+      await handleSendSequence(payload.runnerCode, res);
+    } else {
+      send(res, 400, JSON.stringify({ error: "Missing filePath or runnerCode" }));
     }
-    await handleSendSequence(payload.runnerCode, res);
     return;
   }
 
@@ -218,7 +261,7 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "POST" && pathname === "/api/trigger") {
     const body = await parseBody(req);
-    let payload: { triggerName?: string };
+    let payload: { triggerName?: string; startOffsetSeconds?: number };
     try {
       payload = JSON.parse(body);
     } catch {
@@ -230,7 +273,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     try {
-      await trigger(payload.triggerName);
+      await trigger(payload.triggerName, payload.startOffsetSeconds);
       send(res, 200, JSON.stringify({ ok: true }));
     } catch (e) {
       console.error("trigger failed", e);
@@ -287,15 +330,10 @@ const server = http.createServer(async (req, res) => {
       send(res, 400, JSON.stringify({ error: "startSec must be less than endSec" }));
       return;
     }
-    // Resolve audio path: try as-is first, then ui/public/, then src/songs/ (next to JSON)
-    let audioPath = path.resolve(ROOT, payload.audioFilePath);
-    if (!fs.existsSync(audioPath)) {
-      const publicPath = path.resolve(ROOT, "ui", "public", payload.audioFilePath);
-      if (fs.existsSync(publicPath)) audioPath = publicPath;
-      else {
-        const songsPath = path.resolve(ROOT, "src", "songs", path.basename(payload.audioFilePath));
-        if (fs.existsSync(songsPath)) audioPath = songsPath;
-      }
+    const audioPath = resolveAudioPath(payload.audioFilePath);
+    if (!audioPath) {
+      send(res, 404, JSON.stringify({ error: "Audio file not found" }));
+      return;
     }
     const scriptPath = path.join(ROOT, "scripts", "detect_beats.py");
     const pyArgs = [scriptPath, audioPath];
@@ -357,21 +395,9 @@ const server = http.createServer(async (req, res) => {
       send(res, 400, JSON.stringify({ error: "Missing path query" }));
       return;
     }
-    let audioPath = path.resolve(ROOT, audioPathParam);
-    if (!fs.existsSync(audioPath)) {
-      const publicPath = path.resolve(ROOT, "ui", "public", audioPathParam);
-      if (fs.existsSync(publicPath)) audioPath = publicPath;
-      else {
-        const songsPath = path.resolve(ROOT, "src", "songs", path.basename(audioPathParam));
-        if (fs.existsSync(songsPath)) audioPath = songsPath;
-        else {
-          send(res, 404, JSON.stringify({ error: "Audio file not found" }));
-          return;
-        }
-      }
-    }
-    if (!fs.statSync(audioPath).isFile()) {
-      send(res, 404, JSON.stringify({ error: "Not a file" }));
+    const audioPath = resolveAudioPath(audioPathParam);
+    if (!audioPath) {
+      send(res, 404, JSON.stringify({ error: "Audio file not found" }));
       return;
     }
     const ext = path.extname(audioPath).toLowerCase();
@@ -386,8 +412,99 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // POST /api/save-file — save a file to the repo (e.g. generated .ts to src/songs/)
+  if (req.method === "POST" && pathname === "/api/save-file") {
+    const body = await parseBody(req);
+    let payload: { path?: string; content?: string };
+    try {
+      payload = JSON.parse(body);
+    } catch {
+      send(res, 400, JSON.stringify({ error: "Invalid JSON" }));
+      return;
+    }
+    if (typeof payload.path !== "string" || typeof payload.content !== "string") {
+      send(res, 400, JSON.stringify({ error: "Missing path or content" }));
+      return;
+    }
+    const resolved = path.resolve(ROOT, payload.path);
+    if (!resolved.startsWith(ROOT)) {
+      send(res, 400, JSON.stringify({ error: "Path must be within the repo" }));
+      return;
+    }
+    try {
+      const dir = path.dirname(resolved);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(resolved, payload.content, "utf8");
+      send(res, 200, JSON.stringify({ ok: true, path: payload.path }));
+    } catch (e) {
+      console.error("Failed to save file", e);
+      send(res, 500, JSON.stringify({ error: "Failed to save file" }));
+    }
+    return;
+  }
+
+  // POST /api/upload-audio — upload audio file to ui/public/
+  if (req.method === "POST" && pathname === "/api/upload-audio") {
+    const body = await parseBody(req);
+    let payload: { filename?: string; data?: string };
+    try {
+      payload = JSON.parse(body);
+    } catch {
+      send(res, 400, JSON.stringify({ error: "Invalid JSON" }));
+      return;
+    }
+    if (typeof payload.filename !== "string" || typeof payload.data !== "string") {
+      send(res, 400, JSON.stringify({ error: "Missing filename or data" }));
+      return;
+    }
+    const ext = path.extname(payload.filename).toLowerCase();
+    if (ext !== ".wav" && ext !== ".mp3") {
+      send(res, 400, JSON.stringify({ error: "Only .wav and .mp3 files are supported" }));
+      return;
+    }
+    const basename = path.basename(payload.filename);
+    const publicDir = path.resolve(ROOT, "ui", "public");
+    if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
+    const dest = path.join(publicDir, basename);
+    try {
+      fs.writeFileSync(dest, Buffer.from(payload.data, "base64"));
+      send(res, 200, JSON.stringify({ ok: true, savedPath: basename }));
+    } catch (e) {
+      console.error("Failed to upload audio", e);
+      send(res, 500, JSON.stringify({ error: "Failed to upload audio" }));
+    }
+    return;
+  }
+
+  // GET /api/brightness — returns current brightness value and MQTT connection state
+  if (req.method === "GET" && pathname === "/api/brightness") {
+    send(res, 200, JSON.stringify(getBrightnessState()));
+    return;
+  }
+
+  // POST /api/brightness — set brightness, publishes to MQTT with retain
+  if (req.method === "POST" && pathname === "/api/brightness") {
+    const body = await parseBody(req);
+    let payload: { value?: number };
+    try {
+      payload = JSON.parse(body);
+    } catch {
+      send(res, 400, JSON.stringify({ error: "Invalid JSON" }));
+      return;
+    }
+    if (typeof payload.value !== "number" || isNaN(payload.value)) {
+      send(res, 400, JSON.stringify({ error: "Missing or invalid value" }));
+      return;
+    }
+    const value = setBrightness(payload.value);
+    send(res, 200, JSON.stringify({ value, connected: getBrightnessState().connected }));
+    return;
+  }
+
   send(res, 404, JSON.stringify({ error: "Not found" }));
 });
+
+initMqttBrightness();
 
 server.listen(PORT, () => {
   console.log(`Control server listening on http://localhost:${PORT}`);

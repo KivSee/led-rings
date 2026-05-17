@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import { Timeframe, TimeframeCycleEntry, TimeframeCycleBeats, getTimeframeEffects, TimeframeEffectEntry } from '../App'
 import type { PresetMetadata } from '../presets'
 import { MOVEMENT_TYPES, MOVEMENT_DIRECTIONS, defaultBeatsPerRing } from '../movementGenerators'
@@ -6,6 +6,7 @@ import type { MovementType, MovementDirection } from '../movementGenerators'
 import segmentsData from '../segments.json'
 import RingVisualization from './RingVisualization'
 import PresetBrowser from './PresetBrowser'
+import HsvColorPicker from './HsvColorPicker'
 import './TimeframePanel.css'
 
 // Effect options by category (brightness.ts, hue.ts, motion.ts — coloring removed)
@@ -279,15 +280,51 @@ const EFFECT_PARAM_SCHEMAS: Record<string, EffectParamDef[]> = {
 
 
 
+/** Convert hex color to HSV. Returns h in [0,360], s and v in [0,100]. */
+function hexToHsv(hex: string): { h: number; s: number; v: number } {
+  const r = parseInt(hex.slice(1, 3), 16) / 255
+  const g = parseInt(hex.slice(3, 5), 16) / 255
+  const b = parseInt(hex.slice(5, 7), 16) / 255
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min
+  let h = 0
+  if (d > 0) {
+    if (max === r) h = ((g - b) / d + 6) % 6
+    else if (max === g) h = (b - r) / d + 2
+    else h = (r - g) / d + 4
+  }
+  return {
+    h: Math.round(h * 60),
+    s: Math.round(max === 0 ? 0 : (d / max) * 100),
+    v: Math.round(max * 100),
+  }
+}
+
 interface TimeframePanelProps {
   timeframe: Timeframe | null
   onUpdate: (updates: Partial<Timeframe>) => void
   onClose: () => void
   onApplyPreset?: (preset: PresetMetadata) => void
+  onLoadCategoryPreview?: (payload: { song: Record<string, unknown>; timeframes: unknown[] }) => void
+  songLengthBeats?: number
 }
 
-const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: TimeframePanelProps) => {
-  const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | 'color' | null>(null)
+const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCategoryPreview, songLengthBeats }: TimeframePanelProps) => {
+  const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | null>(null)
+  const [colorPickerOpen, setColorPickerOpen] = useState(false)
+  const colorPickerRef = React.useRef<HTMLDivElement>(null)
+  const openColorPicker = useCallback(() => setColorPickerOpen(true), [])
+
+  // Close picker when clicking outside
+  useEffect(() => {
+    if (!colorPickerOpen) return
+    const onDown = (e: MouseEvent) => {
+      if (colorPickerRef.current && !colorPickerRef.current.contains(e.target as Node)) {
+        setColorPickerOpen(false)
+      }
+    }
+    window.addEventListener('mousedown', onDown)
+    return () => window.removeEventListener('mousedown', onDown)
+  }, [colorPickerOpen])
   const [tempStartTime, setTempStartTime] = useState<string>('')
   const [tempEndTime, setTempEndTime] = useState<string>('')
 
@@ -306,7 +343,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: Timefra
     return (
       <div className="timeframe-panel">
         {onApplyPreset ? (
-          <PresetBrowser onApplyPreset={onApplyPreset} />
+          <PresetBrowser onApplyPreset={onApplyPreset} onLoadCategoryPreview={onLoadCategoryPreview} />
         ) : (
           <div className="timeframe-panel-empty">
             <p>Select a timeframe to view and edit its properties</p>
@@ -318,7 +355,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: Timefra
 
   const handleInputChange = (
     field: 'label' | 'startTime' | 'endTime' | 'color',
-    value: string | number
+    value: string | number,
   ) => {
     if (field === 'label' || field === 'color') {
       onUpdate({ [field]: value as string })
@@ -341,7 +378,8 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: Timefra
       setTempStartTime('')
     } else if (editingField === 'endTime' && tempEndTime !== '') {
       const numValue = parseFloat(tempEndTime)
-      if (!isNaN(numValue) && numValue > timeframe.startTime) {
+      const maxEnd = songLengthBeats ?? Infinity
+      if (!isNaN(numValue) && numValue > timeframe.startTime && numValue <= maxEnd) {
         onUpdate({ endTime: numValue })
       }
       setTempEndTime('')
@@ -450,6 +488,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: Timefra
                 autoFocus
                 step="1"
                 min={timeframe.startTime + 4}
+                max={songLengthBeats}
               />
             ) : (
               <div
@@ -462,16 +501,19 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: Timefra
             <span className="timeframe-panel-duration">({duration}b)</span>
           </div>
 
-          {/* Cycles: cycle(beatsInCycle) and cycleBeats(beatsInCycle, startBeat, endBeat) — outermost first */}
+          {/* Cycles: only one cycle or cycleBeats per timeframe (hardware doesn't support nesting) */}
           <div className="timeframe-panel-cycles">
-            <label className="timeframe-panel-label">Cycles</label>
+            <label className="timeframe-panel-label" title="Repeat the effect within the timeframe. Only one cycle per timeframe is supported.">Cycle</label>
             <div className="timeframe-panel-cycles-list">
               {(timeframe.cycles ?? []).map((entry, idx) => (
                 <div key={idx} className="timeframe-panel-cycle-row">
-                  <span className="timeframe-panel-cycle-type">{entry.type === 'cycle' ? 'cycle' : 'cycleBeats'}</span>
+                  <span className="timeframe-panel-cycle-type" title={entry.type === 'cycle'
+                    ? 'Repeat the full effect every N beats'
+                    : 'Repeat the effect every N beats, but only play the window from startBeat to endBeat within each cycle'}
+                  >{entry.type === 'cycle' ? 'cycle' : 'cycleBeats'}</span>
                   {entry.type === 'cycle' ? (
                     <>
-                      <label className="timeframe-panel-cycle-param">
+                      <label className="timeframe-panel-cycle-param" title="Number of beats per repetition">
                         <span>beatsInCycle</span>
                         <input
                           type="number"
@@ -493,7 +535,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: Timefra
                     </>
                   ) : (
                     <>
-                      <label className="timeframe-panel-cycle-param">
+                      <label className="timeframe-panel-cycle-param" title="Number of beats per repetition">
                         <span>beatsInCycle</span>
                         <input
                           type="number"
@@ -512,7 +554,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: Timefra
                           className={'timeframe-panel-input-small' + (entry.beatsInCycle === 0 ? ' input-error' : '')}
                         />
                       </label>
-                      <label className="timeframe-panel-cycle-param">
+                      <label className="timeframe-panel-cycle-param" title="Start of the active window within each cycle (in beats)">
                         <span>startBeat</span>
                         <input
                           type="number"
@@ -530,7 +572,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: Timefra
                           className="timeframe-panel-input-small"
                         />
                       </label>
-                      <label className="timeframe-panel-cycle-param">
+                      <label className="timeframe-panel-cycle-param" title="End of the active window within each cycle (in beats)">
                         <span>endBeat</span>
                         <input
                           type="number"
@@ -564,58 +606,61 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: Timefra
                 </div>
               ))}
             </div>
-            <div className="timeframe-panel-cycles-actions">
-              <button
-                type="button"
-                className="timeframe-panel-cycle-add"
-                onClick={() => {
-                  const next = [...(timeframe.cycles ?? []), { type: 'cycle', beatsInCycle: 1 } as TimeframeCycleEntry]
-                  onUpdate({ cycles: next })
-                }}
-              >
-                + cycle
-              </button>
-              <button
-                type="button"
-                className="timeframe-panel-cycle-add"
-                onClick={() => {
-                  const next = [...(timeframe.cycles ?? []), { type: 'cycleBeats', beatsInCycle: 1, startBeat: 0, endBeat: 0.5 } as TimeframeCycleBeats]
-                  onUpdate({ cycles: next })
-                }}
-              >
-                + cycleBeats
-              </button>
-            </div>
+            {(timeframe.cycles ?? []).length === 0 && (
+              <div className="timeframe-panel-cycles-actions">
+                <button
+                  type="button"
+                  className="timeframe-panel-cycle-add"
+                  onClick={() => {
+                    onUpdate({ cycles: [{ type: 'cycle', beatsInCycle: 1 } as TimeframeCycleEntry] })
+                  }}
+                  title="Repeat the full effect every N beats"
+                >
+                  + cycle
+                </button>
+                <button
+                  type="button"
+                  className="timeframe-panel-cycle-add"
+                  onClick={() => {
+                    onUpdate({ cycles: [{ type: 'cycleBeats', beatsInCycle: 1, startBeat: 0, endBeat: 0.5 } as TimeframeCycleBeats] })
+                  }}
+                  title="Repeat every N beats, playing only a window within each cycle"
+                >
+                  + cycleBeats
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="timeframe-panel-section">
           <label className="timeframe-panel-label">Color</label>
           <div className="timeframe-panel-color-row">
-            {editingField === 'color' ? (
-              <input
-                type="color"
-                value={timeframe.color}
-                onChange={(e) => handleInputChange('color', e.target.value)}
-                onBlur={handleBlur}
-                className="timeframe-panel-color-input"
-                autoFocus
+            <div className="timeframe-panel-color-picker-anchor" ref={colorPickerRef}>
+              <div
+                className="timeframe-panel-color-preview"
+                style={{ backgroundColor: timeframe.color }}
+                onClick={openColorPicker}
               />
-            ) : (
-              <>
-                <div
-                  className="timeframe-panel-color-preview"
-                  style={{ backgroundColor: timeframe.color }}
-                  onClick={() => setEditingField('color')}
-                />
-                <div
-                  className="timeframe-panel-value editable"
-                  onClick={() => setEditingField('color')}
-                >
-                  {timeframe.color}
+              {colorPickerOpen && (
+                <div className="timeframe-panel-color-popover">
+                  <HsvColorPicker
+                    value={timeframe.color || '#3b82f6'}
+                    onChange={(hex) => onUpdate({ color: hex })}
+                  />
                 </div>
-              </>
-            )}
+              )}
+            </div>
+            {(() => {
+              const { h, s, v } = hexToHsv(timeframe.color || '#000000')
+              return (
+                <div className="timeframe-panel-color-hsv" onClick={openColorPicker}>
+                  <span className="timeframe-panel-color-hsv-item"><span className="timeframe-panel-color-hsv-label">H</span>{h}°</span>
+                  <span className="timeframe-panel-color-hsv-item"><span className="timeframe-panel-color-hsv-label">S</span>{s}%</span>
+                  <span className="timeframe-panel-color-hsv-item"><span className="timeframe-panel-color-hsv-label">V</span>{v}%</span>
+                </div>
+              )
+            })()}
           </div>
           <label className="timeframe-panel-checkbox-label" title="When checked, this timeframe does not contribute color (no constColor). Only its effects (e.g. brightness, hue shift) apply on top of underlying layers. Timeline shows gray.">
             <input
@@ -1165,12 +1210,17 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset }: Timefra
                         checked={mv[ep.key] === true}
                         onChange={(e) => {
                           const checked = e.target.checked
+                          // Retire and accumulate are mutually exclusive
+                          const updates: Record<string, boolean | undefined> = { [ep.key]: checked || undefined }
+                          if (checked && ep.key === 'retire') updates.accumulate = undefined
+                          if (checked && ep.key === 'accumulate') updates.retire = undefined
+                          const updated = { ...mv, ...updates }
                           const bpr = defaultBeatsPerRing(
                             mv.type, timeframe.startTime, timeframe.endTime, timeframe.rings, mv.direction,
-                            ep.key === 'bounce' ? checked : mv.bounce,
-                            ep.key === 'retire' ? checked : mv.retire,
+                            updated.bounce,
+                            updated.retire,
                           )
-                          onUpdate({ movement: { ...mv, [ep.key]: checked || undefined, beatsPerRing: bpr } })
+                          onUpdate({ movement: { ...updated, beatsPerRing: bpr } })
                         }}
                         className="timeframe-panel-checkbox"
                       />

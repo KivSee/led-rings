@@ -3,8 +3,14 @@ import { loadAllPresets, extractPresetColors, summarizePresetEffects } from '../
 import type { PresetMetadata } from '../presets'
 import './PresetBrowser.css'
 
+interface CategoryPreviewPayload {
+  song: Record<string, unknown>
+  timeframes: unknown[]
+}
+
 interface PresetBrowserProps {
   onApplyPreset: (preset: PresetMetadata) => void
+  onLoadCategoryPreview?: (payload: CategoryPreviewPayload) => void
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -36,10 +42,28 @@ const PresetCard = ({ preset, onApply }: { preset: PresetMetadata; onApply: (p: 
   )
 }
 
-const PresetBrowser = ({ onApplyPreset }: PresetBrowserProps) => {
+const PresetBrowser = ({ onApplyPreset, onLoadCategoryPreview }: PresetBrowserProps) => {
   const allPresets = useMemo(() => loadAllPresets(), [])
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
   const [searchTerm, setSearchTerm] = useState('')
+  const [loadingCategory, setLoadingCategory] = useState<string | null>(null)
+
+  const handlePreviewAll = async (cat: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!onLoadCategoryPreview) return
+    const catTitle = cat.charAt(0).toUpperCase() + cat.slice(1)
+    setLoadingCategory(cat)
+    try {
+      const res = await fetch(`/category-previews/All${catTitle}.json`)
+      if (!res.ok) throw new Error(`Not found: /category-previews/All${catTitle}.json`)
+      const payload = await res.json() as CategoryPreviewPayload
+      onLoadCategoryPreview(payload)
+    } catch (err) {
+      alert(`Category preview not generated yet.\nRun: yarn gen-ui-song ${cat}`)
+    } finally {
+      setLoadingCategory(null)
+    }
+  }
 
   const groupedPresets = useMemo(() => {
     const groups: Record<string, PresetMetadata[]> = {}
@@ -88,6 +112,15 @@ const PresetBrowser = ({ onApplyPreset }: PresetBrowserProps) => {
                 <span className="preset-browser-category-arrow">{isExpanded ? '\u25BC' : '\u25B6'}</span>
                 <span className="preset-browser-category-name">{CATEGORY_LABELS[cat] || cat}</span>
                 <span className="preset-browser-category-count">{presets.length}</span>
+                {onLoadCategoryPreview && (
+                  <span
+                    className="preset-browser-category-preview-all"
+                    title={`Load all ${CATEGORY_LABELS[cat] || cat} presets as a timeline`}
+                    onClick={(e) => handlePreviewAll(cat, e)}
+                  >
+                    {loadingCategory === cat ? '...' : 'Preview All'}
+                  </span>
+                )}
               </button>
               {isExpanded && (
                 <div className="preset-browser-preset-list">

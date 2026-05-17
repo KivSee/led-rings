@@ -184,6 +184,9 @@ export default function Spectrogram({
   const paintRef = useRef<() => void>(() => {})
   const spectrogramImageRef = useRef<ImageData | null>(null)
   const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null)
+  // Offscreen canvas for the static background (image + axes + beat markers).
+  // Only repainted when view/data changes, not on every currentTimeSeconds tick.
+  const bgCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const decodedDurationRef = useRef(0)
   const decodedSampleRateRef = useRef(SAMPLE_RATE)
   const lastMouseFracRef = useRef(0.5)
@@ -729,17 +732,27 @@ export default function Spectrogram({
     if (scrollDebounceRef.current) clearTimeout(scrollDebounceRef.current)
   }, [])
 
-  // Paint spectrogram + playhead + X-axis + Y-axis
-  const paint = useCallback(() => {
+  // Paint static background: spectrogram image + Y-axis + X-axis + beat markers
+  // Result is stored in bgCanvasRef so paintForeground can blit it cheaply each frame.
+  const paintBackground = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
     const width = canvas.width
     const height = canvas.height
     const graphLeft = Y_AXIS_WIDTH
     const graphWidth = Math.max(0, width - Y_AXIS_WIDTH)
     const graphHeight = Math.max(0, height - AXIS_HEIGHT)
+
+    // Ensure bgCanvas matches display canvas size
+    let bg = bgCanvasRef.current
+    if (!bg || bg.width !== width || bg.height !== height) {
+      bg = document.createElement('canvas')
+      bg.width = width
+      bg.height = height
+      bgCanvasRef.current = bg
+    }
+    const ctx = bg.getContext('2d')
+    if (!ctx) return
 
     const img = spectrogramImageRef.current
     if (!img) {
@@ -796,6 +809,44 @@ export default function Spectrogram({
       ctx.fillRect(fillLeft, 0, graphWidth - (fillLeft - graphLeft), graphHeight)
     }
 
+  }, [
+    loading,
+    error,
+    durationSeconds,
+    bpm,
+    beatOffset,
+    beatTimestampsMs,
+    viewStart,
+    viewEnd,
+    viewDuration,
+    visibleSpanBeats,
+    beatEditMode,
+    dragPreviewMs,
+    selectedBeatIndex,
+  ])
+
+  // Paint foreground: blit background then draw playhead + range selection overlay.
+  // Cheap — called on every currentTimeSeconds tick.
+  const paintForeground = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    const width = canvas.width
+    const height = canvas.height
+    const graphLeft = Y_AXIS_WIDTH
+    const graphWidth = Math.max(0, width - Y_AXIS_WIDTH)
+    const graphHeight = Math.max(0, height - AXIS_HEIGHT)
+
+    // Blit the pre-rendered background (if available, else trigger a full repaint)
+    const bg = bgCanvasRef.current
+    if (!bg || bg.width !== width || bg.height !== height) {
+      paintBackground()
+      return
+    }
+    ctx.drawImage(bg, 0, 0)
+
+    // Playhead
     let playheadX =
       viewDuration > 0
         ? graphLeft + ((currentTimeSeconds - viewStart) / viewDuration) * graphWidth
@@ -988,28 +1039,22 @@ export default function Spectrogram({
         ctx.fillText(label, midX, ly + 3)
       }
     }
-  }, [
-    loading,
-    error,
-    currentTimeSeconds,
-    durationSeconds,
-    bpm,
-    beatOffset,
-    beatTimestampsMs,
-    viewStart,
-    viewEnd,
-    viewDuration,
-    visibleSpanBeats,
-    beatEditMode,
-    dragPreviewMs,
-    selectedBeatIndex,
-    rangeSelection,
-  ])
+  }, [currentTimeSeconds, viewStart, viewEnd, viewDuration, rangeSelection, paintBackground])
+
+  // Wire up: repaint background when static deps change, then blit foreground.
+  // Foreground-only repaint on currentTimeSeconds ticks.
+  const paint = useCallback(() => {
+    paintBackground()
+    paintForeground()
+  }, [paintBackground, paintForeground])
 
   paintRef.current = paint
   useEffect(() => {
-    paint()
-  }, [paint, currentTimeSeconds])
+    paintBackground()
+  }, [paintBackground])
+  useEffect(() => {
+    paintForeground()
+  }, [paintForeground])
 
   useEffect(() => {
     if (isPlaying) {

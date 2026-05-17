@@ -10,6 +10,7 @@
     "playground": "ts-node-dev --respawn src/playground.ts",
     "idle": "ts-node-dev --respawn src/idle.ts",
     "stop": "ts-node-dev --respawn src/stop.ts",
+    "clock": "ts-node src/clock.ts",
     "random": "ts-node-dev --respawn src/random.ts",
     "index-trigger": "ts-node-dev --respawn src/index-trigger.ts",
     "preset": "ts-node src/preset-runner.ts",
@@ -17,13 +18,15 @@
     "buttons": "ts-node-dev --respawn src/songs/buttons.ts",
     "agent": "ts-node-dev --respawn src/songs/agent.ts",
     "control-server": "ts-node-dev --respawn src/control-server.ts",
-    "export-song": "ts-node src/export-song.ts"
+    "export-song": "ts-node src/export-song.ts",
+    "gen-ui-song": "ts-node src/generate-category-ui-song.ts"
   },
   "dependencies": {
     "@types/node": "^22.10.10",
     "axios": "^1.13.6",
     "dotenv": "^16.4.7",
     "env-var": "^7.5.0",
+    "mqtt": "^5.15.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.3"
   },
