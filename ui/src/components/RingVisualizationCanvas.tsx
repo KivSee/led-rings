@@ -49,7 +49,7 @@ function buildPixelPositions(size: number, scale: number): PixelPos[] {
   const center = size / 2
   const all: PixelPos[] = []
   for (let bigRingIdx = 0; bigRingIdx < 12; bigRingIdx++) {
-    const bigAngle = (bigRingIdx * 30 - 90) * (Math.PI / 180)
+    const bigAngle = (bigRingIdx * 30 - 60) * (Math.PI / 180)
     const bigCx = center + outerR * Math.cos(bigAngle)
     const bigCy = center + outerR * Math.sin(bigAngle)
     for (let subRingIdx = 0; subRingIdx < 12; subRingIdx++) {

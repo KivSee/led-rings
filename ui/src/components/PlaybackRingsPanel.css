@@ -479,3 +479,9 @@
   font-size: 12px;
   opacity: 0.85;
 }
+
+.playback-clock-btn.active {
+  background: rgba(251, 191, 36, 0.85);
+  border-color: rgba(251, 191, 36, 0.9);
+  color: #1a1a00;
+}
