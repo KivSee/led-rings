@@ -4,7 +4,7 @@
     "lengthSeconds": 248.7,
     "bpm": 300,
     "startOffsetMs": 3000,
-    "runStartTimeSeconds": 242.92,
+    "runStartTimeSeconds": 0,
     "animationType": "song",
     "audioFilePath": "loop.wav",
     "beatTimestampsMs": [
@@ -2494,7 +2494,7 @@
   "windowSizes": {
     "playbackPanelWidth": 900,
     "detailsPanelWidth": 361,
-    "spectrogramHeight": 188,
+    "spectrogramHeight": 115,
     "headerHeight": 56
   },
   "theme": "dark"
