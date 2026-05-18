@@ -653,11 +653,19 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
             </div>
             {(() => {
               const { h, s, v } = hexToHsv(timeframe.color || '#000000')
+              const hex = (timeframe.color || '#000000').toLowerCase()
               return (
-                <div className="timeframe-panel-color-hsv" onClick={openColorPicker}>
-                  <span className="timeframe-panel-color-hsv-item"><span className="timeframe-panel-color-hsv-label">H</span>{h}°</span>
-                  <span className="timeframe-panel-color-hsv-item"><span className="timeframe-panel-color-hsv-label">S</span>{s}%</span>
-                  <span className="timeframe-panel-color-hsv-item"><span className="timeframe-panel-color-hsv-label">V</span>{v}%</span>
+                <div className="timeframe-panel-color-hsv">
+                  <span className="timeframe-panel-color-hsv-item" onClick={openColorPicker}><span className="timeframe-panel-color-hsv-label">H</span>{h}°</span>
+                  <span className="timeframe-panel-color-hsv-item" onClick={openColorPicker}><span className="timeframe-panel-color-hsv-label">S</span>{s}%</span>
+                  <span className="timeframe-panel-color-hsv-item" onClick={openColorPicker}><span className="timeframe-panel-color-hsv-label">V</span>{v}%</span>
+                  <span
+                    className="timeframe-panel-color-hsv-hex"
+                    title="Click to copy hex color"
+                    onClick={() => { navigator.clipboard?.writeText(hex).catch(() => {}) }}
+                  >
+                    {hex}
+                  </span>
                 </div>
               )
             })()}

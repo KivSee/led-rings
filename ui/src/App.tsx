@@ -636,11 +636,13 @@ function App() {
     } else {
       // Run: if spectrogram range is selected, play only that section; else if nextRunFromStart, jump to runStartTimeSeconds; otherwise resume from currentTime
       const range = spectrogramRangeRef.current
-      const useRange = range && range.startSec < range.endSec
+      const rangeStart = range ? Math.min(range.startSec, range.endSec) : 0
+      const rangeEnd = range ? Math.max(range.startSec, range.endSec) : 0
+      const useRange = range && rangeStart < rangeEnd
       let startSec: number
       if (useRange) {
-        startSec = Math.max(0, range!.startSec)
-        playbackRangeEndSecRef.current = Math.max(startSec, range!.endSec)
+        startSec = Math.max(0, rangeStart)
+        playbackRangeEndSecRef.current = Math.max(startSec, rangeEnd)
         const startBeats = audioSecToBeats(startSec, song)
         setCurrentTime(Math.max(0, Math.min(songLengthBeats, startBeats)))
       } else {
