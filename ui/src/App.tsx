@@ -1660,18 +1660,28 @@ function App() {
           <span className="song-meta-suffix">ms</span>
         </label>
         <div className="app-header-actions">
-          <label className="app-theme-toggle" title={lightTheme ? 'Switch to dark theme' : 'Switch to light theme'}>
-            <input
-              type="checkbox"
-              checked={lightTheme}
-              onChange={(e) => {
-                const next = e.target.checked
-                setLightTheme(next)
-                localStorage.setItem('kivsee-theme', next ? 'light' : 'dark')
-              }}
-            />
-            <span>{lightTheme ? 'Light theme' : 'Dark theme'}</span>
-          </label>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={lightTheme}
+            aria-label={lightTheme ? 'Switch to dark theme' : 'Switch to light theme'}
+            title={lightTheme ? 'Switch to dark theme' : 'Switch to light theme'}
+            className={`app-theme-switch${lightTheme ? ' is-light' : ''}`}
+            onClick={() => {
+              const next = !lightTheme
+              setLightTheme(next)
+              localStorage.setItem('kivsee-theme', next ? 'light' : 'dark')
+            }}
+          >
+            <svg className="app-theme-switch-icon app-theme-switch-icon-sun" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+            </svg>
+            <svg className="app-theme-switch-icon app-theme-switch-icon-moon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+            <span className="app-theme-switch-knob" aria-hidden="true" />
+          </button>
           <button className="secondary-button" onClick={addTimeframe}>+ Add</button>
           <button className="secondary-button" onClick={handleLoadTimeframes}>Load</button>
           <button className="secondary-button" onClick={handleImportTs} disabled={!API_BASE} title={!API_BASE ? 'Set VITE_API_URL and run control server' : 'Import a .ts song file'}>Import .ts</button>
