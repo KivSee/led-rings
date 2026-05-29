@@ -162,9 +162,14 @@ async function handleSendSequence(runnerCode: string, res: http.ServerResponse) 
 }
 
 async function handleParseSong(songCode: string, fileName: string, res: http.ServerResponse) {
-  // Write to src/songs/ so relative imports (../effects/, ../time/, etc.) resolve
+  // Choose temp dir based on import style: files with ./effects/, ./services/, etc.
+  // belong directly under src/; files with ../effects/, ../services/ are song-style and
+  // belong under src/songs/. This lets us import either kind without rewriting imports.
+  const hasSrcStyleImports = /from\s+["']\.\/(effects|services|animation|time|objects|phase|recorder|sys-config|async-local-storage)\//.test(songCode);
   const safeName = `.tmp-parse-${Date.now()}-${fileName.replace(/[^a-zA-Z0-9._-]/g, "")}`;
-  const songPath = path.join(ROOT, "src", "songs", safeName);
+  const songPath = hasSrcStyleImports
+    ? path.join(ROOT, "src", safeName)
+    : path.join(ROOT, "src", "songs", safeName);
   const outPath = path.join(ROOT, `.tmp-parse-out-${Date.now()}.json`);
   try {
     fs.writeFileSync(songPath, songCode, "utf8");
