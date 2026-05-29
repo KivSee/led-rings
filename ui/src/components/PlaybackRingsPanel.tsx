@@ -28,6 +28,8 @@ interface PlaybackRingsPanelProps {
   brightness: number
   brightnessConnected: boolean
   onBrightnessChange: (v: number) => void
+  /** Called when the clock preview toggle changes. Lets the parent push an MQTT trigger in Live mode. */
+  onClockModeChange?: (active: boolean) => void
 }
 
 function getActiveTimeframesAt(time: number, timeframes: Timeframe[]): Timeframe[] {
@@ -67,6 +69,7 @@ const PlaybackRingsPanel = ({
   brightness,
   brightnessConnected,
   onBrightnessChange,
+  onClockModeChange,
 }: PlaybackRingsPanelProps) => {
   // FPS counter: measure time between renders, keep a rolling window of 30 samples
   const fpsRef = React.useRef<number>(0)
@@ -244,7 +247,13 @@ const PlaybackRingsPanel = ({
           </button>
           <button
             className={`playback-mute-btn playback-clock-btn${clockMode ? ' active' : ''}`}
-            onClick={() => setClockMode(m => !m)}
+            onClick={() => {
+              setClockMode(m => {
+                const next = !m
+                onClockModeChange?.(next)
+                return next
+              })
+            }}
             title="Preview clock mode — shows live time across all 12 rings"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

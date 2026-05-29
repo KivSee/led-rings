@@ -10,6 +10,7 @@ import { spawn, execSync } from "child_process";
 import { sendSequence } from "./services/sequence";
 import { startSong, stop, trigger } from "./services/trigger";
 import { initMqttBrightness, getBrightnessState, setBrightness } from "./mqtt-brightness";
+import { initMqttTrigger, publishTrigger } from "./mqtt-trigger";
 
 const PORT = parseInt(process.env.CONTROL_SERVER_PORT || "3080", 10);
 const ROOT = process.cwd();
@@ -287,6 +288,30 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // POST /api/mqtt-trigger — publish retained {trigger_name} on MQTT 'trigger' topic.
+  // Bypasses the trigger service; used to switch firmware to a static trigger like 'clock'.
+  if (req.method === "POST" && pathname === "/api/mqtt-trigger") {
+    const body = await parseBody(req);
+    let payload: { triggerName?: string };
+    try {
+      payload = JSON.parse(body);
+    } catch {
+      send(res, 400, JSON.stringify({ error: "Invalid JSON" }));
+      return;
+    }
+    if (typeof payload.triggerName !== "string" || !payload.triggerName.trim()) {
+      send(res, 400, JSON.stringify({ error: "Missing triggerName" }));
+      return;
+    }
+    const ok = publishTrigger(payload.triggerName.trim());
+    if (!ok) {
+      send(res, 503, JSON.stringify({ error: "MQTT not connected" }));
+      return;
+    }
+    send(res, 200, JSON.stringify({ ok: true }));
+    return;
+  }
+
   if (req.method === "POST" && pathname === "/api/stop") {
     try {
       await stop();
@@ -510,6 +535,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 initMqttBrightness();
+initMqttTrigger();
 
 server.listen(PORT, () => {
   console.log(`Control server listening on http://localhost:${PORT}`);

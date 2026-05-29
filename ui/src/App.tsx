@@ -1891,6 +1891,20 @@ function App() {
                 body: JSON.stringify({ value: v }),
               }).catch(() => {})
             }}
+            onClockModeChange={(active) => {
+              if (!liveMode || !API_BASE) return
+              if (active) {
+                fetch(`${API_BASE}/api/mqtt-trigger`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ triggerName: 'clock' }),
+                }).catch((err) => console.error('Live clock trigger failed', err))
+              } else {
+                fetch(`${API_BASE}/api/stop`, { method: 'POST' }).catch((err) =>
+                  console.error('Live stop failed', err)
+                )
+              }
+            }}
           />
         </div>
         <div
