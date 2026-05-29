@@ -1,6 +1,6 @@
 // PUT a sequence to led-sequence-service and POST a trigger so the Lilum
-// pendant lights up: inner -> middle -> outer, each fading in and out
-// in sequence, each ring its own colour. Loops with `num_repeats: 0`.
+// pendant plays a snake pattern: all 3 rings simultaneously, each with
+// its own colour and evenly phase-offset by 1/3 of the cycle.
 
 import axios from "axios";
 import {
@@ -8,49 +8,52 @@ import {
     TRIGGER_SERVICE_IP,  TRIGGER_SERVICE_PORT,
 } from "../sys-config/sys-config";
 
-const THING_NAME    = "lilum";
-const TRIGGER_NAME  = "lilum";
+const THING_NAME   = "lilum";
+const TRIGGER_NAME = "lilum";
 
-const FADE_MS    = 1500;          // fade-in + fade-out per ring
-const GAP_MS     = 200;           // overlap is negative; positive = gap
-const RING_COUNT = 3;
+const CYCLE_MS    = 5000;   // one full rotation around a ring
+const TAIL_LENGTH = 0.6;    // fraction of ring lit as tail (~5 of 9 LEDs)
 
-// hue 0..1 (red, green, blue-ish)
-const RING_HUES = { inner: 0.00, middle: 0.33, outer: 0.66 } as const;
+const RING_CONFIGS = [
+    { segment: "inner",  hue: 0.00, phase: 0.00 },
+    { segment: "middle", hue: 0.33, phase: 0.33 },
+    { segment: "outer",  hue: 0.67, phase: 0.67 },
+] as const;
 
 interface Effect {
     effect_config: { start_time: number; end_time: number; segments: string };
-    const_color?:       { color: { hue: number; sat: number; val: number } };
-    timed_brightness?:  { mult_factor_decrease: { half: { f1: { linear: { start: number; end: number } }; f2: { linear: { start: number; end: number } } } } };
+    const_color?: { color: { hue: number; sat: number; val: number } };
+    snake?: {
+        head: { linear: { start: number; end: number } };
+        tail_length: { const_value: { value: number } };
+        cyclic: boolean;
+    };
 }
 
-const fadeInOutPair = (segment: string, hue: number, start: number, end: number): Effect[] => {
-    const cfg = { start_time: start, end_time: end, segments: segment };
+const snakePair = (segment: string, hue: number, phase: number): Effect[] => {
+    const cfg = { start_time: 0, end_time: CYCLE_MS, segments: segment };
     return [
         { effect_config: cfg, const_color: { color: { hue, sat: 1.0, val: 1.0 } } },
-        { effect_config: cfg, timed_brightness: { mult_factor_decrease: { half: {
-            f1: { linear: { start: 0.0, end: 1.0 } },
-            f2: { linear: { start: 1.0, end: 0.0 } },
-        } } } },
+        {
+            effect_config: cfg,
+            snake: {
+                head: { linear: { start: phase, end: phase + 1.0 } },
+                tail_length: { const_value: { value: TAIL_LENGTH } },
+                cyclic: true,
+            },
+        },
     ];
 };
 
 const buildSequence = () => {
     const effects: Effect[] = [];
-    const stride = FADE_MS + GAP_MS;
-
-    let t = 0;
-    effects.push(...fadeInOutPair("inner",  RING_HUES.inner,  t, t + FADE_MS));
-    t += stride;
-    effects.push(...fadeInOutPair("middle", RING_HUES.middle, t, t + FADE_MS));
-    t += stride;
-    effects.push(...fadeInOutPair("outer",  RING_HUES.outer,  t, t + FADE_MS));
-    t += FADE_MS;   // total duration ends with last fade-out
-
+    for (const { segment, hue, phase } of RING_CONFIGS) {
+        effects.push(...snakePair(segment, hue, phase));
+    }
     return {
         [THING_NAME]: {
             effects,
-            duration_ms: t,
+            duration_ms: CYCLE_MS,
             num_repeats: 0,    // 0 = loop forever
         },
     };
