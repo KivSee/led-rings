@@ -10,7 +10,8 @@
 import axios from "axios";
 import { LEDS_OBJECT_SERVICE_IP, LEDS_OBJECT_SERVICE_PORT } from "../sys-config/sys-config";
 
-const THING_NAME = "lilum";
+// lilum0 is a second pendant with identical hardware/segments to lilum.
+const THING_NAMES = ["lilum", "lilum0"];
 const NUM_PIXELS = 27;
 
 interface Pixel { index: number; relPos: number; }
@@ -44,12 +45,14 @@ const payload = {
 };
 
 (async () => {
-    const url = `http://${LEDS_OBJECT_SERVICE_IP}:${LEDS_OBJECT_SERVICE_PORT}/thing/${THING_NAME}`;
-    try {
-        const res = await axios.put(url, payload, { timeout: 5000 });
-        console.log(`Lilum segments synced -> ${url}, status: ${res.status}`);
-    } catch (err) {
-        console.error("Error syncing Lilum segments:", err);
-        process.exit(1);
+    for (const thing of THING_NAMES) {
+        const url = `http://${LEDS_OBJECT_SERVICE_IP}:${LEDS_OBJECT_SERVICE_PORT}/thing/${thing}`;
+        try {
+            const res = await axios.put(url, payload, { timeout: 5000 });
+            console.log(`Lilum segments synced -> ${url}, status: ${res.status}`);
+        } catch (err) {
+            console.error(`Error syncing segments for ${thing}:`, err);
+            process.exit(1);
+        }
     }
 })();
