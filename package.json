@@ -18,6 +18,8 @@
     "buttons": "ts-node-dev --respawn src/songs/buttons.ts",
     "agent": "ts-node-dev --respawn src/songs/agent.ts",
     "control-server": "ts-node-dev --respawn src/control-server.ts",
+    "ui": "yarn --cwd ui dev",
+    "dev": "concurrently -n server,ui -c blue,magenta \"yarn control-server\" \"yarn ui\"",
     "export-song": "ts-node src/export-song.ts",
     "gen-ui-song": "ts-node src/generate-category-ui-song.ts"
   },
@@ -34,5 +36,8 @@
     "minimatch": ">=3.1.4",
     "brace-expansion": ">=1.1.12",
     "diff": ">=4.0.4"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }
