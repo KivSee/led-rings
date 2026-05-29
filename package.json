@@ -6,6 +6,8 @@
   "scripts": {
     "test": "ts-node-dev --respawn src/test.ts",
     "sync-segments": "ts-node src/ring-segments/index.ts",
+    "lilum-segments": "ts-node src/lilum/segments.ts",
+    "lilum": "ts-node src/lilum/lilum.ts",
     "start": "ts-node-dev --respawn src/index.ts",
     "playground": "ts-node-dev --respawn src/playground.ts",
     "idle": "ts-node-dev --respawn src/idle.ts",
