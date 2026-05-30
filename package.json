@@ -17,6 +17,7 @@
     "index-trigger": "ts-node-dev --respawn src/index-trigger.ts",
     "preset": "ts-node src/preset-runner.ts",
     "play": "ts-node src/play-preset.ts",
+    "loop": "ts-node src/songs/loop.ts",
     "buttons": "ts-node-dev --respawn src/songs/buttons.ts",
     "agent": "ts-node-dev --respawn src/songs/agent.ts",
     "control-server": "ts-node-dev --respawn src/control-server.ts",

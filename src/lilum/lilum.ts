@@ -11,7 +11,7 @@ import {
 } from "../sys-config/sys-config";
 
 // Both pendants play the same sequence off the single "lilum" trigger.
-const THING_NAMES  = ["lilum", "lilum0"];
+const THING_NAMES  = ["lilum1", "lilum2"];
 const TRIGGER_NAME = "lilum";
 
 // One brightness-pulse cycle. Slowed down from the firmware's ~1700 ms for a
