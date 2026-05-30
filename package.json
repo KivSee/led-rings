@@ -6,6 +6,8 @@
   "scripts": {
     "test": "ts-node-dev --respawn src/test.ts",
     "sync-segments": "ts-node src/ring-segments/index.ts",
+    "lilum-segments": "ts-node src/lilum/segments.ts",
+    "lilum": "ts-node src/lilum/lilum.ts",
     "start": "ts-node-dev --respawn src/index.ts",
     "playground": "ts-node-dev --respawn src/playground.ts",
     "idle": "ts-node-dev --respawn src/idle.ts",
@@ -15,6 +17,7 @@
     "index-trigger": "ts-node-dev --respawn src/index-trigger.ts",
     "preset": "ts-node src/preset-runner.ts",
     "play": "ts-node src/play-preset.ts",
+    "loop": "ts-node src/songs/loop.ts",
     "buttons": "ts-node-dev --respawn src/songs/buttons.ts",
     "agent": "ts-node-dev --respawn src/songs/agent.ts",
     "control-server": "ts-node-dev --respawn src/control-server.ts",

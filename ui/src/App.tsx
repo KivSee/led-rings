@@ -113,6 +113,8 @@ export interface Song {
   audioFilePath?: string
   /** Detected beat positions in milliseconds. When present, beatToMs uses lookup instead of fixed-BPM formula. */
   beatTimestampsMs?: number[]
+  /** Ring numbers that have a lilum pendant mirroring them. Emits anim.mirrorToLilum([...]). */
+  lilumRings?: number[]
 }
 
 const LAST_SONG_STORAGE_KEY = 'timelineManager:lastSong'
@@ -1204,6 +1206,9 @@ function App() {
       animationType: (s.animationType === 'trigger' ? 'trigger' : 'song') as AnimationType,
       audioFilePath: typeof s.audioFilePath === 'string' ? s.audioFilePath : undefined,
       beatTimestampsMs: Array.isArray(s.beatTimestampsMs) ? s.beatTimestampsMs as number[] : undefined,
+      lilumRings: Array.isArray(s.lilumRings)
+        ? (s.lilumRings as unknown[]).map(Number).filter((n) => Number.isFinite(n) && n >= 1 && n <= 12)
+        : undefined,
     }
   }
 
@@ -1658,6 +1663,23 @@ function App() {
             {...numericInputProps('startOffsetMs', song.startOffsetMs ?? 0, 0, 0, 'int', (n) => handleSongChange({ startOffsetMs: n }))}
           />
           <span className="song-meta-suffix">ms</span>
+        </label>
+        <label className="song-meta-field">
+          <span>Lilum rings</span>
+          <input
+            type="text"
+            className="song-meta-input"
+            placeholder="e.g. 1, 2"
+            title="Ring numbers with a lilum pendant. Each N mirrors ring N onto thing lilumN."
+            value={(song.lilumRings ?? []).join(', ')}
+            onChange={(e) => {
+              const rings = e.target.value
+                .split(',')
+                .map((t) => Number(t.trim()))
+                .filter((n) => Number.isFinite(n) && n >= 1 && n <= 12)
+              handleSongChange({ lilumRings: rings.length > 0 ? rings : undefined })
+            }}
+          />
         </label>
         <div className="app-header-actions">
           <button
