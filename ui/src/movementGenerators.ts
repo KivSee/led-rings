@@ -5,7 +5,7 @@
  */
 
 export type MovementType = 'spread' | 'sweep' | 'stagger' | 'random'
-export type MovementDirection = 'forward' | 'backward' | 'center-out' | 'edges-in'
+export type MovementDirection = 'forward' | 'backward' | 'center-out' | 'edges-in' | 'pairs-forward' | 'pairs-backward'
 
 export interface TimeframeMovement {
   type: MovementType
@@ -65,7 +65,46 @@ export const MOVEMENT_DIRECTIONS: Array<{ id: MovementDirection; label: string }
   { id: 'backward', label: '12 \u2192 1' },
   { id: 'center-out', label: 'Center \u2192 Out' },
   { id: 'edges-in', label: 'Edges \u2192 In' },
+  { id: 'pairs-forward', label: 'Opposite pairs \u2192' },
+  { id: 'pairs-backward', label: 'Opposite pairs \u2190' },
 ]
+
+const RING_COUNT = 12
+
+/** Opposite ring across the circle (6 apart on a 12-ring layout). */
+function oppositeRing(r: number): number {
+  return ((r - 1 + RING_COUNT / 2) % RING_COUNT) + 1
+}
+
+/**
+ * Group rings into opposite pairs (r and r+6). A ring whose partner is absent
+ * from the set forms its own (singleton) group. Groups are keyed and ordered by
+ * their lowest ring number. Returns the step map; reversed for backward.
+ */
+function getPairSteps(rings: number[], reverse: boolean): Map<number, number> {
+  const present = new Set(rings)
+  const seen = new Set<number>()
+  const groups: number[][] = []
+  for (const r of [...rings].sort((a, b) => a - b)) {
+    if (seen.has(r)) continue
+    const partner = oppositeRing(r)
+    if (present.has(partner) && partner !== r) {
+      groups.push([r, partner])
+      seen.add(r)
+      seen.add(partner)
+    } else {
+      groups.push([r])
+      seen.add(r)
+    }
+  }
+  // groups already ordered by lowest ring (rings were sorted ascending)
+  const ordered = reverse ? [...groups].reverse() : groups
+  const stepMap = new Map<number, number>()
+  ordered.forEach((group, step) => {
+    for (const r of group) stepMap.set(r, step)
+  })
+  return stepMap
+}
 
 // ---------------------------------------------------------------------------
 // Ring step assignment — maps each ring to its step index.
@@ -99,6 +138,10 @@ function getRingSteps(rings: number[], direction: MovementDirection, type?: Move
       return new Map(sorted.map((r, i) => [r, i]))
     case 'backward':
       return new Map(sorted.map((r, i) => [r, sorted.length - 1 - i]))
+    case 'pairs-forward':
+      return getPairSteps(rings, false)
+    case 'pairs-backward':
+      return getPairSteps(rings, true)
     case 'center-out': {
       const withDist = sorted.map(r => ({ r, dist: Math.abs(r - RING_CENTER) }))
       withDist.sort((a, b) => a.dist - b.dist)
@@ -384,7 +427,7 @@ export function normalizeMovement(raw: unknown): TimeframeMovement | undefined {
   if (!raw || typeof raw !== 'object') return undefined
   const o = raw as Record<string, unknown>
   const validTypes: MovementType[] = ['spread', 'sweep', 'stagger', 'random']
-  const validDirs: MovementDirection[] = ['forward', 'backward', 'center-out', 'edges-in']
+  const validDirs: MovementDirection[] = ['forward', 'backward', 'center-out', 'edges-in', 'pairs-forward', 'pairs-backward']
   if (!validTypes.includes(o.type as MovementType)) return undefined
   if (!validDirs.includes(o.direction as MovementDirection)) return undefined
   const bpr = Number(o.beatsPerRing)

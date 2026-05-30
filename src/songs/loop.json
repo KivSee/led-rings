@@ -4,7 +4,7 @@
     "lengthSeconds": 248.7,
     "bpm": 300,
     "startOffsetMs": 3000,
-    "runStartTimeSeconds": 0,
+    "runStartTimeSeconds": 172.39,
     "animationType": "song",
     "audioFilePath": "loop.wav",
     "beatTimestampsMs": [
@@ -842,6 +842,8 @@
       152026,
       152384,
       158016,
+      158426,
+      158841,
       159247,
       159630,
       160037,
@@ -921,7 +923,7 @@
       177811,
       178067,
       178195,
-      178311,
+      178326,
       178555,
       178694,
       178798,
@@ -950,11 +952,11 @@
       182281,
       182378,
       182524,
-      182689,
+      182671,
       182780,
       182920,
       183029,
-      183152,
+      183173,
       183268,
       183522,
       183683,
@@ -1230,11 +1232,13 @@
       218365,
       218481,
       218609,
-      218724,
+      218735,
       218864,
-      218978,
+      218986,
       219120,
-      219468,
+      219241,
+      219367,
+      219485,
       219596,
       219700,
       219840,
@@ -1242,97 +1246,119 @@
       220107,
       220211,
       220339,
-      220455,
+      220471,
       220594,
-      220699,
-      220815,
-      220954,
+      220712,
+      220835,
+      220961,
       221093,
-      221198,
-      221442,
+      221215,
+      221351,
+      221462,
       221581,
       221697,
       221802,
       221929,
-      222185,
+      222111,
+      222220,
       222336,
+      222455,
       222580,
       222684,
       222800,
       222928,
       223079,
-      223427,
+      223207,
+      223330,
+      223445,
       223566,
       223682,
       223799,
       223926,
       224066,
-      224170,
-      224414,
+      224186,
+      224329,
+      224446,
       224565,
-      224785,
-      224913,
+      224691,
+      224807,
+      224944,
       225064,
+      225187,
       225331,
-      225517,
-      225656,
-      225784,
-      225912,
-      226132,
+      225445,
+      225574,
+      225680,
+      225797,
+      225935,
+      226074,
+      226179,
       226306,
-      226539,
-      226643,
-      226771,
-      226898,
-      227154,
-      227293,
-      227398,
+      226427,
+      226550,
+      226670,
+      226797,
+      226916,
+      227061,
+      227172,
+      227294,
+      227414,
       227537,
-      227642,
-      227769,
-      227885,
+      227661,
+      227791,
+      227913,
       228036,
       228152,
-      228385,
+      228272,
+      228400,
       228524,
-      228756,
-      228884,
+      228659,
+      228789,
+      228902,
       229035,
-      229267,
-      229371,
-      229511,
-      229755,
-      229871,
+      229148,
+      229281,
+      229398,
+      229530,
+      229646,
+      229780,
+      229890,
       230022,
-      230126,
-      230312,
-      230474,
-      230614,
-      230741,
-      230869,
+      230144,
+      230282,
+      230404,
+      230528,
+      230633,
+      230772,
+      230889,
       231020,
-      231357,
-      231496,
-      231601,
-      231728,
-      231868,
+      231141,
+      231286,
+      231392,
+      231506,
+      231625,
+      231753,
+      231877,
       232007,
-      232111,
-      232355,
-      232494,
-      232599,
-      232727,
-      232854,
+      232125,
+      232264,
+      232377,
+      232504,
+      232615,
+      232743,
+      232869,
       232994,
-      233098,
-      233342,
-      233481,
-      233597,
-      233725,
-      233841,
+      233113,
+      233251,
+      233374,
+      233491,
+      233606,
+      233742,
+      233852,
       233981,
-      234085,
-      234282,
+      234108,
+      234260,
+      234368,
       234468,
       234584,
       234700,
@@ -1340,66 +1366,82 @@
       234979,
       235083,
       235223,
-      235467,
-      235699,
-      235827,
+      235359,
+      235503,
+      235604,
+      235735,
+      235841,
       235966,
-      236082,
-      236314,
-      236453,
-      236558,
-      236686,
+      236092,
+      236245,
+      236349,
+      236484,
+      236594,
+      236705,
       236825,
       236953,
-      237069,
+      237081,
       237208,
-      237313,
+      237328,
       237452,
-      237556,
-      237684,
-      237800,
-      237951,
-      238056,
+      237572,
+      237699,
+      237828,
+      237967,
+      238078,
       238207,
+      238326,
       238450,
-      238555,
+      238567,
       238694,
-      238799,
+      238820,
       238938,
-      239042,
+      239066,
       239205,
+      239317,
       239437,
-      239542,
+      239560,
       239681,
       239797,
       239925,
       240053,
-      240157,
-      240296,
-      240529,
+      240180,
+      240309,
+      240447,
+      240567,
       240680,
-      240796,
-      240923,
-      241039,
+      240809,
+      240943,
+      241061,
       241190,
+      241304,
       241423,
       241539,
-      241643,
-      241782,
-      241922,
-      242258,
-      242409,
-      242525,
-      242642,
-      242769,
+      241667,
+      241799,
+      241932,
+      242056,
+      242183,
+      242296,
+      242425,
+      242546,
+      242663,
+      242796,
       242920,
+      243039,
       243176,
-      243396,
-      243512,
-      243628,
-      243768,
-      243907,
+      243287,
+      243414,
+      243535,
+      243657,
+      243779,
+      243917,
+      244066,
       244348
+    ],
+    "lilumRings": [
+      1,
+      2
     ]
   },
   "timeframes": [
@@ -2279,7 +2321,7 @@
       "id": "1773569896456",
       "startTime": 312,
       "endTime": 328,
-      "label": "Timeframe 26",
+      "label": "Fade In",
       "color": "#5eb838",
       "hasExplicitColor": false,
       "rings": [
@@ -2451,7 +2493,7 @@
           "effectKey": "snake",
           "params": {
             "tailLength": 0.5,
-            "cyclic": false,
+            "cyclic": true,
             "reverse": false
           },
           "phase": 1
@@ -2465,9 +2507,206 @@
     {
       "id": "1774287906119",
       "startTime": 833,
-      "endTime": 925,
+      "endTime": 928,
       "label": "Fade Back In",
       "color": "#7aa0f5",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "phase": 2,
+      "effects": [
+        {
+          "id": "eff-1774288225853-j2pzv4vqzb",
+          "effectKey": "fadeIn"
+        }
+      ]
+    },
+    {
+      "id": "1780135792546",
+      "startTime": 928,
+      "endTime": 1048,
+      "label": "March by 6",
+      "color": "#c541c3",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "updown",
+      "phase": 4,
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780144674631-qa1x5dhl95",
+          "effectKey": "snakeHeadSin",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": false
+          },
+          "phase": 2
+        }
+      ]
+    },
+    {
+      "id": "1780135905266",
+      "startTime": 1174,
+      "endTime": 1270,
+      "label": "Move Random Retire",
+      "color": "#c86d4f",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "centric",
+      "movement": {
+        "type": "random",
+        "direction": "forward",
+        "beatsPerRing": 8,
+        "retire": true
+      },
+      "effects": [
+        {
+          "id": "eff-1780149467934-q8g4asm58p",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "sin": {
+                "min": 0,
+                "max": 1,
+                "phase": 0,
+                "repeats": 1
+              }
+            }
+          },
+          "phase": 1
+        },
+        {
+          "id": "eff-1780149730560-pfpu0ego8dr",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "eff-1780150054469-lht8gi9mkna",
+          "effectKey": "brightness",
+          "params": {
+            "value": 0.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "1780135924255",
+      "startTime": 1428,
+      "endTime": 1446,
+      "label": "End Fade Out",
+      "color": "#98fe8a",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1780136727143-icykpqyzny",
+          "effectKey": "fadeOut"
+        }
+      ]
+    },
+    {
+      "id": "dup-1780136223543-7sno",
+      "startTime": 1428,
+      "endTime": 1429,
+      "label": "Twinkle Cascade at End",
+      "color": "#a855f7",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "phase": 1,
+      "effects": [
+        {
+          "id": "tc-pulse-l44z",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "dup-1780136502789-ogpq",
+      "startTime": 1428,
+      "endTime": 1446,
+      "label": "Phased Hue Snake Rand",
+      "color": "#a855f7",
       "rings": [
         1,
         2,
@@ -2485,8 +2724,490 @@
       "mapping": "rand",
       "effects": [
         {
-          "id": "eff-1774288225853-j2pzv4vqzb",
-          "effectKey": "fadeIn"
+          "id": "eff-1772825253565-dwsv5ndt95l-zk35",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          },
+          "phase": 2
+        },
+        {
+          "id": "eff-1780136812283-knc1y0wk2z",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true,
+            "reverse": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "1780143249177",
+      "startTime": 833,
+      "endTime": 857,
+      "label": "Snake Arc Cycle 6 Spread Retire",
+      "color": "#a66bc5",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "phase": 2,
+      "movement": {
+        "type": "spread",
+        "direction": "center-out",
+        "beatsPerRing": 2,
+        "retire": true
+      },
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780143320392-wm1hga2dzg",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": false,
+            "reverse": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780143454133-hyki",
+      "startTime": 857,
+      "endTime": 881,
+      "label": "Snake Arc Cycle 6 Sweep",
+      "color": "#a66bc5",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "phase": 2,
+      "movement": {
+        "type": "sweep",
+        "direction": "forward",
+        "beatsPerRing": 1.09,
+        "bounce": true
+      },
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780143320392-wm1hga2dzg-lv06",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": false,
+            "reverse": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780143586900-w7hq",
+      "startTime": 881,
+      "endTime": 905,
+      "label": "Snake Arc Cycle 6 Sweep Pairs Bounce",
+      "color": "#a66bc5",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "phase": 2,
+      "movement": {
+        "type": "sweep",
+        "direction": "pairs-forward",
+        "beatsPerRing": 2.4,
+        "bounce": true
+      },
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780143320392-wm1hga2dzg-lv06-a0w1",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": false,
+            "reverse": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780143596343-88vt",
+      "startTime": 905,
+      "endTime": 928,
+      "label": "Snake Arc Cycle 6 Spread Pairs",
+      "color": "#a66bc5",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "phase": 2,
+      "movement": {
+        "type": "spread",
+        "direction": "pairs-forward",
+        "beatsPerRing": 3.83
+      },
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780143320392-wm1hga2dzg-lv06-a0w1-d4tj",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": false,
+            "reverse": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "1780144505899",
+      "startTime": 1048,
+      "endTime": 1172,
+      "label": "Timeframe 39",
+      "color": "#769d93",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "dup-1780145322701-6jfv",
+      "startTime": 1046,
+      "endTime": 1048,
+      "label": "Vibrate Transition 2",
+      "color": "#5f0cb9",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "phase": 0,
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 0.2
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1772900478357-54zs9a65neu-mm0w-aah6-753b",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.2,
+            "staticPhase": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780145746149-ospz",
+      "startTime": 1172,
+      "endTime": 1174,
+      "label": "Twinkle Cascade at Body",
+      "color": "#a855f7",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "phase": 1,
+      "effects": [
+        {
+          "id": "tc-pulse-l44z-88ni",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "dup-1780145799594-17am",
+      "startTime": 1172,
+      "endTime": 1174,
+      "label": "Phased Hue Snake Rand at Body",
+      "color": "#a855f7",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "effects": [
+        {
+          "id": "eff-1772825253565-dwsv5ndt95l-zk35-4wzr",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          },
+          "phase": 1
+        },
+        {
+          "id": "eff-1780136812283-knc1y0wk2z-k092",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true,
+            "reverse": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780147814230-gox4",
+      "startTime": 1270,
+      "endTime": 1366,
+      "label": "Move Random Accumulate",
+      "color": "#c86d4f",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "movement": {
+        "type": "random",
+        "direction": "forward",
+        "beatsPerRing": 8,
+        "accumulate": true
+      },
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 8
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780149367599-4485j6wz58h",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "eff-1780149805952-9twodi36dze",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "sin": {
+                "min": 0,
+                "max": 1,
+                "phase": 0,
+                "repeats": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "eff-1780150029351-l2ye6ssk1qd",
+          "effectKey": "brightness",
+          "params": {
+            "value": 0.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780150174582-obcn",
+      "startTime": 1366,
+      "endTime": 1428,
+      "label": "Step Hue Increase Brightness",
+      "color": "#c86d4f",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "effects": [
+        {
+          "id": "eff-1780149367599-4485j6wz58h-gxth",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "steps": {
+                "num_steps": 8,
+                "diff_per_step": 0.25,
+                "first_step_value": 0
+              }
+            }
+          }
+        },
+        {
+          "id": "eff-1780149805952-9twodi36dze-whut",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "sin": {
+                "min": 0,
+                "max": 1,
+                "phase": 0,
+                "repeats": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "eff-1780150237525-k7vziiknfbi",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_increase": {
+              "linear": {
+                "start": 0,
+                "end": 2
+              }
+            }
+          }
+        },
+        {
+          "id": "eff-1780150420790-sqpgzcci3x",
+          "effectKey": "brightness",
+          "params": {
+            "value": 0.5
+          }
         }
       ]
     }
@@ -2494,7 +3215,7 @@
   "windowSizes": {
     "playbackPanelWidth": 900,
     "detailsPanelWidth": 361,
-    "spectrogramHeight": 115,
+    "spectrogramHeight": 195,
     "headerHeight": 56
   },
   "theme": "dark"
