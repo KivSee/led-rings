@@ -4,7 +4,7 @@
     "lengthSeconds": 248.7,
     "bpm": 300,
     "startOffsetMs": 3000,
-    "runStartTimeSeconds": 172.39,
+    "runStartTimeSeconds": 0,
     "animationType": "song",
     "audioFilePath": "loop.wav",
     "beatTimestampsMs": [
@@ -1051,33 +1051,38 @@
       195168,
       195319,
       195428,
-      195598,
-      195749,
-      195911,
-      196039,
-      196260,
-      196399,
-      196585,
-      196747,
-      196906,
-      197084,
-      197247,
-      197400,
-      197583,
-      197734,
-      197897,
+      195579,
+      195694,
+      195827,
+      195954,
+      196083,
+      196186,
+      196328,
+      196435,
+      196570,
+      196682,
+      196805,
+      196913,
+      197062,
+      197182,
+      197304,
+      197415,
+      197552,
+      197666,
+      197798,
+      197904,
       198036,
-      198141,
+      198162,
       198291,
       198404,
       198533,
-      198639,
+      198650,
       198779,
-      198884,
+      198899,
       199046,
       199147,
       199278,
-      199383,
+      199394,
       199522,
       199635,
       199778,
@@ -1504,8 +1509,11 @@
       "effects": [
         {
           "id": "fi-wave",
-          "effectKey": "fadeIn",
-          "params": {}
+          "effectKey": "fade",
+          "params": {
+            "start": 0.3,
+            "end": 0.5
+          }
         }
       ]
     },
@@ -2320,7 +2328,7 @@
     {
       "id": "1773569896456",
       "startTime": 312,
-      "endTime": 328,
+      "endTime": 320,
       "label": "Fade In",
       "color": "#5eb838",
       "hasExplicitColor": false,
@@ -2427,9 +2435,9 @@
     },
     {
       "id": "dup-1773583240572-jtcf",
-      "startTime": 573,
+      "startTime": 572,
       "endTime": 576,
-      "label": "Vibrate Transition (copy)",
+      "label": "Vibrate Transition",
       "color": "#5f0cb9",
       "hasExplicitColor": false,
       "rings": [
@@ -2507,7 +2515,7 @@
     {
       "id": "1774287906119",
       "startTime": 833,
-      "endTime": 928,
+      "endTime": 927,
       "label": "Fade Back In",
       "color": "#7aa0f5",
       "hasExplicitColor": false,
@@ -2530,14 +2538,18 @@
       "effects": [
         {
           "id": "eff-1774288225853-j2pzv4vqzb",
-          "effectKey": "fadeIn"
+          "effectKey": "fade",
+          "params": {
+            "start": 0.3,
+            "end": 1
+          }
         }
       ]
     },
     {
       "id": "1780135792546",
       "startTime": 928,
-      "endTime": 1048,
+      "endTime": 1049,
       "label": "March by 6",
       "color": "#c541c3",
       "rings": [
@@ -2576,8 +2588,8 @@
     },
     {
       "id": "1780135905266",
-      "startTime": 1174,
-      "endTime": 1270,
+      "startTime": 1179,
+      "endTime": 1275,
       "label": "Move Random Retire",
       "color": "#c86d4f",
       "rings": [
@@ -2640,8 +2652,8 @@
     },
     {
       "id": "1780135924255",
-      "startTime": 1428,
-      "endTime": 1446,
+      "startTime": 1433,
+      "endTime": 1451,
       "label": "End Fade Out",
       "color": "#98fe8a",
       "hasExplicitColor": false,
@@ -2669,8 +2681,8 @@
     },
     {
       "id": "dup-1780136223543-7sno",
-      "startTime": 1428,
-      "endTime": 1429,
+      "startTime": 1433,
+      "endTime": 1434,
       "label": "Twinkle Cascade at End",
       "color": "#a855f7",
       "hasExplicitColor": false,
@@ -2703,9 +2715,9 @@
     },
     {
       "id": "dup-1780136502789-ogpq",
-      "startTime": 1428,
-      "endTime": 1446,
-      "label": "Phased Hue Snake Rand",
+      "startTime": 1433,
+      "endTime": 1451,
+      "label": "Position Hue Snake Rand",
       "color": "#a855f7",
       "rings": [
         1,
@@ -2724,19 +2736,6 @@
       "mapping": "rand",
       "effects": [
         {
-          "id": "eff-1772825253565-dwsv5ndt95l-zk35",
-          "effectKey": "timed_hue",
-          "params": {
-            "offset_factor": {
-              "linear": {
-                "start": 0,
-                "end": 1
-              }
-            }
-          },
-          "phase": 2
-        },
-        {
           "id": "eff-1780136812283-knc1y0wk2z",
           "effectKey": "snake",
           "params": {
@@ -2744,8 +2743,23 @@
             "cyclic": true,
             "reverse": false
           }
+        },
+        {
+          "id": "eff-1780260927186-6jbvl3cxw8e",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "sin": {
+                "min": 0,
+                "max": 1,
+                "phase": 0,
+                "repeats": 1
+              }
+            }
+          }
         }
-      ]
+      ],
+      "disabled": false
     },
     {
       "id": "1780143249177",
@@ -2842,7 +2856,7 @@
     {
       "id": "dup-1780143586900-w7hq",
       "startTime": 881,
-      "endTime": 905,
+      "endTime": 893,
       "label": "Snake Arc Cycle 6 Sweep Pairs Bounce",
       "color": "#a66bc5",
       "rings": [
@@ -2863,9 +2877,8 @@
       "phase": 2,
       "movement": {
         "type": "sweep",
-        "direction": "pairs-forward",
-        "beatsPerRing": 2.4,
-        "bounce": true
+        "direction": "pairs-backward",
+        "beatsPerRing": 1
       },
       "cycles": [
         {
@@ -2888,7 +2901,7 @@
     {
       "id": "dup-1780143596343-88vt",
       "startTime": 905,
-      "endTime": 928,
+      "endTime": 927,
       "label": "Snake Arc Cycle 6 Spread Pairs",
       "color": "#a66bc5",
       "rings": [
@@ -2910,7 +2923,8 @@
       "movement": {
         "type": "spread",
         "direction": "pairs-forward",
-        "beatsPerRing": 3.83
+        "beatsPerRing": 1.83,
+        "retire": true
       },
       "cycles": [
         {
@@ -2932,10 +2946,10 @@
     },
     {
       "id": "1780144505899",
-      "startTime": 1048,
-      "endTime": 1172,
-      "label": "Timeframe 39",
-      "color": "#769d93",
+      "startTime": 1049,
+      "endTime": 1177,
+      "label": "Snake Slow Fast",
+      "color": "#612d9f",
       "rings": [
         1,
         2,
@@ -2950,12 +2964,35 @@
         11,
         12
       ],
-      "mapping": "all"
+      "mapping": "centric",
+      "phase": 3,
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 16
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780175990516-0s1lq79scbii",
+          "effectKey": "brightness",
+          "params": {
+            "value": 0.7
+          }
+        },
+        {
+          "id": "eff-1780238477369-a0h34mzf6p4",
+          "effectKey": "snakeSlowFast",
+          "params": {
+            "tailLength": 1
+          }
+        }
+      ]
     },
     {
       "id": "dup-1780145322701-6jfv",
       "startTime": 1046,
-      "endTime": 1048,
+      "endTime": 1049,
       "label": "Vibrate Transition 2",
       "color": "#5f0cb9",
       "hasExplicitColor": false,
@@ -2994,8 +3031,8 @@
     },
     {
       "id": "dup-1780145746149-ospz",
-      "startTime": 1172,
-      "endTime": 1174,
+      "startTime": 1177,
+      "endTime": 1179,
       "label": "Twinkle Cascade at Body",
       "color": "#a855f7",
       "hasExplicitColor": false,
@@ -3028,8 +3065,8 @@
     },
     {
       "id": "dup-1780145799594-17am",
-      "startTime": 1172,
-      "endTime": 1174,
+      "startTime": 1177,
+      "endTime": 1179,
       "label": "Phased Hue Snake Rand at Body",
       "color": "#a855f7",
       "rings": [
@@ -3074,8 +3111,8 @@
     },
     {
       "id": "dup-1780147814230-gox4",
-      "startTime": 1270,
-      "endTime": 1366,
+      "startTime": 1275,
+      "endTime": 1371,
       "label": "Move Random Accumulate",
       "color": "#c86d4f",
       "rings": [
@@ -3143,8 +3180,8 @@
     },
     {
       "id": "dup-1780150174582-obcn",
-      "startTime": 1366,
-      "endTime": 1428,
+      "startTime": 1371,
+      "endTime": 1433,
       "label": "Step Hue Increase Brightness",
       "color": "#c86d4f",
       "rings": [
@@ -3210,12 +3247,1619 @@
           }
         }
       ]
+    },
+    {
+      "id": "1780174120434",
+      "startTime": 472,
+      "endTime": 476,
+      "label": "Clap Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780174332299-139s",
+      "startTime": 504,
+      "endTime": 506,
+      "label": "Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-2lyi",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780174670580-313i",
+      "startTime": 536,
+      "endTime": 540,
+      "label": "Clap Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-e66e",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780174740257-qkv3",
+      "startTime": 568,
+      "endTime": 570,
+      "label": "Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-2lyi-ur92",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780174851854-kokl",
+      "startTime": 597,
+      "endTime": 601,
+      "label": "Clap Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-e66e-upw3",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780174946206-sel3",
+      "startTime": 629,
+      "endTime": 631,
+      "label": "Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-2lyi-ur92-n74k",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780174997836-bdo6",
+      "startTime": 661,
+      "endTime": 665,
+      "label": "Clap Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-e66e-upw3-lgb3",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780175055918-17vj",
+      "startTime": 693,
+      "endTime": 695,
+      "label": "Clap ",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-2lyi-ur92-ccxw",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780175076610-pr73",
+      "startTime": 697,
+      "endTime": 700,
+      "label": "Vibrate Transition",
+      "color": "#5f0cb9",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "phase": 0,
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 0.2
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1772900478357-54zs9a65neu-mm0w-aah6-k7sg",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.2,
+            "staticPhase": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780175114771-jy9f",
+      "startTime": 725,
+      "endTime": 729,
+      "label": "Clap Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-e66e-upw3-lgb3-zanp",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780175149791-zuqi",
+      "startTime": 757,
+      "endTime": 759,
+      "label": "Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-2lyi-ur92-ccxw-m1so",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780175245175-5yqh",
+      "startTime": 789,
+      "endTime": 793,
+      "label": "Clap Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-e66e-upw3-lgb3-zanp-d5ha",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780175347289-g29n",
+      "startTime": 953,
+      "endTime": 957,
+      "label": "Clap Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-e66e-upw3-lgb3-zanp-d5ha-ifor",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780175400182-8bso",
+      "startTime": 981,
+      "endTime": 983,
+      "label": "Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-2lyi-ur92-ccxw-m1so-rwpa",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780175431163-9dxr",
+      "startTime": 1013,
+      "endTime": 1017,
+      "label": "Clap Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-e66e-upw3-lgb3-zanp-d5ha-ifor-j732",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780175712967-hg8v",
+      "startTime": 1044,
+      "endTime": 1046,
+      "label": "Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-2lyi-ur92-ccxw-m1so-rwpa-ofpn",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780175768452-xg0a",
+      "startTime": 1076,
+      "endTime": 1080,
+      "label": "Clap Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-e66e-upw3-lgb3-zanp-d5ha-ifor-j732-7j8r",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780175806619-3k7u",
+      "startTime": 1108,
+      "endTime": 1110,
+      "label": "Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-2lyi-ur92-ccxw-m1so-rwpa-ofpn-gpu4",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780175887465-uu2o",
+      "startTime": 1174,
+      "endTime": 1176,
+      "label": "Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-2lyi-ur92-ccxw-m1so-rwpa-ofpn-gpu4-iq7j",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "1780175952280",
+      "startTime": 1154,
+      "endTime": 1177,
+      "label": "Increase",
+      "color": "#cf8e68",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1780176005922-krk4ussp9hp",
+          "effectKey": "fade",
+          "params": {
+            "start": 1,
+            "end": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "1780236835435",
+      "startTime": 831,
+      "endTime": 832,
+      "label": "Phased Pulse",
+      "color": "#1bcf9",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1780236859022-9g332ueiyl4",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0,
+            "staticPhase": 0
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "dup-1780237948052-i6p1",
+      "startTime": 893,
+      "endTime": 905,
+      "label": "Snake Arc Cycle 6 Sweep (copy)",
+      "color": "#a66bc5",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "phase": 2,
+      "movement": {
+        "type": "sweep",
+        "direction": "backward",
+        "beatsPerRing": 1
+      },
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780143320392-wm1hga2dzg-lv06-uihm",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": false,
+            "reverse": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "1780240216167",
+      "startTime": 1051,
+      "endTime": 1064,
+      "label": "Sweep on Sound 2 Rounds",
+      "color": "#ce5f0",
+      "rings": [
+        1,
+        5,
+        6,
+        7,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "sweep",
+        "direction": "custom",
+        "beatsPerRing": 1.1,
+        "customOrder": [
+          11,
+          12,
+          1,
+          5,
+          6,
+          7
+        ]
+      },
+      "effects": [
+        {
+          "id": "eff-1780240243760-boo26rld7vh",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          },
+          "phase": 0
+        }
+      ]
+    },
+    {
+      "id": "dup-1780255141896-ih3w",
+      "startTime": 1067,
+      "endTime": 1072,
+      "label": "Sweep 1 Round High",
+      "color": "#ce5f0",
+      "rings": [
+        1,
+        3,
+        6,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "sweep",
+        "direction": "custom",
+        "beatsPerRing": 1.5,
+        "customOrder": [
+          11,
+          12,
+          1,
+          6,
+          3
+        ]
+      },
+      "effects": [
+        {
+          "id": "eff-1780240243760-boo26rld7vh-9vrm",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          },
+          "phase": 0
+        }
+      ]
+    },
+    {
+      "id": "dup-1780257072743-zcm0",
+      "startTime": 1074,
+      "endTime": 1080,
+      "label": "Sweep 1 Round Low",
+      "color": "#ce5f0",
+      "rings": [
+        1,
+        5,
+        6,
+        7,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "sweep",
+        "direction": "custom",
+        "beatsPerRing": 1,
+        "customOrder": [
+          11,
+          12,
+          1,
+          5,
+          6,
+          7
+        ]
+      },
+      "effects": [
+        {
+          "id": "eff-1780240243760-boo26rld7vh-9vrm-vq4j",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          },
+          "phase": 0
+        }
+      ]
+    },
+    {
+      "id": "dup-1780257224212-6e9j",
+      "startTime": 1081,
+      "endTime": 1096,
+      "label": "Sweep on Sound 2 Rounds Low",
+      "color": "#ce5f0",
+      "rings": [
+        1,
+        5,
+        6,
+        7,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "sweep",
+        "direction": "custom",
+        "beatsPerRing": 1.1,
+        "customOrder": [
+          11,
+          12,
+          1,
+          5,
+          6,
+          7
+        ]
+      },
+      "effects": [
+        {
+          "id": "eff-1780240243760-boo26rld7vh-4a3z",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          },
+          "phase": 0
+        }
+      ]
+    },
+    {
+      "id": "dup-1780257443558-il3h",
+      "startTime": 1097,
+      "endTime": 1104,
+      "label": "Sweep 1 Round High (copy)",
+      "color": "#ce5f0",
+      "rings": [
+        1,
+        3,
+        6,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "sweep",
+        "direction": "custom",
+        "beatsPerRing": 1.5,
+        "customOrder": [
+          11,
+          12,
+          1,
+          6,
+          3
+        ]
+      },
+      "effects": [
+        {
+          "id": "eff-1780240243760-boo26rld7vh-9vrm-1ahq",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          },
+          "phase": 0
+        }
+      ]
+    },
+    {
+      "id": "dup-1780257660225-z0bh",
+      "startTime": 1115,
+      "endTime": 1128,
+      "label": "Sweep on Sound 2 Rounds (copy)",
+      "color": "#ce5f0",
+      "rings": [
+        1,
+        5,
+        6,
+        7,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "sweep",
+        "direction": "custom",
+        "beatsPerRing": 1.1,
+        "customOrder": [
+          11,
+          12,
+          1,
+          5,
+          6,
+          7
+        ]
+      },
+      "effects": [
+        {
+          "id": "eff-1780240243760-boo26rld7vh-owlv",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          },
+          "phase": 0
+        }
+      ]
+    },
+    {
+      "id": "dup-1780257669105-clfr",
+      "startTime": 1130,
+      "endTime": 1137,
+      "label": "Sweep 1 Round High (copy)",
+      "color": "#ce5f0",
+      "rings": [
+        1,
+        3,
+        6,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "sweep",
+        "direction": "custom",
+        "beatsPerRing": 1.5,
+        "customOrder": [
+          11,
+          12,
+          1,
+          6,
+          3
+        ]
+      },
+      "effects": [
+        {
+          "id": "eff-1780240243760-boo26rld7vh-9vrm-1ahq-njqw",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          },
+          "phase": 0
+        }
+      ]
+    },
+    {
+      "id": "dup-1780257716363-3xqw",
+      "startTime": 1106,
+      "endTime": 1112,
+      "label": "Sweep 1 Round Low (copy)",
+      "color": "#ce5f0",
+      "rings": [
+        1,
+        5,
+        6,
+        7,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "sweep",
+        "direction": "custom",
+        "beatsPerRing": 1,
+        "customOrder": [
+          11,
+          12,
+          1,
+          5,
+          6,
+          7
+        ]
+      },
+      "effects": [
+        {
+          "id": "eff-1780240243760-boo26rld7vh-9vrm-vq4j-3sx6",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          },
+          "phase": 0
+        }
+      ]
+    },
+    {
+      "id": "dup-1780257749633-g347",
+      "startTime": 1139,
+      "endTime": 1145,
+      "label": "Sweep 1 Round Low (copy)",
+      "color": "#ce5f0",
+      "rings": [
+        1,
+        5,
+        6,
+        7,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "sweep",
+        "direction": "custom",
+        "beatsPerRing": 1,
+        "customOrder": [
+          11,
+          12,
+          1,
+          5,
+          6,
+          7
+        ]
+      },
+      "effects": [
+        {
+          "id": "eff-1780240243760-boo26rld7vh-9vrm-vq4j-3sx6-x4ym",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          },
+          "phase": 0
+        }
+      ]
+    },
+    {
+      "id": "dup-1780257815701-10ju",
+      "startTime": 1148,
+      "endTime": 1161,
+      "label": "Sweep on Sound 2 Rounds (copy)",
+      "color": "#ce5f0",
+      "rings": [
+        1,
+        5,
+        6,
+        7,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "sweep",
+        "direction": "custom",
+        "beatsPerRing": 1.1,
+        "customOrder": [
+          11,
+          12,
+          1,
+          5,
+          6,
+          7
+        ]
+      },
+      "effects": [
+        {
+          "id": "eff-1780240243760-boo26rld7vh-owlv-5u4c",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          },
+          "phase": 0
+        }
+      ]
+    },
+    {
+      "id": "dup-1780261056566-i7pe",
+      "startTime": 1203,
+      "endTime": 1207,
+      "label": "Clap Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-e66e-upw3-lgb3-zanp-d5ha-ifor-j732-7j8r-kgcq",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780261234924-pkkb",
+      "startTime": 1235,
+      "endTime": 1237,
+      "label": "Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-2lyi-ur92-ccxw-m1so-rwpa-ofpn-gpu4-iq7j-z9cv",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780261357087-366u",
+      "startTime": 1267,
+      "endTime": 1271,
+      "label": "Clap Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-e66e-upw3-lgb3-zanp-d5ha-ifor-j732-7j8r-kgcq-qk1d",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780261383579-qekj",
+      "startTime": 1299,
+      "endTime": 1301,
+      "label": "Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-2lyi-ur92-ccxw-m1so-rwpa-ofpn-gpu4-iq7j-z9cv-zlgu",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780261448958-xbex",
+      "startTime": 1302,
+      "endTime": 1305,
+      "label": "Vibrate Transition 2",
+      "color": "#5f0cb9",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "phase": 0,
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 0.2
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1772900478357-54zs9a65neu-mm0w-aah6-753b-6whu",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.2,
+            "staticPhase": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780261513870-r1ff",
+      "startTime": 1331,
+      "endTime": 1335,
+      "label": "Clap Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-e66e-upw3-lgb3-zanp-d5ha-ifor-j732-7j8r-kgcq-qk1d-k19y",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780261536623-z9h3",
+      "startTime": 1363,
+      "endTime": 1365,
+      "label": "Clap",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-2lyi-ur92-ccxw-m1so-rwpa-ofpn-gpu4-iq7j-z9cv-zlgu-k1qk",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1780261623935-btoa",
+      "startTime": 1395,
+      "endTime": 1415,
+      "label": "Clapping",
+      "color": "#a33d7c",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1780174162840-6iev2fyjwoi-e66e-upw3-lgb3-zanp-d5ha-ifor-j732-7j8r-kgcq-qk1d-k19y-b5w4",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
     }
   ],
   "windowSizes": {
     "playbackPanelWidth": 900,
-    "detailsPanelWidth": 361,
-    "spectrogramHeight": 195,
+    "detailsPanelWidth": 405,
+    "spectrogramHeight": 212,
     "headerHeight": 56
   },
   "theme": "dark"
