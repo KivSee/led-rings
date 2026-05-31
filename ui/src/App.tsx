@@ -1538,10 +1538,28 @@ function App() {
     }
   }
 
+  // When beats are added or removed, every reference to a beat number across the project
+  // (timeframe startTime/endTime, playhead currentTime) needs to shift so it still points at
+  // the same moment in audio. Without this, e.g. adding a beat at index 30 would silently
+  // misalign every timeframe whose endpoints were at beat 30 or later.
+  // Rule: insert at index N → values >= N shift by +1; remove at index N → values > N shift by −1.
+  const shiftBeatRefs = (delta: number, threshold: number) => {
+    const adjust = (v: number) => (delta > 0 ? (v >= threshold ? v + delta : v) : (v > threshold ? v + delta : v))
+    setTimeframes(prev => prev.map(tf => ({
+      ...tf,
+      startTime: adjust(tf.startTime),
+      endTime: adjust(tf.endTime),
+    })))
+    setCurrentTime(t => adjust(t))
+  }
+
   const handleBeatAdd = useCallback((timeMs: number) => {
     const rounded = Math.round(timeMs)
-    const next = [...(song.beatTimestampsMs ?? []), rounded].sort((a, b) => a - b)
+    const cur = song.beatTimestampsMs ?? []
+    const next = [...cur, rounded].sort((a, b) => a - b)
+    const insertIndex = next.indexOf(rounded)
     handleSongChange({ beatTimestampsMs: next })
+    shiftBeatRefs(+1, insertIndex)
   }, [song.beatTimestampsMs])
 
   const handleBeatRemove = useCallback((beatIndex: number) => {
@@ -1549,6 +1567,7 @@ function App() {
     if (!cur || beatIndex < 0 || beatIndex >= cur.length) return
     const next = cur.filter((_, i) => i !== beatIndex)
     handleSongChange({ beatTimestampsMs: next.length ? next : undefined })
+    shiftBeatRefs(-1, beatIndex)
   }, [song.beatTimestampsMs])
 
   const handleBeatMove = useCallback((beatIndex: number, newTimeMs: number) => {
