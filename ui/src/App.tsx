@@ -360,6 +360,18 @@ function App() {
   const { startBeat: viewStartBeat, beatsPerScreen } = viewRange
   const viewEndBeat = viewStartBeat + beatsPerScreen
 
+  // A view (zoom + scroll) restored from a saved file must be applied after the
+  // loaded song's length has propagated to songLengthBeats; otherwise setView
+  // clamps against the previous (default) song length and truncates the view.
+  // The nonce bumps whenever a load requests a restore, so the effect re-runs
+  // even when the new song's length matches the current one.
+  const [pendingView, setPendingView] = useState<{ startBeat: number; beatsPerScreen: number; nonce: number } | null>(null)
+  useEffect(() => {
+    if (!pendingView) return
+    viewActions.setView(pendingView.startBeat, pendingView.beatsPerScreen)
+    setPendingView(null)
+  }, [pendingView, songLengthBeats, viewActions])
+
   // Resizable panel widths (px)
   const [playbackPanelWidth, setPlaybackPanelWidth] = useState(720)
   const [detailsPanelWidth, setDetailsPanelWidth] = useState(350)
@@ -934,9 +946,10 @@ function App() {
         // Support: raw array (timeframes only), { timeframes: [...] }, or { song, timeframes }
         const maybeArray = Array.isArray(parsed) ? parsed : (parsed as { timeframes?: unknown }).timeframes
 
+        let loadedSong: Song | null = null
         if ((parsed as { song?: unknown }).song && typeof (parsed as { song: unknown }).song === 'object') {
-          const s = normalizeLoadedSong((parsed as { song: Record<string, unknown> }).song)
-          setSong(s)
+          loadedSong = normalizeLoadedSong((parsed as { song: Record<string, unknown> }).song)
+          setSong(loadedSong)
         }
 
         if (Array.isArray(maybeArray)) {
@@ -992,7 +1005,13 @@ function App() {
         // If we have song but no timeframes array, leave timeframes unchanged
 
         setFocusedTimeframeId(null)
-        setCurrentTime(0)
+        // Place the marker at the saved "run from" time so reopening lands where
+        // the next Run will start, rather than always snapping to beat 0.
+        {
+          const songForMarker = loadedSong ?? song
+          const runFromSec = Math.max(0, songForMarker.runStartTimeSeconds ?? 0)
+          setCurrentTime(audioSecToBeats(runFromSec, songForMarker))
+        }
 
         // Restore window sizes if present (same min/max as resize logic)
         const minPlayback = 240
@@ -1015,6 +1034,16 @@ function App() {
           if (typeof ws.headerHeight === 'number') {
             setHeaderHeight(Math.round(Math.min(120, Math.max(40, ws.headerHeight))))
           }
+        }
+
+        const spectrogramOpenVal = (parsed as { spectrogramOpen?: unknown }).spectrogramOpen
+        if (typeof spectrogramOpenVal === 'boolean') {
+          setSpectrogramOpen(spectrogramOpenVal)
+        }
+
+        const view = (parsed as { view?: { startBeat?: unknown; beatsPerScreen?: unknown } }).view
+        if (view && typeof view === 'object' && typeof view.startBeat === 'number' && typeof view.beatsPerScreen === 'number') {
+          setPendingView({ startBeat: view.startBeat, beatsPerScreen: view.beatsPerScreen, nonce: Date.now() })
         }
 
         const theme = (parsed as { theme?: unknown }).theme
@@ -1120,6 +1149,8 @@ function App() {
         spectrogramHeight,
         headerHeight,
       },
+      spectrogramOpen,
+      view: { startBeat: Math.round(viewStartBeat * 100) / 100, beatsPerScreen },
       theme: lightTheme ? 'light' : 'dark',
     }
     const dataStr = JSON.stringify(payload, null, 2)
@@ -1264,10 +1295,13 @@ function App() {
         song?: Record<string, unknown>
         timeframes?: Timeframe[]
         windowSizes?: { playbackPanelWidth?: number; detailsPanelWidth?: number; spectrogramHeight?: number }
+        spectrogramOpen?: boolean
+        view?: { startBeat?: number; beatsPerScreen?: number }
       }
       if (parsed.song && typeof parsed.song === 'object') {
         const s = normalizeLoadedSong(parsed.song)
         setSong(s)
+        setCurrentTime(audioSecToBeats(Math.max(0, s.runStartTimeSeconds ?? 0), s))
       }
       if (parsed.timeframes && Array.isArray(parsed.timeframes) && parsed.timeframes.length > 0) {
         setTimeframes(parsed.timeframes)
@@ -1288,6 +1322,12 @@ function App() {
           setSpectrogramHeight(Math.round(Math.min(maxSpectrogram, Math.max(minSpectrogram, ws.spectrogramHeight))))
         }
       }
+      if (typeof parsed.spectrogramOpen === 'boolean') {
+        setSpectrogramOpen(parsed.spectrogramOpen)
+      }
+      if (parsed.view && typeof parsed.view.startBeat === 'number' && typeof parsed.view.beatsPerScreen === 'number') {
+        setPendingView({ startBeat: parsed.view.startBeat, beatsPerScreen: parsed.view.beatsPerScreen, nonce: Date.now() })
+      }
     } catch {
       // Ignore corrupted data
     } finally {
@@ -1304,12 +1344,14 @@ function App() {
         song,
         timeframes,
         windowSizes: { playbackPanelWidth, detailsPanelWidth, spectrogramHeight, headerHeight },
+        spectrogramOpen,
+        view: { startBeat: Math.round(viewStartBeat * 100) / 100, beatsPerScreen },
       })
       window.localStorage.setItem(LAST_SONG_STORAGE_KEY, payload)
     } catch {
       // Ignore persistence errors
     }
-  }, [song, timeframes, playbackPanelWidth, detailsPanelWidth, spectrogramHeight, headerHeight])
+  }, [song, timeframes, playbackPanelWidth, detailsPanelWidth, spectrogramHeight, headerHeight, spectrogramOpen, viewStartBeat, beatsPerScreen])
 
   // Layered audio resolution: Vite public → control-server → prompt user to upload
   const resolveAudioSrc = React.useCallback(async (audioFilePath: string) => {
