@@ -399,7 +399,7 @@ const loop = async () => {
       });
     })
 
-    beats(387, 831, () => {
+    beats(387, 700, () => {
       cycle(8, () => {
         elements(all, () => {
           segment(segment_centric, () => {
@@ -410,9 +410,11 @@ const loop = async () => {
     })
 
     beats(387, 831, () => {
-      elements(all, () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+      cycle(64, () => {
+        elements(all, () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+          });
         });
       });
     })
@@ -2273,10 +2275,116 @@ const loop = async () => {
       });
     })
 
+    beats(1167, 1168.5, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0769, sat: 1.0000, val: 0.8078 })
+        });
+      });
+    })
+
+    beats(1170, 1171, () => {
+      elements([3], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0769, sat: 1.0000, val: 0.8078 })
+        });
+      });
+    })
+
+    beats(1168.5, 1170, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0769, sat: 1.0000, val: 0.8078 })
+        });
+      });
+    })
+
+    beats(1164, 1165.5, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0769, sat: 1.0000, val: 0.8078 })
+        });
+      });
+    })
+
+    beats(1165.5, 1167, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0769, sat: 1.0000, val: 0.8078 })
+        });
+      });
+    })
+
+    beats(1173, 1174, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0769, sat: 1.0000, val: 0.8078 })
+        });
+      });
+    })
+
+    beats(1174, 1175, () => {
+      elements([5], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0769, sat: 1.0000, val: 0.8078 })
+        });
+      });
+    })
+
+    beats(1175, 1176, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0769, sat: 1.0000, val: 0.8078 })
+        });
+      });
+    })
+
+    beats(1176, 1177, () => {
+      elements([7], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0769, sat: 1.0000, val: 0.8078 })
+        });
+      });
+    })
+
+    beats(1171, 1172, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0769, sat: 1.0000, val: 0.8078 })
+        });
+      });
+    })
+
+    beats(1172, 1173, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0769, sat: 1.0000, val: 0.8078 })
+        });
+      });
+    })
+
+    beats(700, 831, () => {
+      cycle(8, () => {
+        elements(all, () => {
+          segment(segment_centric, () => {
+            constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+          });
+        });
+      });
+    })
+
+    beats(700, 831, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+        });
+      });
+    })
+
     beats(0, 6, () => {
       elements([1], () => {
         segment(segment_all, () => {
-          fade({ start: 0.3, end: 0.5 })
+          fade({ start: 0.1, end: 0.5 })
         });
       });
     })
@@ -2284,7 +2392,7 @@ const loop = async () => {
     beats(36, 38, () => {
       elements([1], () => {
         segment(segment_all, () => {
-          fade({ start: 0.3, end: 0.5 })
+          fade({ start: 0.1, end: 0.5 })
         });
       });
     })
@@ -2292,7 +2400,7 @@ const loop = async () => {
     beats(6, 12, () => {
       elements([2], () => {
         segment(segment_all, () => {
-          fade({ start: 0.3, end: 0.5 })
+          fade({ start: 0.1, end: 0.5 })
         });
       });
     })
@@ -2300,7 +2408,7 @@ const loop = async () => {
     beats(12, 18, () => {
       elements([3], () => {
         segment(segment_all, () => {
-          fade({ start: 0.3, end: 0.5 })
+          fade({ start: 0.1, end: 0.5 })
         });
       });
     })
@@ -2308,7 +2416,7 @@ const loop = async () => {
     beats(18, 24, () => {
       elements([4], () => {
         segment(segment_all, () => {
-          fade({ start: 0.3, end: 0.5 })
+          fade({ start: 0.1, end: 0.5 })
         });
       });
     })
@@ -2316,7 +2424,7 @@ const loop = async () => {
     beats(24, 30, () => {
       elements([5], () => {
         segment(segment_all, () => {
-          fade({ start: 0.3, end: 0.5 })
+          fade({ start: 0.1, end: 0.5 })
         });
       });
     })
@@ -2324,7 +2432,7 @@ const loop = async () => {
     beats(30, 36, () => {
       elements([6], () => {
         segment(segment_all, () => {
-          fade({ start: 0.3, end: 0.5 })
+          fade({ start: 0.1, end: 0.5 })
         });
       });
     })
@@ -2332,7 +2440,7 @@ const loop = async () => {
     beats(30, 36, () => {
       elements([7], () => {
         segment(segment_all, () => {
-          fade({ start: 0.3, end: 0.5 })
+          fade({ start: 0.1, end: 0.5 })
         });
       });
     })
@@ -2340,7 +2448,7 @@ const loop = async () => {
     beats(24, 30, () => {
       elements([8], () => {
         segment(segment_all, () => {
-          fade({ start: 0.3, end: 0.5 })
+          fade({ start: 0.1, end: 0.5 })
         });
       });
     })
@@ -2348,7 +2456,7 @@ const loop = async () => {
     beats(18, 24, () => {
       elements([9], () => {
         segment(segment_all, () => {
-          fade({ start: 0.3, end: 0.5 })
+          fade({ start: 0.1, end: 0.5 })
         });
       });
     })
@@ -2356,7 +2464,7 @@ const loop = async () => {
     beats(12, 18, () => {
       elements([10], () => {
         segment(segment_all, () => {
-          fade({ start: 0.3, end: 0.5 })
+          fade({ start: 0.1, end: 0.5 })
         });
       });
     })
@@ -2364,7 +2472,7 @@ const loop = async () => {
     beats(6, 12, () => {
       elements([11], () => {
         segment(segment_all, () => {
-          fade({ start: 0.3, end: 0.5 })
+          fade({ start: 0.1, end: 0.5 })
         });
       });
     })
@@ -2372,7 +2480,7 @@ const loop = async () => {
     beats(0, 6, () => {
       elements([12], () => {
         segment(segment_all, () => {
-          fade({ start: 0.3, end: 0.5 })
+          fade({ start: 0.1, end: 0.5 })
         });
       });
     })
@@ -2380,7 +2488,7 @@ const loop = async () => {
     beats(36, 38, () => {
       elements([12], () => {
         segment(segment_all, () => {
-          fade({ start: 0.3, end: 0.5 })
+          fade({ start: 0.1, end: 0.5 })
         });
       });
     })
@@ -2754,10 +2862,12 @@ const loop = async () => {
     })
 
     beats(387, 831, () => {
-      elements(all, () => {
-        segment(segment_all, () => {
-          phase(1, () => {
-            addEffect({ timed_hue: { offset_factor: { steps: { num_steps: 7, diff_per_step: 0.143, first_step_value: 0 } } } })
+      cycle(64, () => {
+        elements(all, () => {
+          segment(segment_all, () => {
+            phase(1, () => {
+              addEffect({ timed_hue: { offset_factor: { steps: { num_steps: 8, diff_per_step: 0.125, first_step_value: 0 } } } })
+            });
           });
         });
       });
@@ -2851,7 +2961,7 @@ const loop = async () => {
       });
     })
 
-    beats(451, 452, () => {
+    beats(451, 454, () => {
       elements([8], () => {
         segment(segment_all, () => {
           blink({ low: 0 })
@@ -2899,7 +3009,7 @@ const loop = async () => {
       });
     })
 
-    beats(454, 831, () => {
+    beats(454, 576, () => {
       cycleBeats(16, 2, 8, () => {
         elements([1], () => {
           segment(segment_all, () => {
@@ -2909,7 +3019,7 @@ const loop = async () => {
       });
     })
 
-    beats(470, 815, () => {
+    beats(470, 576, () => {
       cycleBeats(16, 2, 8, () => {
         elements([2], () => {
           segment(segment_all, () => {
@@ -2919,7 +3029,7 @@ const loop = async () => {
       });
     })
 
-    beats(486, 799, () => {
+    beats(486, 576, () => {
       cycleBeats(16, 2, 8, () => {
         elements([3], () => {
           segment(segment_all, () => {
@@ -2929,7 +3039,7 @@ const loop = async () => {
       });
     })
 
-    beats(502, 783, () => {
+    beats(502, 576, () => {
       cycleBeats(16, 2, 8, () => {
         elements([4], () => {
           segment(segment_all, () => {
@@ -2939,7 +3049,7 @@ const loop = async () => {
       });
     })
 
-    beats(518, 767, () => {
+    beats(518, 576, () => {
       cycleBeats(16, 2, 8, () => {
         elements([5], () => {
           segment(segment_all, () => {
@@ -2949,7 +3059,7 @@ const loop = async () => {
       });
     })
 
-    beats(534, 751, () => {
+    beats(534, 576, () => {
       cycleBeats(16, 2, 8, () => {
         elements([6], () => {
           segment(segment_all, () => {
@@ -2959,7 +3069,7 @@ const loop = async () => {
       });
     })
 
-    beats(550, 735, () => {
+    beats(550, 576, () => {
       cycleBeats(16, 2, 8, () => {
         elements([7], () => {
           segment(segment_all, () => {
@@ -2969,49 +3079,9 @@ const loop = async () => {
       });
     })
 
-    beats(566, 719, () => {
+    beats(566, 576, () => {
       cycleBeats(16, 2, 8, () => {
         elements([8], () => {
-          segment(segment_all, () => {
-            blink({ low: 0 })
-          });
-        });
-      });
-    })
-
-    beats(582, 703, () => {
-      cycleBeats(16, 2, 8, () => {
-        elements([9], () => {
-          segment(segment_all, () => {
-            blink({ low: 0 })
-          });
-        });
-      });
-    })
-
-    beats(598, 687, () => {
-      cycleBeats(16, 2, 8, () => {
-        elements([10], () => {
-          segment(segment_all, () => {
-            blink({ low: 0 })
-          });
-        });
-      });
-    })
-
-    beats(614, 671, () => {
-      cycleBeats(16, 2, 8, () => {
-        elements([11], () => {
-          segment(segment_all, () => {
-            blink({ low: 0 })
-          });
-        });
-      });
-    })
-
-    beats(630, 655, () => {
-      cycleBeats(16, 2, 8, () => {
-        elements([12], () => {
           segment(segment_all, () => {
             blink({ low: 0 })
           });
@@ -3131,7 +3201,7 @@ const loop = async () => {
       });
     })
 
-    beats(452, 454, () => {
+    beats(450, 454, () => {
       cycle(0.2, () => {
         elements(all, () => {
           segment(segment_all, () => {
@@ -3429,7 +3499,7 @@ const loop = async () => {
       cycle(16, () => {
         elements(all, () => {
           segment(segment_centric, () => {
-            brightness({ value: 0.7 })
+            brightness({ value: 0.5 })
           });
         });
       });
@@ -3813,7 +3883,7 @@ const loop = async () => {
     beats(1053.2, 1054.3, () => {
       elements([1], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -3821,7 +3891,7 @@ const loop = async () => {
     beats(1059.8, 1060.8999999999999, () => {
       elements([1], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -3829,7 +3899,7 @@ const loop = async () => {
     beats(1054.3, 1055.4, () => {
       elements([5], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -3837,7 +3907,7 @@ const loop = async () => {
     beats(1060.8999999999999, 1062, () => {
       elements([5], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -3845,7 +3915,7 @@ const loop = async () => {
     beats(1055.4, 1056.5, () => {
       elements([6], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -3853,7 +3923,7 @@ const loop = async () => {
     beats(1062, 1063.1, () => {
       elements([6], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -3861,7 +3931,7 @@ const loop = async () => {
     beats(1056.5, 1057.6, () => {
       elements([7], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -3869,7 +3939,7 @@ const loop = async () => {
     beats(1063.1, 1064, () => {
       elements([7], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -3877,7 +3947,7 @@ const loop = async () => {
     beats(1051, 1052.1, () => {
       elements([11], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -3885,7 +3955,7 @@ const loop = async () => {
     beats(1057.6, 1058.6999999999998, () => {
       elements([11], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -3893,7 +3963,7 @@ const loop = async () => {
     beats(1052.1, 1053.2, () => {
       elements([12], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -3901,7 +3971,7 @@ const loop = async () => {
     beats(1058.6999999999998, 1059.8, () => {
       elements([12], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -3989,7 +4059,7 @@ const loop = async () => {
     beats(1083.2, 1084.3, () => {
       elements([1], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -3997,7 +4067,7 @@ const loop = async () => {
     beats(1089.8, 1090.8999999999999, () => {
       elements([1], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4005,7 +4075,7 @@ const loop = async () => {
     beats(1084.3, 1085.4, () => {
       elements([5], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4013,7 +4083,7 @@ const loop = async () => {
     beats(1090.8999999999999, 1092, () => {
       elements([5], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4021,7 +4091,7 @@ const loop = async () => {
     beats(1085.4, 1086.5, () => {
       elements([6], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4029,7 +4099,7 @@ const loop = async () => {
     beats(1092, 1093.1, () => {
       elements([6], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4037,7 +4107,7 @@ const loop = async () => {
     beats(1086.5, 1087.6, () => {
       elements([7], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4045,7 +4115,7 @@ const loop = async () => {
     beats(1093.1, 1094.1999999999998, () => {
       elements([7], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4053,7 +4123,7 @@ const loop = async () => {
     beats(1081, 1082.1, () => {
       elements([11], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4061,7 +4131,7 @@ const loop = async () => {
     beats(1087.6, 1088.6999999999998, () => {
       elements([11], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4069,7 +4139,7 @@ const loop = async () => {
     beats(1094.2, 1095.3, () => {
       elements([11], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4077,7 +4147,7 @@ const loop = async () => {
     beats(1082.1, 1083.2, () => {
       elements([12], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4085,7 +4155,7 @@ const loop = async () => {
     beats(1088.6999999999998, 1089.8, () => {
       elements([12], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4093,7 +4163,7 @@ const loop = async () => {
     beats(1095.3, 1096, () => {
       elements([12], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4141,7 +4211,7 @@ const loop = async () => {
     beats(1117.2, 1118.3, () => {
       elements([1], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4149,7 +4219,7 @@ const loop = async () => {
     beats(1123.8, 1124.8999999999999, () => {
       elements([1], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4157,7 +4227,7 @@ const loop = async () => {
     beats(1118.3, 1119.4, () => {
       elements([5], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4165,7 +4235,7 @@ const loop = async () => {
     beats(1124.8999999999999, 1126, () => {
       elements([5], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4173,7 +4243,7 @@ const loop = async () => {
     beats(1119.4, 1120.5, () => {
       elements([6], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4181,7 +4251,7 @@ const loop = async () => {
     beats(1126, 1127.1, () => {
       elements([6], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4189,7 +4259,7 @@ const loop = async () => {
     beats(1120.5, 1121.6, () => {
       elements([7], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4197,7 +4267,7 @@ const loop = async () => {
     beats(1127.1, 1128, () => {
       elements([7], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4205,7 +4275,7 @@ const loop = async () => {
     beats(1115, 1116.1, () => {
       elements([11], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4213,7 +4283,7 @@ const loop = async () => {
     beats(1121.6, 1122.6999999999998, () => {
       elements([11], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4221,7 +4291,7 @@ const loop = async () => {
     beats(1116.1, 1117.2, () => {
       elements([12], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4229,7 +4299,7 @@ const loop = async () => {
     beats(1122.6999999999998, 1123.8, () => {
       elements([12], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4373,7 +4443,7 @@ const loop = async () => {
     beats(1150.2, 1151.3, () => {
       elements([1], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4381,7 +4451,7 @@ const loop = async () => {
     beats(1156.8, 1157.8999999999999, () => {
       elements([1], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4389,7 +4459,7 @@ const loop = async () => {
     beats(1151.3, 1152.4, () => {
       elements([5], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4397,7 +4467,7 @@ const loop = async () => {
     beats(1157.8999999999999, 1159, () => {
       elements([5], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4405,7 +4475,7 @@ const loop = async () => {
     beats(1152.4, 1153.5, () => {
       elements([6], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4413,7 +4483,7 @@ const loop = async () => {
     beats(1159, 1160.1, () => {
       elements([6], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4421,7 +4491,7 @@ const loop = async () => {
     beats(1153.5, 1154.6, () => {
       elements([7], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4429,7 +4499,7 @@ const loop = async () => {
     beats(1160.1, 1161, () => {
       elements([7], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4437,7 +4507,7 @@ const loop = async () => {
     beats(1148, 1149.1, () => {
       elements([11], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4445,7 +4515,7 @@ const loop = async () => {
     beats(1154.6, 1155.6999999999998, () => {
       elements([11], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4453,7 +4523,7 @@ const loop = async () => {
     beats(1149.1, 1150.2, () => {
       elements([12], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4461,7 +4531,7 @@ const loop = async () => {
     beats(1155.6999999999998, 1156.8, () => {
       elements([12], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.2 } } } })
         });
       });
     })
@@ -4536,6 +4606,342 @@ const loop = async () => {
           segment(segment_all, () => {
             addEffect({ timed_saturation: { mult_factor_decrease: { linear: { start: 0, end: 1 } } } })
           });
+        });
+      });
+    })
+
+    beats(580, 700, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([1], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(588, 692, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([2], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(596, 684, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([3], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(604, 676, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([4], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(612, 668, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([5], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(620, 660, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([6], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(580, 700, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([7], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(588, 692, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([8], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(596, 684, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([9], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(604, 676, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([10], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(612, 668, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([11], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(620, 660, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([12], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(724, 811, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([1], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(720, 815, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([2], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(716, 819, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([3], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(712, 823, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([4], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(708, 827, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([5], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(704, 831, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([6], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(724, 811, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([7], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(720, 815, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([8], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(716, 819, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([9], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(712, 823, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([10], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(708, 827, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([11], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(704, 831, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements([12], () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(1167, 1168.5, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(1170, 1171, () => {
+      elements([3], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(1168.5, 1170, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(1164, 1165.5, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(1165.5, 1167, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(1173, 1174, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(1174, 1175, () => {
+      elements([5], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(1175, 1176, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(1176, 1177, () => {
+      elements([7], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(1171, 1172, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(1172, 1173, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(700, 831, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { steps: { num_steps: 8, diff_per_step: -0.125, first_step_value: 1 } } } })
         });
       });
     })
@@ -4700,7 +5106,7 @@ const loop = async () => {
       });
     })
 
-    beats(387, 831, () => {
+    beats(387, 700, () => {
       cycle(8, () => {
         elements(all, () => {
           segment(segment_centric, () => {
@@ -5583,6 +5989,16 @@ const loop = async () => {
         elements([12], () => {
           segment(segment_arc, () => {
             snake({ tailLength: 0.5, cyclic: false, reverse: false })
+          });
+        });
+      });
+    })
+
+    beats(700, 831, () => {
+      cycle(8, () => {
+        elements(all, () => {
+          segment(segment_centric, () => {
+            snake({ tailLength: 0.5, cyclic: true, reverse: true })
           });
         });
       });
