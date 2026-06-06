@@ -1963,7 +1963,18 @@ function App() {
             useSimSpeed={useSimSpeed}
             onSimPlayPause={handleSimPlayPause}
             runFromSeconds={song.runStartTimeSeconds ?? 0}
-            onRunFromChange={(n) => handleSongChange({ runStartTimeSeconds: n })}
+            onRunFromChange={(n) => handleSeekToBeat(audioSecToBeats(n, song))}
+            onResetRunFrom={() => {
+              // Run from a literal 0s — earlier than beat 0 when there's an audio
+              // offset, a position the clamped marker can't otherwise reach.
+              handleSongChange({ runStartTimeSeconds: 0 })
+              setNextRunFromStart(true)
+              setCurrentTime(0)
+              const audio = audioRef.current
+              if (song.animationType === 'song' && song.audioFilePath && audio && isPlaying) {
+                audio.currentTime = 0
+              }
+            }}
             brightness={brightness}
             brightnessConnected={brightnessConnected}
             onBrightnessChange={(v) => {

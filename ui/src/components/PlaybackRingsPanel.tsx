@@ -25,6 +25,8 @@ interface PlaybackRingsPanelProps {
   onSimPlayPause: () => void
   runFromSeconds: number
   onRunFromChange: (n: number) => void
+  /** Reset Run from to a literal 0s (before beat 0, where the marker can't reach). */
+  onResetRunFrom: () => void
   brightness: number
   brightnessConnected: boolean
   onBrightnessChange: (v: number) => void
@@ -66,6 +68,7 @@ const PlaybackRingsPanel = ({
   onSimPlayPause,
   runFromSeconds,
   onRunFromChange,
+  onResetRunFrom,
   brightness,
   brightnessConnected,
   onBrightnessChange,
@@ -161,6 +164,18 @@ const PlaybackRingsPanel = ({
               }}
               className="playback-run-from-input"
             />
+            <button
+              type="button"
+              className="playback-run-from-reset"
+              title="Reset Run from to 0"
+              aria-label="Reset Run from to 0"
+              onClick={() => { setRunFromInput(null); onResetRunFrom() }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points="11 17 6 12 11 7" />
+                <polyline points="18 17 13 12 18 7" />
+              </svg>
+            </button>
           </label>
           <div className="playback-brightness-group">
             <span className={`playback-brightness-dot${brightnessConnected ? ' connected' : ''}`} title={brightnessConnected ? 'MQTT broker connected' : 'MQTT broker not connected'} />
