@@ -91,10 +91,13 @@ export function computeClockColors(
     const snakeFillStart    = fullSubRings * 12  // start of snake sub-ring in fill order
     const headPos           = relCycle * 12  // 0.0 → 12.0
 
-    // Fill order starts at sub-ring 9 (1 o'clock) and walks counter-clockwise around the face.
-    // Map fill-order index f → actual pixel index i.
+    // Fill order starts at the sub-ring sitting at 1 o'clock and walks counter-clockwise
+    // around the face. Ring 12 is mounted with sub-ring 9 at 1 o'clock; each ring after it
+    // (ring 1, 2, ...) is rotated clockwise by another 30°, so on ring N the sub-ring at
+    // 1 o'clock is (9 - N) mod 12. Map fill-order index f → actual pixel index i.
     arr.fill('rgb(0,0,0)')
-    const fillSubToPixelSub = (sub: number) => (sub + 9) % 12
+    const anchorSub = ((9 - ringNumber) % 12 + 12) % 12
+    const fillSubToPixelSub = (sub: number) => (sub + anchorSub) % 12
     for (let f = 0; f < 144; f++) {
       const fillSub = Math.floor(f / 12)
       const pos     = f % 12

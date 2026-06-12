@@ -52,15 +52,18 @@ function buildPixelPositions(size: number, scale: number): PixelPos[] {
     const bigAngle = (bigRingIdx * 30 - 60) * (Math.PI / 180)
     const bigCx = center + outerR * Math.cos(bigAngle)
     const bigCy = center + outerR * Math.sin(bigAngle)
+    // Physical mounting: ring 12 has sub-ring 0 at 4 o'clock (sub-ring 9 at 1 o'clock);
+    // each ring after it (ring 1, 2, ...) is rotated clockwise by another 30°.
+    const ringRotation = ((bigRingIdx + 1) % 12) * 30
     for (let subRingIdx = 0; subRingIdx < 12; subRingIdx++) {
       // sub-ring 0 at 4 o'clock (60° clockwise from 2 o'clock). 4 o'clock = +30° in screen coords.
-      const subAngle = (subRingIdx * 30 + 30) * (Math.PI / 180)
+      const subAngle = (subRingIdx * 30 + 30 + ringRotation) * (Math.PI / 180)
       const subCx = bigCx + subR * Math.cos(subAngle)
       const subCy = bigCy + subR * Math.sin(subAngle)
       for (let posIdx = 0; posIdx < 12; posIdx++) {
         const pixelIndex = subRingIdx * 12 + posIdx
         // Pixel 0 faces the big-ring center: 180° inward from sub-ring 0's position.
-        const pixAngle = (210 + subRingIdx * 30 + posIdx * 30) * (Math.PI / 180)
+        const pixAngle = (210 + subRingIdx * 30 + posIdx * 30 + ringRotation) * (Math.PI / 180)
         all.push({
           cx: subCx + pixR * Math.cos(pixAngle),
           cy: subCy + pixR * Math.sin(pixAngle),
