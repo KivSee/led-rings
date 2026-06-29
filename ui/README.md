@@ -52,9 +52,10 @@ The application will be available at `http://localhost:5173` (or another port if
 
 **Send Sequence & Live mode:** To use "Send Sequence" and "Live mode" (Run/Stop controlling the device):
 
-1. Run the control server from the repo root: `yarn control-server` or `npm run control-server` (default port 3080).
-2. The UI reads the control server URL from the `ui/.env` file. Edit this file and set `VITE_API_URL` to the URL where the control server is running (e.g. `http://localhost:3080`). Change it as needed when the server runs on a different host or port.
+1. Run the control server from a machine reachable from wherever you're using the UI: `yarn control-server` or `npm run control-server` (default port 3080).
+2. Open the ⚙ Settings panel in the app and set the control server URL (e.g. `http://localhost:3080`, or `http://<that machine's LAN IP>:3080` if it's running elsewhere). This is saved in the browser and takes effect immediately — no rebuild needed. (For local dev, `ui/.env`'s `VITE_API_URL` still works as the initial default until you save a value in Settings.)
 3. With Live mode checked, Run also starts the song on the device at the current marker time; Stop sends stop.
+4. With no control server configured/reachable, timeline and preset editing still work fully — only Send Sequence, Live mode, Import .ts and Detect Beats need one.
 
 ### Building for Production
 

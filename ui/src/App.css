@@ -272,6 +272,37 @@
   font-size: 12px;
 }
 
+.song-reconnect-button {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: rgba(245, 158, 11, 0.6);
+}
+
+.song-reconnect-button:hover {
+  background: rgba(245, 158, 11, 0.4);
+}
+
+.app-settings-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-settings-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  flex-shrink: 0;
+}
+
+.app-settings-button.is-connected .app-settings-dot {
+  background: #22c55e;
+}
+
+.app-settings-button.is-disconnected .app-settings-dot {
+  background: #ef4444;
+}
+
 .song-name-input::placeholder {
   color: rgba(249, 250, 251, 0.7);
 }

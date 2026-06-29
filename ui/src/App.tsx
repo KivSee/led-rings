@@ -10,9 +10,11 @@ import { presetToTimeframes } from './presets'
 import { normalizeMovement } from './movementGenerators'
 import type { TimeframeMovement } from './movementGenerators'
 import type { PresetMetadata } from './presets'
+import SettingsPanel from './components/SettingsPanel'
+import { tryReuseHandle, grantPermissionAndGetFile, pickAndRememberAudioFile, supportsFileHandles } from './audioFileHandles'
 import './App.css'
 
-const API_BASE = (import.meta as any).env?.VITE_API_URL ?? ''
+const CONTROL_SERVER_URL_STORAGE_KEY = 'kivsee-control-server-url'
 
 export class AppErrorBoundary extends Component<{ children: React.ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null }
@@ -322,6 +324,19 @@ function App() {
   const [useSimSpeed, setUseSimSpeed] = useState(false)
   const useSimSpeedRef = useRef(false)
   const playbackSpeedRef = useRef(1.0)
+  /** Control-server URL, editable at runtime via Settings (no rebuild needed to point at a different machine). */
+  const [apiBase, setApiBaseState] = useState(
+    () => localStorage.getItem(CONTROL_SERVER_URL_STORAGE_KEY) ?? (import.meta as any).env?.VITE_API_URL ?? ''
+  )
+  const setApiBase = useCallback((value: string) => {
+    const trimmed = value.trim()
+    setApiBaseState(trimmed)
+    if (trimmed) localStorage.setItem(CONTROL_SERVER_URL_STORAGE_KEY, trimmed)
+    else localStorage.removeItem(CONTROL_SERVER_URL_STORAGE_KEY)
+  }, [])
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  /** A stored audio file handle exists but needs a fresh permission grant (must happen from a user gesture). */
+  const [audioReconnectHandle, setAudioReconnectHandle] = useState<any>(null)
   const [controlServerAvailable, setControlServerAvailable] = useState(false)
   const [sendSequenceLoading, setSendSequenceLoading] = useState(false)
   const [brightness, setBrightnessState] = useState(1.0)
@@ -385,27 +400,27 @@ function App() {
 
   // Periodically check if control server is reachable
   useEffect(() => {
-    if (!API_BASE) return
+    if (!apiBase) return
     const check = () => {
-      fetch(`${API_BASE}/api/audio?path=_ping`, { method: 'HEAD' })
+      fetch(`${apiBase}/api/audio?path=_ping`, { method: 'HEAD' })
         .then(() => setControlServerAvailable(true))
         .catch(() => setControlServerAvailable(false))
     }
     check()
     const id = setInterval(check, 5000)
     return () => clearInterval(id)
-  }, [])
+  }, [apiBase])
 
   // Poll brightness from control server every 2 s; reset to defaults when server is down
   useEffect(() => {
-    if (!API_BASE) return
+    if (!apiBase) return
     const poll = () => {
       if (!controlServerAvailable) {
         setBrightnessConnected(false)
         setBrightnessState(1.0)
         return
       }
-      fetch(`${API_BASE}/api/brightness`)
+      fetch(`${apiBase}/api/brightness`)
         .then(r => r.json())
         .then((data: { value: number; connected: boolean }) => {
           setBrightnessState(data.value)
@@ -419,7 +434,7 @@ function App() {
     poll()
     const id = setInterval(poll, 2000)
     return () => clearInterval(id)
-  }, [controlServerAvailable])
+  }, [controlServerAvailable, apiBase])
 
   const songRef = useRef(song)
   songRef.current = song
@@ -640,8 +655,8 @@ function App() {
     if (isPlaying) {
       // Pause: stop playback; next Run will resume from current position
       if (isSongWithAudio) audio.pause()
-      if (liveMode && API_BASE) {
-        fetch(`${API_BASE}/api/stop`, { method: 'POST' }).catch((err) =>
+      if (liveMode && apiBase) {
+        fetch(`${apiBase}/api/stop`, { method: 'POST' }).catch((err) =>
           console.error('Live stop failed', err)
         )
       }
@@ -680,16 +695,16 @@ function App() {
           audio.play().catch(() => {})
         }
       }
-      if (liveMode && API_BASE) {
+      if (liveMode && apiBase) {
         const name = (song.name || 'sequence').trim() || 'sequence'
         if (song.animationType === 'trigger') {
-          fetch(`${API_BASE}/api/trigger`, {
+          fetch(`${apiBase}/api/trigger`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ triggerName: name, startOffsetSeconds: startSec }),
           }).catch((err) => console.error('Live trigger failed', err))
         } else {
-          fetch(`${API_BASE}/api/start-song`, {
+          fetch(`${apiBase}/api/start-song`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ songName: name, startOffsetSeconds: startSec }),
@@ -781,8 +796,8 @@ function App() {
       audio.pause()
       audio.currentTime = Math.max(0, song.runStartTimeSeconds ?? 0)
     }
-    if (liveMode && API_BASE) {
-      fetch(`${API_BASE}/api/stop`, { method: 'POST' }).catch((err) =>
+    if (liveMode && apiBase) {
+      fetch(`${apiBase}/api/stop`, { method: 'POST' }).catch((err) =>
         console.error('Live stop failed', err)
       )
     }
@@ -795,8 +810,8 @@ function App() {
   }
 
   const handleSendSequence = async () => {
-    if (!API_BASE) {
-      console.warn('VITE_API_URL not set; cannot send sequence')
+    if (!apiBase) {
+      console.warn('No control server configured (set one in Settings); cannot send sequence')
       return
     }
     setSendSequenceLoading(true)
@@ -805,7 +820,7 @@ function App() {
       await handleSaveTimeframes()
       const safeName = (song.name || 'song').trim() || 'song'
       const filePath = `src/songs/${safeName}.ts`
-      const res = await fetch(`${API_BASE}/api/send-sequence`, {
+      const res = await fetch(`${apiBase}/api/send-sequence`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filePath, sendOnly: true }),
@@ -861,13 +876,13 @@ function App() {
   }
 
   const handleDetectBeats = async () => {
-    if (!API_BASE || !song.audioFilePath?.trim()) return
+    if (!apiBase || !song.audioFilePath?.trim()) return
     setDetectBeatsLoading(true)
     setDetectBeatsProgress(null)
     try {
       if (detectBeatsScope === 'full') {
         setDetectBeatsProgress('Detecting…')
-        const res = await fetch(`${API_BASE}/api/detect-beats`, {
+        const res = await fetch(`${apiBase}/api/detect-beats`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -893,7 +908,7 @@ function App() {
         handleSongChange({ beatTimestampsMs: kept.length ? kept : undefined })
         setDetectBeatsProgress('Detecting range…')
         const bpmForRange = typeof rangeBpm === 'number' && rangeBpm > 0 ? rangeBpm : (song.bpm || undefined)
-        const res = await fetch(`${API_BASE}/api/detect-beats`, {
+        const res = await fetch(`${apiBase}/api/detect-beats`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1069,7 +1084,7 @@ function App() {
       if (!file) return
       try {
         const songCode = await file.text()
-        const res = await fetch(`${API_BASE}/api/parse-song`, {
+        const res = await fetch(`${apiBase}/api/parse-song`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ songCode, fileName: file.name }),
@@ -1078,9 +1093,9 @@ function App() {
         if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
 
         // Save a backup of the original .ts before it gets overwritten on next save
-        if (API_BASE) {
+        if (apiBase) {
           const baseName = file.name.replace(/\.ts$/, '')
-          fetch(`${API_BASE}/api/save-file`, {
+          fetch(`${apiBase}/api/save-file`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ path: `src/songs/${baseName}.original.ts`, content: songCode }),
@@ -1197,10 +1212,10 @@ function App() {
     }
 
     // Save TS to src/songs/ via control-server (always uses ../ import prefix)
-    if (API_BASE) {
+    if (apiBase) {
       const tsCode = generateSequenceTs(song, timeframes)
       try {
-        const resp = await fetch(`${API_BASE}/api/save-file`, {
+        const resp = await fetch(`${apiBase}/api/save-file`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ path: `src/songs/${safeName}.ts`, content: tsCode }),
@@ -1364,14 +1379,27 @@ function App() {
       if (publicResp.ok) return `/${encodeURIComponent(audioFilePath)}`
     } catch {}
     // 2. Try control-server
-    if (API_BASE) {
+    if (apiBase) {
       try {
-        const serverUrl = `${API_BASE}/api/audio?path=${encodeURIComponent(audioFilePath)}`
+        const serverUrl = `${apiBase}/api/audio?path=${encodeURIComponent(audioFilePath)}`
         const serverResp = await fetch(serverUrl, { method: 'HEAD' })
         if (serverResp.ok) return serverUrl
       } catch {}
     }
-    // 3. Prompt user to select the file
+    // 3. Reuse a previously-picked local file via its remembered handle (no server, no re-prompt)
+    const reuse = await tryReuseHandle(audioFilePath)
+    if (reuse && reuse.status === 'resolved') {
+      const blobUrl = URL.createObjectURL(reuse.file)
+      audioBlobUrlRef.current = blobUrl
+      setAudioReconnectHandle(null)
+      return blobUrl
+    }
+    if (reuse && reuse.status === 'needs-permission') {
+      // Permission must be re-granted from a user gesture; surface a "Reconnect" button instead of prompting here.
+      setAudioReconnectHandle(reuse.handle)
+      return ''
+    }
+    // 4. Prompt user to select the file
     return new Promise<string>((resolve) => {
       const input = document.createElement('input')
       input.type = 'file'
@@ -1384,7 +1412,7 @@ function App() {
         audioBlobUrlRef.current = blobUrl
         if (audioRef.current) audioRef.current.src = blobUrl
         // Upload to ui/public/ via control-server if available
-        if (API_BASE) {
+        if (apiBase) {
           try {
             const buf = await file.arrayBuffer()
             const bytes = new Uint8Array(buf)
@@ -1393,7 +1421,7 @@ function App() {
               binary += String.fromCharCode(...bytes.subarray(i, i + 8192))
             }
             const base64 = btoa(binary)
-            await fetch(`${API_BASE}/api/upload-audio`, {
+            await fetch(`${apiBase}/api/upload-audio`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ filename: audioFilePath, data: base64 }),
@@ -1407,7 +1435,7 @@ function App() {
       input.oncancel = () => resolve('')
       input.click()
     })
-  }, [])
+  }, [apiBase])
 
   // Keep spectrogram audio URL in sync: blob from Browse, or resolved path from song
   useEffect(() => {
@@ -1458,8 +1486,8 @@ function App() {
           audio.currentTime = Math.max(0, runStartSec)
         }
       }
-      if (liveMode && API_BASE) {
-        fetch(`${API_BASE}/api/stop`, { method: 'POST' }).catch((err) =>
+      if (liveMode && apiBase) {
+        fetch(`${apiBase}/api/stop`, { method: 'POST' }).catch((err) =>
           console.error('Live stop failed', err)
         )
       }
@@ -1542,7 +1570,7 @@ function App() {
         playbackIntervalRef.current = null
       }
     }
-  }, [isPlaying, song.animationType, song.audioFilePath, song.bpm, song.lengthSeconds, song.runStartTimeSeconds, songLengthBeats, liveMode, API_BASE])
+  }, [isPlaying, song.animationType, song.audioFilePath, song.bpm, song.lengthSeconds, song.runStartTimeSeconds, songLengthBeats, liveMode, apiBase])
 
   // Clamp current time if song length shrinks
   useEffect(() => {
@@ -1629,7 +1657,22 @@ function App() {
     handleSongChange({ audioFilePath: value || undefined })
   }
 
-  const handleBrowseAudio = () => {
+  const handleBrowseAudio = async () => {
+    setAudioReconnectHandle(null)
+    if (supportsFileHandles()) {
+      // Persists a reusable handle, so this same file reopens silently next time.
+      const picked = await pickAndRememberAudioFile()
+      if (picked) {
+        if (audioBlobUrlRef.current) URL.revokeObjectURL(audioBlobUrlRef.current)
+        const blobUrl = URL.createObjectURL(picked.file)
+        audioBlobUrlRef.current = blobUrl
+        setEffectiveAudioSrc(blobUrl)
+        handleSongChange({ audioFilePath: picked.name })
+        if (audioRef.current) audioRef.current.src = blobUrl
+        return
+      }
+    }
+    // Unsupported browser (e.g. Firefox/Safari) — falls back to a one-off picker, no persistence.
     audioFileInputRef.current?.click()
   }
 
@@ -1642,6 +1685,18 @@ function App() {
     audioBlobUrlRef.current = blobUrl
     setEffectiveAudioSrc(blobUrl)
     handleSongChange({ audioFilePath: file.name })
+    if (audioRef.current) audioRef.current.src = blobUrl
+  }
+
+  const handleReconnectAudio = async () => {
+    if (!audioReconnectHandle) return
+    const file = await grantPermissionAndGetFile(audioReconnectHandle)
+    setAudioReconnectHandle(null)
+    if (!file) return
+    if (audioBlobUrlRef.current) URL.revokeObjectURL(audioBlobUrlRef.current)
+    const blobUrl = URL.createObjectURL(file)
+    audioBlobUrlRef.current = blobUrl
+    setEffectiveAudioSrc(blobUrl)
     if (audioRef.current) audioRef.current.src = blobUrl
   }
 
@@ -1691,6 +1746,16 @@ function App() {
             >
               Browse…
             </button>
+            {audioReconnectHandle && (
+              <button
+                type="button"
+                className="secondary-button song-browse-button song-reconnect-button"
+                onClick={handleReconnectAudio}
+                title="Re-grant access to the previously selected audio file"
+              >
+                Reconnect audio
+              </button>
+            )}
           </label>
         )}
         <label className="song-meta-field">
@@ -1767,10 +1832,27 @@ function App() {
           </button>
           <button className="secondary-button" onClick={addTimeframe}>+ Add</button>
           <button className="secondary-button" onClick={handleLoadTimeframes}>Load</button>
-          <button className="secondary-button" onClick={handleImportTs} disabled={!API_BASE} title={!API_BASE ? 'Set VITE_API_URL and run control server' : 'Import a .ts song file'}>Import .ts</button>
+          <button className="secondary-button" onClick={handleImportTs} disabled={!apiBase} title={!apiBase ? 'Set a control server URL in Settings first' : 'Import a .ts song file'}>Import .ts</button>
           <button className="secondary-button" onClick={handleSaveTimeframes}>Save</button>
+          <button
+            type="button"
+            className={`secondary-button app-settings-button${apiBase ? (controlServerAvailable ? ' is-connected' : ' is-disconnected') : ''}`}
+            onClick={() => setSettingsOpen(true)}
+            title={!apiBase ? 'No control server configured' : controlServerAvailable ? 'Control server connected' : 'Control server configured but unreachable'}
+          >
+            {apiBase && <span className="app-settings-dot" aria-hidden="true" />}
+            ⚙ Settings
+          </button>
         </div>
       </div>
+      {settingsOpen && (
+        <SettingsPanel
+          value={apiBase}
+          connected={controlServerAvailable}
+          onSave={(value) => { setApiBase(value); setSettingsOpen(false) }}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
       <div
         className="app-resize-handle app-resize-handle-header"
         onMouseDown={() => setResizing('header')}
@@ -1979,22 +2061,22 @@ function App() {
             brightnessConnected={brightnessConnected}
             onBrightnessChange={(v) => {
               setBrightnessState(v)
-              fetch(`${API_BASE}/api/brightness`, {
+              fetch(`${apiBase}/api/brightness`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ value: v }),
               }).catch(() => {})
             }}
             onClockModeChange={(active) => {
-              if (!liveMode || !API_BASE) return
+              if (!liveMode || !apiBase) return
               if (active) {
-                fetch(`${API_BASE}/api/mqtt-trigger`, {
+                fetch(`${apiBase}/api/mqtt-trigger`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ triggerName: 'clock' }),
                 }).catch((err) => console.error('Live clock trigger failed', err))
               } else {
-                fetch(`${API_BASE}/api/stop`, { method: 'POST' }).catch((err) =>
+                fetch(`${apiBase}/api/stop`, { method: 'POST' }).catch((err) =>
                   console.error('Live stop failed', err)
                 )
               }
