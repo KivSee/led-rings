@@ -6,6 +6,10 @@
 .tmp-sequence-out.json
 src/.tmp-sequence-runner.ts
 
+# Packaged Windows app output
+release
+packaging/dist
+
 # Logs
 logs
 *.log
