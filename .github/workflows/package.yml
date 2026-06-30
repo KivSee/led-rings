@@ -36,9 +36,7 @@ jobs:
         working-directory: ui
 
       - name: Build packages
-        run: node packaging/build.js --all
-        env:
-          KIVSEE_BUILD_ALL: '1'
+        run: node packaging/build.js
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
