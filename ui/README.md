@@ -96,6 +96,28 @@ yarn preview
 
 The timeline axis displays beats (marked with "b"), allowing you to manage musical or rhythmic timeframes.
 
+## Standalone Packaged App
+
+For distributing to people who don't have Node installed, run from the repo root:
+
+```bash
+npm run package:win
+```
+
+This vite-builds the UI, embeds it into a static file server, and produces self-contained binaries in `release/`:
+
+| File | Platform |
+|---|---|
+| `kivsee-time-simulator-win.exe` | Windows x64 |
+| `kivsee-time-simulator-mac-arm64` | macOS Apple Silicon (M1/M2/M3) |
+| `kivsee-time-simulator-mac-x64` | macOS Intel |
+
+Hand out the appropriate single file — no installation required. Double-clicking launches a local server on port 4173 and opens a browser tab automatically.
+
+**macOS first-launch:** Apple Gatekeeper blocks unsigned binaries by default. Right-click the file → Open → Open to bypass the warning once. After that it runs normally.
+
+**Control server:** The app works fully offline for timeline/preset editing. To enable hardware control (Send Sequence, Live mode), open ⚙ Settings and enter the LAN URL of a running control server.
+
 ## Technology Stack
 
 - **React 18** - UI framework

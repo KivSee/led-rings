@@ -1,9 +1,17 @@
 'use strict'
 /**
- * Builds the lightweight Windows package: vite-builds the UI, strips any local audio
- * test assets out of the build (they're gitignored but vite still copies whatever's
+ * Builds standalone packages for Windows and Mac: vite-builds the UI, strips any local
+ * audio test assets out of the build (they're gitignored but vite still copies whatever's
  * sitting in ui/public on disk), then embeds the build into packaging/static-server.js
- * via pkg's asset snapshot, producing a single self-contained .exe — nothing else to ship.
+ * via pkg's asset snapshot, producing self-contained binaries — nothing else to ship.
+ *
+ * Outputs to release/:
+ *   kivsee-time-simulator-win.exe   — Windows x64
+ *   kivsee-time-simulator-mac-arm64 — macOS Apple Silicon (M1/M2/M3)
+ *   kivsee-time-simulator-mac-x64   — macOS Intel
+ *
+ * Cross-compilation works: pkg downloads the appropriate Node runtime per target, so
+ * you can produce Mac binaries from Windows and vice-versa.
  */
 const { execSync } = require('child_process')
 const fs = require('fs')
@@ -15,9 +23,20 @@ const UI_DIST = path.join(UI_DIR, 'dist')
 const PACKAGING_DIR = __dirname
 const PACKAGING_DIST = path.join(PACKAGING_DIR, 'dist')
 const RELEASE_DIR = path.join(ROOT, 'release')
-const EXE_PATH = path.join(RELEASE_DIR, 'kivsee-time-simulator.exe')
 
 const AUDIO_EXTENSIONS = new Set(['.wav', '.mp3', '.ogg', '.flac', '.aac'])
+
+const ALL_PLATFORMS = [
+  { target: 'node22-win-x64',   output: 'kivsee-time-simulator-win.exe',    os: 'win32'  },
+  { target: 'node22-mac-arm64', output: 'kivsee-time-simulator-mac-arm64',  os: 'darwin' },
+  { target: 'node22-mac-x64',   output: 'kivsee-time-simulator-mac-x64',    os: 'darwin' },
+]
+
+// By default build only targets that match the current OS (cross-compile doesn't work —
+// pkg's fabrication step requires native system tools). Pass --all in CI where each job
+// runs on the matching OS and explicitly sets KIVSEE_BUILD_ALL=1.
+const buildAll = process.argv.includes('--all') || process.env.KIVSEE_BUILD_ALL === '1'
+const PLATFORMS = buildAll ? ALL_PLATFORMS : ALL_PLATFORMS.filter(p => p.os === process.platform)
 
 function run(cmd, cwd) {
   console.log(`> ${cmd}`)
@@ -56,15 +75,23 @@ console.log('--- Staging build for embedding ---')
 fs.rmSync(PACKAGING_DIST, { recursive: true, force: true })
 copyDir(UI_DIST, PACKAGING_DIST)
 
+// Invoke the locally-installed devDependency directly rather than via `npx`, which
+// doesn't reliably find it from packaging/'s own package.json and re-fetches it instead.
+const pkgBin = path.join(ROOT, 'node_modules', '.bin', process.platform === 'win32' ? 'pkg.cmd' : 'pkg')
+fs.mkdirSync(RELEASE_DIR, { recursive: true })
+
 try {
-  console.log('--- Packaging static server + embedded UI into a single Windows exe (pkg) ---')
-  fs.mkdirSync(RELEASE_DIR, { recursive: true })
-  // Invoke the locally-installed devDependency directly rather than via `npx`, which
-  // doesn't reliably find it from packaging/'s own package.json and re-fetches it instead.
-  const pkgBin = path.join(ROOT, 'node_modules', '.bin', process.platform === 'win32' ? 'pkg.cmd' : 'pkg')
-  run(`"${pkgBin}" . --output "${EXE_PATH}"`, PACKAGING_DIR)
+  for (const { target, output } of PLATFORMS) {
+    console.log(`\n--- Packaging ${output} (${target}) ---`)
+    const outPath = path.join(RELEASE_DIR, output)
+    run(`"${pkgBin}" . --targets ${target} --output "${outPath}"`, PACKAGING_DIR)
+  }
 } finally {
   fs.rmSync(PACKAGING_DIST, { recursive: true, force: true })
 }
 
-console.log(`\nDone. ${path.relative(ROOT, EXE_PATH)} is fully self-contained — hand out just that file.`)
+console.log('\nDone. Outputs in release/:')
+for (const { output } of PLATFORMS) {
+  console.log(`  ${output}`)
+}
+console.log('\nNote: Mac binaries require "right-click → Open" on first launch to bypass Gatekeeper.')

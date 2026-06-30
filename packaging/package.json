@@ -5,6 +5,6 @@
   "bin": "static-server.js",
   "pkg": {
     "assets": ["dist/**/*"],
-    "targets": ["node22-win-x64"]
+    "targets": ["node22-win-x64", "node22-mac-arm64", "node22-mac-x64"]
   }
 }
