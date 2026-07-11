@@ -12,6 +12,7 @@ import type { TimeframeMovement } from './movementGenerators'
 import type { PresetMetadata } from './presets'
 import SettingsPanel from './components/SettingsPanel'
 import { tryReuseHandle, grantPermissionAndGetFile, pickAndRememberAudioFile, supportsFileHandles } from './audioFileHandles'
+import { normalizeControlServerUrl } from './controlServerUrl'
 import './App.css'
 
 const CONTROL_SERVER_URL_STORAGE_KEY = 'kivsee-control-server-url'
@@ -326,12 +327,12 @@ function App() {
   const playbackSpeedRef = useRef(1.0)
   /** Control-server URL, editable at runtime via Settings (no rebuild needed to point at a different machine). */
   const [apiBase, setApiBaseState] = useState(
-    () => localStorage.getItem(CONTROL_SERVER_URL_STORAGE_KEY) ?? (import.meta as any).env?.VITE_API_URL ?? ''
+    () => normalizeControlServerUrl(localStorage.getItem(CONTROL_SERVER_URL_STORAGE_KEY) ?? (import.meta as any).env?.VITE_API_URL ?? '')
   )
   const setApiBase = useCallback((value: string) => {
-    const trimmed = value.trim()
-    setApiBaseState(trimmed)
-    if (trimmed) localStorage.setItem(CONTROL_SERVER_URL_STORAGE_KEY, trimmed)
+    const normalized = normalizeControlServerUrl(value)
+    setApiBaseState(normalized)
+    if (normalized) localStorage.setItem(CONTROL_SERVER_URL_STORAGE_KEY, normalized)
     else localStorage.removeItem(CONTROL_SERVER_URL_STORAGE_KEY)
   }, [])
   const [settingsOpen, setSettingsOpen] = useState(false)

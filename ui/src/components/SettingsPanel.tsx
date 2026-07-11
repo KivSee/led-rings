@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { normalizeControlServerUrl } from '../controlServerUrl'
 import './SettingsPanel.css'
 
 interface SettingsPanelProps {
@@ -15,7 +16,7 @@ export default function SettingsPanel({ value, connected, onSave, onClose }: Set
   const [test, setTest] = useState<TestState>({ status: 'idle' })
 
   const handleTest = async () => {
-    const target = input.trim()
+    const target = normalizeControlServerUrl(input)
     if (!target) { setTest({ status: 'fail' }); return }
     setTest({ status: 'testing' })
     try {
