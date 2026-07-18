@@ -347,6 +347,7 @@ const PlaybackRingsPanel = ({
                 zoom={zoom}
                 onZoomChange={z => setZoom(clampZoom(z))}
                 resetPanToken={resetPanToken}
+                fit="box"
               />
             </div>
           </>
