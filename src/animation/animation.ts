@@ -43,6 +43,13 @@ function applyPhaseToEffect(effect: Effect, phase: number): Effect {
     return result;
 }
 
+/** Per-element phase offset. Negative intensity reverses direction: offsets run
+ *  from last element to first, so ring pairs (i, N+1-i) mirror each other. */
+function perElementPhase(index: number, count: number, intensity: number): number {
+    if (intensity >= 0) return index / count * intensity;
+    return (count - 1 - index) / count * -intensity;
+}
+
 interface EffectWithElements {
     effect: Effect;
     elements: number[];
@@ -85,7 +92,7 @@ export class Animation {
         const store = als.getStore();
         if (typeof effect === "function") {
             for (let i = 0; i < store.elements.length; i++) {
-                const phase = i / store.elements.length * (store.phase ?? 0);
+                const phase = perElementPhase(i, store.elements.length, store.phase ?? 0);
                 const e = effect(phase);
                 this.effects.push({
                     effect: e,
@@ -95,9 +102,9 @@ export class Animation {
             return;
         }
         const phaseIntensity = store.phase ?? 0;
-        if (phaseIntensity > 0) {
+        if (phaseIntensity !== 0) {
             for (let i = 0; i < store.elements.length; i++) {
-                const phase = i / store.elements.length * phaseIntensity;
+                const phase = perElementPhase(i, store.elements.length, phaseIntensity);
                 this.effects.push({
                     effect: applyPhaseToEffect(effect, phase),
                     elements: [store.elements[i]],

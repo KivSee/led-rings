@@ -548,7 +548,10 @@ export function getPixelColor(
   let colorPerRingPhase = 0
   if (colorPhaseIntensity > 0) {
     const elIdx = timeframe.rings.indexOf(ringIndex + 1)
-    if (elIdx >= 0 && timeframe.rings.length > 1) colorPerRingPhase = elIdx / timeframe.rings.length * colorPhaseIntensity
+    if (elIdx >= 0 && timeframe.rings.length > 1) {
+      const phaseIdx = timeframe.phaseReverse ? timeframe.rings.length - 1 - elIdx : elIdx
+      colorPerRingPhase = phaseIdx / timeframe.rings.length * colorPhaseIntensity
+    }
   }
 
   let { h, s, v } = getBaseColor(relPos, timeframe, colorPerRingPhase)
@@ -587,7 +590,10 @@ export function getPixelColorMulti(
   let colorPerRingPhase = 0
   if (colorPhaseIntensity > 0) {
     const elIdx = baseSource.timeframe.rings.indexOf(ringIndex + 1)
-    if (elIdx >= 0 && baseSource.timeframe.rings.length > 1) colorPerRingPhase = elIdx / baseSource.timeframe.rings.length * colorPhaseIntensity
+    if (elIdx >= 0 && baseSource.timeframe.rings.length > 1) {
+      const phaseIdx = baseSource.timeframe.phaseReverse ? baseSource.timeframe.rings.length - 1 - elIdx : elIdx
+      colorPerRingPhase = phaseIdx / baseSource.timeframe.rings.length * colorPhaseIntensity
+    }
   }
   let { h, s, v } = getBaseColor(baseSource.relPos, baseSource.timeframe, colorPerRingPhase)
 

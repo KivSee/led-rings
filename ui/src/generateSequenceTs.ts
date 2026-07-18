@@ -46,6 +46,7 @@ export interface Timeframe {
   disabled?: boolean
   mapping?: string
   phase?: number
+  phaseReverse?: boolean
   movement?: TimeframeMovement
   cycles?: TimeframeCycleEntry[]
   effects?: TimeframeEffectEntry[]
@@ -288,10 +289,11 @@ function indentBlock(block: string, spaces: number): string {
   return block.split('\n').map((line) => prefix + line).join('\n')
 }
 
-function wrapWithPhase(lines: string[], phaseValue: number | undefined): string[] {
+// Negative intensity tells the runtime phase() to reverse direction (offsets run last→first ring).
+function wrapWithPhase(lines: string[], phaseValue: number | undefined, reverse?: boolean): string[] {
   if (phaseValue == null || phaseValue <= 0 || lines.length === 0) return lines
   const block = lines.join('\n')
-  return [`phase(${formatParamValue(phaseValue)}, () => {
+  return [`phase(${formatParamValue(reverse ? -phaseValue : phaseValue)}, () => {
 ${indentBlock(block, 2)}
 });`]
 }
@@ -307,7 +309,7 @@ function emitInnerContent(tf: Timeframe, layer: EmitLayer, hueOffset?: number): 
       // Phase baked into hue directly (used for movement per-ring blocks)
       inner.push(...emitColor(tf, hueOffset))
     } else {
-      inner.push(...wrapWithPhase(emitColor(tf), tf.phase))
+      inner.push(...wrapWithPhase(emitColor(tf), tf.phase, tf.phaseReverse))
     }
   } else {
     const effectEntries = getTimeframeEffects(tf)
@@ -367,8 +369,10 @@ ${indentBlock(core, 6)}
           continue
         }
         // When phase is set on a color layer, bake hue offset per ring
+        const ringIdx = sortedRings.indexOf(entry.ringNum)
+        const phaseIdx = tf.phaseReverse ? sortedRings.length - 1 - ringIdx : ringIdx
         const ringInner = phasePerRing
-          ? emitInnerContent(tf, layer, (sortedRings.indexOf(entry.ringNum) / sortedRings.length) * tf.phase!)
+          ? emitInnerContent(tf, layer, (phaseIdx / sortedRings.length) * tf.phase!)
           : inner
         const effectLines = ringInner.join('\n')
         let core: string

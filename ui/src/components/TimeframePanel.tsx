@@ -60,6 +60,45 @@ const TIMED_EFFECT_OPTIONS: { value: string; label: string }[] = [
   { value: 'timed_saturation', label: 'Timed Saturation' },
 ]
 
+/** Hover descriptions per effect key, shown on the selector options and on the selector itself. */
+const EFFECT_DESCRIPTIONS: Record<string, string> = {
+  // Brightness (over time in the timeframe/cycle)
+  brightness: 'Constant brightness level for the whole timeframe',
+  fadeIn: 'Brightness ramps 0 → 1 over the timeframe/cycle',
+  fadeOut: 'Brightness ramps 1 → 0 over the timeframe/cycle',
+  fadeInOut: 'Brightness rises 0 → High at the midpoint, then back to 0',
+  fadeOutIn: 'Brightness dips 1 → Low at the midpoint, then back to 1',
+  blink: 'Square-wave on/off between full brightness and Low',
+  pulse: 'Smooth sine pulse between Low and full brightness',
+  fade: 'Linear brightness ramp from Start to End',
+  // Hue (offset from the base color)
+  staticHueShift: 'Constant hue offset from the base color',
+  hueShiftStartToEnd: 'Hue offset sweeps from Start to End over the timeframe/cycle',
+  hueShiftSin: 'Hue offset oscillates 0 → Amount → 0 (sine) over the timeframe/cycle',
+  // Motion (lit head/tail mask moving along the segment)
+  snakeHeadMove: 'Lit head moves from Start to End with a tail behind it',
+  staticSnake: 'Static lit range from Start to End (no motion)',
+  snake: 'Head sweeps the full segment once, with a tail; Cyclic wraps, Reverse goes backward',
+  snakeHeadSin: 'Head oscillates back and forth along the segment (sine)',
+  snakeFillGrow: 'Lit region grows from one end until it fills the segment',
+  snakeInOut: 'Head sweeps in and back out (half sine forward, half back)',
+  snakeSlowFast: 'Head sweeps with uneven speed — sine and ramp combined (slow, fast, slow)',
+  snakeTailShrinkGrow: 'Head oscillates while the tail grows on the way in and shrinks on the way back',
+  snakeHeadSteps: 'Head jumps through discrete positions instead of moving smoothly',
+  // Position (varies per pixel by its Mapping relPos)
+  position_brightness: 'Brightness varies by pixel position — the function is evaluated at each pixel’s relPos from the Mapping',
+  position_hue: 'Hue offset varies by pixel position — a static gradient along the Mapping',
+  position_saturation: 'Saturation varies by pixel position (relPos from the Mapping)',
+  // Timed (same value for all pixels, varies over time)
+  timed_brightness: 'Brightness follows a function of time, same for all pixels',
+  timed_hue: 'Hue offset follows a function of time, same for all pixels',
+  timed_saturation: 'Saturation follows a function of time, same for all pixels',
+  // Snake (moving head/tail with a value profile along the tail)
+  snake_brightness: 'Moving head/tail mask: brightness profile along the tail, head position driven by a time function',
+  snake_hue: 'Moving head/tail: hue offset profile along the tail, head position driven by a time function',
+  snake_saturation: 'Moving head/tail: saturation profile along the tail, head position driven by a time function',
+}
+
 // Single combined list for one selector: (none) then Position / Timed / Snake / Brightness / Hue / Motion groups
 type EffectCategory = 'Brightness' | 'Hue' | 'Motion' | 'Position' | 'Snake' | 'Timed' | null
 const ALL_EFFECT_OPTIONS: { value: string; label: string; category: EffectCategory }[] = [
@@ -74,7 +113,7 @@ const ALL_EFFECT_OPTIONS: { value: string; label: string; category: EffectCatego
 
 // FloatFunction kinds and their parameter definitions (for UI and codegen)
 export type FloatFunctionKind = 'const_value' | 'linear' | 'sin' | 'steps'
-type FloatFunctionParamDef = { key: string; label: string; type: 'number'; default: number; min?: number; max?: number; step?: number }
+type FloatFunctionParamDef = { key: string; label: string; type: 'number'; default: number; min?: number; max?: number; step?: number; hint?: string }
 
 const FLOAT_FUNCTION_KINDS: { value: FloatFunctionKind; label: string }[] = [
   { value: 'const_value', label: 'Const' },
@@ -90,15 +129,15 @@ const FLOAT_FUNCTION_KIND_PARAMS: Record<FloatFunctionKind, FloatFunctionParamDe
     { key: 'end', label: 'End', type: 'number', default: 1, min: 0, max: 2, step: 0.01 },
   ],
   sin: [
-    { key: 'min', label: 'Min', type: 'number', default: 0, min: 0, max: 2, step: 0.01 },
-    { key: 'max', label: 'Max', type: 'number', default: 1, min: 0, max: 2, step: 0.01 },
-    { key: 'phase', label: 'Phase', type: 'number', default: 0, min: 0, max: 1, step: 0.01 },
-    { key: 'repeats', label: 'Repeats', type: 'number', default: 1, min: 0.25, max: 16, step: 0.25 },
+    { key: 'min', label: 'Min', type: 'number', default: 0, min: 0, max: 2, step: 0.01, hint: 'Value at the bottom of the wave' },
+    { key: 'max', label: 'Max', type: 'number', default: 1, min: 0, max: 2, step: 0.01, hint: 'Value at the peak of the wave' },
+    { key: 'phase', label: 'Phase', type: 'number', default: 0, min: 0, max: 1, step: 0.01, hint: 'Horizontal shift of the wave (1 = one full cycle)' },
+    { key: 'repeats', label: 'Repeats', type: 'number', default: 1, min: 0.25, max: 16, step: 0.25, hint: 'Number of oscillations across the range (time or position)' },
   ],
   steps: [
-    { key: 'num_steps', label: 'Steps', type: 'number', default: 4, min: 1, max: 32, step: 1 },
-    { key: 'diff_per_step', label: 'Diff per step', type: 'number', default: 0.25, min: -2, max: 2, step: 0.01 },
-    { key: 'first_step_value', label: 'First value', type: 'number', default: 0, min: 0, max: 2, step: 0.01 },
+    { key: 'num_steps', label: 'Steps', type: 'number', default: 4, min: 1, max: 32, step: 1, hint: 'Number of discrete steps in the staircase' },
+    { key: 'diff_per_step', label: 'Diff per step', type: 'number', default: 0.25, min: -2, max: 2, step: 0.01, hint: 'Value change per step; negative steps downward' },
+    { key: 'first_step_value', label: 'First value', type: 'number', default: 0, min: 0, max: 2, step: 0.01, hint: 'Value of the first step' },
   ],
 }
 
@@ -182,99 +221,107 @@ type EffectParamDef = {
   step?: number
   /** For floatFunction: at least one of increase/decrease or single offset must be set */
   optional?: boolean
+  /** Tooltip shown on hover over the param label */
+  hint?: string
+}
+
+const MOVEMENT_EXTRA_HINTS: Record<'retire' | 'bounce' | 'accumulate', string> = {
+  retire: 'Rings also turn off in activation order — spread: staggered end times (diamond shape); random: ring goes dark after its turn',
+  bounce: 'Sweep ping-pongs back and forth instead of restarting from the first ring',
+  accumulate: 'Rings stay on after their turn instead of turning off',
 }
 
 const EFFECT_PARAM_SCHEMAS: Record<string, EffectParamDef[]> = {
   brightness: [{ key: 'value', label: 'Value', type: 'number', default: 1, min: 0, max: 1, step: 0.01 }],
-  fadeInOut: [{ key: 'high', label: 'High', type: 'number', default: 1, min: 0, max: 1, step: 0.01 }],
-  fadeOutIn: [{ key: 'low', label: 'Low', type: 'number', default: 0, min: 0, max: 1, step: 0.01 }],
-  blink: [{ key: 'low', label: 'Low', type: 'number', default: 0.5, min: 0, max: 1, step: 0.01 }],
+  fadeInOut: [{ key: 'high', label: 'High', type: 'number', default: 1, min: 0, max: 1, step: 0.01, hint: 'Peak brightness at the midpoint' }],
+  fadeOutIn: [{ key: 'low', label: 'Low', type: 'number', default: 0, min: 0, max: 1, step: 0.01, hint: 'Minimum brightness at the midpoint' }],
+  blink: [{ key: 'low', label: 'Low', type: 'number', default: 0.5, min: 0, max: 1, step: 0.01, hint: 'Brightness during the off half' }],
   pulse: [
-    { key: 'low', label: 'Low', type: 'number', default: 0.5, min: 0, max: 1, step: 0.01 },
-    { key: 'staticPhase', label: 'Static phase', type: 'number', default: 0, min: 0, max: 1, step: 0.01 },
+    { key: 'low', label: 'Low', type: 'number', default: 0.5, min: 0, max: 1, step: 0.01, hint: 'Brightness at the bottom of the pulse wave' },
+    { key: 'staticPhase', label: 'Static phase', type: 'number', default: 0, min: 0, max: 1, step: 0.01, hint: 'Shifts the starting point along the pulse wave: 0 = start at midpoint rising, 0.25 = start at peak (falls first), 0.75 = start at Low (rises first). 1 = one full cycle.' },
   ],
   fade: [
-    { key: 'start', label: 'Start', type: 'number', default: 0, min: 0, max: 1, step: 0.01 },
-    { key: 'end', label: 'End', type: 'number', default: 1, min: 0, max: 1, step: 0.01 },
+    { key: 'start', label: 'Start', type: 'number', default: 0, min: 0, max: 1, step: 0.01, hint: 'Brightness at the start of the timeframe/cycle' },
+    { key: 'end', label: 'End', type: 'number', default: 1, min: 0, max: 1, step: 0.01, hint: 'Brightness at the end of the timeframe/cycle' },
   ],
-  staticHueShift: [{ key: 'value', label: 'Value', type: 'number', default: 0, min: 0, max: 1, step: 0.01 }],
+  staticHueShift: [{ key: 'value', label: 'Value', type: 'number', default: 0, min: 0, max: 1, step: 0.01, hint: 'Constant hue offset from the base color (1 = full color wheel)' }],
   hueShiftStartToEnd: [
     { key: 'start', label: 'Start', type: 'number', default: 0, min: 0, max: 1, step: 0.01 },
     { key: 'end', label: 'End', type: 'number', default: 1, min: 0, max: 1, step: 0.01 },
   ],
-  hueShiftSin: [{ key: 'amount', label: 'Amount', type: 'number', default: 0.5, min: 0, max: 1, step: 0.01 }],
+  hueShiftSin: [{ key: 'amount', label: 'Amount', type: 'number', default: 0.5, min: 0, max: 1, step: 0.01, hint: 'Maximum hue offset at the peak of the oscillation' }],
   snakeHeadMove: [
-    { key: 'start', label: 'Start', type: 'number', default: 0, min: 0, max: 1, step: 0.01 },
-    { key: 'end', label: 'End', type: 'number', default: 1, min: 0, max: 1, step: 0.01 },
-    { key: 'tail', label: 'Tail', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01 },
+    { key: 'start', label: 'Start', type: 'number', default: 0, min: 0, max: 1, step: 0.01, hint: 'Head position at the start (0–1 along the segment)' },
+    { key: 'end', label: 'End', type: 'number', default: 1, min: 0, max: 1, step: 0.01, hint: 'Head position at the end (0–1 along the segment)' },
+    { key: 'tail', label: 'Tail', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01, hint: 'Length of the lit tail behind the head (fraction of the segment)' },
   ],
   staticSnake: [
-    { key: 'start', label: 'Start', type: 'number', default: 0, min: 0, max: 1, step: 0.01 },
-    { key: 'end', label: 'End', type: 'number', default: 1, min: 0, max: 1, step: 0.01 },
+    { key: 'start', label: 'Start', type: 'number', default: 0, min: 0, max: 1, step: 0.01, hint: 'Start of the lit range (0–1 along the segment)' },
+    { key: 'end', label: 'End', type: 'number', default: 1, min: 0, max: 1, step: 0.01, hint: 'End of the lit range (0–1 along the segment)' },
   ],
   snake: [
-    { key: 'tailLength', label: 'Tail length', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01 },
-    { key: 'cyclic', label: 'Cyclic', type: 'boolean', default: false },
-    { key: 'reverse', label: 'Reverse', type: 'boolean', default: false },
+    { key: 'tailLength', label: 'Tail length', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01, hint: 'Length of the lit tail behind the head (fraction of the segment)' },
+    { key: 'cyclic', label: 'Cyclic', type: 'boolean', default: false, hint: 'Wrap around the segment ends instead of stopping' },
+    { key: 'reverse', label: 'Reverse', type: 'boolean', default: false, hint: 'Move backward (end to start)' },
   ],
   snakeHeadSin: [
-    { key: 'tailLength', label: 'Tail length', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01 },
-    { key: 'cyclic', label: 'Cyclic', type: 'boolean', default: false },
+    { key: 'tailLength', label: 'Tail length', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01, hint: 'Length of the lit tail behind the head (fraction of the segment)' },
+    { key: 'cyclic', label: 'Cyclic', type: 'boolean', default: false, hint: 'Wrap around the segment ends instead of stopping' },
   ],
-  snakeFillGrow: [{ key: 'reverse', label: 'Reverse', type: 'boolean', default: false }],
+  snakeFillGrow: [{ key: 'reverse', label: 'Reverse', type: 'boolean', default: false, hint: 'Grow from the end backward' }],
   snakeInOut: [
-    { key: 'start', label: 'Start', type: 'number', default: 0, min: 0, max: 1, step: 0.01 },
-    { key: 'end', label: 'End', type: 'number', default: 1, min: 0, max: 1, step: 0.01 },
+    { key: 'start', label: 'Start', type: 'number', default: 0, min: 0, max: 1, step: 0.01, hint: 'Start of the range the snake sweeps (0–1 along the segment)' },
+    { key: 'end', label: 'End', type: 'number', default: 1, min: 0, max: 1, step: 0.01, hint: 'End of the range the snake sweeps (0–1 along the segment)' },
   ],
-  snakeSlowFast: [{ key: 'tailLength', label: 'Tail length', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01 }],
+  snakeSlowFast: [{ key: 'tailLength', label: 'Tail length', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01, hint: 'Length of the lit tail behind the head (fraction of the segment)' }],
   snakeHeadSteps: [
-    { key: 'steps', label: 'Steps', type: 'number', default: 4, min: 1, max: 32, step: 1 },
-    { key: 'tailLength', label: 'Tail length', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01 },
+    { key: 'steps', label: 'Steps', type: 'number', default: 4, min: 1, max: 32, step: 1, hint: 'Number of discrete positions the head jumps through' },
+    { key: 'tailLength', label: 'Tail length', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01, hint: 'Length of the lit tail behind the head (fraction of the segment)' },
   ],
   // Position effects: params are FloatFunctions (by position in segment)
   position_brightness: [
-    { key: 'mult_factor_increase', label: 'Increase (by position)', type: 'floatFunction', optional: true },
-    { key: 'mult_factor_decrease', label: 'Decrease (by position)', type: 'floatFunction', optional: true },
+    { key: 'mult_factor_increase', label: 'Increase (by position)', type: 'floatFunction', optional: true, hint: 'Brightness multiplier evaluated at each pixel position (relPos 0→1 from the Mapping)' },
+    { key: 'mult_factor_decrease', label: 'Decrease (by position)', type: 'floatFunction', optional: true, hint: 'Brightness multiplier evaluated at each pixel position (relPos 0→1 from the Mapping)' },
   ],
   position_hue: [
-    { key: 'offset_factor', label: 'Offset (by position)', type: 'floatFunction' },
+    { key: 'offset_factor', label: 'Offset (by position)', type: 'floatFunction', hint: 'Hue offset added at each pixel position (relPos 0→1 from the Mapping); 1 = full color wheel' },
   ],
   position_saturation: [
-    { key: 'mult_factor_increase', label: 'Increase (by position)', type: 'floatFunction', optional: true },
-    { key: 'mult_factor_decrease', label: 'Decrease (by position)', type: 'floatFunction', optional: true },
+    { key: 'mult_factor_increase', label: 'Increase (by position)', type: 'floatFunction', optional: true, hint: 'Saturation multiplier evaluated at each pixel position (relPos 0→1 from the Mapping)' },
+    { key: 'mult_factor_decrease', label: 'Decrease (by position)', type: 'floatFunction', optional: true, hint: 'Saturation multiplier evaluated at each pixel position (relPos 0→1 from the Mapping)' },
   ],
   // Timed effects: params are FloatFunctions (by time)
   timed_brightness: [
-    { key: 'mult_factor_increase', label: 'Increase (by time)', type: 'floatFunction', optional: true },
-    { key: 'mult_factor_decrease', label: 'Decrease (by time)', type: 'floatFunction', optional: true },
+    { key: 'mult_factor_increase', label: 'Increase (by time)', type: 'floatFunction', optional: true, hint: 'Brightness multiplier evaluated over the timeframe/cycle duration (t 0→1), same for all pixels' },
+    { key: 'mult_factor_decrease', label: 'Decrease (by time)', type: 'floatFunction', optional: true, hint: 'Brightness multiplier evaluated over the timeframe/cycle duration (t 0→1), same for all pixels' },
   ],
   timed_hue: [
-    { key: 'offset_factor', label: 'Offset (by time)', type: 'floatFunction' },
+    { key: 'offset_factor', label: 'Offset (by time)', type: 'floatFunction', hint: 'Hue offset evaluated over the timeframe/cycle duration (t 0→1); 1 = full color wheel' },
   ],
   timed_saturation: [
-    { key: 'mult_factor_increase', label: 'Increase (by time)', type: 'floatFunction', optional: true },
-    { key: 'mult_factor_decrease', label: 'Decrease (by time)', type: 'floatFunction', optional: true },
+    { key: 'mult_factor_increase', label: 'Increase (by time)', type: 'floatFunction', optional: true, hint: 'Saturation multiplier evaluated over the timeframe/cycle duration (t 0→1), same for all pixels' },
+    { key: 'mult_factor_decrease', label: 'Decrease (by time)', type: 'floatFunction', optional: true, hint: 'Saturation multiplier evaluated over the timeframe/cycle duration (t 0→1), same for all pixels' },
   ],
   // Snake effects: head/tail along segment, params by position in snake
   snake_brightness: [
-    { key: 'head', label: 'Head (time)', type: 'floatFunction' },
-    { key: 'tail_length', label: 'Tail length', type: 'floatFunction' },
-    { key: 'cyclic', label: 'Cyclic', type: 'boolean', default: false },
-    { key: 'mult_factor_increase', label: 'Increase (along snake)', type: 'floatFunction', optional: true },
-    { key: 'mult_factor_decrease', label: 'Decrease (along snake)', type: 'floatFunction', optional: true },
+    { key: 'head', label: 'Head (time)', type: 'floatFunction', hint: 'Head position over the timeframe/cycle duration (0–1 along the segment)' },
+    { key: 'tail_length', label: 'Tail length', type: 'floatFunction', hint: 'Tail length behind the head over time (fraction of the segment)' },
+    { key: 'cyclic', label: 'Cyclic', type: 'boolean', default: false, hint: 'Wrap around the segment ends instead of clamping' },
+    { key: 'mult_factor_increase', label: 'Increase (along snake)', type: 'floatFunction', optional: true, hint: 'Brightness multiplier along the tail (0 = head, 1 = tail end)' },
+    { key: 'mult_factor_decrease', label: 'Decrease (along snake)', type: 'floatFunction', optional: true, hint: 'Brightness multiplier along the tail (0 = head, 1 = tail end)' },
   ],
   snake_hue: [
-    { key: 'head', label: 'Head (time)', type: 'floatFunction' },
-    { key: 'tail_length', label: 'Tail length', type: 'floatFunction' },
-    { key: 'cyclic', label: 'Cyclic', type: 'boolean', default: false },
-    { key: 'offset_factor', label: 'Offset (along snake)', type: 'floatFunction' },
+    { key: 'head', label: 'Head (time)', type: 'floatFunction', hint: 'Head position over the timeframe/cycle duration (0–1 along the segment)' },
+    { key: 'tail_length', label: 'Tail length', type: 'floatFunction', hint: 'Tail length behind the head over time (fraction of the segment)' },
+    { key: 'cyclic', label: 'Cyclic', type: 'boolean', default: false, hint: 'Wrap around the segment ends instead of clamping' },
+    { key: 'offset_factor', label: 'Offset (along snake)', type: 'floatFunction', hint: 'Hue offset along the tail (0 = head, 1 = tail end); 1 = full color wheel' },
   ],
   snake_saturation: [
-    { key: 'head', label: 'Head (time)', type: 'floatFunction' },
-    { key: 'tail_length', label: 'Tail length', type: 'floatFunction' },
-    { key: 'cyclic', label: 'Cyclic', type: 'boolean', default: false },
-    { key: 'mult_factor_increase', label: 'Increase (along snake)', type: 'floatFunction', optional: true },
-    { key: 'mult_factor_decrease', label: 'Decrease (along snake)', type: 'floatFunction', optional: true },
+    { key: 'head', label: 'Head (time)', type: 'floatFunction', hint: 'Head position over the timeframe/cycle duration (0–1 along the segment)' },
+    { key: 'tail_length', label: 'Tail length', type: 'floatFunction', hint: 'Tail length behind the head over time (fraction of the segment)' },
+    { key: 'cyclic', label: 'Cyclic', type: 'boolean', default: false, hint: 'Wrap around the segment ends instead of clamping' },
+    { key: 'mult_factor_increase', label: 'Increase (along snake)', type: 'floatFunction', optional: true, hint: 'Saturation multiplier along the tail (0 = head, 1 = tail end)' },
+    { key: 'mult_factor_decrease', label: 'Decrease (along snake)', type: 'floatFunction', optional: true, hint: 'Saturation multiplier along the tail (0 = head, 1 = tail end)' },
   ],
 }
 
@@ -459,12 +506,12 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
               onChange={(e) => onUpdate({ disabled: !e.target.checked })}
               className="timeframe-panel-checkbox"
             />
-            <span>Enabled</span>
+            <span title="Unchecked: excluded from playback preview and from the generated sequence">Enabled</span>
           </label>
         </div>
 
         <div className="timeframe-panel-section">
-          <label className="timeframe-panel-label">Time Range</label>
+          <label className="timeframe-panel-label" title="Start → end in beats. Total beats = song length in minutes × BPM; the timeline snaps to a 4-beat grid.">Time Range</label>
           <div className="timeframe-panel-time-row">
             {editingField === 'startTime' ? (
               <input
@@ -690,7 +737,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
             <span>No color (modifiers only)</span>
           </label>
           <div className="timeframe-panel-phase-row">
-            <label className="timeframe-panel-phase-label">Color Phase</label>
+            <label className="timeframe-panel-phase-label" title="Spreads the base hue across the selected rings: ring at position i of N gets hue offset i/N × phase. Affects only the base color — to spread an effect per ring, use that effect's own Phase field.">Color Phase</label>
             <input
               type="number"
               value={timeframe.phase ?? ''}
@@ -698,6 +745,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
               max={12}
               step={0.1}
               placeholder="0"
+              title="Spreads the base hue across the selected rings: ring at position i of N gets hue offset i/N × phase."
               onChange={(e) => {
                 const val = e.target.value
                 if (val === '') {
@@ -709,6 +757,15 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
               }}
               className="timeframe-panel-input-small"
             />
+            <label className="timeframe-panel-checkbox-label" title="Reverse phase direction: offsets run from last ring to first, so left/right ring pairs (1&12, 2&11, ...) get matching colors.">
+              <input
+                type="checkbox"
+                className="timeframe-panel-checkbox"
+                checked={timeframe.phaseReverse === true}
+                onChange={(e) => onUpdate({ phaseReverse: e.target.checked ? true : undefined })}
+              />
+              <span>Reverse</span>
+            </label>
             <span className="timeframe-panel-phase-hint">Offsets base hue per ring</span>
           </div>
         </div>
@@ -745,7 +802,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
         </div>
 
         <div className="timeframe-panel-section timeframe-panel-effects-section">
-          <label className="timeframe-panel-label">Effects</label>
+          <label className="timeframe-panel-label" title="Effect stack applied in this timeframe. Position = varies by pixel position (uses Mapping); Timed = varies over time; Snake = moving head/tail; Brightness/Hue/Motion = simple presets.">Effects</label>
           {(() => {
             const effects = getTimeframeEffects(timeframe)
             const displayList: TimeframeEffectEntry[] = effects.length > 0
@@ -784,18 +841,19 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
                           setEffects(next)
                         }}
                         className="timeframe-panel-select"
+                        title={entry.effectKey ? EFFECT_DESCRIPTIONS[entry.effectKey] : undefined}
                       >
                         <option value="">(none)</option>
                         {(['Position', 'Timed', 'Snake', 'Brightness', 'Hue', 'Motion'] as const).map(cat => (
                           <optgroup key={cat} label={cat}>
                             {ALL_EFFECT_OPTIONS.filter(o => o.category === cat).map(opt => (
-                              <option key={opt.value} value={opt.value}>{opt.label}</option>
+                              <option key={opt.value} value={opt.value} title={EFFECT_DESCRIPTIONS[opt.value]}>{opt.label}</option>
                             ))}
                           </optgroup>
                         ))}
                         </select>
                         {entry.id !== 'placeholder' && entry.effectKey && (
-                          <div className="timeframe-panel-effect-phase">
+                          <div className="timeframe-panel-effect-phase" title="Offsets this effect per ring (ring at position i of N shifted by i/N × phase), creating a wave across rings.">
                             <label className="timeframe-panel-effect-phase-label">Phase</label>
                             <input
                               type="number"
@@ -851,7 +909,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
                                     const tailObj = (tailVal?.[tailKind] ?? tailParams.reduce((a, p) => ({ ...a, [p.key]: p.default }), {} as Record<string, number>)) as Record<string, number>
                                     return (
                                       <>
-                                        <div className="timeframe-panel-float-function-block">
+                                        <div className="timeframe-panel-float-function-block" title="Head position over the timeframe/cycle duration (0–1 along the segment)">
                                           <div className="timeframe-panel-effect-param-row">
                                             <label className="timeframe-panel-effect-param-label">Head (time)</label>
                                             <select
@@ -871,8 +929,8 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
                                             </select>
                                           </div>
                                           {headParams.map(pDef => (
-                                            <div key={pDef.key} className="timeframe-panel-effect-param-row timeframe-panel-effect-param-row-indent">
-                                              <label className="timeframe-panel-effect-param-label">{pDef.label}</label>
+                                            <div key={pDef.key} className="timeframe-panel-effect-param-row timeframe-panel-effect-param-row-indent" title={pDef.hint}>
+                                              <label className="timeframe-panel-effect-param-label" title={pDef.hint}>{pDef.label}</label>
                                               <input
                                                 type="number"
                                                 value={typeof headObj[pDef.key] === 'number' ? headObj[pDef.key] : pDef.default}
@@ -893,7 +951,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
                                             </div>
                                           ))}
                                         </div>
-                                        <div className="timeframe-panel-float-function-block">
+                                        <div className="timeframe-panel-float-function-block" title="Tail length behind the head over time (fraction of the segment)">
                                           <div className="timeframe-panel-effect-param-row">
                                             <label className="timeframe-panel-effect-param-label">Tail length</label>
                                             <select
@@ -913,8 +971,8 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
                                             </select>
                                           </div>
                                           {tailParams.map(pDef => (
-                                            <div key={pDef.key} className="timeframe-panel-effect-param-row timeframe-panel-effect-param-row-indent">
-                                              <label className="timeframe-panel-effect-param-label">{pDef.label}</label>
+                                            <div key={pDef.key} className="timeframe-panel-effect-param-row timeframe-panel-effect-param-row-indent" title={pDef.hint}>
+                                              <label className="timeframe-panel-effect-param-label" title={pDef.hint}>{pDef.label}</label>
                                               <input
                                                 type="number"
                                                 value={typeof tailObj[pDef.key] === 'number' ? tailObj[pDef.key] : pDef.default}
@@ -948,13 +1006,13 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
                                               }}
                                               className="timeframe-panel-checkbox"
                                             />
-                                            <span>Cyclic</span>
+                                            <span title="Wrap around the segment ends instead of clamping">Cyclic</span>
                                           </label>
                                         </div>
                                       </>
                                     )
                                   })()}
-                                  <div className="timeframe-panel-effect-param-row">
+                                  <div className="timeframe-panel-effect-param-row" title="Decrease multiplies the value down from its base (e.g. 1→0 fades out); Increase multiplies it up (values above 1 boost)">
                                     <label className="timeframe-panel-effect-param-label">Apply</label>
                                     <select
                                       value={currentKey}
@@ -979,7 +1037,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
                                     </select>
                                   </div>
                                   <div className="timeframe-panel-float-function-block">
-                                    <div className="timeframe-panel-effect-param-row">
+                                    <div className="timeframe-panel-effect-param-row" title="Curve shape: Const = flat value, Linear = ramp start→end, Sin = oscillation, Steps = staircase">
                                       <label className="timeframe-panel-effect-param-label">Function</label>
                                       <select
                                         value={kind}
@@ -1005,8 +1063,8 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
                                     {kindParams.map(pDef => {
                                       const pVal = typeof currentObj[pDef.key] === 'number' ? currentObj[pDef.key] : pDef.default
                                       return (
-                                        <div key={pDef.key} className="timeframe-panel-effect-param-row timeframe-panel-effect-param-row-indent">
-                                          <label className="timeframe-panel-effect-param-label">{pDef.label}</label>
+                                        <div key={pDef.key} className="timeframe-panel-effect-param-row timeframe-panel-effect-param-row-indent" title={pDef.hint}>
+                                          <label className="timeframe-panel-effect-param-label" title={pDef.hint}>{pDef.label}</label>
                                           <input
                                             type="number"
                                             value={pVal}
@@ -1040,9 +1098,9 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
                                 const kindParams = FLOAT_FUNCTION_KIND_PARAMS[kind]
                                 const currentObj = (fVal?.[kind] ?? kindParams.reduce((a, p) => ({ ...a, [p.key]: p.default }), {} as Record<string, number>)) as Record<string, number>
                                 return (
-                                  <div key={def.key} className="timeframe-panel-float-function-block">
+                                  <div key={def.key} className="timeframe-panel-float-function-block" title={def.hint}>
                                     <div className="timeframe-panel-effect-param-row">
-                                      <label className="timeframe-panel-effect-param-label">{def.label}</label>
+                                      <label className="timeframe-panel-effect-param-label" title={def.hint}>{def.label}</label>
                                       <select
                                         value={kind}
                                         onChange={(e) => {
@@ -1063,8 +1121,8 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
                                     {kindParams.map(pDef => {
                                       const pVal = typeof currentObj[pDef.key] === 'number' ? currentObj[pDef.key] : pDef.default
                                       return (
-                                        <div key={pDef.key} className="timeframe-panel-effect-param-row timeframe-panel-effect-param-row-indent">
-                                          <label className="timeframe-panel-effect-param-label">{pDef.label}</label>
+                                        <div key={pDef.key} className="timeframe-panel-effect-param-row timeframe-panel-effect-param-row-indent" title={pDef.hint}>
+                                          <label className="timeframe-panel-effect-param-label" title={pDef.hint}>{pDef.label}</label>
                                           <input
                                             type="number"
                                             value={pVal}
@@ -1092,8 +1150,8 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
                               const current = entry.params?.[def.key]
                               const value = current !== undefined ? current : def.default
                               return (
-                                <div key={def.key} className="timeframe-panel-effect-param-row">
-                                  <label className="timeframe-panel-effect-param-label">{def.label}</label>
+                                <div key={def.key} className="timeframe-panel-effect-param-row" title={def.hint}>
+                                  <label className="timeframe-panel-effect-param-label" title={def.hint}>{def.label}</label>
                                   {def.type === 'boolean' ? (
                                     <input
                                       type="checkbox"
@@ -1152,7 +1210,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
         </div>
 
         <div className="timeframe-panel-section timeframe-panel-movement-section">
-          <label className="timeframe-panel-label">Movement</label>
+          <label className="timeframe-panel-label" title="Distributes this timeframe across its rings as per-ring time windows — rings activate at different times instead of all at once.">Movement</label>
           <select
             value={timeframe.movement?.type ?? ''}
             onChange={(e) => {
@@ -1186,7 +1244,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
                 <p className="timeframe-panel-movement-desc">{typeDef?.description}</p>
                 {/* Direction: hidden for random unless using a custom order (random shuffles otherwise). */}
                 {(mv.type !== 'random' || mv.direction === 'custom') && (
-                  <div className="timeframe-panel-movement-param-row">
+                  <div className="timeframe-panel-movement-param-row" title="Ring activation order. Center→Out / Edges→In group rings equidistant from the center; Opposite pairs group ring r with r+6.">
                     <label className="timeframe-panel-effect-param-label">Direction</label>
                     <select
                       value={mv.direction}
@@ -1219,12 +1277,12 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
                         }}
                         className="timeframe-panel-checkbox"
                       />
-                      <span>Use custom order</span>
+                      <span title="Replace the random shuffle with an explicit ring order">Use custom order</span>
                     </label>
                   </div>
                 )}
                 {mv.direction === 'custom' && (
-                  <div className="timeframe-panel-movement-param-row">
+                  <div className="timeframe-panel-movement-param-row" title="Explicit activation order: ring numbers 1–12, comma or space separated. Rings of this timeframe not listed stay on the whole time.">
                     <label className="timeframe-panel-effect-param-label">Ring order</label>
                     <input
                       type="text"
@@ -1256,7 +1314,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
                     </p>
                   )
                 })()}
-                <div className="timeframe-panel-movement-param-row">
+                <div className="timeframe-panel-movement-param-row" title="Beats between one ring (or group) activating and the next">
                   <label className="timeframe-panel-effect-param-label">Beats / ring</label>
                   <input
                     type="number"
@@ -1294,7 +1352,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
                         }}
                         className="timeframe-panel-checkbox"
                       />
-                      <span>{ep.label}</span>
+                      <span title={MOVEMENT_EXTRA_HINTS[ep.key]}>{ep.label}</span>
                     </label>
                   </div>
                 ))}
@@ -1304,7 +1362,7 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, onApplyPreset, onLoadCat
         </div>
 
         <div className="timeframe-panel-section">
-          <label className="timeframe-panel-label">Mapping</label>
+          <label className="timeframe-panel-label" title="How the pixels map to positions 0→1 (relPos), shown below. Only Position and Snake effects use it — Timed and simple effects ignore it. Also selects which pixels participate (e.g. b1/b2 are partial arcs).">Mapping</label>
           <select
             value={timeframe.mapping || 'all'}
             onChange={(e) => onUpdate({ mapping: e.target.value })}
