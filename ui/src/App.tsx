@@ -1,15 +1,15 @@
 import React, { useState, useRef, useEffect, useCallback, Component } from 'react'
 import Timeline from './components/Timeline'
 import TimeframePanel from './components/TimeframePanel'
+import PatternLibrary from './components/PatternLibrary'
+import type { ImportedPattern, PatternEdit } from './components/PatternLibrary'
 import PlaybackRingsPanel from './components/PlaybackRingsPanel'
 import Spectrogram from './components/Spectrogram'
 import { useViewRange } from './hooks/useViewRange'
 import { useUndoHistory } from './hooks/useUndoHistory'
 import { generateSequenceTs } from './generateSequenceTs'
-import { presetToTimeframes } from './presets'
 import { normalizeMovement } from './movementGenerators'
 import type { TimeframeMovement } from './movementGenerators'
-import type { PresetMetadata } from './presets'
 import SettingsPanel from './components/SettingsPanel'
 import { tryReuseHandle, grantPermissionAndGetFile, pickAndRememberAudioFile, supportsFileHandles } from './audioFileHandles'
 import { normalizeControlServerUrl } from './controlServerUrl'
@@ -119,6 +119,8 @@ export interface Song {
   beatTimestampsMs?: number[]
   /** Ring numbers that have a lilum pendant mirroring them. Emits anim.mirrorToLilum([...]). */
   lilumRings?: number[]
+  /** Pattern-library ids hidden for THIS song only (global hides live in localStorage). */
+  hiddenPatterns?: string[]
 }
 
 const LAST_SONG_STORAGE_KEY = 'timelineManager:lastSong'
@@ -551,13 +553,58 @@ function App() {
     setTimeframes([...timeframes, newTimeframe])
   }
 
-  const addTimeframesFromPreset = (preset: PresetMetadata) => {
+  // ── Pattern-library curation ──
+  // Per-song hides live on the song (song.hiddenPatterns, saved with it);
+  // global hides, imported patterns, and per-pattern edits persist in localStorage.
+  const [globalHiddenPatterns, setGlobalHiddenPatterns] = useState<string[]>(() => {
+    try { const v = JSON.parse(localStorage.getItem('kivsee:patternsHiddenGlobal') || '[]'); return Array.isArray(v) ? v.filter((x: unknown): x is string => typeof x === 'string') : [] } catch { return [] }
+  })
+  const [importedPatterns, setImportedPatterns] = useState<ImportedPattern[]>(() => {
+    try { const v = JSON.parse(localStorage.getItem('kivsee:patternsImported') || '[]'); return Array.isArray(v) ? (v as ImportedPattern[]) : [] } catch { return [] }
+  })
+  const [patternEdits, setPatternEdits] = useState<Record<string, PatternEdit>>(() => {
+    try { const v = JSON.parse(localStorage.getItem('kivsee:patternEdits') || '{}'); return v && typeof v === 'object' ? v : {} } catch { return {} }
+  })
+  useEffect(() => { try { localStorage.setItem('kivsee:patternsHiddenGlobal', JSON.stringify(globalHiddenPatterns)) } catch {} }, [globalHiddenPatterns])
+  useEffect(() => { try { localStorage.setItem('kivsee:patternsImported', JSON.stringify(importedPatterns)) } catch {} }, [importedPatterns])
+  useEffect(() => { try { localStorage.setItem('kivsee:patternEdits', JSON.stringify(patternEdits)) } catch {} }, [patternEdits])
+  const savePatternEdit = (id: string, patch: PatternEdit) =>
+    setPatternEdits((m) => ({ ...m, [id]: { ...m[id], ...patch } }))
+  const hidePatternForSong = (id: string) =>
+    setSong((s) => ({ ...s, hiddenPatterns: Array.from(new Set([...(s.hiddenPatterns ?? []), id])) }))
+  const restorePatternForSong = (id: string) =>
+    setSong((s) => ({ ...s, hiddenPatterns: (s.hiddenPatterns ?? []).filter((x) => x !== id) }))
+  const hidePatternGlobal = (id: string) =>
+    setGlobalHiddenPatterns((prev) => (prev.includes(id) ? prev : [...prev, id]))
+  const restorePatternGlobal = (id: string) =>
+    setGlobalHiddenPatterns((prev) => prev.filter((x) => x !== id))
+  const importPatterns = (patterns: ImportedPattern[]) => {
+    setImportedPatterns((prev) => {
+      const m = new Map(prev.map((p) => [p.id, p]))
+      for (const p of patterns) m.set(p.id, p)
+      return Array.from(m.values())
+    })
+    // Re-importing un-hides globally, so a removed pattern truly returns.
+    const ids = new Set(patterns.map((p) => p.id))
+    setGlobalHiddenPatterns((prev) => prev.filter((x) => !ids.has(x)))
+  }
+
+  /** Add a pattern's (possibly edited) timeframes to the timeline at the playhead. */
+  const addEditedTimeframesFromPattern = (tfs: Timeframe[], name: string) => {
     const snappedBeat = Math.round(currentTime)
-    const newTimeframes = presetToTimeframes(preset, snappedBeat, song.bpm)
-      .filter(tf => tf.endTime <= songLengthBeats)
-    if (newTimeframes.length > 0) {
-      setTimeframes(prev => [...prev, ...newTimeframes])
-      setFocusedTimeframeId(newTimeframes[0].id)
+    const stamp = Date.now()
+    const shifted = tfs
+      .map((tf, i) => ({
+        ...tf,
+        id: `${stamp}-${i}`,
+        label: tfs.length > 1 ? `${name} ${i + 1}` : name,
+        startTime: tf.startTime + snappedBeat,
+        endTime: tf.endTime + snappedBeat,
+      }))
+      .filter((tf) => tf.endTime <= songLengthBeats)
+    if (shifted.length > 0) {
+      setTimeframes(prev => [...prev, ...shifted])
+      setFocusedTimeframeId(shifted[0].id)
     }
   }
 
@@ -1178,6 +1225,9 @@ function App() {
       beatTimestampsMs: Array.isArray(s.beatTimestampsMs) ? s.beatTimestampsMs as number[] : undefined,
       lilumRings: Array.isArray(s.lilumRings)
         ? (s.lilumRings as unknown[]).map(Number).filter((n) => Number.isFinite(n) && n >= 1 && n <= 12)
+        : undefined,
+      hiddenPatterns: Array.isArray(s.hiddenPatterns)
+        ? (s.hiddenPatterns as unknown[]).filter((x): x is string => typeof x === 'string')
         : undefined,
     }
   }
@@ -2053,14 +2103,31 @@ function App() {
           className="app-details-wrapper"
           style={{ width: detailsPanelWidth, minWidth: detailsPanelWidth }}
         >
-          <TimeframePanel
-            timeframe={focusedTimeframe}
-            onUpdate={handlePanelUpdate}
-            onClose={() => setFocusedTimeframeId(null)}
-            onApplyPreset={addTimeframesFromPreset}
-            onLoadCategoryPreview={loadCategoryPreview}
-            songLengthBeats={songLengthBeats}
-          />
+          {focusedTimeframe ? (
+            <TimeframePanel
+              timeframe={focusedTimeframe}
+              onUpdate={handlePanelUpdate}
+              onClose={() => setFocusedTimeframeId(null)}
+              songLengthBeats={songLengthBeats}
+            />
+          ) : (
+            <PatternLibrary
+              imported={importedPatterns}
+              globalHidden={globalHiddenPatterns}
+              songHidden={song.hiddenPatterns ?? []}
+              songName={song.name}
+              bpm={song.bpm}
+              onApplyEdited={addEditedTimeframesFromPattern}
+              patternEdits={patternEdits}
+              onSavePatternEdit={savePatternEdit}
+              onHideForSong={hidePatternForSong}
+              onHideGlobal={hidePatternGlobal}
+              onRestoreForSong={restorePatternForSong}
+              onRestoreGlobal={restorePatternGlobal}
+              onImport={importPatterns}
+              onLoadCategoryPreview={loadCategoryPreview}
+            />
+          )}
         </div>
       </div>
     </div>
