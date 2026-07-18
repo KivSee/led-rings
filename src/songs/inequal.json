@@ -1,0 +1,323 @@
+{
+  "song": {
+    "name": "inequal",
+    "lengthSeconds": 312,
+    "bpm": 150,
+    "startOffsetMs": 0,
+    "runStartTimeSeconds": 51.14074074074074,
+    "animationType": "song",
+    "audioFilePath": "inequal.wav"
+  },
+  "timeframes": [
+    {
+      "id": "1784364634785",
+      "startTime": 0,
+      "endTime": 72,
+      "label": "Start Fade In",
+      "color": "#d63fe9",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "phase": 0,
+      "movement": {
+        "type": "spread",
+        "direction": "edges-in",
+        "beatsPerRing": 12
+      },
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 12
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1784364893382-tzizwr7yqxe",
+          "effectKey": "fadeInOut",
+          "params": {
+            "high": 1
+          }
+        },
+        {
+          "id": "eff-1784364968608-r48c9z93ivp",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true,
+            "reverse": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "1784365330809",
+      "startTime": 0,
+      "endTime": 72,
+      "label": "B2 Saturate",
+      "color": "#ffffff",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b2",
+      "effects": [
+        {
+          "id": "eff-1784365647748-ro4a9tqksvb",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1784366620788-ha6n",
+      "startTime": 0,
+      "endTime": 72,
+      "label": "B1 Color Left",
+      "color": "#d51f1f",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "mapping": "b1",
+      "phase": 1
+    },
+    {
+      "id": "dup-1784366834861-v63x",
+      "startTime": 0,
+      "endTime": 72,
+      "label": "B1 Color Right",
+      "color": "#d51f1f",
+      "rings": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b1",
+      "phase": 1,
+      "phaseReverse": true,
+      "effects": [
+        {
+          "id": "eff-1784367323592-l0fo3aytvh",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1784370908771-4zln",
+      "startTime": 72,
+      "endTime": 144,
+      "label": "Second Part Snake",
+      "color": "#d63fe9",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "centric",
+      "phase": 0,
+      "movement": {
+        "type": "spread",
+        "direction": "center-out",
+        "beatsPerRing": 12
+      },
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 4
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1784364968608-r48c9z93ivp-vszj",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true,
+            "reverse": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "1784371391372",
+      "startTime": 72,
+      "endTime": 144,
+      "label": "Pulsate",
+      "color": "#6eafc5",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "hasExplicitColor": false,
+      "effects": [
+        {
+          "id": "eff-1784371552798-s94j6kieecb",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.7,
+            "staticPhase": 0
+          }
+        }
+      ],
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 0.33
+        }
+      ],
+      "disabled": true
+    },
+    {
+      "id": "dup-1784371726229-h8s7",
+      "startTime": 72,
+      "endTime": 144,
+      "label": "Second Part Fade",
+      "color": "#d63fe9",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "centric",
+      "phase": 0,
+      "movement": {
+        "type": "spread",
+        "direction": "center-out",
+        "beatsPerRing": 12
+      },
+      "effects": [
+        {
+          "id": "eff-1784364968608-r48c9z93ivp-vszj-oejc",
+          "effectKey": "fade",
+          "params": {
+            "start": 0.2,
+            "end": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "1784372446249",
+      "startTime": 110,
+      "endTime": 139,
+      "label": "Timeframe 8",
+      "color": "#dd224d",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "hasExplicitColor": false,
+      "effects": [
+        {
+          "id": "eff-1784372468610-dbbd3ljq3k",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.5,
+            "staticPhase": 0
+          }
+        }
+      ],
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ]
+    }
+  ],
+  "windowSizes": {
+    "playbackPanelWidth": 720,
+    "detailsPanelWidth": 424,
+    "spectrogramHeight": 233,
+    "headerHeight": 56
+  },
+  "spectrogramOpen": true,
+  "view": {
+    "startBeat": 84.22,
+    "beatsPerScreen": 64
+  },
+  "theme": "dark"
+}
