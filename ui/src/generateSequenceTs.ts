@@ -5,6 +5,7 @@
 
 import { getMovementCodeGenEntries } from './movementGenerators'
 import type { TimeframeMovement, MovementWindow } from './movementGenerators'
+import { ringGroupName } from '../../shared/ring-groups'
 
 export type AnimationType = 'song' | 'trigger'
 
@@ -70,38 +71,15 @@ function getTimeframeEffects(tf: Timeframe): TimeframeEffectEntry[] {
   return entries
 }
 
-const RINGS_ALL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-const RINGS_EVEN = [2, 4, 6, 8, 10, 12]
-const RINGS_ODD = [1, 3, 5, 7, 9, 11]
-const RINGS_LEFT = [1, 2, 3, 4, 5, 6]
-const RINGS_RIGHT = [7, 8, 9, 10, 11, 12]
-const RINGS_CENTER = [4, 5, 6, 7, 8, 9]
-
-function sameRings(a: number[], b: number[]): boolean {
-  if (a.length !== b.length) return false
-  const sa = [...a].sort((x, y) => x - y)
-  const sb = [...b].sort((x, y) => x - y)
-  return sa.every((v, i) => v === sb[i])
-}
-
+/** Emits the `elements(...)` argument: a group name when the rings match one, else a literal array. */
 function ringsToElementsArg(rings: number[]): string {
-  if (sameRings(rings, RINGS_ALL)) return 'all'
-  if (sameRings(rings, RINGS_EVEN)) return 'even'
-  if (sameRings(rings, RINGS_ODD)) return 'odd'
-  if (sameRings(rings, RINGS_LEFT)) return 'left'
-  if (sameRings(rings, RINGS_RIGHT)) return 'right'
-  if (sameRings(rings, RINGS_CENTER)) return 'center'
-  return `[${rings.sort((a, b) => a - b).join(', ')}]`
+  return ringGroupName(rings) ?? `[${[...rings].sort((a, b) => a - b).join(', ')}]`
 }
 
 /** Returns a display label for the rings selection (e.g. "All", "Center") or comma-separated numbers. */
 export function ringsToDisplayLabel(rings: number[]): string {
-  if (sameRings(rings, RINGS_ALL)) return 'All'
-  if (sameRings(rings, RINGS_EVEN)) return 'Even'
-  if (sameRings(rings, RINGS_ODD)) return 'Odd'
-  if (sameRings(rings, RINGS_LEFT)) return 'Left'
-  if (sameRings(rings, RINGS_RIGHT)) return 'Right'
-  if (sameRings(rings, RINGS_CENTER)) return 'Center'
+  const group = ringGroupName(rings)
+  if (group) return group.charAt(0).toUpperCase() + group.slice(1)
   return [...rings].sort((a, b) => a - b).join(', ')
 }
 
