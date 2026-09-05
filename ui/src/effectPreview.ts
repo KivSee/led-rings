@@ -369,9 +369,11 @@ function computeSnakeMask(relPos: number, head: number, tail: number, cyclic: bo
   }
 }
 
-/** Brightness mult from timeframe: legacy + timed + position + snake_brightness. */
-function getBrightnessMult(relPos: number, t: number, timeframe: Timeframe, ringIndex: number = 0): number {
-  let mult = 1
+/** Brightness mult from timeframe: legacy + timed + position + snake_brightness.
+ *  `initial` seeds the accumulated value so mult_factor_increase (interpolate toward 1)
+ *  sees the value produced by earlier layers, matching the C++ renderer's sequential accumulation. */
+function getBrightnessMult(relPos: number, t: number, timeframe: Timeframe, ringIndex: number = 0, initial: number = 1): number {
+  let mult = initial
   const lk = getEffectLookup(timeframe)
 
   // Legacy brightness → FloatFunc conversion
@@ -467,9 +469,10 @@ function getHueOffset(relPos: number, t: number, timeframe: Timeframe, ringIndex
   return offset
 }
 
-/** Saturation mult from timeframe: timed + position + snake_saturation. */
-function getSaturationMult(relPos: number, t: number, timeframe: Timeframe, ringIndex: number = 0): number {
-  let mult = 1
+/** Saturation mult from timeframe: timed + position + snake_saturation.
+ *  `initial` seeds the accumulated value (see getBrightnessMult). */
+function getSaturationMult(relPos: number, t: number, timeframe: Timeframe, ringIndex: number = 0, initial: number = 1): number {
+  let mult = initial
   const lk = getEffectLookup(timeframe)
 
   const timedS = lk.timedSaturation
@@ -560,14 +563,17 @@ export function getPixelColor(
   h = (h + getHueOffset(relPos, t, timeframe, ringIndex)) % 1
   if (h < 0) h += 1
 
-  s = s * getSaturationMult(relPos, t, timeframe, ringIndex)
+  // Fold s/v through the effect chain (seeding with the base value) so
+  // mult_factor_increase interpolates from the accumulated value toward 1,
+  // matching the C++ renderer.
+  s = getSaturationMult(relPos, t, timeframe, ringIndex, s)
 
-  const brightnessMult = holdOff ? 0 : getBrightnessMult(relPos, t, timeframe, ringIndex)
+  v = holdOff ? 0 : getBrightnessMult(relPos, t, timeframe, ringIndex, v)
   const snakeMask = hasMotionEffect(timeframe)
     ? getSnakeMask(relPos, t, 12, timeframe, ringIndex)
     : 1
 
-  v = v * brightnessMult * snakeMask
+  v = v * snakeMask
   return { h, s, v }
 }
 
@@ -597,15 +603,23 @@ export function getPixelColorMulti(
   }
   let { h, s, v } = getBaseColor(baseSource.relPos, baseSource.timeframe, colorPerRingPhase)
 
+  // Fold s/v sequentially through every timeframe's effect chain (instead of
+  // multiplying independent per-timeframe results) so mult_factor_increase in
+  // one timeframe sees the value accumulated by earlier timeframes — matching
+  // the C++ renderer's sequential effect list. Snake masks are applied after
+  // all modifiers (the motion layer is emitted last in the generated sequence),
+  // so a masked-off pixel is not re-lit by a later Increase.
+  let snakeMask = 1
   for (const { timeframe, t, relPos, holdOff } of timeframesWithT) {
     h = (h + getHueOffset(relPos, t, timeframe, ringIndex)) % 1
     if (h < 0) h += 1
-    s *= getSaturationMult(relPos, t, timeframe, ringIndex)
-    v *= holdOff ? 0 : getBrightnessMult(relPos, t, timeframe, ringIndex)
+    s = getSaturationMult(relPos, t, timeframe, ringIndex, s)
+    v = holdOff ? 0 : getBrightnessMult(relPos, t, timeframe, ringIndex, v)
     if (hasMotionEffect(timeframe)) {
-      v *= getSnakeMask(relPos, t, 12, timeframe, ringIndex)
+      snakeMask *= getSnakeMask(relPos, t, 12, timeframe, ringIndex)
     }
   }
+  v *= snakeMask
   return { h, s, v }
 }
 
