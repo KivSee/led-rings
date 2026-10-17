@@ -9,6 +9,10 @@ export function setRecordingMode(enabled: boolean) {
   recordingMode = enabled;
 }
 
+export function isRecordingMode(): boolean {
+  return recordingMode;
+}
+
 export const addEffect = (specificEffectConfig: any | Function) => {
   const store = als.getStore();
   const { animation } = store;
