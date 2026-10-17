@@ -1772,13 +1772,26 @@ function App() {
             className="song-meta-input"
             placeholder="e.g. 1, 2"
             title="Ring numbers with a lilum pendant. Each N mirrors ring N onto thing lilumN."
-            value={(song.lilumRings ?? []).join(', ')}
-            onChange={(e) => {
-              const rings = e.target.value
-                .split(',')
-                .map((t) => Number(t.trim()))
-                .filter((n) => Number.isFinite(n) && n >= 1 && n <= 12)
+            // Keep the raw text while editing (so "1," isn't reformatted to "1"); parse on blur.
+            value={numericEdit?.field === 'lilumRings' ? numericEdit.value : (song.lilumRings ?? []).join(', ')}
+            onFocus={() => setNumericEdit({ field: 'lilumRings', value: (song.lilumRings ?? []).join(', ') })}
+            onChange={(e) =>
+              setNumericEdit((prev) => (prev?.field === 'lilumRings' ? { ...prev, value: e.target.value } : null))
+            }
+            onBlur={() => {
+              if (numericEdit?.field !== 'lilumRings') return
+              const rings = [...new Set(
+                numericEdit.value
+                  .split(/[\s,]+/)
+                  .filter((t) => t !== '')
+                  .map(Number)
+                  .filter((n) => Number.isInteger(n) && n >= 1 && n <= 12)
+              )]
               handleSongChange({ lilumRings: rings.length > 0 ? rings : undefined })
+              setNumericEdit(null)
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') e.currentTarget.blur()
             }}
           />
         </label>
