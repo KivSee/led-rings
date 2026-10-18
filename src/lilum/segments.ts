@@ -8,7 +8,7 @@
 // indices (the firmware already strips it before exposing the buffer).
 //
 // Besides the lilum-only segments (outer/middle/inner), we define every
-// segment name the ring object has (all/centric/ind/arc/updown/b1/b2/rand and
+// segment name the ring object has (all/centric/ind/arc/updown/rad/b1/b2/rand and
 // the single small-ring segments "0".."11"), so a pendant can mirror a ring's
 // animation (see Animation.mirrorToLilum). A name missing here makes the
 // pendant reject the whole sequence ("segment name not found in store").
@@ -56,6 +56,7 @@ const angleOf = (i: number) => {
     const base = ringOf(i) === 1 ? 90 - 40 * k : 270 - 40 * (k - 4);
     return (((base + PENDANT_ROTATION_DEG) % 360) + 360) % 360;
 };
+const xOf = (i: number) => RING_RADIUS[ringOf(i)] * Math.cos((angleOf(i) * Math.PI) / 180);
 const yOf = (i: number) => RING_RADIUS[ringOf(i)] * Math.sin((angleOf(i) * Math.PI) / 180);
 
 // Clockwise step within the pixel's ring from its first pixel (index order).
@@ -89,19 +90,39 @@ const allSegment = () =>
 const centricSegment = () =>
     segmentFrom("centric", (i) => cwStep(i) / PIXELS_PER_RING);
 
-// ind: on the ring object, one value per small ring (s/12), the 12 small rings
-// sitting clockwise round the big circle. Here each pixel takes the value of
-// the small ring whose 30° sector it falls in, clockwise from
-// SMALL_RING_0_DEG, so all three rings light by sector the way the small rings
-// do round the big circle (checked on the real pendant). Sector 0 sits at
-// 8 o'clock; change SMALL_RING_0_DEG to start elsewhere.
+// The ring object's 12 small rings, laid onto the pendant: small ring s owns the
+// 30° sector centred SMALL_RING_0_DEG - 30*s (clockwise round the pendant), so
+// all three pendant rings light by sector the way the small rings do round the
+// big circle (checked on the real pendant). Small ring 0 sits at 8 o'clock;
+// change SMALL_RING_0_DEG to start elsewhere.
 const SMALL_RINGS = 12;
 const SMALL_RING_0_DEG = 210; // 8 o'clock
+const smallRingOf = (i: number) => {
+    const frac = ((((SMALL_RING_0_DEG - angleOf(i)) % 360) + 360) % 360) / 360;
+    return Math.round(frac * SMALL_RINGS) % SMALL_RINGS;
+};
+
+// ind: on the ring object, one value per small ring, starting at physical
+// small ring IND_FIRST_SMALL_RING and increasing clockwise in steps of 1/11
+// (src/ring-segments/segments.json). Same here, by sector.
+const IND_FIRST_SMALL_RING = 3;
 const indSegment = () =>
     segmentFrom("ind", (i) => {
-        const frac = ((((SMALL_RING_0_DEG - angleOf(i)) % 360) + 360) % 360) / 360;
-        return (Math.round(frac * SMALL_RINGS) % SMALL_RINGS) / SMALL_RINGS;
+        const pos = (smallRingOf(i) - IND_FIRST_SMALL_RING + SMALL_RINGS) % SMALL_RINGS;
+        return round2(pos / (SMALL_RINGS - 1));
     });
+
+// rad: on the ring object, a straight gradient across the whole ring, 0 on the
+// side facing the installation's centre (between small rings 2 and 3) and 1 on
+// the outer side (between 8 and 9). Same here, across the pendant, towards the
+// sector midway between small rings 2 and 3.
+const RAD_INNER_DEG = SMALL_RING_0_DEG - 2.5 * (360 / SMALL_RINGS); // 10:30
+const radSegment = () => {
+    const a = (RAD_INNER_DEG * Math.PI) / 180;
+    const ds = Array.from({ length: NUM_PIXELS }, (_, i) => xOf(i) * Math.cos(a) + yOf(i) * Math.sin(a));
+    const inner = Math.max(...ds), outer = Math.min(...ds);
+    return segmentFrom("rad", (i) => round2((inner - ds[i]) / (inner - outer)));
+};
 
 // arc: on the ring object it runs from each small ring's side facing the big
 // circle's centre (0) to its outer side (6/7). Here: inner ring 0, middle
@@ -116,9 +137,11 @@ const updownSegment = () => {
     return segmentFrom("updown", (i) => round2((top - ys[i]) / (top - bottom)));
 };
 
-// "0".."11": the ring object's single small-ring segments. Small ring s maps to
-// lilum ring s % 3 (0 = outer, 1 = middle, 2 = inner), same direction as centric
-// (on the ring object it is exactly centric restricted to one small ring).
+// "0".."11": the ring object's single small-ring segments. Segment s is
+// physical small ring (s + 3) % 12 (the small ring at ind position s); it maps
+// to lilum ring s % 3 (0 = outer, 1 = middle, 2 = inner), which is the same as
+// (s + 3) % 3, same direction as centric (on the ring object it is exactly
+// centric restricted to one small ring).
 const smallRingSegment = (s: number): Segment => {
     const ring = s % NUM_RINGS;
     const pixels: Pixel[] = [];
@@ -162,6 +185,7 @@ const payload = {
         indSegment(),
         arcSegment(),
         updownSegment(),
+        radSegment(),
         bucketSegment("b1", 0),
         bucketSegment("b2", 1),
         randSegment(),

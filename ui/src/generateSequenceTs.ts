@@ -92,6 +92,7 @@ const UI_MAPPING_TO_SEGMENT: Record<string, string> = {
   centric: 'segment_centric',
   updown: 'segment_updown',
   rand: 'segment_rand',
+  rad: 'segment_rad',
 }
 
 function mappingToSegment(mapping: string | undefined): string {
@@ -485,6 +486,7 @@ import {
   segment_b2,
   segment_centric,
   segment_ind,
+  segment_rad,
   segment_rand,
   segment_updown,
 } from "${importPrefix}/objects/ring-elements";
@@ -576,6 +578,7 @@ import {
   segment_b2,
   segment_centric,
   segment_ind,
+  segment_rad,
   segment_rand,
   segment_updown,
 } from "./objects/ring-elements";
