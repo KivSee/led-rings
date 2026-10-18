@@ -1,4 +1,5 @@
 import React from 'react'
+import { LAYOUT_ROTATION_DEG } from '../ringLayout'
 
 interface RingVisualizationCanvasProps {
   /** precomputedColors[ringNumber (1-12)] = string[144] of rgb colors indexed by pixel index */
@@ -33,6 +34,8 @@ const BASE_OUTER_R = 268
 const BASE_PIX_R = 11
 const BASE_SUB_R = 57
 const BASE_PIX_SIZE = 6
+// LAYOUT_ROTATION_DEG is applied to the whole layout (big rings, sub-rings and
+// pixels) so each ring keeps its orientation relative to the circle.
 
 interface PixelPos { cx: number; cy: number; ringIdx: number; pixelIndex: number }
 
@@ -63,18 +66,18 @@ function buildPixelPositions(size: number, scale: number): PixelPos[] {
   const center = size / 2
   const all: PixelPos[] = []
   for (let bigRingIdx = 0; bigRingIdx < 12; bigRingIdx++) {
-    const bigAngle = (bigRingIdx * 30 - 60) * (Math.PI / 180)
+    const bigAngle = (bigRingIdx * 30 - 60 + LAYOUT_ROTATION_DEG) * (Math.PI / 180)
     const bigCx = center + outerR * Math.cos(bigAngle)
     const bigCy = center + outerR * Math.sin(bigAngle)
     for (let subRingIdx = 0; subRingIdx < 12; subRingIdx++) {
       // sub-ring 0 at 4 o'clock (60° clockwise from 2 o'clock). 4 o'clock = +30° in screen coords.
-      const subAngle = (subRingIdx * 30 + 30) * (Math.PI / 180)
+      const subAngle = (subRingIdx * 30 + 30 + LAYOUT_ROTATION_DEG) * (Math.PI / 180)
       const subCx = bigCx + subR * Math.cos(subAngle)
       const subCy = bigCy + subR * Math.sin(subAngle)
       for (let posIdx = 0; posIdx < 12; posIdx++) {
         const pixelIndex = subRingIdx * 12 + posIdx
         // Pixel 0 faces the big-ring center: 180° inward from sub-ring 0's position.
-        const pixAngle = (210 + subRingIdx * 30 + posIdx * 30) * (Math.PI / 180)
+        const pixAngle = (210 + subRingIdx * 30 + posIdx * 30 + LAYOUT_ROTATION_DEG) * (Math.PI / 180)
         all.push({
           cx: subCx + pixR * Math.cos(pixAngle),
           cy: subCy + pixR * Math.sin(pixAngle),

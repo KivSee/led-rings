@@ -5,7 +5,16 @@
  */
 
 export type MovementType = 'spread' | 'sweep' | 'stagger' | 'random'
-export type MovementDirection = 'forward' | 'backward' | 'center-out' | 'edges-in' | 'pairs-forward' | 'pairs-backward' | 'custom'
+import { RING_COUNT, clockPosition, ringUnitPosition } from './ringLayout'
+
+export type MovementDirection =
+  | 'forward' | 'backward' | 'center-out' | 'edges-in' | 'pairs-forward' | 'pairs-backward'
+  | 'top-bottom' | 'bottom-top' | 'left-right' | 'right-left' | 'custom'
+
+const ALL_DIRECTIONS: MovementDirection[] = [
+  'forward', 'backward', 'center-out', 'edges-in', 'pairs-forward', 'pairs-backward',
+  'top-bottom', 'bottom-top', 'left-right', 'right-left', 'custom',
+]
 
 export interface TimeframeMovement {
   type: MovementType
@@ -66,8 +75,12 @@ export const MOVEMENT_TYPES: MovementTypeDef[] = [
 ]
 
 export const MOVEMENT_DIRECTIONS: Array<{ id: MovementDirection; label: string }> = [
-  { id: 'forward', label: '1 \u2192 12' },
-  { id: 'backward', label: '12 \u2192 1' },
+  { id: 'forward', label: '12 \u2192 11 (clockwise)' },
+  { id: 'backward', label: '11 \u2192 12 (counter-clockwise)' },
+  { id: 'top-bottom', label: 'Top \u2192 Bottom' },
+  { id: 'bottom-top', label: 'Bottom \u2192 Top' },
+  { id: 'left-right', label: 'Left \u2192 Right' },
+  { id: 'right-left', label: 'Right \u2192 Left' },
   { id: 'center-out', label: 'Center \u2192 Out' },
   { id: 'edges-in', label: 'Edges \u2192 In' },
   { id: 'pairs-forward', label: 'Opposite pairs \u2192' },
@@ -75,7 +88,10 @@ export const MOVEMENT_DIRECTIONS: Array<{ id: MovementDirection; label: string }
   { id: 'custom', label: 'Custom order\u2026' },
 ]
 
-const RING_COUNT = 12
+// Ring orderings start from the top of the circle. Because the installation is
+// rotated (see ringLayout.ts), ring 12 hangs nearest the top and ring 11 just
+// left of it, so "forward" runs 12, 1, 2, ..., 11 and "backward" 11, 10, ..., 1, 12.
+const byClockPosition = (a: number, b: number) => clockPosition(a) - clockPosition(b)
 
 /** Opposite ring across the circle (6 apart on a 12-ring layout). */
 function oppositeRing(r: number): number {
@@ -84,14 +100,14 @@ function oppositeRing(r: number): number {
 
 /**
  * Group rings into opposite pairs (r and r+6). A ring whose partner is absent
- * from the set forms its own (singleton) group. Groups are keyed and ordered by
- * their lowest ring number. Returns the step map; reversed for backward.
+ * from the set forms its own (singleton) group. Groups are ordered clockwise
+ * from the top (12/6, 1/7, ..., 5/11). Returns the step map; reversed for backward.
  */
 function getPairSteps(rings: number[], reverse: boolean): Map<number, number> {
   const present = new Set(rings)
   const seen = new Set<number>()
   const groups: number[][] = []
-  for (const r of [...rings].sort((a, b) => a - b)) {
+  for (const r of [...rings].sort(byClockPosition)) {
     if (seen.has(r)) continue
     const partner = oppositeRing(r)
     if (present.has(partner) && partner !== r) {
@@ -103,7 +119,7 @@ function getPairSteps(rings: number[], reverse: boolean): Map<number, number> {
       seen.add(r)
     }
   }
-  // groups already ordered by lowest ring (rings were sorted ascending)
+  // groups already ordered clockwise from the top (rings were sorted that way)
   const ordered = reverse ? [...groups].reverse() : groups
   const stepMap = new Map<number, number>()
   ordered.forEach((group, step) => {
@@ -117,7 +133,19 @@ function getPairSteps(rings: number[], reverse: boolean): Map<number, number> {
 // Rings equidistant from center share a step in center-out / edges-in.
 // ---------------------------------------------------------------------------
 
-const RING_CENTER = 6.5
+// Centre of the clockwise-from-top sequence 12, 1, ..., 11 (positions 0..11):
+// edges are 12 and 11, the centre is between 5 and 6.
+const RING_CENTER = (RING_COUNT - 1) / 2
+
+/**
+ * Rings with the same key share a step; steps follow ascending key. Keys are
+ * rounded so rings at the same physical height/column group together.
+ */
+function stepsByKey(rings: number[], key: (r: number) => number): Map<number, number> {
+  const keyOf = (r: number) => Math.round(key(r) * 1000) / 1000
+  const distinct = [...new Set(rings.map(keyOf))].sort((a, b) => a - b)
+  return new Map(rings.map(r => [r, distinct.indexOf(keyOf(r))]))
+}
 
 /** Deterministic shuffle (seeded by 0) so random movement order is stable per ring set. */
 function shuffledRingOrder(rings: number[]): number[] {
@@ -149,7 +177,7 @@ function getCustomSteps(rings: number[], customOrder: number[] | undefined): Map
 }
 
 function getRingSteps(rings: number[], direction: MovementDirection, type?: MovementType, customOrder?: number[]): Map<number, number> {
-  const sorted = [...rings].sort((a, b) => a - b)
+  const sorted = [...rings].sort(byClockPosition)
 
   // Custom order takes precedence over type-based ordering (e.g. random shuffle).
   if (direction === 'custom') {
@@ -170,36 +198,21 @@ function getRingSteps(rings: number[], direction: MovementDirection, type?: Move
       return getPairSteps(rings, false)
     case 'pairs-backward':
       return getPairSteps(rings, true)
-    case 'center-out': {
-      const withDist = sorted.map(r => ({ r, dist: Math.abs(r - RING_CENTER) }))
-      withDist.sort((a, b) => a.dist - b.dist)
-      const stepMap = new Map<number, number>()
-      let step = 0
-      let prevDist = -1
-      for (const { r, dist } of withDist) {
-        if (dist !== prevDist) {
-          if (prevDist >= 0) step++
-          prevDist = dist
-        }
-        stepMap.set(r, step)
-      }
-      return stepMap
-    }
-    case 'edges-in': {
-      const withDist = sorted.map(r => ({ r, dist: Math.abs(r - RING_CENTER) }))
-      withDist.sort((a, b) => b.dist - a.dist)
-      const stepMap = new Map<number, number>()
-      let step = 0
-      let prevDist = -1
-      for (const { r, dist } of withDist) {
-        if (dist !== prevDist) {
-          if (prevDist >= 0) step++
-          prevDist = dist
-        }
-        stepMap.set(r, step)
-      }
-      return stepMap
-    }
+    case 'center-out':
+      return stepsByKey(rings, r => Math.abs(clockPosition(r) - RING_CENTER))
+    case 'edges-in':
+      return stepsByKey(rings, r => -Math.abs(clockPosition(r) - RING_CENTER))
+    // Physical directions: rings at the same height (or column) share a step.
+    // Full set top → bottom: 11+12, 10+1, 9+2, 8+3, 7+4, 6+5.
+    // Full set left → right: 8+9, 7+10, 6+11, 5+12, 4+1, 3+2.
+    case 'top-bottom':
+      return stepsByKey(rings, r => ringUnitPosition(r).y)
+    case 'bottom-top':
+      return stepsByKey(rings, r => -ringUnitPosition(r).y)
+    case 'left-right':
+      return stepsByKey(rings, r => ringUnitPosition(r).x)
+    case 'right-left':
+      return stepsByKey(rings, r => -ringUnitPosition(r).x)
   }
 }
 
@@ -467,9 +480,8 @@ export function normalizeMovement(raw: unknown): TimeframeMovement | undefined {
   if (!raw || typeof raw !== 'object') return undefined
   const o = raw as Record<string, unknown>
   const validTypes: MovementType[] = ['spread', 'sweep', 'stagger', 'random']
-  const validDirs: MovementDirection[] = ['forward', 'backward', 'center-out', 'edges-in', 'pairs-forward', 'pairs-backward', 'custom']
   if (!validTypes.includes(o.type as MovementType)) return undefined
-  if (!validDirs.includes(o.direction as MovementDirection)) return undefined
+  if (!ALL_DIRECTIONS.includes(o.direction as MovementDirection)) return undefined
   const bpr = Number(o.beatsPerRing)
   if (!Number.isFinite(bpr) || bpr <= 0) return undefined
 
