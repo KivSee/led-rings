@@ -18,7 +18,7 @@ import {
 import { elements, segment } from "./objects/elements";
 import {
   all,
-  center,
+  bottom,
   even,
   left,
   odd,

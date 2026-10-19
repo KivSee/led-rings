@@ -8,8 +8,10 @@ export const odd = [...RING_GROUPS.odd];
 export const even = [...RING_GROUPS.even];
 export const left = [...RING_GROUPS.left];
 export const right = [...RING_GROUPS.right];
-export const center = [...RING_GROUPS.center];
-export const outer = [...RING_GROUPS.outer];
+export const top = [...RING_GROUPS.top];
+export const bottom = [...RING_GROUPS.bottom];
+export const b1 = [...RING_GROUPS.b1];
+export const b2 = [...RING_GROUPS.b2];
 
 export const segment_all = "all";
 export const segment_centric = "centric";

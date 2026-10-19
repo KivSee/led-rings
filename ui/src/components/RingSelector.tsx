@@ -14,7 +14,9 @@ const RingSelector = ({ rings, onChange }: RingSelectorProps) => {
   const panelRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const allRings = [...RING_GROUPS.all]
+  // Ring 12 first: it hangs nearest the top of the installation, so the grid
+  // reads clockwise from the top.
+  const allRings = [12, ...RING_GROUPS.all.filter(r => r !== 12)]
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -135,8 +137,10 @@ const RingSelector = ({ rings, onChange }: RingSelectorProps) => {
             <button onClick={(e) => quickSelect('odd', e)}>Odd</button>
             <button onClick={(e) => quickSelect('left', e)}>Left</button>
             <button onClick={(e) => quickSelect('right', e)}>Right</button>
-            <button onClick={(e) => quickSelect('center', e)}>Center</button>
-            <button onClick={(e) => quickSelect('outer', e)}>Outer</button>
+            <button onClick={(e) => quickSelect('top', e)}>Top</button>
+            <button onClick={(e) => quickSelect('bottom', e)}>Bottom</button>
+            <button onClick={(e) => quickSelect('b1', e)}>B1</button>
+            <button onClick={(e) => quickSelect('b2', e)}>B2</button>
           </div>
           <div className="ring-grid">
             {allRings.map(ring => (

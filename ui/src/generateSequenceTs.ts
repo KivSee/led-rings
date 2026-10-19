@@ -475,11 +475,14 @@ import {
 import { elements, segment } from "${importPrefix}/objects/elements";
 import {
   all,
-  center,
+  b1,
+  b2,
+  bottom,
   even,
   left,
   odd,
   right,
+  top,
   segment_all,
   segment_arc,
   segment_b1,
@@ -567,11 +570,14 @@ import {
 import { elements, segment } from "./objects/elements";
 import {
   all,
-  center,
+  b1,
+  b2,
+  bottom,
   even,
   left,
   odd,
   right,
+  top,
   segment_all,
   segment_arc,
   segment_b1,

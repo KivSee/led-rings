@@ -18,11 +18,11 @@ import {
 import { elements, segment } from "./objects/elements";
 import {
   all,
-  center,
-  even,
+  bottom,
   left,
-  odd,
   right,
+  even,
+  odd,
   segment_arc,
   segment_b1,
   segment_b2,
@@ -74,7 +74,7 @@ const testSequence = async () => {
     });
 
     beats(8, 16, () => {
-      elements(center, () => {
+      elements(bottom, () => {
         segment(segment_arc, () => {
           rainbow({ startHue: 0.75, endHue: 0.98 });
           cycle(8, () => {
@@ -85,7 +85,7 @@ const testSequence = async () => {
     });
 
     beats(7, 9, () => {
-      elements(center, () => {
+      elements(bottom, () => {
         fadeOutIn();
       });
     });

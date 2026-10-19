@@ -23,10 +23,15 @@ export const RING_GROUPS = {
   all: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
   odd: [1, 3, 5, 7, 9, 11],
   even: [2, 4, 6, 8, 10, 12],
-  left: [1, 2, 3, 4, 5, 6],
-  right: [7, 8, 9, 10, 11, 12],
-  center: [4, 5, 6, 7, 8, 9],
-  outer: [1, 2, 3, 10, 11, 12],
+  // Physical halves of the installation (ring 12 hangs just right of the top,
+  // see ui/src/ringLayout.ts). Kept in ascending order: phase() offsets follow
+  // element order, and the preview/generator count rings ascending.
+  left: [6, 7, 8, 9, 10, 11],
+  right: [1, 2, 3, 4, 5, 12],
+  top: [1, 2, 9, 10, 11, 12],
+  bottom: [3, 4, 5, 6, 7, 8],
+  b1: [1, 4, 7, 10],
+  b2: [2, 3, 5, 6, 8, 9, 11, 12],
 } as const
 
 export type RingGroupName = keyof typeof RING_GROUPS
