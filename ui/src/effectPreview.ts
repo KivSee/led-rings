@@ -9,14 +9,33 @@
 
 import { Timeframe, TimeframeEffectEntry, getTimeframeEffects } from './App'
 
-/** Compute per-ring phase offset from an effect entry's phase value.
- *  Uses element position in the rings array (matching C++ animation.ts). */
-function entryPhase(entry: TimeframeEffectEntry | undefined, ringIndex: number, rings: number[]): number {
+/** Compute per-ring phase offset from an effect entry's phase value, matching
+ *  perElementPhase in src/animation/animation.ts for the generated code:
+ *  - elements are emitted in ascending ring order, so index into sorted rings;
+ *  - negative intensity reverses direction (last ring gets offset 0);
+ *  - movement timeframes emit one beats() block per ring (a single element),
+ *    so every ring's offset is 0 on hardware. */
+function entryPhase(entry: TimeframeEffectEntry | undefined, ringIndex: number, timeframe: Timeframe): number {
   const intensity = entry?.phase ?? 0
-  if (intensity <= 0) return 0
+  if (intensity === 0 || timeframe.movement) return 0
+  const rings = [...timeframe.rings].sort((a, b) => a - b)
   const elementIndex = rings.indexOf(ringIndex + 1)  // rings are 1-based
   if (elementIndex < 0 || rings.length <= 1) return 0
-  return elementIndex / rings.length * intensity
+  return intensity > 0
+    ? elementIndex / rings.length * intensity
+    : (rings.length - 1 - elementIndex) / rings.length * -intensity
+}
+
+/** Per-ring hue offset from the timeframe-level color phase. The generated code
+ *  bakes it per ring in ascending ring order (phaseReverse counts from the last). */
+function colorRingPhase(timeframe: Timeframe, ringIndex: number): number {
+  const intensity = timeframe.phase ?? 0
+  if (intensity <= 0) return 0
+  const rings = [...timeframe.rings].sort((a, b) => a - b)
+  const elIdx = rings.indexOf(ringIndex + 1)
+  if (elIdx < 0 || rings.length <= 1) return 0
+  const phaseIdx = timeframe.phaseReverse ? rings.length - 1 - elIdx : elIdx
+  return phaseIdx / rings.length * intensity
 }
 
 const BRIGHTNESS_KEYS = new Set(['brightness', 'fadeIn', 'fadeOut', 'fadeInOut', 'fadeOutIn', 'blink', 'pulse', 'fade'])
@@ -379,7 +398,7 @@ function getBrightnessMult(relPos: number, t: number, timeframe: Timeframe, ring
   // Legacy brightness → FloatFunc conversion
   const legacy = lk.legacyBrightness
   if (legacy) {
-    const func = legacyBrightnessToFloatFunc(legacy, entryPhase(legacy, ringIndex, timeframe.rings))
+    const func = legacyBrightnessToFloatFunc(legacy, entryPhase(legacy, ringIndex, timeframe))
     if (func) mult *= evalFloat(t, func)
   }
 
@@ -387,19 +406,19 @@ function getBrightnessMult(relPos: number, t: number, timeframe: Timeframe, ring
   const timedB = lk.timedBrightness
   if (timedB?.params) {
     const par = timedB.params as Record<string, unknown>
-    mult = evalBrightnessMult(mult, t, par, entryPhase(timedB, ringIndex, timeframe.rings))
+    mult = evalBrightnessMult(mult, t, par, entryPhase(timedB, ringIndex, timeframe))
   }
   // Position brightness — value offset matches C++ applyPhaseToEffect
   const posB = lk.posBrightness
   if (posB?.params) {
     const par = posB.params as Record<string, unknown>
-    mult = evalBrightnessMult(mult, relPos, par, entryPhase(posB, ringIndex, timeframe.rings))
+    mult = evalBrightnessMult(mult, relPos, par, entryPhase(posB, ringIndex, timeframe))
   }
   // Snake brightness
   const snakeB = lk.snakeBrightness
   if (snakeB?.params) {
     const par = snakeB.params as Record<string, unknown>
-    const snakeBPhase = entryPhase(snakeB, ringIndex, timeframe.rings)
+    const snakeBPhase = entryPhase(snakeB, ringIndex, timeframe)
     const head = evalFloat(t, par.head as FloatFunc) + snakeBPhase
     const tailLen = evalFloat(t, (par.tail_length ?? par.tailLength) as FloatFunc)
     const cyclic = par.cyclic === true
@@ -428,7 +447,7 @@ function getHueOffset(relPos: number, t: number, timeframe: Timeframe, ringIndex
   // Legacy hue → FloatFunc conversion
   const legacy = lk.legacyHue
   if (legacy) {
-    const func = legacyHueToFloatFunc(legacy, entryPhase(legacy, ringIndex, timeframe.rings))
+    const func = legacyHueToFloatFunc(legacy, entryPhase(legacy, ringIndex, timeframe))
     if (func) offset += evalFloat(t, func)
   }
 
@@ -436,21 +455,21 @@ function getHueOffset(relPos: number, t: number, timeframe: Timeframe, ringIndex
   const timedH = lk.timedHue
   if (timedH?.params) {
     const par = timedH.params as Record<string, unknown>
-    const huePhaseOffset = entryPhase(timedH, ringIndex, timeframe.rings)
+    const huePhaseOffset = entryPhase(timedH, ringIndex, timeframe)
     if (par.offset_factor != null) offset += evalFloat(t, par.offset_factor as FloatFunc) + huePhaseOffset
   }
   // Position hue
   const posH = lk.posHue
   if (posH?.params) {
     const par = posH.params as Record<string, unknown>
-    const relPosShifted = ((relPos + entryPhase(posH, ringIndex, timeframe.rings)) % 1 + 1) % 1
+    const relPosShifted = ((relPos + entryPhase(posH, ringIndex, timeframe)) % 1 + 1) % 1
     if (par.offset_factor != null) offset += evalFloat(relPosShifted, par.offset_factor as FloatFunc)
   }
   // Snake hue
   const snakeH = lk.snakeHue
   if (snakeH?.params) {
     const par = snakeH.params as Record<string, unknown>
-    const snakeHPhase = entryPhase(snakeH, ringIndex, timeframe.rings)
+    const snakeHPhase = entryPhase(snakeH, ringIndex, timeframe)
     const head = evalFloat(t, par.head as FloatFunc) + snakeHPhase
     const tailLen = evalFloat(t, (par.tail_length ?? par.tailLength) as FloatFunc)
     const cyclic = par.cyclic === true
@@ -478,19 +497,19 @@ function getSaturationMult(relPos: number, t: number, timeframe: Timeframe, ring
   const timedS = lk.timedSaturation
   if (timedS?.params) {
     const par = timedS.params as Record<string, unknown>
-    const tShifted = ((t + entryPhase(timedS, ringIndex, timeframe.rings)) % 1 + 1) % 1
+    const tShifted = ((t + entryPhase(timedS, ringIndex, timeframe)) % 1 + 1) % 1
     mult = evalBrightnessMult(mult, tShifted, par)
   }
   const posS = lk.posSaturation
   if (posS?.params) {
     const par = posS.params as Record<string, unknown>
-    const relPosShifted = ((relPos + entryPhase(posS, ringIndex, timeframe.rings)) % 1 + 1) % 1
+    const relPosShifted = ((relPos + entryPhase(posS, ringIndex, timeframe)) % 1 + 1) % 1
     mult = evalBrightnessMult(mult, relPosShifted, par)
   }
   const snakeS = lk.snakeSaturation
   if (snakeS?.params) {
     const par = snakeS.params as Record<string, unknown>
-    const snakeSPhase = entryPhase(snakeS, ringIndex, timeframe.rings)
+    const snakeSPhase = entryPhase(snakeS, ringIndex, timeframe)
     const head = evalFloat(t, par.head as FloatFunc) + snakeSPhase
     const tailLen = evalFloat(t, (par.tail_length ?? par.tailLength) as FloatFunc)
     const cyclic = par.cyclic === true
@@ -521,7 +540,7 @@ function getSnakeMask(
 ): number {
   const entry = getEffectLookup(timeframe).motion
   if (!entry) return 1
-  const params = legacyMotionToSnakeParams(entry, entryPhase(entry, ringIndex, timeframe.rings))
+  const params = legacyMotionToSnakeParams(entry, entryPhase(entry, ringIndex, timeframe))
   if (!params) return 1
   const head = evalFloat(t, params.head)
   const tail = evalFloat(t, params.tailLength)
@@ -547,17 +566,7 @@ export function getPixelColor(
   holdOff: boolean = false
 ): HSV {
   // Color phase from timeframe level (offsets base hue per ring)
-  const colorPhaseIntensity = timeframe.phase ?? 0
-  let colorPerRingPhase = 0
-  if (colorPhaseIntensity > 0) {
-    const elIdx = timeframe.rings.indexOf(ringIndex + 1)
-    if (elIdx >= 0 && timeframe.rings.length > 1) {
-      const phaseIdx = timeframe.phaseReverse ? timeframe.rings.length - 1 - elIdx : elIdx
-      colorPerRingPhase = phaseIdx / timeframe.rings.length * colorPhaseIntensity
-    }
-  }
-
-  let { h, s, v } = getBaseColor(relPos, timeframe, colorPerRingPhase)
+  let { h, s, v } = getBaseColor(relPos, timeframe, colorRingPhase(timeframe, ringIndex))
 
   // Each effect function reads phase from its own effect entry
   h = (h + getHueOffset(relPos, t, timeframe, ringIndex)) % 1
@@ -589,19 +598,15 @@ export function getPixelColorMulti(
 ): HSV {
   if (timeframesWithT.length === 0) return { h: 0, s: 0, v: 0 }
 
-  // Base color from first timeframe that contributes color (hasExplicitColor !== false); else neutral
-  const firstWithColor = timeframesWithT.find(t => t.timeframe.hasExplicitColor !== false)
-  const baseSource = firstWithColor ?? timeframesWithT[0]
-  const colorPhaseIntensity = baseSource.timeframe.phase ?? 0
-  let colorPerRingPhase = 0
-  if (colorPhaseIntensity > 0) {
-    const elIdx = baseSource.timeframe.rings.indexOf(ringIndex + 1)
-    if (elIdx >= 0 && baseSource.timeframe.rings.length > 1) {
-      const phaseIdx = baseSource.timeframe.phaseReverse ? baseSource.timeframe.rings.length - 1 - elIdx : elIdx
-      colorPerRingPhase = phaseIdx / baseSource.timeframe.rings.length * colorPhaseIntensity
-    }
+  // Base color from the LAST timeframe that contributes color (hasExplicitColor !== false); else neutral.
+  // The generated code emits every color block in timeframe order and the renderer's constColor
+  // overwrites the pixel, so the last color-setting timeframe covering the pixel wins on hardware.
+  let lastWithColor: (typeof timeframesWithT)[number] | undefined
+  for (const entry of timeframesWithT) {
+    if (entry.timeframe.hasExplicitColor !== false) lastWithColor = entry
   }
-  let { h, s, v } = getBaseColor(baseSource.relPos, baseSource.timeframe, colorPerRingPhase)
+  const baseSource = lastWithColor ?? timeframesWithT[0]
+  let { h, s, v } = getBaseColor(baseSource.relPos, baseSource.timeframe, colorRingPhase(baseSource.timeframe, ringIndex))
 
   // Fold s/v sequentially through every timeframe's effect chain (instead of
   // multiplying independent per-timeframe results) so mult_factor_increase in
