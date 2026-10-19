@@ -4,7 +4,7 @@
     "lengthSeconds": 248.7,
     "bpm": 300,
     "startOffsetMs": 3000,
-    "runStartTimeSeconds": 3.075384406165005,
+    "runStartTimeSeconds": 58.36220489573889,
     "animationType": "song",
     "audioFilePath": "loop.wav",
     "beatTimestampsMs": [
@@ -1446,7 +1446,10 @@
     ],
     "lilumRings": [
       1,
-      2
+      2,
+      4,
+      7,
+      10
     ]
   },
   "timeframes": [
@@ -1584,14 +1587,150 @@
           "type": "cycle",
           "beatsInCycle": 6
         }
+      ]
+    },
+    {
+      "id": "snake-wave-right",
+      "startTime": 76,
+      "endTime": 124,
+      "label": "Snake Wave Right (clockwise)",
+      "color": "#8b5cf6",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        12
+      ],
+      "mapping": "ind",
+      "movement": {
+        "type": "spread",
+        "direction": "edges-in",
+        "beatsPerRing": 6
+      },
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
       ],
       "effects": [
         {
-          "id": "sw-snake",
+          "id": "snake-wave-right-snake",
           "effectKey": "snake",
           "params": {
             "tailLength": 0.5,
-            "cyclic": true
+            "cyclic": true,
+            "reverse": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "snake-wave-left",
+      "startTime": 76,
+      "endTime": 124,
+      "label": "Snake Wave Left (counter-clockwise)",
+      "color": "#8b5cf6",
+      "hasExplicitColor": false,
+      "rings": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "mapping": "ind",
+      "movement": {
+        "type": "spread",
+        "direction": "edges-in",
+        "beatsPerRing": 6
+      },
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "snake-wave-left-snake",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 1.5,
+                "end": 0.5
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.5
+              }
+            },
+            "cyclic": true,
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 1,
+                "end": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "snake-wave-left-dark",
+      "startTime": 76,
+      "endTime": 124,
+      "label": "Snake Wave Left (dark half)",
+      "color": "#8b5cf6",
+      "hasExplicitColor": false,
+      "rings": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "mapping": "ind",
+      "movement": {
+        "type": "spread",
+        "direction": "edges-in",
+        "beatsPerRing": 6
+      },
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "snake-wave-left-dark-fx",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 1,
+                "end": 0
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.5
+              }
+            },
+            "cyclic": true,
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
           }
         }
       ]
@@ -1632,10 +1771,10 @@
       ]
     },
     {
-      "id": "sc-snake-all",
+      "id": "sc-snake-right",
       "startTime": 124,
-      "endTime": 166,
-      "label": "Snake All Rings",
+      "endTime": 192,
+      "label": "Snake All Rings Right (clockwise)",
       "color": "#a855f7",
       "rings": [
         1,
@@ -1643,12 +1782,6 @@
         3,
         4,
         5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
         12
       ],
       "mapping": "centric",
@@ -1667,6 +1800,102 @@
             "cyclic": true
           },
           "phase": 0
+        }
+      ]
+    },
+    {
+      "id": "sc-snake-all",
+      "startTime": 124,
+      "endTime": 192,
+      "label": "Snake All Rings Left (counter-clockwise)",
+      "color": "#a855f7",
+      "rings": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "mapping": "centric",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "sc-s-all-ccw",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 1.5,
+                "end": 0.5
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.5
+              }
+            },
+            "cyclic": true,
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 1,
+                "end": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sc-snake-all-dark",
+      "startTime": 124,
+      "endTime": 192,
+      "label": "Snake All Rings Left (dark half)",
+      "color": "#a855f7",
+      "hasExplicitColor": false,
+      "rings": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "mapping": "centric",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "sc-snake-all-dark-fx",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 1,
+                "end": 0
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.5
+              }
+            },
+            "cyclic": true,
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
         }
       ]
     },
@@ -1866,11 +2095,12 @@
       ]
     },
     {
-      "id": "dup-1772819818817-8493",
+      "id": "sat-fade-166",
       "startTime": 166,
       "endTime": 192,
-      "label": "Snake All Rings Arc",
-      "color": "#a855f7",
+      "label": "Saturation Fade to White",
+      "color": "#ffffff",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -1885,22 +2115,19 @@
         11,
         12
       ],
-      "mapping": "arc",
-      "cycles": [
-        {
-          "type": "cycle",
-          "beatsInCycle": 6
-        }
-      ],
+      "mapping": "all",
       "effects": [
         {
-          "id": "sc-s-all-uh9m",
-          "effectKey": "snake",
+          "id": "sat-fade-166-fx",
+          "effectKey": "timed_saturation",
           "params": {
-            "tailLength": 0.5,
-            "cyclic": true
-          },
-          "phase": 0
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 1,
+                "end": 0
+              }
+            }
+          }
         }
       ]
     },
@@ -1939,38 +2166,6 @@
             }
           },
           "phase": 1
-        }
-      ]
-    },
-    {
-      "id": "dup-1772819954019-s6rq",
-      "startTime": 158,
-      "endTime": 174,
-      "label": "Fade Out In 2",
-      "color": "#c71c0a",
-      "hasExplicitColor": false,
-      "rings": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
-      ],
-      "mapping": "all",
-      "effects": [
-        {
-          "id": "eff-1772819697267-97r3hv4qwne-d7rn",
-          "effectKey": "fadeOutIn",
-          "params": {
-            "low": 0
-          }
         }
       ]
     },
@@ -2022,10 +2217,50 @@
       ]
     },
     {
-      "id": "preset-1772895058540-1-72j0",
+      "id": "snake-rand-cont",
+      "startTime": 312,
+      "endTime": 356,
+      "label": "Snake All Rings Rand (cont.)",
+      "color": "#a855f7",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "sc-s-all-fdbk-cont",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true
+          },
+          "phase": 0
+        }
+      ]
+    },
+    {
+      "id": "snake-ind-308",
       "startTime": 308,
       "endTime": 356,
-      "label": "Snake Head cycle 6",
+      "label": "Snake Ind",
       "color": "#3b82f6",
       "rings": [
         1,
@@ -2041,7 +2276,8 @@
         11,
         12
       ],
-      "mapping": "arc",
+      "mapping": "all",
+      "phase": 1,
       "cycles": [
         {
           "type": "cycle",
@@ -2050,11 +2286,27 @@
       ],
       "effects": [
         {
-          "id": "preset-1772895058540-xaqe",
-          "effectKey": "snakeHeadSteps",
+          "id": "snake-ind-308-snake",
+          "effectKey": "snake_brightness",
           "params": {
-            "steps": 6,
-            "tailLength": 0.5
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 1
+              }
+            },
+            "cyclic": true,
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0.4,
+                "end": 1
+              }
+            }
           }
         }
       ]
@@ -2240,7 +2492,7 @@
         11,
         12
       ],
-      "mapping": "all",
+      "mapping": "b2",
       "movement": {
         "type": "random",
         "direction": "forward",
@@ -2259,8 +2511,8 @@
     {
       "id": "dup-1772901470681-vbe4",
       "startTime": 454,
-      "endTime": 576,
-      "label": "Blink Out Spread Forward",
+      "endTime": 534,
+      "label": "Blink Out Spread Top to Bottom",
       "color": "#fc5c5e",
       "hasExplicitColor": false,
       "rings": [
@@ -2280,7 +2532,7 @@
       "mapping": "all",
       "movement": {
         "type": "spread",
-        "direction": "forward",
+        "direction": "top-bottom",
         "beatsPerRing": 16
       },
       "cycles": [
@@ -2302,11 +2554,11 @@
       ]
     },
     {
-      "id": "1773569794546",
-      "startTime": 296,
-      "endTime": 312,
-      "label": "Fade Out",
-      "color": "#3d0278",
+      "id": "dup-1792310400000-bo8a",
+      "startTime": 550,
+      "endTime": 566,
+      "label": "Blink Out All Sat 0.5",
+      "color": "#fc5c5e",
       "hasExplicitColor": false,
       "rings": [
         1,
@@ -2323,19 +2575,41 @@
         12
       ],
       "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycleBeats",
+          "beatsInCycle": 16,
+          "startBeat": 2,
+          "endBeat": 8
+        }
+      ],
       "effects": [
         {
-          "id": "eff-1773569830841-urx5cl8xc8",
-          "effectKey": "fadeOut"
+          "id": "eff-1792310400000-bo8a-blink",
+          "effectKey": "blink",
+          "params": {
+            "low": 0
+          }
+        },
+        {
+          "id": "eff-1792310400000-bo8a-sat",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0.5
+              }
+            }
+          }
         }
       ]
     },
     {
-      "id": "1773569896456",
-      "startTime": 312,
-      "endTime": 320,
-      "label": "Fade In",
-      "color": "#5eb838",
+      "id": "dup-1792310400000-bo8b",
+      "startTime": 566,
+      "endTime": 576,
+      "label": "Blink Out All Sat 0",
+      "color": "#fc5c5e",
       "hasExplicitColor": false,
       "rings": [
         1,
@@ -2352,17 +2626,39 @@
         12
       ],
       "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycleBeats",
+          "beatsInCycle": 16,
+          "startBeat": 2,
+          "endBeat": 8
+        }
+      ],
       "effects": [
         {
-          "id": "eff-1773569906202-1fmjhrf8kep",
-          "effectKey": "fadeIn"
+          "id": "eff-1792310400000-bo8b-blink",
+          "effectKey": "blink",
+          "params": {
+            "low": 0
+          }
+        },
+        {
+          "id": "eff-1792310400000-bo8b-sat",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
         }
       ]
     },
     {
       "id": "dup-1773570608803-zpmt",
       "startTime": 356,
-      "endTime": 380,
+      "endTime": 368,
       "label": "Pulse Accumulate",
       "color": "#38ea0a",
       "rings": [
@@ -2384,7 +2680,7 @@
       "movement": {
         "type": "random",
         "direction": "forward",
-        "beatsPerRing": 2,
+        "beatsPerRing": 1,
         "accumulate": true
       },
       "effects": [
@@ -2394,6 +2690,91 @@
           "params": {
             "low": 0.5,
             "staticPhase": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "pulse-full-368",
+      "startTime": 368,
+      "endTime": 380,
+      "label": "Pulse Full",
+      "color": "#38ea0a",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "phase": 2,
+      "effects": [
+        {
+          "id": "eff-1772900127237-l5mzbp2my2j-owrb-full",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.5,
+            "staticPhase": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "pulse-takeout-368",
+      "startTime": 368,
+      "endTime": 380,
+      "label": "Take Out Rings",
+      "color": "#000000",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "random",
+        "direction": "custom",
+        "beatsPerRing": 1,
+        "retire": true,
+        "customOrder": [
+          12,
+          11,
+          1,
+          10,
+          2,
+          9,
+          3,
+          8,
+          4,
+          7,
+          5,
+          6
+        ]
+      },
+      "effects": [
+        {
+          "id": "pulse-takeout-368-fx",
+          "effectKey": "brightness",
+          "params": {
+            "value": 1
           }
         }
       ]
@@ -3365,9 +3746,20 @@
           "effectKey": "timed_saturation",
           "params": {
             "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        },
+        {
+          "id": "eff-1792310400000-clap-bri",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
               "linear": {
-                "start": 0,
-                "end": 1
+                "start": 1,
+                "end": 0
               }
             }
           }
@@ -4880,7 +5272,7 @@
         11,
         12
       ],
-      "mapping": "all",
+      "mapping": "b2",
       "movement": {
         "type": "spread",
         "direction": "pairs-forward",
@@ -4926,7 +5318,7 @@
         11,
         12
       ],
-      "mapping": "all",
+      "mapping": "b2",
       "movement": {
         "type": "spread",
         "direction": "pairs-backward",
@@ -5039,7 +5431,7 @@
       "id": "dup-1780759198222-xq99",
       "startTime": 700,
       "endTime": 831,
-      "label": "Snake All Rings Centric Reverse",
+      "label": "Snake All Rings Rad In to Out",
       "color": "#a855f7",
       "rings": [
         1,
@@ -5055,11 +5447,11 @@
         11,
         12
       ],
-      "mapping": "centric",
+      "mapping": "rad",
       "cycles": [
         {
           "type": "cycle",
-          "beatsInCycle": 8
+          "beatsInCycle": 16
         }
       ],
       "effects": [
@@ -5067,9 +5459,9 @@
           "id": "sc-s-all-qhga-zwaq",
           "effectKey": "snake",
           "params": {
-            "tailLength": 0.5,
+            "tailLength": 0.8,
             "cyclic": true,
-            "reverse": true
+            "reverse": false
           },
           "phase": 0
         }
@@ -5115,14 +5507,14 @@
     }
   ],
   "windowSizes": {
-    "playbackPanelWidth": 900,
+    "playbackPanelWidth": 621,
     "detailsPanelWidth": 405,
     "spectrogramHeight": 212,
     "headerHeight": 56
   },
   "spectrogramOpen": false,
   "view": {
-    "startBeat": 1059.86,
+    "startBeat": 305.48,
     "beatsPerScreen": 128
   },
   "theme": "dark"
