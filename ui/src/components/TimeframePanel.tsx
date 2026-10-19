@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import { Timeframe, TimeframeCycleEntry, TimeframeCycleBeats, getTimeframeEffects, TimeframeEffectEntry } from '../App'
 import { MOVEMENT_TYPES, MOVEMENT_DIRECTIONS, defaultBeatsPerRing } from '../movementGenerators'
-import type { MovementType, MovementDirection } from '../movementGenerators'
+import type { MovementType, MovementDirection, MovementExtraKey } from '../movementGenerators'
 import segmentsData from '../segments.json'
 import RingVisualization from './RingVisualization'
 import HsvColorPicker from './HsvColorPicker'
@@ -224,10 +224,11 @@ type EffectParamDef = {
   hint?: string
 }
 
-const MOVEMENT_EXTRA_HINTS: Record<'retire' | 'bounce' | 'accumulate', string> = {
+const MOVEMENT_EXTRA_HINTS: Record<MovementExtraKey, string> = {
   retire: 'Rings also turn off in activation order — spread: staggered end times (diamond shape); random: ring goes dark after its turn',
   bounce: 'Sweep ping-pongs back and forth instead of restarting from the first ring',
   accumulate: 'Rings stay on after their turn instead of turning off',
+  darkBefore: 'Rings stay fully off until the spread reaches them, hiding every other layer on them until then',
 }
 
 const EFFECT_PARAM_SCHEMAS: Record<string, EffectParamDef[]> = {
@@ -1350,6 +1351,11 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, songLengthBeats }: Timef
                           if (checked && ep.key === 'retire') updates.accumulate = undefined
                           if (checked && ep.key === 'accumulate') updates.retire = undefined
                           const updated = { ...mv, ...updates }
+                          // Dark before start doesn't change timing; keep the user's beats/ring.
+                          if (ep.key === 'darkBefore') {
+                            onUpdate({ movement: updated })
+                            return
+                          }
                           const bpr = defaultBeatsPerRing(
                             mv.type, timeframe.startTime, timeframe.endTime, timeframe.rings, mv.direction,
                             updated.bounce,

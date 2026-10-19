@@ -22,6 +22,9 @@ export interface TimeframeMovement {
   beatsPerRing: number
   /** Spread: also stagger end times (diamond/rhombus pattern). First ring stays longest. */
   retire?: boolean
+  /** Spread: rings stay dark from the timeframe start until their turn, so
+   *  other layers (e.g. coloring) don't show on them before the spread reaches them. */
+  darkBefore?: boolean
   /** Sweep: ping-pong back and forth. */
   bounce?: boolean
   /** Random: each ring turns on at its step and stays on for the rest of the timeframe. */
@@ -37,8 +40,10 @@ export interface MovementTypeDef {
   id: MovementType
   label: string
   description: string
-  extraParams: Array<{ key: 'retire' | 'bounce' | 'accumulate'; label: string }>
+  extraParams: Array<{ key: MovementExtraKey; label: string }>
 }
+
+export type MovementExtraKey = 'retire' | 'bounce' | 'accumulate' | 'darkBefore'
 
 export const MOVEMENT_TYPES: MovementTypeDef[] = [
   {
@@ -47,6 +52,7 @@ export const MOVEMENT_TYPES: MovementTypeDef[] = [
     description: 'Rings activate progressively; all stay on until the end.',
     extraParams: [
       { key: 'retire', label: 'Retire (diamond)' },
+      { key: 'darkBefore', label: 'Dark before start' },
     ],
   },
   {
@@ -349,11 +355,14 @@ export function getMovementRingWindows(
     }
     case 'spread': {
       const s = startTime + step * bpr
-      if (movement.retire) {
-        const e = endTime - step * bpr
-        return s < e ? [{ start: s, end: e }] : []
+      const out: MovementWindow[] = []
+      // Dark before start: hold the ring off until its turn.
+      if (movement.darkBefore && s > startTime) {
+        out.push({ start: startTime, end: Math.min(s, endTime), holdOff: true })
       }
-      return s < endTime ? [{ start: s, end: endTime }] : []
+      const e = movement.retire ? endTime - step * bpr : endTime
+      if (s < e) out.push({ start: s, end: e })
+      return out
     }
 
     case 'sweep': {
@@ -505,6 +514,7 @@ export function normalizeMovement(raw: unknown): TimeframeMovement | undefined {
     direction,
     beatsPerRing: bpr,
     retire: o.retire === true ? true : undefined,
+    darkBefore: o.darkBefore === true ? true : undefined,
     bounce: o.bounce === true ? true : undefined,
     accumulate: o.accumulate === true ? true : undefined,
     customOrder,
