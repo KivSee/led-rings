@@ -19,17 +19,21 @@ import {
 import { elements, segment } from "../objects/elements";
 import {
   all,
-  center,
+  b1,
+  b2,
+  bottom,
   even,
   left,
   odd,
   right,
+  top,
   segment_all,
   segment_arc,
   segment_b1,
   segment_b2,
   segment_centric,
   segment_ind,
+  segment_rad,
   segment_rand,
   segment_updown,
 } from "../objects/ring-elements";
@@ -58,7 +62,7 @@ const aladdin = async () => {
     })
 
     beats(8, 16, () => {
-      elements(center, () => {
+      elements(bottom, () => {
         segment(segment_arc, () => {
           constColor({ hue: 0.7503, sat: 1.0000, val: 1.0000 })
         });
@@ -662,7 +666,7 @@ const aladdin = async () => {
     })
 
     beats(8, 16, () => {
-      elements(center, () => {
+      elements(bottom, () => {
         segment(segment_arc, () => {
           addEffect({ position_hue: { offset_factor: { linear: { start: 0, end: 0.23 } } } })
         });
@@ -670,7 +674,7 @@ const aladdin = async () => {
     })
 
     beats(7, 9, () => {
-      elements(center, () => {
+      elements(bottom, () => {
         segment(segment_all, () => {
           fadeOutIn()
         });
@@ -1335,7 +1339,7 @@ const aladdin = async () => {
 
     beats(8, 16, () => {
       cycle(8, () => {
-        elements(center, () => {
+        elements(bottom, () => {
           segment(segment_arc, () => {
             snakeInOut()
           });
@@ -1552,7 +1556,9 @@ const aladdin = async () => {
 
   console.log("sending sequence");
   await sendSequence("aladdin", anim.getSequence());
-  await startSong("aladdin", 0);
+  if (!process.env.SEND_ONLY) {
+    await startSong("aladdin", 0);
+  }
 };
 
 (async () => {

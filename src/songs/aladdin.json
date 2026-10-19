@@ -119,12 +119,12 @@
       "label": "",
       "color": "#8000ff",
       "rings": [
+        3,
         4,
         5,
         6,
         7,
-        8,
-        9
+        8
       ],
       "mapping": "arc",
       "effects": [
@@ -150,12 +150,12 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
+        3,
         4,
         5,
         6,
         7,
-        8,
-        9
+        8
       ],
       "mapping": "arc",
       "cycles": [
@@ -179,12 +179,12 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
+        3,
         4,
         5,
         6,
         7,
-        8,
-        9
+        8
       ],
       "mapping": "all",
       "effects": [
@@ -230,12 +230,12 @@
       "label": "",
       "color": "#2c19ff",
       "rings": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
       ],
       "mapping": "all"
     },
@@ -600,11 +600,11 @@
       "label": "",
       "color": "#2c19ff",
       "rings": [
-        7,
-        8,
-        9,
-        10,
-        11,
+        1,
+        2,
+        3,
+        4,
+        5,
         12
       ],
       "mapping": "all"
