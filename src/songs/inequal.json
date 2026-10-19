@@ -4,7 +4,7 @@
     "lengthSeconds": 312,
     "bpm": 150,
     "startOffsetMs": 0,
-    "runStartTimeSeconds": 51.14074074074074,
+    "runStartTimeSeconds": 91.53939393939395,
     "animationType": "song",
     "audioFilePath": "inequal.wav"
   },
@@ -35,7 +35,8 @@
       "movement": {
         "type": "spread",
         "direction": "edges-in",
-        "beatsPerRing": 12
+        "beatsPerRing": 12,
+        "darkBefore": true
       },
       "cycles": [
         {
@@ -67,7 +68,7 @@
       "startTime": 0,
       "endTime": 72,
       "label": "B2 Saturate",
-      "color": "#ffffff",
+      "color": "#b80400",
       "rings": [
         1,
         2,
@@ -104,33 +105,56 @@
       "label": "B1 Color Left",
       "color": "#d51f1f",
       "rings": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
       ],
       "mapping": "b1",
-      "phase": 1
+      "phase": 1,
+      "phaseReverse": true
+    },
+    {
+      "id": "dup-1784366834861-v63x-r12",
+      "startTime": 0,
+      "endTime": 72,
+      "label": "B1 Color Right (12)",
+      "color": "#d51f1f",
+      "rings": [
+        12
+      ],
+      "mapping": "b1",
+      "effects": [
+        {
+          "id": "eff-1784367323592-l0fo3aytvh-r12",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
     },
     {
       "id": "dup-1784366834861-v63x",
       "startTime": 0,
       "endTime": 72,
-      "label": "B1 Color Right",
-      "color": "#d51f1f",
+      "label": "B1 Color Right (1-5)",
+      "color": "#d5d51f",
       "rings": [
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
+        1,
+        2,
+        3,
+        4,
+        5
       ],
       "mapping": "b1",
-      "phase": 1,
-      "phaseReverse": true,
+      "phase": 0.8333333333333334,
       "effects": [
         {
           "id": "eff-1784367323592-l0fo3aytvh",
@@ -151,6 +175,7 @@
       "endTime": 144,
       "label": "Second Part Snake",
       "color": "#d63fe9",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -165,12 +190,13 @@
         11,
         12
       ],
-      "mapping": "centric",
+      "mapping": "rand",
       "phase": 0,
       "movement": {
         "type": "spread",
         "direction": "center-out",
-        "beatsPerRing": 12
+        "beatsPerRing": 12,
+        "darkBefore": true
       },
       "cycles": [
         {
@@ -187,15 +213,23 @@
             "cyclic": true,
             "reverse": false
           }
+        },
+        {
+          "id": "eff-1784405878275-5vrf6jg3b0v",
+          "effectKey": "brightness",
+          "params": {
+            "value": 0.5
+          }
         }
       ]
     },
     {
       "id": "1784371391372",
       "startTime": 72,
-      "endTime": 144,
-      "label": "Pulsate",
+      "endTime": 216,
+      "label": "Fast Pulse",
       "color": "#6eafc5",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -211,7 +245,12 @@
         12
       ],
       "mapping": "all",
-      "hasExplicitColor": false,
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 0.33
+        }
+      ],
       "effects": [
         {
           "id": "eff-1784371552798-s94j6kieecb",
@@ -221,14 +260,7 @@
             "staticPhase": 0
           }
         }
-      ],
-      "cycles": [
-        {
-          "type": "cycle",
-          "beatsInCycle": 0.33
-        }
-      ],
-      "disabled": true
+      ]
     },
     {
       "id": "dup-1784371726229-h8s7",
@@ -236,6 +268,7 @@
       "endTime": 144,
       "label": "Second Part Fade",
       "color": "#d63fe9",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -271,9 +304,10 @@
     {
       "id": "1784372446249",
       "startTime": 110,
-      "endTime": 139,
-      "label": "Timeframe 8",
+      "endTime": 144,
+      "label": "Slow Pulse",
       "color": "#dd224d",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -289,21 +323,411 @@
         12
       ],
       "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1784405954679-pa8lqiuqa58",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.25,
+            "staticPhase": 0.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1784405534748-fl0a-r12",
+      "startTime": 72,
+      "endTime": 228,
+      "label": "B1 Color Right (12)",
+      "color": "#d51f1f",
+      "rings": [
+        12
+      ],
+      "mapping": "b1",
+      "effects": [
+        {
+          "id": "eff-1784367323592-l0fo3aytvh-87zn-r12",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1784405534748-fl0a",
+      "startTime": 72,
+      "endTime": 228,
+      "label": "B1 Color Right (1-5)",
+      "color": "#d5d51f",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "mapping": "b1",
+      "phase": 0.8333333333333334,
+      "effects": [
+        {
+          "id": "eff-1784367323592-l0fo3aytvh-87zn",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1784405542914-627i",
+      "startTime": 72,
+      "endTime": 228,
+      "label": "B1 Color Left",
+      "color": "#d51f1f",
+      "rings": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "mapping": "b1",
+      "phase": 1,
+      "phaseReverse": true
+    },
+    {
+      "id": "dup-1784405802604-b1ad",
+      "startTime": 72,
+      "endTime": 144,
+      "label": "B2 Saturate (copy)",
+      "color": "#00aaff",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b2",
+      "effects": [
+        {
+          "id": "eff-1784365647748-ro4a9tqksvb-rh6p",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "1792423097439",
+      "startTime": 216,
+      "endTime": 228,
+      "label": "Blink in fade",
+      "color": "#ffffff",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b1",
       "hasExplicitColor": false,
       "effects": [
         {
-          "id": "eff-1784372468610-dbbd3ljq3k",
+          "id": "eff-1792423994058-i61k274woll",
           "effectKey": "pulse",
           "params": {
             "low": 0.5,
             "staticPhase": 0
+          },
+          "phase": 0
+        }
+      ],
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ]
+    },
+    {
+      "id": "dup-1792423356227-1lh0",
+      "startTime": 144,
+      "endTime": 216,
+      "label": "Second Part Fade (copy)",
+      "color": "#d63fe9",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b2",
+      "phase": 0,
+      "movement": {
+        "type": "spread",
+        "direction": "center-out",
+        "beatsPerRing": 12
+      },
+      "effects": [
+        {
+          "id": "eff-1784364968608-r48c9z93ivp-vszj-oejc-cwwx",
+          "effectKey": "fade",
+          "params": {
+            "start": 0.2,
+            "end": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1792423449759-622f",
+      "startTime": 144,
+      "endTime": 198,
+      "label": "Slow Pulse (copy)",
+      "color": "#dd224d",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1784405954679-pa8lqiuqa58-nbgz",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.25,
+            "staticPhase": 0.75
+          }
+        }
+      ]
+    },
+    {
+      "id": "dup-1792423881751-ekux",
+      "startTime": 198,
+      "endTime": 216,
+      "label": "Slow Pulse (copy)",
+      "color": "#dd224d",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 3
+        }
+      ],
+      "effects": [
+        {
+          "id": "eff-1784405954679-pa8lqiuqa58-nbgz-u2sn",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.25,
+            "staticPhase": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "1792424427137",
+      "startTime": 216,
+      "endTime": 228,
+      "label": "Fade",
+      "color": "#a81e0b",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "eff-1792424493627-h5qktn7s9kv",
+          "effectKey": "fadeOut"
+        }
+      ],
+      "hasExplicitColor": false
+    },
+    {
+      "id": "1792424643855",
+      "startTime": 228,
+      "endTime": 274,
+      "label": "March",
+      "color": "#0aa0c0",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "centric",
+      "effects": [
+        {
+          "id": "eff-1792424728029-fx62s3h33vl",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "steps": {
+                "num_steps": 4,
+                "diff_per_step": 0.25,
+                "first_step_value": 0
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.5
+              }
+            },
+            "cyclic": false,
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 1,
+                "end": 0
+              }
+            }
           }
         }
       ],
       "cycles": [
         {
           "type": "cycle",
-          "beatsInCycle": 6
+          "beatsInCycle": 2
+        }
+      ]
+    },
+    {
+      "id": "1792425000321",
+      "startTime": 228,
+      "endTime": 274,
+      "label": "hue shift",
+      "color": "#787368",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "centric",
+      "effects": [
+        {
+          "id": "eff-1792425057098-7wcwg36pyer",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "steps": {
+                "num_steps": 4,
+                "diff_per_step": 0.25,
+                "first_step_value": 0
+              }
+            }
+          }
+        }
+      ],
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 4
         }
       ]
     }
@@ -311,12 +735,12 @@
   "windowSizes": {
     "playbackPanelWidth": 720,
     "detailsPanelWidth": 424,
-    "spectrogramHeight": 233,
+    "spectrogramHeight": 338,
     "headerHeight": 56
   },
   "spectrogramOpen": true,
   "view": {
-    "startBeat": 84.22,
+    "startBeat": 223.47,
     "beatsPerScreen": 64
   },
   "theme": "dark"
