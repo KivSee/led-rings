@@ -269,9 +269,49 @@ const loop = async () => {
       });
     })
 
-    beats(124, 192, () => {
+    beats(130, 192, () => {
       cycle(6, () => {
-        elements(right, () => {
+        elements([1], () => {
+          segment(segment_centric, () => {
+            constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+          });
+        });
+      });
+    })
+
+    beats(136, 192, () => {
+      cycle(6, () => {
+        elements([2], () => {
+          segment(segment_centric, () => {
+            constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+          });
+        });
+      });
+    })
+
+    beats(142, 192, () => {
+      cycle(6, () => {
+        elements([3], () => {
+          segment(segment_centric, () => {
+            constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+          });
+        });
+      });
+    })
+
+    beats(148, 192, () => {
+      cycle(6, () => {
+        elements([4], () => {
+          segment(segment_centric, () => {
+            constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+          });
+        });
+      });
+    })
+
+    beats(154, 192, () => {
+      cycle(6, () => {
+        elements([5], () => {
           segment(segment_centric, () => {
             constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
           });
@@ -281,7 +321,67 @@ const loop = async () => {
 
     beats(124, 192, () => {
       cycle(6, () => {
-        elements(left, () => {
+        elements([12], () => {
+          segment(segment_centric, () => {
+            constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+          });
+        });
+      });
+    })
+
+    beats(124, 192, () => {
+      cycle(6, () => {
+        elements([6], () => {
+          segment(segment_centric, () => {
+            constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+          });
+        });
+      });
+    })
+
+    beats(130, 192, () => {
+      cycle(6, () => {
+        elements([7], () => {
+          segment(segment_centric, () => {
+            constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+          });
+        });
+      });
+    })
+
+    beats(136, 192, () => {
+      cycle(6, () => {
+        elements([8], () => {
+          segment(segment_centric, () => {
+            constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+          });
+        });
+      });
+    })
+
+    beats(142, 192, () => {
+      cycle(6, () => {
+        elements([9], () => {
+          segment(segment_centric, () => {
+            constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+          });
+        });
+      });
+    })
+
+    beats(148, 192, () => {
+      cycle(6, () => {
+        elements([10], () => {
+          segment(segment_centric, () => {
+            constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+          });
+        });
+      });
+    })
+
+    beats(154, 192, () => {
+      cycle(6, () => {
+        elements([11], () => {
           segment(segment_centric, () => {
             constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
           });
@@ -305,7 +405,15 @@ const loop = async () => {
       });
     })
 
-    beats(192, 312, () => {
+    beats(312, 330, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.7521, sat: 0.6559, val: 0.9686 })
+        });
+      });
+    })
+
+    beats(192, 330, () => {
       cycle(6, () => {
         elements(all, () => {
           segment(segment_rand, () => {
@@ -323,7 +431,7 @@ const loop = async () => {
       });
     })
 
-    beats(308, 356, () => {
+    beats(330, 356, () => {
       cycle(6, () => {
         elements(all, () => {
           segment(segment_all, () => {
@@ -335,7 +443,227 @@ const loop = async () => {
       });
     })
 
-    beats(308, 356, () => {
+    beats(356, 358, () => {
+      cycle(6, () => {
+        elements([2], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.5288, sat: 1.0000, val: 1.0000 })
+          });
+        });
+      });
+    })
+
+    beats(356, 367, () => {
+      cycle(6, () => {
+        elements([3], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 1.0288, sat: 1.0000, val: 1.0000 })
+          });
+        });
+      });
+    })
+
+    beats(356, 366, () => {
+      cycle(6, () => {
+        elements([4], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 1.5288, sat: 1.0000, val: 1.0000 })
+          });
+        });
+      });
+    })
+
+    beats(356, 362, () => {
+      cycle(6, () => {
+        elements([5], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 2.0288, sat: 1.0000, val: 1.0000 })
+          });
+        });
+      });
+    })
+
+    beats(356, 359, () => {
+      cycle(6, () => {
+        elements([6], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 2.5288, sat: 1.0000, val: 1.0000 })
+          });
+        });
+      });
+    })
+
+    beats(356, 364, () => {
+      cycle(6, () => {
+        elements([7], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 3.0288, sat: 1.0000, val: 1.0000 })
+          });
+        });
+      });
+    })
+
+    beats(356, 360, () => {
+      cycle(6, () => {
+        elements([8], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 3.5288, sat: 1.0000, val: 1.0000 })
+          });
+        });
+      });
+    })
+
+    beats(356, 365, () => {
+      cycle(6, () => {
+        elements([9], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 4.0288, sat: 1.0000, val: 1.0000 })
+          });
+        });
+      });
+    })
+
+    beats(356, 357, () => {
+      cycle(6, () => {
+        elements([10], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 4.5288, sat: 1.0000, val: 1.0000 })
+          });
+        });
+      });
+    })
+
+    beats(356, 363, () => {
+      cycle(6, () => {
+        elements([11], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 5.0288, sat: 1.0000, val: 1.0000 })
+          });
+        });
+      });
+    })
+
+    beats(356, 361, () => {
+      cycle(6, () => {
+        elements([12], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 5.5288, sat: 1.0000, val: 1.0000 })
+          });
+        });
+      });
+    })
+
+    beats(356, 358, () => {
+      cycle(6, () => {
+        elements([2], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.6867, sat: 0.7602, val: 0.9647 })
+          });
+        });
+      });
+    })
+
+    beats(356, 367, () => {
+      cycle(6, () => {
+        elements([3], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.7701, sat: 0.7602, val: 0.9647 })
+          });
+        });
+      });
+    })
+
+    beats(356, 366, () => {
+      cycle(6, () => {
+        elements([4], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.8534, sat: 0.7602, val: 0.9647 })
+          });
+        });
+      });
+    })
+
+    beats(356, 362, () => {
+      cycle(6, () => {
+        elements([5], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 0.9367, sat: 0.7602, val: 0.9647 })
+          });
+        });
+      });
+    })
+
+    beats(356, 359, () => {
+      cycle(6, () => {
+        elements([6], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 1.0201, sat: 0.7602, val: 0.9647 })
+          });
+        });
+      });
+    })
+
+    beats(356, 364, () => {
+      cycle(6, () => {
+        elements([7], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 1.1034, sat: 0.7602, val: 0.9647 })
+          });
+        });
+      });
+    })
+
+    beats(356, 360, () => {
+      cycle(6, () => {
+        elements([8], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 1.1867, sat: 0.7602, val: 0.9647 })
+          });
+        });
+      });
+    })
+
+    beats(356, 365, () => {
+      cycle(6, () => {
+        elements([9], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 1.2701, sat: 0.7602, val: 0.9647 })
+          });
+        });
+      });
+    })
+
+    beats(356, 357, () => {
+      cycle(6, () => {
+        elements([10], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 1.3534, sat: 0.7602, val: 0.9647 })
+          });
+        });
+      });
+    })
+
+    beats(356, 363, () => {
+      cycle(6, () => {
+        elements([11], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 1.4367, sat: 0.7602, val: 0.9647 })
+          });
+        });
+      });
+    })
+
+    beats(356, 361, () => {
+      cycle(6, () => {
+        elements([12], () => {
+          segment(segment_all, () => {
+            constColor({ hue: 1.5201, sat: 0.7602, val: 0.9647 })
+          });
+        });
+      });
+    })
+
+    beats(330, 356, () => {
       cycle(6, () => {
         elements(all, () => {
           segment(segment_all, () => {
@@ -2621,6 +2949,16 @@ const loop = async () => {
       });
     })
 
+    beats(0, 192, () => {
+      cycle(1, () => {
+        elements(all, () => {
+          segment(segment_b1, () => {
+            addEffect({ timed_saturation: { mult_factor_decrease: { linear: { start: 0, end: 1 } } } })
+          });
+        });
+      });
+    })
+
     beats(106, 124, () => {
       cycle(6, () => {
         elements([6], () => {
@@ -2869,9 +3207,159 @@ const loop = async () => {
       });
     })
 
+    beats(124, 130, () => {
+      cycle(6, () => {
+        elements([7], () => {
+          segment(segment_ind, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1.5, end: 0.5 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 1, end: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(124, 130, () => {
+      cycle(6, () => {
+        elements([7], () => {
+          segment(segment_ind, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1, end: 0 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(124, 136, () => {
+      cycle(6, () => {
+        elements([8], () => {
+          segment(segment_ind, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1.5, end: 0.5 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 1, end: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(124, 136, () => {
+      cycle(6, () => {
+        elements([8], () => {
+          segment(segment_ind, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1, end: 0 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(124, 142, () => {
+      cycle(6, () => {
+        elements([9], () => {
+          segment(segment_ind, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1.5, end: 0.5 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 1, end: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(124, 142, () => {
+      cycle(6, () => {
+        elements([9], () => {
+          segment(segment_ind, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1, end: 0 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(124, 148, () => {
+      cycle(6, () => {
+        elements([10], () => {
+          segment(segment_ind, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1.5, end: 0.5 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 1, end: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(124, 148, () => {
+      cycle(6, () => {
+        elements([10], () => {
+          segment(segment_ind, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1, end: 0 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(124, 154, () => {
+      cycle(6, () => {
+        elements([11], () => {
+          segment(segment_ind, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1.5, end: 0.5 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 1, end: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(124, 154, () => {
+      cycle(6, () => {
+        elements([11], () => {
+          segment(segment_ind, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1, end: 0 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
     beats(124, 192, () => {
       cycle(6, () => {
-        elements(left, () => {
+        elements([6], () => {
+          segment(segment_centric, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1.5, end: 0.5 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 1, end: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(130, 192, () => {
+      cycle(6, () => {
+        elements([7], () => {
+          segment(segment_centric, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1.5, end: 0.5 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 1, end: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(136, 192, () => {
+      cycle(6, () => {
+        elements([8], () => {
+          segment(segment_centric, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1.5, end: 0.5 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 1, end: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(142, 192, () => {
+      cycle(6, () => {
+        elements([9], () => {
+          segment(segment_centric, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1.5, end: 0.5 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 1, end: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(148, 192, () => {
+      cycle(6, () => {
+        elements([10], () => {
+          segment(segment_centric, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1.5, end: 0.5 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 1, end: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(154, 192, () => {
+      cycle(6, () => {
+        elements([11], () => {
           segment(segment_centric, () => {
             addEffect({ snake_brightness: { head: { linear: { start: 1.5, end: 0.5 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 1, end: 0 } } } })
           });
@@ -2881,7 +3369,57 @@ const loop = async () => {
 
     beats(124, 192, () => {
       cycle(6, () => {
-        elements(left, () => {
+        elements([6], () => {
+          segment(segment_centric, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1, end: 0 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(130, 192, () => {
+      cycle(6, () => {
+        elements([7], () => {
+          segment(segment_centric, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1, end: 0 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(136, 192, () => {
+      cycle(6, () => {
+        elements([8], () => {
+          segment(segment_centric, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1, end: 0 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(142, 192, () => {
+      cycle(6, () => {
+        elements([9], () => {
+          segment(segment_centric, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1, end: 0 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(148, 192, () => {
+      cycle(6, () => {
+        elements([10], () => {
+          segment(segment_centric, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 1, end: 0 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(154, 192, () => {
+      cycle(6, () => {
+        elements([11], () => {
           segment(segment_centric, () => {
             addEffect({ snake_brightness: { head: { linear: { start: 1, end: 0 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
           });
@@ -2920,10 +3458,205 @@ const loop = async () => {
       });
     })
 
-    beats(116, 132, () => {
+    beats(312, 330, () => {
       elements(all, () => {
         segment(segment_all, () => {
-          fadeOutIn({ low: 0 })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.44 } } } })
+          phase(1, () => {
+            addEffect({ timed_hue: { offset_factor: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(264, 356, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0.5 } } } })
+        });
+      });
+    })
+
+    beats(268, 356, () => {
+      elements([2], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0.5 } } } })
+        });
+      });
+    })
+
+    beats(272, 356, () => {
+      elements([3], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0.5 } } } })
+        });
+      });
+    })
+
+    beats(276, 356, () => {
+      elements([4], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0.5 } } } })
+        });
+      });
+    })
+
+    beats(280, 356, () => {
+      elements([5], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0.5 } } } })
+        });
+      });
+    })
+
+    beats(284, 356, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0.5 } } } })
+        });
+      });
+    })
+
+    beats(288, 356, () => {
+      elements([7], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0.5 } } } })
+        });
+      });
+    })
+
+    beats(292, 356, () => {
+      elements([8], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0.5 } } } })
+        });
+      });
+    })
+
+    beats(296, 356, () => {
+      elements([9], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0.5 } } } })
+        });
+      });
+    })
+
+    beats(300, 356, () => {
+      elements([10], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0.5 } } } })
+        });
+      });
+    })
+
+    beats(304, 356, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0.5 } } } })
+        });
+      });
+    })
+
+    beats(260, 356, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0.5 } } } })
+        });
+      });
+    })
+
+    beats(312, 356, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(316, 356, () => {
+      elements([2], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(320, 356, () => {
+      elements([3], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(324, 356, () => {
+      elements([4], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(328, 356, () => {
+      elements([5], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(332, 356, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(336, 356, () => {
+      elements([7], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(340, 356, () => {
+      elements([8], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(344, 356, () => {
+      elements([9], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(348, 356, () => {
+      elements([10], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(352, 356, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+        });
+      });
+    })
+
+    beats(308, 356, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
         });
       });
     })
@@ -2946,7 +3679,7 @@ const loop = async () => {
       });
     })
 
-    beats(308, 356, () => {
+    beats(330, 356, () => {
       cycle(6, () => {
         elements(all, () => {
           segment(segment_all, () => {
@@ -2959,7 +3692,579 @@ const loop = async () => {
       });
     })
 
-    beats(308, 356, () => {
+    beats(356, 358, () => {
+      cycle(6, () => {
+        elements([2], () => {
+          segment(segment_all, () => {
+            hueShiftStartToEnd({ start: 0.333, end: 1.333 })
+            phase(2, () => {
+              pulse({ low: 0.6065, staticPhase: 0.333 })
+            });
+          });
+        });
+      });
+    })
+
+    beats(356, 367, () => {
+      cycle(6, () => {
+        elements([3], () => {
+          segment(segment_all, () => {
+            hueShiftStartToEnd({ start: 0.333, end: 1.333 })
+            phase(2, () => {
+              pulse({ low: 0.6065, staticPhase: 0.333 })
+            });
+          });
+        });
+      });
+    })
+
+    beats(356, 366, () => {
+      cycle(6, () => {
+        elements([4], () => {
+          segment(segment_all, () => {
+            hueShiftStartToEnd({ start: 0.333, end: 1.333 })
+            phase(2, () => {
+              pulse({ low: 0.6065, staticPhase: 0.333 })
+            });
+          });
+        });
+      });
+    })
+
+    beats(356, 362, () => {
+      cycle(6, () => {
+        elements([5], () => {
+          segment(segment_all, () => {
+            hueShiftStartToEnd({ start: 0.333, end: 1.333 })
+            phase(2, () => {
+              pulse({ low: 0.6065, staticPhase: 0.333 })
+            });
+          });
+        });
+      });
+    })
+
+    beats(356, 359, () => {
+      cycle(6, () => {
+        elements([6], () => {
+          segment(segment_all, () => {
+            hueShiftStartToEnd({ start: 0.333, end: 1.333 })
+            phase(2, () => {
+              pulse({ low: 0.6065, staticPhase: 0.333 })
+            });
+          });
+        });
+      });
+    })
+
+    beats(356, 364, () => {
+      cycle(6, () => {
+        elements([7], () => {
+          segment(segment_all, () => {
+            hueShiftStartToEnd({ start: 0.333, end: 1.333 })
+            phase(2, () => {
+              pulse({ low: 0.6065, staticPhase: 0.333 })
+            });
+          });
+        });
+      });
+    })
+
+    beats(356, 360, () => {
+      cycle(6, () => {
+        elements([8], () => {
+          segment(segment_all, () => {
+            hueShiftStartToEnd({ start: 0.333, end: 1.333 })
+            phase(2, () => {
+              pulse({ low: 0.6065, staticPhase: 0.333 })
+            });
+          });
+        });
+      });
+    })
+
+    beats(356, 365, () => {
+      cycle(6, () => {
+        elements([9], () => {
+          segment(segment_all, () => {
+            hueShiftStartToEnd({ start: 0.333, end: 1.333 })
+            phase(2, () => {
+              pulse({ low: 0.6065, staticPhase: 0.333 })
+            });
+          });
+        });
+      });
+    })
+
+    beats(356, 357, () => {
+      cycle(6, () => {
+        elements([10], () => {
+          segment(segment_all, () => {
+            hueShiftStartToEnd({ start: 0.333, end: 1.333 })
+            phase(2, () => {
+              pulse({ low: 0.6065, staticPhase: 0.333 })
+            });
+          });
+        });
+      });
+    })
+
+    beats(356, 363, () => {
+      cycle(6, () => {
+        elements([11], () => {
+          segment(segment_all, () => {
+            hueShiftStartToEnd({ start: 0.333, end: 1.333 })
+            phase(2, () => {
+              pulse({ low: 0.6065, staticPhase: 0.333 })
+            });
+          });
+        });
+      });
+    })
+
+    beats(356, 361, () => {
+      cycle(6, () => {
+        elements([12], () => {
+          segment(segment_all, () => {
+            hueShiftStartToEnd({ start: 0.333, end: 1.333 })
+            phase(2, () => {
+              pulse({ low: 0.6065, staticPhase: 0.333 })
+            });
+          });
+        });
+      });
+    })
+
+    beats(356, 358, () => {
+      cycle(6, () => {
+        elements([2], () => {
+          segment(segment_all, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 1 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0.4, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 367, () => {
+      cycle(6, () => {
+        elements([3], () => {
+          segment(segment_all, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 1 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0.4, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 366, () => {
+      cycle(6, () => {
+        elements([4], () => {
+          segment(segment_all, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 1 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0.4, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 362, () => {
+      cycle(6, () => {
+        elements([5], () => {
+          segment(segment_all, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 1 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0.4, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 359, () => {
+      cycle(6, () => {
+        elements([6], () => {
+          segment(segment_all, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 1 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0.4, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 364, () => {
+      cycle(6, () => {
+        elements([7], () => {
+          segment(segment_all, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 1 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0.4, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 360, () => {
+      cycle(6, () => {
+        elements([8], () => {
+          segment(segment_all, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 1 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0.4, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 365, () => {
+      cycle(6, () => {
+        elements([9], () => {
+          segment(segment_all, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 1 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0.4, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 357, () => {
+      cycle(6, () => {
+        elements([10], () => {
+          segment(segment_all, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 1 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0.4, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 363, () => {
+      cycle(6, () => {
+        elements([11], () => {
+          segment(segment_all, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 1 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0.4, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 361, () => {
+      cycle(6, () => {
+        elements([12], () => {
+          segment(segment_all, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 1 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0.4, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 358, () => {
+      cycle(6, () => {
+        elements([2], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 367, () => {
+      cycle(6, () => {
+        elements([3], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 366, () => {
+      cycle(6, () => {
+        elements([4], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 362, () => {
+      cycle(6, () => {
+        elements([5], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 359, () => {
+      cycle(6, () => {
+        elements([6], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 364, () => {
+      cycle(6, () => {
+        elements([7], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 360, () => {
+      cycle(6, () => {
+        elements([8], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 365, () => {
+      cycle(6, () => {
+        elements([9], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 357, () => {
+      cycle(6, () => {
+        elements([10], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 363, () => {
+      cycle(6, () => {
+        elements([11], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 361, () => {
+      cycle(6, () => {
+        elements([12], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.333, end: 1.333 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { linear: { start: 0, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 358, () => {
+      cycle(6, () => {
+        elements([2], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.833, end: 1.833 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 367, () => {
+      cycle(6, () => {
+        elements([3], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.833, end: 1.833 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 366, () => {
+      cycle(6, () => {
+        elements([4], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.833, end: 1.833 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 362, () => {
+      cycle(6, () => {
+        elements([5], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.833, end: 1.833 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 359, () => {
+      cycle(6, () => {
+        elements([6], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.833, end: 1.833 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 364, () => {
+      cycle(6, () => {
+        elements([7], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.833, end: 1.833 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 360, () => {
+      cycle(6, () => {
+        elements([8], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.833, end: 1.833 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 365, () => {
+      cycle(6, () => {
+        elements([9], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.833, end: 1.833 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 357, () => {
+      cycle(6, () => {
+        elements([10], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.833, end: 1.833 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 363, () => {
+      cycle(6, () => {
+        elements([11], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.833, end: 1.833 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 361, () => {
+      cycle(6, () => {
+        elements([12], () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0.833, end: 1.833 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, mult_factor_decrease: { const_value: { value: 0 } } } })
+          });
+        });
+      });
+    })
+
+    beats(356, 358, () => {
+      elements([2], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          fadeOut()
+        });
+      });
+    })
+
+    beats(356, 367, () => {
+      elements([3], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          fadeOut()
+        });
+      });
+    })
+
+    beats(356, 366, () => {
+      elements([4], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          fadeOut()
+        });
+      });
+    })
+
+    beats(356, 362, () => {
+      elements([5], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          fadeOut()
+        });
+      });
+    })
+
+    beats(356, 359, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          fadeOut()
+        });
+      });
+    })
+
+    beats(356, 364, () => {
+      elements([7], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          fadeOut()
+        });
+      });
+    })
+
+    beats(356, 360, () => {
+      elements([8], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          fadeOut()
+        });
+      });
+    })
+
+    beats(356, 365, () => {
+      elements([9], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          fadeOut()
+        });
+      });
+    })
+
+    beats(356, 357, () => {
+      elements([10], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          fadeOut()
+        });
+      });
+    })
+
+    beats(356, 363, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          fadeOut()
+        });
+      });
+    })
+
+    beats(356, 361, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
+          fadeOut()
+        });
+      });
+    })
+
+    beats(330, 356, () => {
       cycle(6, () => {
         elements(all, () => {
           segment(segment_all, () => {
@@ -3055,7 +4360,7 @@ const loop = async () => {
       });
     })
 
-    beats(395, 399, () => {
+    beats(399, 403, () => {
       elements([2], () => {
         segment(segment_b2, () => {
           blink({ low: 0 })
@@ -3063,7 +4368,7 @@ const loop = async () => {
       });
     })
 
-    beats(443, 447, () => {
+    beats(447, 451, () => {
       elements([2], () => {
         segment(segment_b2, () => {
           blink({ low: 0 })
@@ -3095,40 +4400,8 @@ const loop = async () => {
       });
     })
 
-    beats(399, 403, () => {
+    beats(407, 411, () => {
       elements([6], () => {
-        segment(segment_b2, () => {
-          blink({ low: 0 })
-        });
-      });
-    })
-
-    beats(447, 451, () => {
-      elements([6], () => {
-        segment(segment_b2, () => {
-          blink({ low: 0 })
-        });
-      });
-    })
-
-    beats(419, 423, () => {
-      elements([7], () => {
-        segment(segment_b2, () => {
-          blink({ low: 0 })
-        });
-      });
-    })
-
-    beats(403, 407, () => {
-      elements([8], () => {
-        segment(segment_b2, () => {
-          blink({ low: 0 })
-        });
-      });
-    })
-
-    beats(451, 454, () => {
-      elements([8], () => {
         segment(segment_b2, () => {
           blink({ low: 0 })
         });
@@ -3136,6 +4409,30 @@ const loop = async () => {
     })
 
     beats(423, 427, () => {
+      elements([7], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(395, 399, () => {
+      elements([8], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(443, 447, () => {
+      elements([8], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(419, 423, () => {
       elements([9], () => {
         segment(segment_b2, () => {
           blink({ low: 0 })
@@ -3167,7 +4464,7 @@ const loop = async () => {
       });
     })
 
-    beats(407, 411, () => {
+    beats(403, 407, () => {
       elements([12], () => {
         segment(segment_b2, () => {
           blink({ low: 0 })
@@ -3175,9 +4472,289 @@ const loop = async () => {
       });
     })
 
-    beats(470, 534, () => {
+    beats(451, 454, () => {
+      elements([12], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(419, 423, () => {
+      elements([1], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(391, 395, () => {
+      elements([2], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(439, 443, () => {
+      elements([2], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(415, 419, () => {
+      elements([3], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(403, 407, () => {
+      elements([4], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(451, 454, () => {
+      elements([4], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(387, 391, () => {
+      elements([5], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(435, 439, () => {
+      elements([5], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(399, 403, () => {
+      elements([6], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(447, 451, () => {
+      elements([6], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(431, 435, () => {
+      elements([7], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(427, 431, () => {
+      elements([8], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(411, 415, () => {
+      elements([9], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(407, 411, () => {
+      elements([10], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(423, 427, () => {
+      elements([11], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(395, 399, () => {
+      elements([12], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(443, 447, () => {
+      elements([12], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(411, 415, () => {
+      elements([1], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(407, 411, () => {
+      elements([2], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(423, 427, () => {
+      elements([3], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(395, 399, () => {
+      elements([4], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(443, 447, () => {
+      elements([4], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(419, 423, () => {
+      elements([5], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(391, 395, () => {
+      elements([6], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(439, 443, () => {
+      elements([6], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(415, 419, () => {
+      elements([7], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(403, 407, () => {
+      elements([8], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(451, 454, () => {
+      elements([8], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(387, 391, () => {
+      elements([9], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(435, 439, () => {
+      elements([9], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(399, 403, () => {
+      elements([10], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(447, 451, () => {
+      elements([10], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(431, 435, () => {
+      elements([11], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(427, 431, () => {
+      elements([12], () => {
+        segment(segment_b2, () => {
+          blink({ low: 0 })
+        });
+      });
+    })
+
+    beats(454, 470, () => {
       cycleBeats(16, 2, 8, () => {
-        elements([1], () => {
+        elements([11, 12], () => {
           segment(segment_all, () => {
             blink({ low: 0 })
           });
@@ -3185,9 +4762,9 @@ const loop = async () => {
       });
     })
 
-    beats(486, 534, () => {
+    beats(470, 486, () => {
       cycleBeats(16, 2, 8, () => {
-        elements([2], () => {
+        elements(b1, () => {
           segment(segment_all, () => {
             blink({ low: 0 })
           });
@@ -3195,9 +4772,19 @@ const loop = async () => {
       });
     })
 
-    beats(502, 534, () => {
+    beats(486, 502, () => {
       cycleBeats(16, 2, 8, () => {
-        elements([3], () => {
+        elements(even, () => {
+          segment(segment_all, () => {
+            blink({ low: 0 })
+          });
+        });
+      });
+    })
+
+    beats(502, 518, () => {
+      cycleBeats(16, 2, 8, () => {
+        elements(b1, () => {
           segment(segment_all, () => {
             blink({ low: 0 })
           });
@@ -3207,67 +4794,7 @@ const loop = async () => {
 
     beats(518, 534, () => {
       cycleBeats(16, 2, 8, () => {
-        elements([4], () => {
-          segment(segment_all, () => {
-            blink({ low: 0 })
-          });
-        });
-      });
-    })
-
-    beats(518, 534, () => {
-      cycleBeats(16, 2, 8, () => {
-        elements([7], () => {
-          segment(segment_all, () => {
-            blink({ low: 0 })
-          });
-        });
-      });
-    })
-
-    beats(502, 534, () => {
-      cycleBeats(16, 2, 8, () => {
-        elements([8], () => {
-          segment(segment_all, () => {
-            blink({ low: 0 })
-          });
-        });
-      });
-    })
-
-    beats(486, 534, () => {
-      cycleBeats(16, 2, 8, () => {
-        elements([9], () => {
-          segment(segment_all, () => {
-            blink({ low: 0 })
-          });
-        });
-      });
-    })
-
-    beats(470, 534, () => {
-      cycleBeats(16, 2, 8, () => {
-        elements([10], () => {
-          segment(segment_all, () => {
-            blink({ low: 0 })
-          });
-        });
-      });
-    })
-
-    beats(454, 534, () => {
-      cycleBeats(16, 2, 8, () => {
-        elements([11], () => {
-          segment(segment_all, () => {
-            blink({ low: 0 })
-          });
-        });
-      });
-    })
-
-    beats(454, 534, () => {
-      cycleBeats(16, 2, 8, () => {
-        elements([12], () => {
+        elements([5, 6], () => {
           segment(segment_all, () => {
             blink({ low: 0 })
           });
@@ -3279,7 +4806,7 @@ const loop = async () => {
       cycleBeats(16, 2, 8, () => {
         elements(all, () => {
           segment(segment_all, () => {
-            blink({ low: 0 })
+            blink({ low: 0.3 })
             addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0.5 } } } })
           });
         });
@@ -3290,7 +4817,7 @@ const loop = async () => {
       cycleBeats(16, 2, 8, () => {
         elements(all, () => {
           segment(segment_all, () => {
-            blink({ low: 0 })
+            blink({ low: 0.3 })
             addEffect({ timed_saturation: { mult_factor_decrease: { const_value: { value: 0 } } } })
           });
         });
@@ -3617,6 +5144,16 @@ const loop = async () => {
       elements(all, () => {
         segment(segment_all, () => {
           fade({ start: 0.3, end: 1 })
+        });
+      });
+    })
+
+    beats(928, 1049, () => {
+      cycle(32, () => {
+        elements(all, () => {
+          segment(segment_ind, () => {
+            addEffect({ snake_hue: { head: { steps: { num_steps: 8, diff_per_step: 0.125, first_step_value: 0 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: true, offset_factor: { linear: { start: 0, end: 0.3 } } } })
+          });
         });
       });
     })
@@ -5391,9 +6928,59 @@ const loop = async () => {
       });
     })
 
-    beats(124, 192, () => {
+    beats(124, 130, () => {
       cycle(6, () => {
-        elements(right, () => {
+        elements([1], () => {
+          segment(segment_ind, () => {
+            snake({ tailLength: 0.5, cyclic: true, reverse: false })
+          });
+        });
+      });
+    })
+
+    beats(124, 136, () => {
+      cycle(6, () => {
+        elements([2], () => {
+          segment(segment_ind, () => {
+            snake({ tailLength: 0.5, cyclic: true, reverse: false })
+          });
+        });
+      });
+    })
+
+    beats(124, 142, () => {
+      cycle(6, () => {
+        elements([3], () => {
+          segment(segment_ind, () => {
+            snake({ tailLength: 0.5, cyclic: true, reverse: false })
+          });
+        });
+      });
+    })
+
+    beats(124, 148, () => {
+      cycle(6, () => {
+        elements([4], () => {
+          segment(segment_ind, () => {
+            snake({ tailLength: 0.5, cyclic: true, reverse: false })
+          });
+        });
+      });
+    })
+
+    beats(124, 154, () => {
+      cycle(6, () => {
+        elements([5], () => {
+          segment(segment_ind, () => {
+            snake({ tailLength: 0.5, cyclic: true, reverse: false })
+          });
+        });
+      });
+    })
+
+    beats(130, 192, () => {
+      cycle(6, () => {
+        elements([1], () => {
           segment(segment_centric, () => {
             snake({ tailLength: 0.5, cyclic: true })
           });
@@ -5401,17 +6988,67 @@ const loop = async () => {
       });
     })
 
-    beats(192, 312, () => {
+    beats(136, 192, () => {
       cycle(6, () => {
-        elements(all, () => {
-          segment(segment_rand, () => {
+        elements([2], () => {
+          segment(segment_centric, () => {
             snake({ tailLength: 0.5, cyclic: true })
           });
         });
       });
     })
 
-    beats(312, 356, () => {
+    beats(142, 192, () => {
+      cycle(6, () => {
+        elements([3], () => {
+          segment(segment_centric, () => {
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(148, 192, () => {
+      cycle(6, () => {
+        elements([4], () => {
+          segment(segment_centric, () => {
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(154, 192, () => {
+      cycle(6, () => {
+        elements([5], () => {
+          segment(segment_centric, () => {
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(124, 192, () => {
+      cycle(6, () => {
+        elements([12], () => {
+          segment(segment_centric, () => {
+            snake({ tailLength: 0.5, cyclic: true })
+          });
+        });
+      });
+    })
+
+    beats(192, 330, () => {
+      cycle(6, () => {
+        elements(all, () => {
+          segment(segment_rand, () => {
+            snakeHeadSteps({ steps: 6, tailLength: 0.5 })
+          });
+        });
+      });
+    })
+
+    beats(330, 356, () => {
       cycle(6, () => {
         elements(all, () => {
           segment(segment_rand, () => {
@@ -6320,7 +7957,7 @@ const loop = async () => {
     })
   });
 
-  anim.mirrorToLilum([1, 2, 4, 7, 10]);
+  anim.mirrorToLilum([1, 4, 5, 7, 10]);
   console.log("sending sequence");
   await sendSequence("loop", anim.getSequence());
   if (!process.env.SEND_ONLY) {
