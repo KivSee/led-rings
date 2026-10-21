@@ -228,6 +228,7 @@ const MOVEMENT_EXTRA_HINTS: Record<MovementExtraKey, string> = {
   retire: 'Rings also turn off in activation order — spread: staggered end times (diamond shape); random: ring goes dark after its turn',
   bounce: 'Sweep ping-pongs back and forth instead of restarting from the first ring',
   accumulate: 'Rings stay on after their turn instead of turning off',
+  untilTurn: 'Reverse of accumulate: each ring plays from the start until its turn, then stops. With the same rings and timing as an Accumulate timeframe, it hands each ring over exactly when the accumulate turns it on',
   darkBefore: 'Rings stay fully off until the spread reaches them, hiding every other layer on them until then',
 }
 
@@ -1350,13 +1351,15 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, songLengthBeats }: Timef
                         checked={mv[ep.key] === true}
                         onChange={(e) => {
                           const checked = e.target.checked
-                          // Retire and accumulate are mutually exclusive
+                          // Retire, accumulate and until-turn are mutually exclusive
                           const updates: Record<string, boolean | undefined> = { [ep.key]: checked || undefined }
-                          if (checked && ep.key === 'retire') updates.accumulate = undefined
-                          if (checked && ep.key === 'accumulate') updates.retire = undefined
+                          const exclusive = ['retire', 'accumulate', 'untilTurn']
+                          if (checked && exclusive.includes(ep.key)) {
+                            for (const k of exclusive) if (k !== ep.key) updates[k] = undefined
+                          }
                           const updated = { ...mv, ...updates }
-                          // Dark before start doesn't change timing; keep the user's beats/ring.
-                          if (ep.key === 'darkBefore') {
+                          // Dark before start / until turn don't change the step timing; keep the user's beats/ring.
+                          if (ep.key === 'darkBefore' || ep.key === 'untilTurn') {
                             onUpdate({ movement: updated })
                             return
                           }

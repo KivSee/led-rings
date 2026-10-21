@@ -29,6 +29,8 @@ export interface TimeframeMovement {
   bounce?: boolean
   /** Random: each ring turns on at its step and stays on for the rest of the timeframe. */
   accumulate?: boolean
+  /** Random: reverse of accumulate — each ring is active from the timeframe start until its turn. */
+  untilTurn?: boolean
   /**
    * Custom direction: explicit ring order. Rings step in this order; rings in
    * the timeframe's set but absent from this list stay on for the full timeframe.
@@ -43,7 +45,7 @@ export interface MovementTypeDef {
   extraParams: Array<{ key: MovementExtraKey; label: string }>
 }
 
-export type MovementExtraKey = 'retire' | 'bounce' | 'accumulate' | 'darkBefore'
+export type MovementExtraKey = 'retire' | 'bounce' | 'accumulate' | 'darkBefore' | 'untilTurn'
 
 export const MOVEMENT_TYPES: MovementTypeDef[] = [
   {
@@ -76,6 +78,7 @@ export const MOVEMENT_TYPES: MovementTypeDef[] = [
     extraParams: [
       { key: 'retire', label: 'Retire (stay off after fade)' },
       { key: 'accumulate', label: 'Accumulate (stay on after fade)' },
+      { key: 'untilTurn', label: 'Until turn (reverse of accumulate)' },
     ],
   },
 ]
@@ -335,6 +338,13 @@ export function getMovementRingWindows(
       // Retire = one pass then holdOff; Accumulate = turn on and stay on; else repeat.
       const s = startTime + step * bpr
       const e = s + bpr
+      if (movement.untilTurn) {
+        // Reverse of accumulate: ring is active from the start until its turn.
+        // With the same rings and timing as an accumulate timeframe, it hands each
+        // ring over exactly when the accumulate turns it on.
+        const until = Math.min(s, endTime)
+        return until > startTime ? [{ start: startTime, end: until }] : []
+      }
       if (s >= endTime) return []
       const fadeEnd = Math.min(e, endTime)
       if (movement.accumulate) {
@@ -517,6 +527,7 @@ export function normalizeMovement(raw: unknown): TimeframeMovement | undefined {
     darkBefore: o.darkBefore === true ? true : undefined,
     bounce: o.bounce === true ? true : undefined,
     accumulate: o.accumulate === true ? true : undefined,
+    untilTurn: o.untilTurn === true ? true : undefined,
     customOrder,
   }
 }
