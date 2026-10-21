@@ -322,11 +322,15 @@ ${indentBlock(core, 2)}
 function emitTimeframeBody(tf: Timeframe, layer: EmitLayer): string | null {
   const segmentId = mappingToSegment(tf.mapping)
   const inner = emitInnerContent(tf, layer)
-  if (inner.length === 0) return null
 
   // Movement: emit separate beats() per ring with per-ring timing
   if (tf.movement) {
     const entries = getMovementCodeGenEntries(tf.startTime, tf.endTime, tf.rings, tf.movement)
+    // holdOff windows (Dark before start, Random + retire) are emitted in the
+    // modifiers layer even when the timeframe has no modifier effects of its
+    // own (e.g. only a snake), so the rings still go dark.
+    const hasHoldOff = layer === 'modifiers' && entries.some(e => e.windows.some(w => w.holdOff))
+    if (inner.length === 0 && !hasHoldOff) return null
     const sortedRings = [...tf.rings].sort((a, b) => a - b)
     const phasePerRing = (layer === 'color' && tf.phase && tf.phase > 0 && tf.hasExplicitColor !== false)
     const blocks: string[] = []
@@ -347,6 +351,7 @@ ${indentBlock(core, 6)}
     })`)
           continue
         }
+        if (inner.length === 0) continue
         // When phase is set on a color layer, bake hue offset per ring
         const ringIdx = sortedRings.indexOf(entry.ringNum)
         const phaseIdx = tf.phaseReverse ? sortedRings.length - 1 - ringIdx : ringIdx
@@ -388,6 +393,7 @@ ${indentBlock(core, 6)}
   }
 
   // No movement: single beats() block with all rings
+  if (inner.length === 0) return null
   const elementsArg = ringsToElementsArg(tf.rings)
   const effectLines = inner.join('\n')
   let core = `elements(${elementsArg}, () => {
