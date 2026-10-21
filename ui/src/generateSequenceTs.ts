@@ -157,6 +157,11 @@ function formatFloatFunction(obj: unknown): string {
     const first_step_value = typeof v.first_step_value === 'number' ? v.first_step_value : 0
     return `steps: { num_steps: ${formatParamValue(num_steps)}, diff_per_step: ${formatParamValue(diff_per_step)}, first_step_value: ${formatParamValue(first_step_value)} }`
   }
+  if (o.half && typeof o.half === 'object') {
+    // f1 over the first half of t, f2 over the second (each sees its own 0..1)
+    const v = o.half as Record<string, unknown>
+    return `half: { f1: { ${formatFloatFunction(v.f1)} }, f2: { ${formatFloatFunction(v.f2)} } }`
+  }
   return 'const_value: { value: 1 }'
 }
 
