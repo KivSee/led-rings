@@ -125,7 +125,7 @@ const inequal = async () => {
       });
     })
 
-    beats(228, 274, () => {
+    beats(228, 324, () => {
       cycle(2, () => {
         elements(all, () => {
           segment(segment_centric, () => {
@@ -153,30 +153,10 @@ const inequal = async () => {
       });
     })
 
-    beats(12, 72, () => {
-      cycle(12, () => {
-        elements([1], () => {
-          segment(segment_rand, () => {
-            fadeInOut({ high: 1 })
-          });
-        });
-      });
-    })
-
     beats(0, 24, () => {
       elements([2], () => {
         segment(segment_rand, () => {
           addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
-        });
-      });
-    })
-
-    beats(24, 72, () => {
-      cycle(12, () => {
-        elements([2], () => {
-          segment(segment_rand, () => {
-            fadeInOut({ high: 1 })
-          });
         });
       });
     })
@@ -189,30 +169,10 @@ const inequal = async () => {
       });
     })
 
-    beats(36, 72, () => {
-      cycle(12, () => {
-        elements([3], () => {
-          segment(segment_rand, () => {
-            fadeInOut({ high: 1 })
-          });
-        });
-      });
-    })
-
     beats(0, 48, () => {
       elements([4], () => {
         segment(segment_rand, () => {
           addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
-        });
-      });
-    })
-
-    beats(48, 72, () => {
-      cycle(12, () => {
-        elements([4], () => {
-          segment(segment_rand, () => {
-            fadeInOut({ high: 1 })
-          });
         });
       });
     })
@@ -225,30 +185,10 @@ const inequal = async () => {
       });
     })
 
-    beats(60, 72, () => {
-      cycle(12, () => {
-        elements([5], () => {
-          segment(segment_rand, () => {
-            fadeInOut({ high: 1 })
-          });
-        });
-      });
-    })
-
     beats(0, 60, () => {
       elements([6], () => {
         segment(segment_rand, () => {
           addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
-        });
-      });
-    })
-
-    beats(60, 72, () => {
-      cycle(12, () => {
-        elements([6], () => {
-          segment(segment_rand, () => {
-            fadeInOut({ high: 1 })
-          });
         });
       });
     })
@@ -261,30 +201,10 @@ const inequal = async () => {
       });
     })
 
-    beats(48, 72, () => {
-      cycle(12, () => {
-        elements([7], () => {
-          segment(segment_rand, () => {
-            fadeInOut({ high: 1 })
-          });
-        });
-      });
-    })
-
     beats(0, 36, () => {
       elements([8], () => {
         segment(segment_rand, () => {
           addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0 } } } })
-        });
-      });
-    })
-
-    beats(36, 72, () => {
-      cycle(12, () => {
-        elements([8], () => {
-          segment(segment_rand, () => {
-            fadeInOut({ high: 1 })
-          });
         });
       });
     })
@@ -297,16 +217,6 @@ const inequal = async () => {
       });
     })
 
-    beats(24, 72, () => {
-      cycle(12, () => {
-        elements([9], () => {
-          segment(segment_rand, () => {
-            fadeInOut({ high: 1 })
-          });
-        });
-      });
-    })
-
     beats(0, 12, () => {
       elements([10], () => {
         segment(segment_rand, () => {
@@ -315,31 +225,221 @@ const inequal = async () => {
       });
     })
 
-    beats(12, 72, () => {
+    beats(12, 24, () => {
+      cycle(12, () => {
+        elements([1], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, outLow: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(24, 36, () => {
+      cycle(12, () => {
+        elements([2], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, outLow: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(36, 48, () => {
+      cycle(12, () => {
+        elements([3], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, outLow: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(48, 60, () => {
+      cycle(12, () => {
+        elements([4], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, outLow: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(60, 72, () => {
+      cycle(12, () => {
+        elements([5], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, outLow: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(60, 72, () => {
+      cycle(12, () => {
+        elements([6], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, outLow: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(48, 60, () => {
+      cycle(12, () => {
+        elements([7], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, outLow: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(36, 48, () => {
+      cycle(12, () => {
+        elements([8], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, outLow: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(24, 36, () => {
+      cycle(12, () => {
+        elements([9], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, outLow: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(12, 24, () => {
       cycle(12, () => {
         elements([10], () => {
-          segment(segment_rand, () => {
-            fadeInOut({ high: 1 })
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, outLow: 0.4 })
           });
         });
       });
     })
 
-    beats(0, 72, () => {
+    beats(0, 12, () => {
       cycle(12, () => {
         elements([11], () => {
-          segment(segment_rand, () => {
-            fadeInOut({ high: 1 })
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, outLow: 0.4 })
           });
         });
       });
     })
 
-    beats(0, 72, () => {
+    beats(0, 12, () => {
       cycle(12, () => {
         elements([12], () => {
-          segment(segment_rand, () => {
-            fadeInOut({ high: 1 })
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, outLow: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(24, 72, () => {
+      cycle(12, () => {
+        elements([1], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, low: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(36, 72, () => {
+      cycle(12, () => {
+        elements([2], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, low: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(48, 72, () => {
+      cycle(12, () => {
+        elements([3], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, low: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(60, 72, () => {
+      cycle(12, () => {
+        elements([4], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, low: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(60, 72, () => {
+      cycle(12, () => {
+        elements([7], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, low: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(48, 72, () => {
+      cycle(12, () => {
+        elements([8], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, low: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(36, 72, () => {
+      cycle(12, () => {
+        elements([9], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, low: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(24, 72, () => {
+      cycle(12, () => {
+        elements([10], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, low: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(12, 72, () => {
+      cycle(12, () => {
+        elements([11], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, low: 0.4 })
+          });
+        });
+      });
+    })
+
+    beats(12, 72, () => {
+      cycle(12, () => {
+        elements([12], () => {
+          segment(segment_all, () => {
+            fadeInOut({ high: 1, low: 0.4 })
           });
         });
       });
@@ -582,7 +682,7 @@ const inequal = async () => {
     beats(120, 144, () => {
       elements([1], () => {
         segment(segment_centric, () => {
-          fade({ start: 0.2, end: 1 })
+          fade({ start: 0.4, end: 1 })
         });
       });
     })
@@ -590,7 +690,7 @@ const inequal = async () => {
     beats(108, 144, () => {
       elements([2], () => {
         segment(segment_centric, () => {
-          fade({ start: 0.2, end: 1 })
+          fade({ start: 0.4, end: 1 })
         });
       });
     })
@@ -598,7 +698,7 @@ const inequal = async () => {
     beats(96, 144, () => {
       elements([3], () => {
         segment(segment_centric, () => {
-          fade({ start: 0.2, end: 1 })
+          fade({ start: 0.4, end: 1 })
         });
       });
     })
@@ -606,7 +706,7 @@ const inequal = async () => {
     beats(84, 144, () => {
       elements([4], () => {
         segment(segment_centric, () => {
-          fade({ start: 0.2, end: 1 })
+          fade({ start: 0.4, end: 1 })
         });
       });
     })
@@ -614,7 +714,7 @@ const inequal = async () => {
     beats(72, 144, () => {
       elements([5], () => {
         segment(segment_centric, () => {
-          fade({ start: 0.2, end: 1 })
+          fade({ start: 0.4, end: 1 })
         });
       });
     })
@@ -622,7 +722,7 @@ const inequal = async () => {
     beats(72, 144, () => {
       elements([6], () => {
         segment(segment_centric, () => {
-          fade({ start: 0.2, end: 1 })
+          fade({ start: 0.4, end: 1 })
         });
       });
     })
@@ -630,7 +730,7 @@ const inequal = async () => {
     beats(84, 144, () => {
       elements([7], () => {
         segment(segment_centric, () => {
-          fade({ start: 0.2, end: 1 })
+          fade({ start: 0.4, end: 1 })
         });
       });
     })
@@ -638,7 +738,7 @@ const inequal = async () => {
     beats(96, 144, () => {
       elements([8], () => {
         segment(segment_centric, () => {
-          fade({ start: 0.2, end: 1 })
+          fade({ start: 0.4, end: 1 })
         });
       });
     })
@@ -646,7 +746,7 @@ const inequal = async () => {
     beats(108, 144, () => {
       elements([9], () => {
         segment(segment_centric, () => {
-          fade({ start: 0.2, end: 1 })
+          fade({ start: 0.4, end: 1 })
         });
       });
     })
@@ -654,7 +754,7 @@ const inequal = async () => {
     beats(120, 144, () => {
       elements([10], () => {
         segment(segment_centric, () => {
-          fade({ start: 0.2, end: 1 })
+          fade({ start: 0.4, end: 1 })
         });
       });
     })
@@ -662,7 +762,7 @@ const inequal = async () => {
     beats(132, 144, () => {
       elements([11], () => {
         segment(segment_centric, () => {
-          fade({ start: 0.2, end: 1 })
+          fade({ start: 0.4, end: 1 })
         });
       });
     })
@@ -670,7 +770,7 @@ const inequal = async () => {
     beats(132, 144, () => {
       elements([12], () => {
         segment(segment_centric, () => {
-          fade({ start: 0.2, end: 1 })
+          fade({ start: 0.4, end: 1 })
         });
       });
     })
@@ -721,7 +821,7 @@ const inequal = async () => {
 
     beats(192, 216, () => {
       elements([1], () => {
-        segment(segment_b2, () => {
+        segment(segment_rand, () => {
           fade({ start: 0.2, end: 1 })
         });
       });
@@ -729,7 +829,7 @@ const inequal = async () => {
 
     beats(180, 216, () => {
       elements([2], () => {
-        segment(segment_b2, () => {
+        segment(segment_rand, () => {
           fade({ start: 0.2, end: 1 })
         });
       });
@@ -737,7 +837,7 @@ const inequal = async () => {
 
     beats(168, 216, () => {
       elements([3], () => {
-        segment(segment_b2, () => {
+        segment(segment_rand, () => {
           fade({ start: 0.2, end: 1 })
         });
       });
@@ -745,7 +845,7 @@ const inequal = async () => {
 
     beats(156, 216, () => {
       elements([4], () => {
-        segment(segment_b2, () => {
+        segment(segment_rand, () => {
           fade({ start: 0.2, end: 1 })
         });
       });
@@ -753,7 +853,7 @@ const inequal = async () => {
 
     beats(144, 216, () => {
       elements([5], () => {
-        segment(segment_b2, () => {
+        segment(segment_rand, () => {
           fade({ start: 0.2, end: 1 })
         });
       });
@@ -761,7 +861,7 @@ const inequal = async () => {
 
     beats(144, 216, () => {
       elements([6], () => {
-        segment(segment_b2, () => {
+        segment(segment_rand, () => {
           fade({ start: 0.2, end: 1 })
         });
       });
@@ -769,7 +869,7 @@ const inequal = async () => {
 
     beats(156, 216, () => {
       elements([7], () => {
-        segment(segment_b2, () => {
+        segment(segment_rand, () => {
           fade({ start: 0.2, end: 1 })
         });
       });
@@ -777,7 +877,7 @@ const inequal = async () => {
 
     beats(168, 216, () => {
       elements([8], () => {
-        segment(segment_b2, () => {
+        segment(segment_rand, () => {
           fade({ start: 0.2, end: 1 })
         });
       });
@@ -785,7 +885,7 @@ const inequal = async () => {
 
     beats(180, 216, () => {
       elements([9], () => {
-        segment(segment_b2, () => {
+        segment(segment_rand, () => {
           fade({ start: 0.2, end: 1 })
         });
       });
@@ -793,7 +893,7 @@ const inequal = async () => {
 
     beats(192, 216, () => {
       elements([10], () => {
-        segment(segment_b2, () => {
+        segment(segment_rand, () => {
           fade({ start: 0.2, end: 1 })
         });
       });
@@ -801,7 +901,7 @@ const inequal = async () => {
 
     beats(204, 216, () => {
       elements([11], () => {
-        segment(segment_b2, () => {
+        segment(segment_rand, () => {
           fade({ start: 0.2, end: 1 })
         });
       });
@@ -809,7 +909,7 @@ const inequal = async () => {
 
     beats(204, 216, () => {
       elements([12], () => {
-        segment(segment_b2, () => {
+        segment(segment_rand, () => {
           fade({ start: 0.2, end: 1 })
         });
       });
@@ -843,7 +943,7 @@ const inequal = async () => {
       });
     })
 
-    beats(228, 274, () => {
+    beats(228, 324, () => {
       cycle(2, () => {
         elements(all, () => {
           segment(segment_centric, () => {
@@ -1104,6 +1204,7 @@ const inequal = async () => {
     })
   });
 
+  anim.mirrorToLilum([1, 4, 5, 7, 10]);
   console.log("sending sequence");
   await sendSequence("inequal", anim.getSequence());
   if (!process.env.SEND_ONLY) {

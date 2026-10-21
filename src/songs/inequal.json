@@ -4,9 +4,16 @@
     "lengthSeconds": 312,
     "bpm": 150,
     "startOffsetMs": 0,
-    "runStartTimeSeconds": 91.53939393939395,
+    "runStartTimeSeconds": 0,
     "animationType": "song",
-    "audioFilePath": "inequal.wav"
+    "audioFilePath": "inequal.wav",
+    "lilumRings": [
+      1,
+      4,
+      5,
+      7,
+      10
+    ]
   },
   "timeframes": [
     {
@@ -46,19 +53,100 @@
       ],
       "effects": [
         {
-          "id": "eff-1784364893382-tzizwr7yqxe",
-          "effectKey": "fadeInOut",
-          "params": {
-            "high": 1
-          }
-        },
-        {
           "id": "eff-1784364968608-r48c9z93ivp",
           "effectKey": "snake",
           "params": {
             "tailLength": 0.5,
             "cyclic": true,
             "reverse": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "start-fade-first",
+      "startTime": 0,
+      "endTime": 72,
+      "label": "Start Fade In (first fade)",
+      "color": "#ffffff",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "sweep",
+        "direction": "edges-in",
+        "beatsPerRing": 12
+      },
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 12
+        }
+      ],
+      "effects": [
+        {
+          "id": "start-fade-first-fx",
+          "effectKey": "fadeInOut",
+          "params": {
+            "high": 1,
+            "outLow": 0.4
+          }
+        }
+      ]
+    },
+    {
+      "id": "start-fade-rest",
+      "startTime": 12,
+      "endTime": 72,
+      "label": "Start Fade In (repeats)",
+      "color": "#ffffff",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "spread",
+        "direction": "edges-in",
+        "beatsPerRing": 12
+      },
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 12
+        }
+      ],
+      "effects": [
+        {
+          "id": "start-fade-rest-fx",
+          "effectKey": "fadeInOut",
+          "params": {
+            "high": 1,
+            "low": 0.4
           }
         }
       ]
@@ -295,7 +383,7 @@
           "id": "eff-1784364968608-r48c9z93ivp-vszj-oejc",
           "effectKey": "fade",
           "params": {
-            "start": 0.2,
+            "start": 0.4,
             "end": 1
           }
         }
@@ -453,6 +541,7 @@
       "endTime": 228,
       "label": "Blink in fade",
       "color": "#ffffff",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -468,7 +557,12 @@
         12
       ],
       "mapping": "b1",
-      "hasExplicitColor": false,
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
       "effects": [
         {
           "id": "eff-1792423994058-i61k274woll",
@@ -478,12 +572,6 @@
             "staticPhase": 0
           },
           "phase": 0
-        }
-      ],
-      "cycles": [
-        {
-          "type": "cycle",
-          "beatsInCycle": 2
         }
       ]
     },
@@ -508,7 +596,7 @@
         11,
         12
       ],
-      "mapping": "b2",
+      "mapping": "rand",
       "phase": 0,
       "movement": {
         "type": "spread",
@@ -610,6 +698,7 @@
       "endTime": 228,
       "label": "Fade",
       "color": "#a81e0b",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -630,13 +719,12 @@
           "id": "eff-1792424493627-h5qktn7s9kv",
           "effectKey": "fadeOut"
         }
-      ],
-      "hasExplicitColor": false
+      ]
     },
     {
       "id": "1792424643855",
       "startTime": 228,
-      "endTime": 274,
+      "endTime": 324,
       "label": "March",
       "color": "#0aa0c0",
       "rings": [
@@ -654,6 +742,12 @@
         12
       ],
       "mapping": "centric",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 2
+        }
+      ],
       "effects": [
         {
           "id": "eff-1792424728029-fx62s3h33vl",
@@ -680,12 +774,6 @@
             }
           }
         }
-      ],
-      "cycles": [
-        {
-          "type": "cycle",
-          "beatsInCycle": 2
-        }
       ]
     },
     {
@@ -709,6 +797,12 @@
         12
       ],
       "mapping": "centric",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 4
+        }
+      ],
       "effects": [
         {
           "id": "eff-1792425057098-7wcwg36pyer",
@@ -723,12 +817,6 @@
             }
           }
         }
-      ],
-      "cycles": [
-        {
-          "type": "cycle",
-          "beatsInCycle": 4
-        }
       ]
     }
   ],
@@ -740,8 +828,8 @@
   },
   "spectrogramOpen": true,
   "view": {
-    "startBeat": 223.47,
-    "beatsPerScreen": 64
+    "startBeat": 0,
+    "beatsPerScreen": 128
   },
   "theme": "dark"
 }
