@@ -121,7 +121,9 @@ function legacyBrightnessToFloatFunc(entry: TimeframeEffectEntry, perRingPhase: 
       return { linear: { start: 1 + off, end: 0 + off } }
     case 'fadeInOut': {
       const high = typeof p.high === 'number' ? p.high : 1
-      return { half: { f1: { linear: { start: 0 + off, end: high + off } }, f2: { linear: { start: high + off, end: 0 + off } } } }
+      const low = typeof p.low === 'number' ? p.low : 0
+      const outLow = typeof p.outLow === 'number' ? p.outLow : low
+      return { half: { f1: { linear: { start: low + off, end: high + off } }, f2: { linear: { start: high + off, end: outLow + off } } } }
     }
     case 'fadeOutIn': {
       const low = typeof p.low === 'number' ? p.low : 0

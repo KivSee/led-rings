@@ -226,7 +226,7 @@ function emitSingleEffect(effectKey: string, params: Record<string, number | boo
   const args = formatEffectParams(params)
   const schemas: Record<string, { key: string }[]> = {
     brightness: [{ key: 'value' }],
-    fadeInOut: [{ key: 'high' }],
+    fadeInOut: [{ key: 'high' }, { key: 'low' }, { key: 'outLow' }],
     fadeOutIn: [{ key: 'low' }],
     blink: [{ key: 'low' }],
     pulse: [{ key: 'low' }, { key: 'staticPhase' }],

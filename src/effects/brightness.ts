@@ -47,10 +47,13 @@ export const fadeOut = () => {
 
 // start with brightness 0.0, go up to "high" brightness, then go back down to 0.0
 // the change is linear over the whole duration in a triangle shape
-export const fadeInOut = (opts?: { high?: number }) => {
+// rise from "low" to "high" over the first half, then fall to "outLow" over the
+// second half (outLow defaults to low, low defaults to 0)
+export const fadeInOut = (opts?: { high?: number; low?: number; outLow?: number }) => {
   tagEffect("fadeInOut", opts || {});
-  const min = 0.0;
+  const min = opts?.low ?? 0.0;
   const max = opts?.high ?? 1.0;
+  const outMin = opts?.outLow ?? min;
   addEffect({
     timed_brightness: {
       mult_factor_decrease: {
@@ -64,7 +67,7 @@ export const fadeInOut = (opts?: { high?: number }) => {
           f2: {
             linear: {
               start: max,
-              end: min,
+              end: outMin,
             },
           },
         },

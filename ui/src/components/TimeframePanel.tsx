@@ -65,7 +65,7 @@ const EFFECT_DESCRIPTIONS: Record<string, string> = {
   brightness: 'Constant brightness level for the whole timeframe',
   fadeIn: 'Brightness ramps 0 → 1 over the timeframe/cycle',
   fadeOut: 'Brightness ramps 1 → 0 over the timeframe/cycle',
-  fadeInOut: 'Brightness rises 0 → High at the midpoint, then back to 0',
+  fadeInOut: 'Brightness rises Low (start) → High at the midpoint, then falls to Low (end)',
   fadeOutIn: 'Brightness dips 1 → Low at the midpoint, then back to 1',
   blink: 'Square-wave on/off between full brightness and Low',
   pulse: 'Smooth sine pulse between Low and full brightness',
@@ -233,7 +233,11 @@ const MOVEMENT_EXTRA_HINTS: Record<MovementExtraKey, string> = {
 
 const EFFECT_PARAM_SCHEMAS: Record<string, EffectParamDef[]> = {
   brightness: [{ key: 'value', label: 'Value', type: 'number', default: 1, min: 0, max: 1, step: 0.01 }],
-  fadeInOut: [{ key: 'high', label: 'High', type: 'number', default: 1, min: 0, max: 1, step: 0.01, hint: 'Peak brightness at the midpoint' }],
+  fadeInOut: [
+    { key: 'high', label: 'High', type: 'number', default: 1, min: 0, max: 1, step: 0.01, hint: 'Peak brightness at the midpoint' },
+    { key: 'low', label: 'Low (start)', type: 'number', default: 0, min: 0, max: 1, step: 0.01, hint: 'Brightness the fade in starts from' },
+    { key: 'outLow', label: 'Low (end)', type: 'number', default: 0, min: 0, max: 1, step: 0.01, hint: 'Brightness the fade out ends at (defaults to Low (start))' },
+  ],
   fadeOutIn: [{ key: 'low', label: 'Low', type: 'number', default: 0, min: 0, max: 1, step: 0.01, hint: 'Minimum brightness at the midpoint' }],
   blink: [{ key: 'low', label: 'Low', type: 'number', default: 0.5, min: 0, max: 1, step: 0.01, hint: 'Brightness during the off half' }],
   pulse: [
