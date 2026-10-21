@@ -225,6 +225,9 @@ const RingVisualization = ({
             tfWithT.push({ timeframe: tf, t: tVal, relPos: rp, holdOff })
           }
           if (tfWithT.length === 0) { colors[pixelIndex] = 'rgb(0,0,0)'; continue }
+          // No active timeframe paints this pixel (only modifiers/motion): on hardware
+          // nothing sets its color, so it stays black — modifiers can't light it.
+          if (!tfWithT.some(e => e.timeframe.hasExplicitColor !== false)) { colors[pixelIndex] = 'rgb(0,0,0)'; continue }
           const hsv = tfWithT.length === 1
             ? getPixelColor(tfWithT[0].relPos, tfWithT[0].t, tfWithT[0].timeframe, bigRingIdx, tfWithT[0].holdOff)
             : getPixelColorMulti(tfWithT, bigRingIdx)
