@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>d2 Layout Options</title>
+<style>
+  :root {
+    --bg: #0d0f14;
+    --panel: #161a22;
+    --line: #2a303c;
+    --text: #e6e8ee;
+    --muted: #8a92a3;
+    --gA: #4f8cff;
+    --gB: #ffb020;
+    --gC: #3fcf8e;
+    --gD: #e05cff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 20px 16px 32px; }
+  h1 { margin: 0 0 6px; font-size: 20px; }
+  .intro { color: var(--muted); margin: 0 0 16px; max-width: 760px; }
+  .intro code { color: var(--text); }
+  table { border-collapse: separate; border-spacing: 12px; width: 100%; margin: 0 -12px; table-layout: fixed; }
+  th { color: var(--muted); font-weight: 500; text-align: center; padding: 0; }
+  thead th:first-child { width: 130px; }
+  th.row { text-align: left; color: var(--text); font-weight: 600; width: 120px; vertical-align: middle; }
+  td {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px;
+    vertical-align: top;
+  }
+  td .seq { font: 12px ui-monospace, Menlo, monospace; color: var(--muted); text-align: center; margin-top: 4px; }
+  td.plain { background: transparent; border: 0; padding: 0; }
+  td.unsupported {
+    background: transparent; border-style: dashed; color: var(--muted);
+    text-align: center; vertical-align: middle; font-size: 13px;
+  }
+  h1.section { margin-top: 28px; }
+  .bar {
+    position: sticky; top: 0; z-index: 1; background: var(--bg); border-bottom: 1px solid var(--line);
+    padding: 10px 16px;
+  }
+  .bar .in { max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+  .bar label { font-weight: 600; }
+  .bar input[type=range] { flex: none; width: 200px; accent-color: var(--gA); }
+  .bar output { flex: none; width: 3ch; margin-right: 12px; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .bar select {
+    background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 6px;
+    padding: 3px 6px; font: inherit;
+  }
+  .bar input[type=range]:disabled { opacity: 0.4; }
+  [hidden] { display: none !important; }
+  .card:not(.unsupported) { cursor: zoom-in; }
+  .card:not(.unsupported):hover { border-color: var(--muted); }
+  .zoom {
+    position: fixed; inset: 0; z-index: 10; background: rgba(5, 6, 10, 0.88);
+    display: flex; align-items: center; justify-content: center; padding: 16px; cursor: zoom-out;
+  }
+  .zoom .card {
+    cursor: default; width: min(92vw, calc(92vh - 140px)); max-height: 96vh; overflow: auto; padding: 16px;
+  }
+  .zoom .card h2 { font-size: 18px; }
+  .zoom .card p, .zoom .card .seq { font-size: 14px; }
+  .zoom .close {
+    position: fixed; top: 12px; right: 16px; background: var(--panel); color: var(--text);
+    border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; font: inherit; cursor: pointer;
+  }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px; }
+  .card h2 { margin: 4px 4px 0; font-size: 14px; }
+  .card h2 small.score { color: var(--muted); font-weight: 400; font-size: 12px; }
+  .card p { margin: 2px 4px 0; color: var(--muted); font-size: 12px; }
+  .card code.fn {
+    display: block; margin: 6px 4px 0; padding: 4px 6px; border-radius: 6px;
+    background: var(--bg); color: var(--text); font: 12px ui-monospace, Menlo, monospace;
+  }
+  .card .seq { font: 12px ui-monospace, Menlo, monospace; color: var(--muted); text-align: center; margin-top: 4px; }
+  .card.unsupported {
+    background: transparent; border-style: dashed; color: var(--muted);
+    display: flex; align-items: center; justify-content: center; text-align: center; font-size: 13px; min-height: 200px;
+  }
+  svg { width: 100%; height: auto; display: block; }
+  .lbl { text-anchor: middle; dominant-baseline: central; }
+  @media (max-width: 760px) {
+    table, tbody, tr, th, td { display: block; width: auto; }
+    table { margin: 0; border-spacing: 0; }
+    thead { display: none; }
+    th.row { margin: 16px 0 8px; }
+    td { margin-bottom: 12px; }
+    td::before { content: attr(data-g); display: block; color: var(--muted); text-align: center; }
+  }
+</style>
+</head>
+<body>
+<div class="bar"><div class="in">
+  <label for="groups">Groups</label>
+  <select id="groups">
+    <option value="1">1</option>
+    <option value="2" selected>2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+  </select>
+  <label for="balance">Balance</label>
+  <input id="balance" type="range" min="0" max="1" step="0.01" value="1">
+  <output id="balanceOut"></output>
+  <label for="clustering">Clustering</label>
+  <input id="clustering" type="range" min="0" max="1" step="0.01" value="0">
+  <output id="clusterOut"></output>
+</div></div>
+<div class="wrap">
+  <h1>d2 layout: which d1 ring is in which group</h1>
+  <p class="intro">
+    The options are same, alternate, square and triangle. Rings are drawn at their real place on the clock
+    (ring <code>r</code> at <code>r:30</code>).
+  </p>
+  <p class="intro" id="empty" hidden><b>No layout matches this balance and clustering.</b></p>
+
+  <section class="sec">
+  <h1 class="section">same: all d1 rings alike</h1>
+  <p class="intro">
+    No grouping at the d2 level: all 12 d1 rings get identical effects. The groups are made inside each d1 ring
+    instead, on its pixels through segments and position functions (described later).
+  </p>
+  <div class="cards" id="same"></div>
+  </section>
+
+  <section class="sec">
+  <h1 class="section">alternate</h1>
+  <p class="intro">
+    Groups alternate around the d2 ring in blocks of <code>k</code> rings, cycling through all <code>G</code> groups:
+    ring <code>r</code> is in group <code>floor((r - 1) / k) mod G</code>. At lower balance, 2-group alternate becomes
+    uneven: B gets the last block of every 3 (mid) or every 4 (least). Combinations where <code>k × G</code> does
+    not divide 12 would leave a seam between ring 12 and ring 1, so they are not supported.
+  </p>
+  <div class="cards" id="alternate"></div>
+  </section>
+
+  <section class="sec">
+  <h1 class="section">square: rings 1, 4, 7, 10 together</h1>
+  <p class="intro">
+    Rings 1, 4, 7 and 10 sit 90° apart (1:30, 4:30, 7:30, 10:30), so as one group they form a symmetric square.
+    The other 8 rings are the four pairs between them: 2-3 (right), 5-6 (bottom), 8-9 (left) and 11-12 (top).
+  </p>
+  <div class="cards" id="square"></div>
+  </section>
+
+  <section class="sec">
+  <h1 class="section">triangle: rings 1, 5, 9 together</h1>
+  <p class="intro">
+    Rings 1, 5 and 9 sit 120° apart (1:30, 5:30, 9:30), so as one group they form a symmetric triangle. It is the
+    least balanced d2 layout.
+  </p>
+  <div class="cards" id="triangle"></div>
+  </section>
+
+  <section class="sec">
+  <h1 class="section">combined: a d2 split, then a d1 split</h1>
+  <p class="intro">
+    A balanced 2-group d2 layout splits the d1 rings into X (its group A) and Y, and a d1 layout splits them further.
+    2 groups: <b>checker</b> (Y gets the d1 split inverted, still balanced) or <b>accent in X</b> (only X is split and Y
+    stays A, so A = 3/4). 3 groups: X splits into A and B, Y is C. 4 groups: X into A and B, Y into C and D. The pairs
+    closest to the clustering value are shown (a high value favors the d2 split, a low value the d1 split).
+  </p>
+  <div class="cards" id="combos"></div>
+  </section>
+
+  <section class="sec">
+  <h1 class="section">d1 layout: which small ring is in which group</h1>
+  <p class="intro">
+    The same idea inside one d1 ring: its 12 small rings (d0 0-11) are split into 2 groups (only 2 are supported).
+    Drawn on the d1 ring's own clock, with local 12 facing the d2 center and d0 <code>i</code> at local
+    <code>i:30</code>. Each card shows the segment and position function to give the effect:
+    <code>ind</code> (small ring <code>i</code> has <code>relPos = i / 12</code>) for whole small rings, and
+    <code>centric</code> (pixel <code>p</code> of every small ring has <code>relPos = p / 12</code>) for the d0
+    layouts, <code>rand</code> (a random <code>relPos</code> per pixel) for the random split, and <code>arc</code> /
+    <code>updown</code> for the shapes those segments give. The function returns 0 for group A and 1 for group B; the
+    colors on this page are computed by evaluating that function, the same way the renderer does.
+  </p>
+  <div class="cards" id="d1"></div>
+  </section>
+
+</div>
+
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const LETTERS = ['A', 'B', 'C', 'D'];
+const COLORS = ['var(--gA)', 'var(--gB)', 'var(--gC)', 'var(--gD)'];
+const R2 = 100, R1 = 22;
+
+// Clock angle in degrees: 0 = 12 o'clock, increasing clockwise.
+const at = (R, deg) => {
+  const a = deg * Math.PI / 180;
+  return [R * Math.sin(a), -R * Math.cos(a)];
+};
+const el = (tag, attrs, parent) => {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  parent.appendChild(e);
+  return e;
+};
+const groupOf = (r, k, G) => Math.floor((r - 1) / k) % G;
+
+// group(r) -> group index of part r. Parts are d1 rings 1-12 on d2 (first = 1)
+// or small rings 0-11 on one d1 ring (first = 0); both sit at r:30.
+function drawLayout(group, first = 1) {
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '-135 -135 270 270');
+  el('circle', { cx: 0, cy: 0, r: R2, fill: 'none', stroke: 'var(--line)', 'stroke-dasharray': '3 4' }, svg);
+  if (first === 0) {
+    el('text', { x: 0, y: -8, class: 'lbl', 'font-size': 11, fill: 'var(--muted)' }, svg).textContent = '↑ d2 center';
+    el('text', { x: 0, y: 8, class: 'lbl', 'font-size': 11, fill: 'var(--muted)' }, svg).textContent = '(local 12)';
+  }
+  for (let r = first; r < first + 12; r++) {
+    const g = group(r);
+    const [x, y] = at(R2, (r + 0.5) * 30);
+    el('circle', { cx: x, cy: y, r: R1, fill: COLORS[g], 'fill-opacity': 0.9 }, svg);
+    const id = el('text', { x, y: y - 6, class: 'lbl', 'font-size': 13, 'font-weight': 700, fill: '#0d0f14' }, svg);
+    id.textContent = r;
+    const gl = el('text', { x, y: y + 8, class: 'lbl', 'font-size': 10, fill: '#0d0f14' }, svg);
+    gl.textContent = LETTERS[g];
+  }
+  return svg;
+}
+
+// Balanced alternate: blocks of k rings cycle through all G groups.
+const altCards = document.getElementById('alternate');
+for (const G of [2, 3, 4]) {
+  for (const k of [1, 2, 3]) {
+    const title = `alternate ${k} ring${k > 1 ? 's' : ''}`;
+    let c;
+    if (12 % (k * G) !== 0) {
+      c = document.createElement('div');
+      c.className = 'card unsupported';
+      c.innerHTML = `<div><b>${title}, ${G} groups: not supported</b><br>${k} × ${G} = ${k * G} does not divide 12</div>`;
+    } else {
+      const group = r => groupOf(r, k, G);
+      c = card(title, `${G} groups, blocks of ${k}.`, '', drawLayout(group), '');
+      c.querySelector('.seq').replaceWith(seqLine(group));
+    }
+    altCards.appendChild(tagged(c, 'most', G, d2Score(k)));
+  }
+}
+
+// Uneven alternate (2 groups): in each period of P blocks of k rings, B gets the last block.
+
+for (const [level, P, pattern] of [['mid', 3, 'A A B'], ['least', 4, 'A A A B']]) {
+  for (const k of [1, 2, 3]) {
+    const title = `alternate ${k} ring${k > 1 ? 's' : ''}, ${pattern}`;
+    let c;
+    if (12 % (k * P) !== 0) {
+      c = document.createElement('div');
+      c.className = 'card unsupported';
+      c.innerHTML = `<div><b>${title}: not supported</b><br>${k} × ${P} = ${k * P} does not divide 12</div>`;
+    } else {
+      const group = r => Math.floor((r - 1) / k) % P === P - 1 ? 1 : 0;
+      c = card(title, `B = the last block of every ${P}; A = ${P - 1}/${P}.`, '', drawLayout(group), '');
+      c.querySelector('.seq').replaceWith(seqLine(group));
+    }
+    altCards.appendChild(tagged(c, level, 2, d2Score(k)));
+  }
+}
+
+function seqLine(group) {
+  const seq = document.createElement('div');
+  seq.className = 'seq';
+  seq.textContent = Array.from({ length: 12 }, (_, i) => LETTERS[group(i + 1)]).join(' ');
+  return seq;
+}
+
+const inSquare = r => r % 3 === 1;
+const SQUARE = [
+  {
+    title: 'square + rest (2 groups)', level: 'mid', groups: 2, cluster: 0.6,
+    note: 'B = the square (the accent), A = all 8 rings between.',
+    group: r => inSquare(r) ? 1 : 0,
+  },
+  {
+    title: 'square + split pairs (3 groups)', level: 'most', groups: 3, cluster: 0.6,
+    note: 'B = first ring of each pair (2, 5, 8, 11), C = second (3, 6, 9, 12). Same as alternate 1 ring with 3 groups; every group is a square.',
+    group: r => (r - 1) % 3,
+  },
+  {
+    title: 'square + axis pairs (3 groups)', level: 'most', groups: 3, cluster: 0.8,
+    note: 'B = the left and right pairs (2-3, 8-9), C = the top and bottom pairs (5-6, 11-12). Mirror symmetric across both axes.',
+    group: r => inSquare(r) ? 0 : [2, 3, 8, 9].includes(r) ? 1 : 2,
+  },
+];
+const squareCards = document.getElementById('square');
+for (const opt of SQUARE) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `<h2>${opt.title}</h2><p>${opt.note}</p>`;
+  card.appendChild(drawLayout(opt.group));
+  card.appendChild(seqLine(opt.group));
+  squareCards.appendChild(tagged(card, opt.level, opt.groups, opt.cluster));
+}
+const no4 = document.createElement('div');
+no4.className = 'card unsupported';
+tagged(no4, 'most', 4);
+no4.innerHTML = '<div><b>4 groups: not supported</b><br>The 8 rings left over do not split evenly into 3 groups.</div>';
+squareCards.appendChild(no4);
+
+const same = document.createElement('div');
+same.className = 'card';
+same.innerHTML = '<h2>same (1 group at d2)</h2><p>Every ring is A; groups come from inside each ring.</p>';
+same.appendChild(drawLayout(() => 0));
+same.appendChild(seqLine(() => 0));
+tagged(same, 'all', '1 2');
+document.getElementById('same').appendChild(same);
+
+// Float functions in the proto's JSON shape, evaluated like kivsee-render does.
+const K = v => ({ const_value: { value: v } });
+const REPEAT = (n, f) => ({ repeat: { numberOfTimes: n, funcToRepeat: f } });
+const HALF = (f1, f2) => ({ half: { f1, f2 } });
+function evalFn(fn, x) {
+  if (fn.const_value) return fn.const_value.value;
+  if (fn.repeat) return evalFn(fn.repeat.funcToRepeat, (x * fn.repeat.numberOfTimes) % 1);
+  if (fn.half) return x < 0.5 ? evalFn(fn.half.f1, x * 2) : evalFn(fn.half.f2, (x - 0.5) * 2);
+  throw new Error('unsupported float function');
+}
+function fnText(fn) {
+  if (fn.const_value) return String(fn.const_value.value);
+  if (fn.repeat) return `repeat(${fn.repeat.numberOfTimes}, ${fnText(fn.repeat.funcToRepeat)})`;
+  if (fn.half) return `half(${fnText(fn.half.f1)}, ${fnText(fn.half.f2)})`;
+}
+
+// Uneven: B (value 1) is the accent at the start of each period, A takes the rest.
+const ONE_OF_3 = REPEAT(4, HALF(HALF(K(1), K(0)), K(0)));
+const ONE_OF_4 = REPEAT(3, HALF(HALF(K(1), K(0)), K(0)));
+
+function card(title, note, fnLine, svg, seqText) {
+  const c = document.createElement('div');
+  c.className = 'card';
+  c.innerHTML = `<h2>${title}</h2><p>${note}</p>` + (fnLine ? `<code class="fn">${fnLine}</code>` : '');
+  c.appendChild(svg);
+  const seq = document.createElement('div');
+  seq.className = 'seq';
+  seq.textContent = seqText;
+  c.appendChild(seq);
+  return c;
+}
+// Balance level of a card: 'most', 'mid', 'least', or 'all' (always shown).
+// Clustering score 0-1, scale aware: splits across whole d1 rings (d2) are the most visible and score
+// 0.6-1; splits between small rings inside a d1 ring score 0.3-0.5; pixel splits inside small rings read as
+// texture and score 0-0.25. d2 score by block size k:
+function d2Score(k) {
+  return { 1: 0.6, 2: 0.8, 3: 1 }[k];
+}
+// Number(s) of groups a card can make, space separated; d1 and d0 layouts only support 2.
+// The 'same' cards also serve 1 group: the whole scene does the same thing.
+// Clustering: a 0-1 score, or 'all' (nothing to cluster); combined cards use 'combo'.
+function tagged(c, level, groups = 2, cluster = 'all') {
+  c.dataset.level = level;
+  c.dataset.groups = groups;
+  c.dataset.cluster = cluster;
+  return c;
+}
+// d2 layout: group(r) for d1 rings 1-12.
+const d2Card = (title, note, group) => card(title, note, '', drawLayout(group), seqLine(group).textContent);
+// d1 layout on segment ind: small ring i has relPos = i / 12. Value 0 -> group A, 1 -> group B.
+function d1Card(opt) {
+  const group = opt.single ? () => 0 : i => evalFn(opt.fn, i / 12);
+  return card(opt.title, opt.note, `ind: ${fnText(opt.fn)}`, drawLayout(group, 0),
+    Array.from({ length: 12 }, (_, i) => LETTERS[group(i)]).join(' '));
+}
+// d0 pixels on segment centric: pixel p of every small ring has relPos = p / 12.
+function pixelCard(opt) {
+  const group = p => evalFn(opt.fn, p / 12);
+  return card(opt.title, opt.note, `centric: ${fnText(opt.fn)}`, drawPixels(group),
+    'pixels 0-11: ' + Array.from({ length: 12 }, (_, p) => LETTERS[group(p)]).join(' '));
+}
+
+const inTriangle = r => (r - 1) % 4 === 0;
+const TRIANGLE_D2 = { title: 'triangle + rest (2 groups)', note: 'B = rings 1, 5, 9, 120° apart. A = the other 9.', group: r => inTriangle(r) ? 1 : 0 };
+const triangleCard = d2Card(TRIANGLE_D2.title, TRIANGLE_D2.note, TRIANGLE_D2.group);
+tagged(triangleCard, 'least', 2, 0.6);
+document.getElementById('triangle').appendChild(triangleCard);
+
+const D1 = [
+  { title: 'same', note: 'No split: the whole d1 ring is one group.', fn: K(1), single: true, level: 'all', groups: '1 2' },
+  { title: 'alternate 1', note: 'Every other small ring.', fn: REPEAT(6, HALF(K(0), K(1))), level: 'most' , cluster: 0.3 },
+  { title: 'alternate 2', note: 'Pairs of small rings.', fn: REPEAT(3, HALF(K(0), K(1))), level: 'most' , cluster: 0.4 },
+  { title: 'alternate 3', note: 'Alternating quarters of the ring.', fn: REPEAT(2, HALF(K(0), K(1))), level: 'most' , cluster: 0.5 },
+  { title: 'square + rest', note: 'B = d0 0, 3, 6, 9, 90° apart. A = the other 8.', fn: ONE_OF_3, level: 'mid' , cluster: 0.3 },
+  { title: 'd1 half: sides', note: 'd0 0-5 -> A, 6-11 -> B. The split line points at the d2 center.',
+    fn: HALF(K(0), K(1)), level: 'most', cluster: 0.55 },
+  { title: 'd1 half: inner / outer', note: 'd0 9-11, 0-2 (facing the d2 center) -> A, 3-8 (facing out) -> B.',
+    fn: HALF(HALF(K(0), K(1)), HALF(K(1), K(0))), level: 'most', cluster: 0.55 },
+  { title: 'triangle + rest', note: 'B = d0 0, 4, 8, 120° apart. A = the other 9.', fn: ONE_OF_4, level: 'least' , cluster: 0.3 },
+];
+const d1Cards = document.getElementById('d1');
+for (const opt of D1) d1Cards.appendChild(tagged(d1Card(opt), opt.level, opt.groups, opt.cluster));
+
+// Pixels of every small ring: drawn per pixel. Pixel p of small ring i sits at local p:30
+// on the small ring's clock, whose 12 faces the d1 center.
+const PIXELS_D0 = [
+  { title: 'half d0: inner / outer', note: 'A = the half of each small ring facing the d1 center, B = the half facing out.',
+    fn: HALF(HALF(K(0), K(1)), HALF(K(1), K(0))), level: 'most', cluster: 0.25 },
+  { title: 'd0 batch 1', note: 'Every other pixel.', fn: REPEAT(6, HALF(K(0), K(1))), level: 'most' , cluster: 0.05 },
+  { title: 'd0 batch 2', note: 'Pairs of pixels.', fn: REPEAT(3, HALF(K(0), K(1))), level: 'most' , cluster: 0.1 },
+  { title: 'd0 batch 3', note: 'Alternating quarters of the small ring.', fn: REPEAT(2, HALF(K(0), K(1))), level: 'most' , cluster: 0.15 },
+  { title: 'd0 batch 4', note: 'Thirds; does not close evenly, so A gets one run of 8 pixels (8-11, 0-3) and B gets 4.',
+    fn: REPEAT(1.5, HALF(K(0), K(1))), level: 'mid', cluster: 0.2 },
+  { title: 'd0 batch 6', note: 'Halves: A = pixels 0-5 (clockwise side), B = pixels 6-11. The split line points at the d1 center.',
+    fn: HALF(K(0), K(1)), level: 'most', cluster: 0.25 },
+  { title: 'd0 1 of 3', note: 'B = pixels 0, 3, 6, 9: a square inside each small ring. A = the rest.', fn: ONE_OF_3, level: 'mid' , cluster: 0.05 },
+  { title: 'd0 1 of 4', note: 'B = pixels 0, 4, 8: a triangle inside each small ring. A = the rest.', fn: ONE_OF_4, level: 'least' , cluster: 0.05 },
+];
+function drawPixels(groupOfPixel) {
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '-135 -135 270 270');
+  el('text', { x: 0, y: -8, class: 'lbl', 'font-size': 11, fill: 'var(--muted)' }, svg).textContent = '↑ d2 center';
+  el('text', { x: 0, y: 8, class: 'lbl', 'font-size': 11, fill: 'var(--muted)' }, svg).textContent = '(local 12)';
+  for (let i = 0; i < 12; i++) {
+    const a = (i + 0.5) * 30;
+    const [cx, cy] = at(R2, a);
+    for (let p = 0; p < 12; p++) {
+      const [dx, dy] = at(18, a + 180 + (p + 0.5) * 30);
+      el('circle', { cx: cx + dx, cy: cy + dy, r: 3.8, fill: COLORS[groupOfPixel(p, i)] }, svg);
+    }
+    el('text', { x: cx, y: cy, class: 'lbl', 'font-size': 10, fill: 'var(--muted)' }, svg).textContent = i;
+  }
+  return svg;
+}
+for (const opt of PIXELS_D0) d1Cards.appendChild(tagged(pixelCard(opt), opt.level, 2, opt.cluster));
+
+// Segment rand: relPos of each physical pixel index 0-143, copied from src/ring-segments/segments.json.
+const RAND = [0.23, 0.74, 0.14, 0.86, 0.59, 0.04, 0.91, 0.33, 0.63, 0.51, 0.77, 0.17, 0.98, 0.22, 0.42, 0.88, 0.67, 0.31, 0.53, 0.11, 0.94, 0.35, 0.69, 0.28, 0.76, 0.49, 0.08, 0.87, 0.21, 0.39, 0.95, 0.12, 0.61, 0.47, 0.02, 0.84, 0.18, 0.56, 0.73, 0.25, 0.99, 0.66, 0.37, 0.05, 0.89, 0.3, 0.55, 0.71, 0.26, 0.97, 0.62, 0.1, 0.83, 0.44, 0.07, 0.75, 0.34, 0.93, 0.19, 0.5, 0.79, 0.13, 0.68, 0.24, 0.96, 0.36, 0.09, 0.82, 0.41, 0.06, 0.92, 0.29, 0.7, 0.15, 0.58, 0.46, 0.01, 0.8, 0.2, 0.6, 0.38, 0.93, 0.16, 0.48, 0.85, 0.32, 0.06, 0.9, 0.4, 0.03, 0.78, 0.57, 0.27, 0.65, 0.45, 0.0, 0.81, 0.22, 0.69, 0.52, 0.35, 0.98, 0.17, 0.64, 0.43, 0.09, 0.72, 0.31, 0.55, 0.08, 0.74, 0.18, 0.66, 0.39, 0.04, 0.88, 0.23, 0.49, 0.12, 0.93, 0.6, 0.25, 0.76, 0.53, 0.07, 0.83, 0.19, 0.67, 0.45, 0.1, 0.86, 0.36, 0.01, 0.79, 0.28, 0.62, 0.16, 0.5, 0.92, 0.33, 0.13, 0.97, 0.61, 0.05];
+const RANDOM = [
+  { title: 'random, balanced', note: 'Below 0.5 -> A. Pixels split at random, about half each.', fn: HALF(K(0), K(1)), level: 'most' , cluster: 0 },
+  { title: 'random, mid', note: 'Below 0.625 -> A (closest cut to 2/3).', fn: HALF(K(0), HALF(HALF(K(0), K(1)), K(1))), level: 'mid' , cluster: 0 },
+  { title: 'random, least', note: 'Below 0.75 -> A; B is a sparse random sprinkle.', fn: HALF(K(0), HALF(K(0), K(1))), level: 'least' , cluster: 0 },
+];
+function randCard(opt) {
+  const group = (p, i) => evalFn(opt.fn, RAND[i * 12 + p]);
+  let a = 0;
+  for (let x = 0; x < 144; x++) if (evalFn(opt.fn, RAND[x]) === 0) a++;
+  return card(opt.title, opt.note, `rand: ${fnText(opt.fn)}`, drawPixels(group), `A: ${a} of 144 pixels`);
+}
+for (const opt of RANDOM) d1Cards.appendChild(tagged(randCard(opt), opt.level, 2, opt.cluster));
+
+// Other segments, as relPos(i, p) for small ring i and pixel p (formulas match src/ring-segments/segments.json).
+const SEGMENT_REL = {
+  arc: (i, p) => Math.min(p, 12 - p) / 7,
+  updown: (i, p) => ((i + p) % 12) / 12,
+};
+const OTHER_SEG = [
+  { title: 'arc half', seg: 'arc', note: 'arc is mirrored around pixels 0 and 6. A = 7 pixels around pixel 0, B = 5 around pixel 6.',
+    fn: HALF(K(0), K(1)), level: 'most', cluster: 0.25 },
+  { title: 'arc stripes', seg: 'arc', note: 'Stripes mirrored around pixels 0 and 6 (A = 7 of 12).',
+    fn: REPEAT(2, HALF(K(0), K(1))), level: 'most', cluster: 0.1 },
+  { title: 'same direction half', seg: 'updown', note: 'Pixels pointing the same way share a value, so every small ring is cut on the same line, as if lit from one side.',
+    fn: HALF(K(0), K(1)), level: 'most', cluster: 0.25 },
+  { title: 'same direction quarters', seg: 'updown', note: 'Quarters by direction, the same on every small ring.',
+    fn: REPEAT(2, HALF(K(0), K(1))), level: 'most', cluster: 0.15 },
+];
+function segCard(opt) {
+  const group = (p, i) => evalFn(opt.fn, SEGMENT_REL[opt.seg](i, p));
+  let a = 0;
+  for (let i = 0; i < 12; i++) for (let p = 0; p < 12; p++) if (group(p, i) === 0) a++;
+  return card(opt.title, opt.note, `${opt.seg}: ${fnText(opt.fn)}`, drawPixels(group), `A: ${a} of 144 pixels`);
+}
+for (const opt of OTHER_SEG) d1Cards.appendChild(tagged(segCard(opt), opt.level, 2, opt.cluster));
+
+// Combined layout: a 2-group d2 layout splits the rings into X (its group A, value 0) and Y (value 1), and a
+// d1 layout splits them further. Both parts can be balanced or uneven; the resulting group shares decide the
+// card's balance level. All pairs are built; the sliders filter and rank them.
+const D2_TWO = [
+  ...[1, 2, 3].map(k => ({ title: `alternate ${k} ring${k > 1 ? 's' : ''}`, cluster: d2Score(k), group: r => groupOf(r, k, 2) })),
+  ...[[3, 1], [3, 2], [4, 1], [4, 3]].map(([P, k]) => ({
+    title: `alternate ${k} ring${k > 1 ? 's' : ''}, ${P === 3 ? 'A A B' : 'A A A B'}`, cluster: d2Score(k),
+    group: r => Math.floor((r - 1) / k) % P === P - 1 ? 1 : 0,
+  })),
+  { title: 'square + rest', cluster: 0.6, group: SQUARE[0].group },
+  { title: 'triangle + rest', cluster: 0.6, group: TRIANGLE_D2.group },
+];
+// Each d1 option as pixelGroup(i, p) -> 0 or 1, for small ring i and pixel p.
+const D1_TWO = [
+  ...D1.filter(o => !o.single).map(o => ({ ...o, pg: (i, p) => evalFn(o.fn, i / 12) })),
+  ...PIXELS_D0.map(o => ({ ...o, pg: (i, p) => evalFn(o.fn, p / 12) })),
+  ...RANDOM.map(o => ({ ...o, pg: (i, p) => evalFn(o.fn, RAND[i * 12 + p]) })),
+  ...OTHER_SEG.map(o => ({ ...o, pg: (i, p) => evalFn(o.fn, SEGMENT_REL[o.seg](i, p)) })),
+];
+// Precomputed groups: d2 per ring 1-12, d1 per pixel index i * 12 + p.
+for (const d2 of D2_TWO) d2.grid = Array.from({ length: 13 }, (_, r) => r ? d2.group(r) : 0);
+for (const d1 of D1_TWO) d1.grid = Array.from({ length: 144 }, (_, x) => d1.pg(Math.floor(x / 12), x % 12));
+
+// Balance of any layout from its group sizes: smallest share / largest share (1 = all equal). For 2 groups this
+// gives 1 for A = 1/2, 0.5 for A = 2/3 and 0.33 for A = 3/4, matching the three levels.
+function balanceLevel(counts) {
+  const b = Math.min(...counts) / Math.max(...counts);
+  return b >= 0.75 ? 'most' : b >= 0.4 ? 'mid' : 'least';
+}
+
+function drawInstallation(groupOf3) {
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '-660 -660 1320 1320');
+  const counts = [0, 0, 0, 0];
+  for (let r = 1; r <= 12; r++) {
+    const A = (r + 0.5) * 30;
+    const [x1, y1] = at(500, A);
+    for (let i = 0; i < 12; i++) {
+      const Ai = A + 180 + (i + 0.5) * 30;
+      const [dx0, dy0] = at(100, Ai);
+      for (let p = 0; p < 12; p++) {
+        const g = groupOf3(r, i, p);
+        counts[g]++;
+        const [dx, dy] = at(20, Ai + 180 + (p + 0.5) * 30);
+        el('circle', { cx: x1 + dx0 + dx, cy: y1 + dy0 + dy, r: 5, fill: COLORS[g] }, svg);
+      }
+    }
+    el('text', { x: x1, y: y1, class: 'lbl', 'font-size': 44, fill: 'var(--muted)' }, svg).textContent = r;
+  }
+  return { svg, counts };
+}
+
+const comboCards = document.getElementById('combos');
+// Combined cards draw all 1728 pixels, so each one is drawn the first time it is shown.
+const pendingDraw = new Map();
+function comboCard(G, d2, d1, kind, groupOf3, note) {
+  const counts = new Array(G).fill(0);
+  for (let r = 1; r <= 12; r++) for (let i = 0; i < 12; i++) for (let p = 0; p < 12; p++) counts[groupOf3(r, i, p)]++;
+  if (Math.min(...counts) === 0) return;
+  // With 2 groups A is always the larger one.
+  if (G === 2 && counts[1] > counts[0]) {
+    const f = groupOf3;
+    groupOf3 = (r, i, p) => 1 - f(r, i, p);
+    counts.reverse();
+  }
+  const c = tagged(card(`${d2.title} + ${d1.title}`, note, '', document.createElementNS(NS, 'svg'),
+    counts.map((n, g) => `${LETTERS[g]} ${Math.round(n / 17.28)}%`).join('  ')), balanceLevel(counts), G, 'combo');
+  c.dataset.s2 = d2.cluster;
+  c.dataset.s1 = d1.cluster;
+  c.querySelector('h2').insertAdjacentHTML('beforeend', ` <small class="score">${kind}</small>`);
+  pendingDraw.set(c, () => c.querySelector('svg').replaceWith(drawInstallation(groupOf3).svg));
+  comboCards.appendChild(c);
+}
+for (const d2 of D2_TWO) {
+  for (const d1 of D1_TWO) {
+    const X = r => d2.grid[r] === 0;
+    const g1 = (i, p) => d1.grid[i * 12 + p];
+    // 2 groups, checker: Y rings get the inverted d1 split.
+    comboCard(2, d2, d1, 'checker', (r, i, p) => X(r) ? g1(i, p) : 1 - g1(i, p),
+      `X split by ${d1.title}; Y gets the same split inverted.`);
+    // 2 groups, accent in X: only X is split, Y stays A.
+    comboCard(2, d2, d1, 'accent in X', (r, i, p) => X(r) ? g1(i, p) : 0,
+      `X split by ${d1.title}; Y stays A, so B is an accent inside X.`);
+    comboCard(3, d2, d1, '3 groups', (r, i, p) => X(r) ? g1(i, p) : 2,
+      `X split by ${d1.title}; Y = C.`);
+    comboCard(4, d2, d1, '4 groups', (r, i, p) => X(r) ? g1(i, p) : 2 + g1(i, p),
+      `X and Y both split by ${d1.title}.`);
+  }
+}
+
+// Balance: the 0-1 slider picks one level, and only that level's options are shown.
+// Cards tagged 'all' (one group, nothing to balance) are always shown.
+const LEVELS = [
+  { name: 'least', min: 0, label: 'A = 3/4, B is the accent' },
+  { name: 'mid', min: 1 / 3, label: 'A = 2/3, B is the accent' },
+  { name: 'most', min: 2 / 3, label: 'balanced, A = 1/2' },
+];
+const slider = document.getElementById('balance');
+const groupsSelect = document.getElementById('groups');
+const clusterSlider = document.getElementById('clustering');
+// A single layout matches when its score is within CLUSTER_WINDOW of the slider.
+const CLUSTER_WINDOW = 0.15;
+// Combined layouts: each level has its own target that moves with slider value c (d2: 0.6 -> 1, d1: 0 -> 0.5),
+// and a high c weights the d2 match more (big blocks across rings) while a low c weights the d1 match more
+// (fine texture inside rings).
+function comboCost(c, s2, s1) {
+  const t2 = 0.6 + 0.4 * c, t1 = 0.5 * c;
+  const w2 = 0.25 + 0.5 * c, w1 = 1 - w2;
+  return w2 * Math.abs(t2 - s2) + w1 * Math.abs(t1 - s1);
+}
+
+// Category of every card, for ranking: d2 layouts, d1 layouts, or combined.
+for (const e of document.querySelectorAll('[data-level]')) {
+  e.dataset.cat = e.closest('#d1') ? 'd1' : e.closest('#combos') ? 'combo' : 'd2';
+  if (e.dataset.cluster !== 'all' && e.dataset.cluster !== 'combo' && !e.classList.contains('unsupported')) {
+    e.querySelector('h2').insertAdjacentHTML('beforeend', ` <small class="score">${e.dataset.cluster}</small>`);
+  }
+}
+// How many of the closest options each category shows.
+const SHOWN = { d2: 4, d1: 6, combo: 4 };
+
+function applyFilters() {
+  const G = Number(groupsSelect.value);
+  const v = Number(slider.value);
+  slider.disabled = G === 1;
+  const level = [...LEVELS].reverse().find(l => v >= l.min);
+  document.getElementById('balanceOut').textContent = v.toFixed(2);
+  const cv = Number(clusterSlider.value);
+  document.getElementById('clusterOut').textContent = cv.toFixed(2);
+  // Distance of a card from the clustering value: |score - c|, or the combined cost for combined cards.
+  const dist = e => e.dataset.cluster === 'combo'
+    ? comboCost(cv, Number(e.dataset.s2), Number(e.dataset.s1))
+    : Math.abs(Number(e.dataset.cluster) - cv);
+  const ranked = { d2: [], d1: [], combo: [] };
+  for (const e of document.querySelectorAll('[data-level]')) {
+    e.hidden = (e.dataset.level !== 'all' && e.dataset.level !== level.name)
+      || !e.dataset.groups.split(' ').includes(String(G));
+    if (e.hidden || e.dataset.cluster === 'all') continue;
+    // Unsupported boxes only show when they are about the current value.
+    if (e.classList.contains('unsupported')) {
+      e.hidden = Math.abs(Number(e.dataset.cluster) - cv) > CLUSTER_WINDOW + 1e-9;
+      continue;
+    }
+    ranked[e.dataset.cat].push({ e, d: dist(e) });
+  }
+  // Keep the closest few of each category, closest first.
+  for (const [cat, list] of Object.entries(ranked)) {
+    list.sort((a, b) => a.d - b.d);
+    list.forEach(({ e }, n) => {
+      e.hidden = n >= SHOWN[cat];
+      if (!e.hidden) {
+        e.parentElement.appendChild(e);
+        if (pendingDraw.has(e)) { pendingDraw.get(e)(); pendingDraw.delete(e); }
+      }
+    });
+  }
+  for (const sec of document.querySelectorAll('section.sec')) {
+    sec.hidden = !sec.querySelector('[data-level]:not([hidden])');
+  }
+  document.getElementById('empty').hidden =
+    !!document.querySelector('[data-level]:not(.unsupported):not([data-cluster="all"]):not([hidden])');
+}
+slider.addEventListener('input', applyFilters);
+clusterSlider.addEventListener('input', applyFilters);
+groupsSelect.addEventListener('change', applyFilters);
+applyFilters();
+
+// Click a card to see it large; click outside, the close button or Esc to close.
+const zoom = document.createElement('div');
+zoom.className = 'zoom';
+zoom.hidden = true;
+document.body.appendChild(zoom);
+function closeZoom() {
+  zoom.hidden = true;
+  zoom.replaceChildren();
+}
+document.addEventListener('click', e => {
+  const c = e.target.closest('.wrap .card');
+  if (!c || c.classList.contains('unsupported')) return;
+  if (pendingDraw.has(c)) { pendingDraw.get(c)(); pendingDraw.delete(c); }
+  const big = c.cloneNode(true);
+  big.hidden = false;
+  big.addEventListener('click', ev => ev.stopPropagation());
+  const close = document.createElement('button');
+  close.className = 'close';
+  close.textContent = '✕ Close';
+  zoom.replaceChildren(big, close);
+  zoom.hidden = false;
+});
+zoom.addEventListener('click', closeZoom);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeZoom(); });
+</script>
+</body>
+</html>
