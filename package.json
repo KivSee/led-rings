@@ -24,6 +24,7 @@
     "ui": "yarn --cwd ui dev",
     "dev": "concurrently -n server,ui -c blue,magenta \"yarn control-server\" \"yarn ui\"",
     "export-song": "ts-node src/export-song.ts",
+    "export-sequence": "ts-node src/export-sequence.ts",
     "gen-ui-song": "ts-node src/generate-category-ui-song.ts",
     "package:win": "node packaging/build.js"
   },
