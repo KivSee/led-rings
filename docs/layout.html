@@ -415,13 +415,15 @@ const PIXELS_D0 = [
   { title: 'd0 1 of 3', note: 'B = pixels 0, 3, 6, 9: a square inside each small ring. A = the rest.', fn: ONE_OF_3, level: 'mid' , cluster: 0.05 },
   { title: 'd0 1 of 4', note: 'B = pixels 0, 4, 8: a triangle inside each small ring. A = the rest.', fn: ONE_OF_4, level: 'least' , cluster: 0.05 },
 ];
+// The wiring starts 9 small rings in: physical small ring i sits at local (i + 9):30.
+const D0_OFFSET = 9;
 function drawPixels(groupOfPixel) {
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('viewBox', '-135 -135 270 270');
   el('text', { x: 0, y: -8, class: 'lbl', 'font-size': 11, fill: 'var(--muted)' }, svg).textContent = '↑ d2 center';
   el('text', { x: 0, y: 8, class: 'lbl', 'font-size': 11, fill: 'var(--muted)' }, svg).textContent = '(local 12)';
   for (let i = 0; i < 12; i++) {
-    const a = (i + 0.5) * 30;
+    const a = (((i + D0_OFFSET) % 12) + 0.5) * 30;
     const [cx, cy] = at(R2, a);
     for (let p = 0; p < 12; p++) {
       const [dx, dy] = at(18, a + 180 + (p + 0.5) * 30);
@@ -509,7 +511,7 @@ function drawInstallation(groupOf3) {
     const A = (r + 0.5) * 30;
     const [x1, y1] = at(500, A);
     for (let i = 0; i < 12; i++) {
-      const Ai = A + 180 + (i + 0.5) * 30;
+      const Ai = A + 180 + (((i + D0_OFFSET) % 12) + 0.5) * 30;
       const [dx0, dy0] = at(100, Ai);
       for (let p = 0; p < 12; p++) {
         const g = groupOf3(r, i, p);

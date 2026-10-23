@@ -175,7 +175,10 @@ const ringLeds = Array.from({ length: 13 }, newLeds)
 
 // --- the installation ------------------------------------------------------------------------------------------
 
-// Pixel positions in a unit square (-1..1), like docs/layout.html: ring r at r:30, d0 i at local i:30.
+// The wiring starts 9 small rings in: physical small ring i (pixels 12i - 12i+11) sits at local (i + 9):30, the
+// same as src/ring-segments/geometry-segments.ts.
+const D0_OFFSET = 9
+// Pixel positions in a unit square (-1..1), like docs/layout.html: ring r at r:30, physical d0 i at local (i + 9):30.
 const PIXEL_POS: { r: number; index: number; x: number; y: number }[] = []
 const RING_CENTER: { x: number; y: number }[] = []
 {
@@ -188,7 +191,7 @@ const RING_CENTER: { x: number; y: number }[] = []
     const [x1, y1] = at(0, 0, 500, A)
     RING_CENTER[r] = { x: x1 / 640, y: y1 / 640 }
     for (let i = 0; i < 12; i++) {
-      const Ai = A + 180 + (i + 0.5) * 30
+      const Ai = A + 180 + (((i + D0_OFFSET) % 12) + 0.5) * 30
       const [x0, y0] = at(x1, y1, 100, Ai)
       for (let p = 0; p < 12; p++) {
         const [x, y] = at(x0, y0, 20, Ai + 180 + (p + 0.5) * 30)

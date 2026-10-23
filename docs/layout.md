@@ -92,7 +92,7 @@ Rings 1, 5 and 9 sit 120° apart (1:30, 5:30, 9:30), so as one group they form a
 
 The **d1 layout** does the same thing one level down. It looks at **one d1 ring** and splits its 12 small rings (d0 0-11) into groups, using the same kinds of options as the d2 layout. Only **2 groups** (A, B) are supported.
 
-Small rings are numbered on the d1 ring's own clock, whose 12 o'clock faces the d2 center, and d0 `i` sits at local `i:30` (see CLAUDE.md "d0 rings inside a d1 ring").
+Small rings are numbered on the d1 ring's own clock, whose 12 o'clock faces the d2 center, and the wiring starts 9 small rings in: d0 `i` (pixels `12i`-`12i+11`) sits at local `(i + 9):30` (see CLAUDE.md "d0 rings inside a d1 ring").
 
 | d1 layout | d0 0-11 | Groups |
 |---|---|---|
@@ -100,7 +100,7 @@ Small rings are numbered on the d1 ring's own clock, whose 12 o'clock faces the 
 | **alternate 1** | A B A B A B A B A B A B | Every other small ring. |
 | **alternate 2** | A A B B A A B B A A B B | Pairs of small rings. |
 | **alternate 3** | A A A B B B A A A B B B | Alternating quarters of the ring. |
-| **square + rest** | B A A B A A B A A B A A | B = d0 0, 3, 6, 9 (local 0:30, 3:30, 6:30, 9:30), 90° apart like d1 rings 1, 4, 7, 10 on d2. A = the other 8. |
+| **square + rest** | B A A B A A B A A B A A | B = d0 0, 3, 6, 9 (local 9:30, 0:30, 3:30, 6:30), 90° apart like d1 rings 1, 4, 7, 10 on d2. A = the other 8. |
 | **triangle + rest** | B A A A B A A A B A A A | B = d0 0, 4, 8, 120° apart like d1 rings 1, 5, 9 on d2. A = the other 9. |
 
 In general, for alternate, small ring `i` is in group `floor(i / k) mod 2`. All of these close evenly around the ring.
