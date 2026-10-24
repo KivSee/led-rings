@@ -163,14 +163,18 @@ function renderEffect(e: EffectJson, seg: SegPixel[], leds: HSV[], t: number) {
   }
 }
 
-/** Render a ring's sequence at `timeMs` (time since the song started) into `leds` (PIXELS_PER_RING pixels). */
-export function renderRing(seq: ThingSequence | undefined, timeMs: number, leds: HSV[]) {
+/**
+ * Render a ring's sequence at `timeMs` (time since the song started) into `leds` (PIXELS_PER_RING pixels). Effects
+ * whose index `skip` returns true for are left out.
+ */
+export function renderRing(seq: ThingSequence | undefined, timeMs: number, leds: HSV[], skip?: (index: number) => boolean) {
   for (const px of leds) { px.hue = 0; px.sat = 0; px.val = 0 }
   if (!seq || seq.duration_ms <= 0 || timeMs < 0) return
   const iteration = Math.floor(timeMs / seq.duration_ms)
   if (seq.num_repeats > 0 && iteration >= seq.num_repeats) return
   const t = timeMs % seq.duration_ms
-  for (const e of seq.effects) {
+  for (const [index, e] of seq.effects.entries()) {
+    if (skip?.(index)) continue
     const relTime = effectRelTime(e.effect_config, t)
     if (relTime === undefined) continue
     const seg = SEGMENTS[e.effect_config.segments || 'all']
