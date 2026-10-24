@@ -6,7 +6,7 @@
  *
  * Behaviour:
  *  - On first connect, if no retained message arrives within 2 s →
- *    publishes 1.0 with retain=true to initialise the topic.
+ *    publishes DEFAULT_BRIGHTNESS (0.2) with retain=true to initialise the topic.
  *  - Always keeps the last known value so GET /api/brightness responds
  *    instantly without waiting for the broker.
  */
@@ -18,10 +18,12 @@ const BROKER_IP = process.env.MQTT_BROKER || "";
 const BROKER_URL = BROKER_IP ? `mqtt://${BROKER_IP}` : "";
 const TOPIC = "brightness";
 const INIT_TIMEOUT_MS = 2000;
+// used when the broker has no retained brightness -- dim, never full power
+const DEFAULT_BRIGHTNESS = 0.2;
 
 let client: mqtt.MqttClient | null = null;
 let connected = false;
-let currentValue = 1.0;
+let currentValue = DEFAULT_BRIGHTNESS;
 let receivedRetained = false;
 
 function clamp(v: number): number {
@@ -65,12 +67,12 @@ export function initMqttBrightness() {
         console.error("[brightness] Subscribe error:", err.message);
         return;
       }
-      // If broker has no retained message, initialise to 1.0 after a short wait
+      // If broker has no retained message, initialise to the default after a short wait
       setTimeout(() => {
         if (!receivedRetained) {
-          console.log("[brightness] No retained value found — initialising to 1.0");
-          currentValue = 1.0;
-          publish(1.0);
+          console.log(`[brightness] No retained value found — initialising to ${DEFAULT_BRIGHTNESS}`);
+          currentValue = DEFAULT_BRIGHTNESS;
+          publish(DEFAULT_BRIGHTNESS);
         }
       }, INIT_TIMEOUT_MS);
     });
