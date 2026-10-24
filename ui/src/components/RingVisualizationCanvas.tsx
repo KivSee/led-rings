@@ -1,4 +1,5 @@
 import React from 'react'
+import { LAYOUT_ROTATION_DEG } from '../ringLayout'
 
 interface RingVisualizationCanvasProps {
   /** precomputedColors[ringNumber (1-12)] = string[144] of rgb colors indexed by pixel index */
@@ -11,6 +12,20 @@ interface RingVisualizationCanvasProps {
   onZoomChange?: (zoom: number) => void
   /** When true, resets pan to center (parent toggles this by bumping a counter) */
   resetPanToken?: number
+  /** 'width' (default): square sized to container width (legacy, for small previews).
+   *  'box': fit the smaller of container width/height and center — shows all rings without clipping. */
+  fit?: 'width' | 'box'
+  /** When true, off LEDs render as pure black (no gray outline / no dimmed inactive rings) —
+   *  so unlit pixels look truly off, not like gray dots. */
+  darkOff?: boolean
+}
+
+/** True when an rgb(a) color is effectively off (near-black). */
+function isOffColor(c?: string): boolean {
+  if (!c) return true
+  const m = c.match(/rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)/)
+  if (!m) return false
+  return +m[1] + +m[2] + +m[3] < 12
 }
 
 // Base geometry at 680px — all values scale linearly with available size
@@ -19,6 +34,9 @@ const BASE_OUTER_R = 268
 const BASE_PIX_R = 11
 const BASE_SUB_R = 57
 const BASE_PIX_SIZE = 6
+// Midpoint between sub-rings 2 and 3: the side of each big ring that faces the
+// installation's centre.
+const SUB_RINGS_FACING_CENTER = 2.5
 
 interface PixelPos { cx: number; cy: number; ringIdx: number; pixelIndex: number }
 
@@ -49,18 +67,21 @@ function buildPixelPositions(size: number, scale: number): PixelPos[] {
   const center = size / 2
   const all: PixelPos[] = []
   for (let bigRingIdx = 0; bigRingIdx < 12; bigRingIdx++) {
-    const bigAngle = (bigRingIdx * 30 - 60) * (Math.PI / 180)
+    const bigAngleDeg = bigRingIdx * 30 - 60 + LAYOUT_ROTATION_DEG
+    const bigAngle = bigAngleDeg * (Math.PI / 180)
     const bigCx = center + outerR * Math.cos(bigAngle)
     const bigCy = center + outerR * Math.sin(bigAngle)
     for (let subRingIdx = 0; subRingIdx < 12; subRingIdx++) {
-      // sub-ring 0 at 4 o'clock (60° clockwise from 2 o'clock). 4 o'clock = +30° in screen coords.
-      const subAngle = (subRingIdx * 30 + 30) * (Math.PI / 180)
+      // Each big ring hangs turned so the gap between sub-rings 2 and 3 faces the
+      // installation's centre (see the rad segment); sub-rings run clockwise.
+      const subAngleDeg = bigAngleDeg + 180 + (subRingIdx - SUB_RINGS_FACING_CENTER) * 30
+      const subAngle = subAngleDeg * (Math.PI / 180)
       const subCx = bigCx + subR * Math.cos(subAngle)
       const subCy = bigCy + subR * Math.sin(subAngle)
       for (let posIdx = 0; posIdx < 12; posIdx++) {
         const pixelIndex = subRingIdx * 12 + posIdx
-        // Pixel 0 faces the big-ring center: 180° inward from sub-ring 0's position.
-        const pixAngle = (210 + subRingIdx * 30 + posIdx * 30) * (Math.PI / 180)
+        // Pixel 0 faces the big-ring center: 180° inward from the sub-ring's position.
+        const pixAngle = (subAngleDeg + 180 + posIdx * 30) * (Math.PI / 180)
         all.push({
           cx: subCx + pixR * Math.cos(pixAngle),
           cy: subCy + pixR * Math.sin(pixAngle),
@@ -73,7 +94,7 @@ function buildPixelPositions(size: number, scale: number): PixelPos[] {
   return all
 }
 
-const RingVisualizationCanvas = ({ colors, activeRings, zoom = 1, onZoomChange, resetPanToken }: RingVisualizationCanvasProps) => {
+const RingVisualizationCanvas = ({ colors, activeRings, zoom = 1, onZoomChange, resetPanToken, fit = 'width', darkOff = false }: RingVisualizationCanvasProps) => {
   const wrapperRef = React.useRef<HTMLDivElement>(null)
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
   const [size, setSize] = React.useState(BASE)
@@ -88,8 +109,11 @@ const RingVisualizationCanvas = ({ colors, activeRings, zoom = 1, onZoomChange, 
     const el = wrapperRef.current
     if (!el) return
     const ro = new ResizeObserver(entries => {
-      const w = entries[0]?.contentRect.width
-      if (w && w > 0) setSize(Math.floor(w))
+      const cr = entries[0]?.contentRect
+      if (!cr) return
+      // 'box': fit the smaller of width/height so the whole ring cluster is visible and centered.
+      const s = fit === 'box' && cr.height > 0 ? Math.min(cr.width, cr.height) : cr.width
+      if (s && s > 0) setSize(Math.floor(s))
     })
     ro.observe(el)
     return () => ro.disconnect()
@@ -142,13 +166,28 @@ const RingVisualizationCanvas = ({ colors, activeRings, zoom = 1, onZoomChange, 
     for (const pos of pixelPositions) {
       const ringNumber = pos.ringIdx + 1
       const isActive = !activeRings || activeRings.length === 0 || activeRings.includes(ringNumber)
+      const fill = colors.get(ringNumber)?.[pos.pixelIndex] ?? 'rgb(0,0,0)'
+
+      if (darkOff) {
+        // Live look: off LEDs are pure black (no outline); only lit pixels are drawn + ringed.
+        if (!isActive || isOffColor(fill)) continue
+        ctx.beginPath()
+        ctx.arc(pos.cx, pos.cy, pixelRadius, 0, Math.PI * 2)
+        ctx.fillStyle = fill
+        ctx.fill()
+        ctx.strokeStyle = activeStroke
+        ctx.lineWidth = 1
+        ctx.stroke()
+        continue
+      }
+
       ctx.beginPath()
       ctx.arc(pos.cx, pos.cy, pixelRadius, 0, Math.PI * 2)
       if (isActive) {
         ctx.strokeStyle = activeStroke
         ctx.lineWidth = 1
         ctx.stroke()
-        ctx.fillStyle = colors.get(ringNumber)?.[pos.pixelIndex] ?? 'rgb(0,0,0)'
+        ctx.fillStyle = fill
         ctx.fill()
       } else {
         ctx.strokeStyle = inactiveStroke
@@ -157,7 +196,7 @@ const RingVisualizationCanvas = ({ colors, activeRings, zoom = 1, onZoomChange, 
       }
     }
     ctx.restore()
-  }, [colors, activeRings, pixelPositions, size, scale, zoom, pan])
+  }, [colors, activeRings, pixelPositions, size, scale, zoom, pan, darkOff])
 
   // Ctrl+wheel: zoom towards mouse
   React.useEffect(() => {
@@ -255,12 +294,19 @@ const RingVisualizationCanvas = ({ colors, activeRings, zoom = 1, onZoomChange, 
   }, [])
 
   return (
-    <div ref={wrapperRef} style={{ width: '100%', aspectRatio: '1', position: 'relative' }}>
+    <div
+      ref={wrapperRef}
+      style={fit === 'box'
+        ? { width: '100%', height: '100%', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }
+        : { width: '100%', aspectRatio: '1', position: 'relative' }}
+    >
       <canvas
         ref={canvasRef}
         width={size}
         height={size}
-        style={{ display: 'block', width: '100%', height: '100%', cursor: 'grab' }}
+        style={fit === 'box'
+          ? { display: 'block', width: size, height: size, maxWidth: '100%', maxHeight: '100%', cursor: 'grab' }
+          : { display: 'block', width: '100%', height: '100%', cursor: 'grab' }}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}

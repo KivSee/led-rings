@@ -26,6 +26,8 @@ interface RingVisualizationProps {
   resetPanToken?: number
   /** Global brightness multiplier 0–1, applied to all rendered pixel values */
   globalBrightness?: number
+  /** Render off LEDs as pure black (no gray outline) — for live-look previews. */
+  darkOff?: boolean
 }
 
 /** Compute normalized time t in [0,1] for a timeframe at a given currentTime in beats.
@@ -147,6 +149,7 @@ const RingVisualization = ({
   onZoomChange,
   resetPanToken,
   globalBrightness = 1,
+  darkOff = false,
 }: RingVisualizationProps) => {
   // Multi-big-ring playback mode when a timeframes array is provided.
   const multiMode = Boolean(timeframes && currentTime !== undefined)
@@ -222,6 +225,9 @@ const RingVisualization = ({
             tfWithT.push({ timeframe: tf, t: tVal, relPos: rp, holdOff })
           }
           if (tfWithT.length === 0) { colors[pixelIndex] = 'rgb(0,0,0)'; continue }
+          // No active timeframe paints this pixel (only modifiers/motion): on hardware
+          // nothing sets its color, so it stays black — modifiers can't light it.
+          if (!tfWithT.some(e => e.timeframe.hasExplicitColor !== false)) { colors[pixelIndex] = 'rgb(0,0,0)'; continue }
           const hsv = tfWithT.length === 1
             ? getPixelColor(tfWithT[0].relPos, tfWithT[0].t, tfWithT[0].timeframe, bigRingIdx, tfWithT[0].holdOff)
             : getPixelColorMulti(tfWithT, bigRingIdx)
@@ -259,6 +265,8 @@ const RingVisualization = ({
           zoom={zoom}
           onZoomChange={onZoomChange}
           resetPanToken={resetPanToken}
+          fit="box"
+          darkOff={darkOff}
         />
       </div>
     )

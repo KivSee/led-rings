@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import './RingSelector.css'
+import { RING_GROUPS, ringGroupName, type RingGroupName } from '../../../shared/ring-groups'
 
 interface RingSelectorProps {
   rings: number[]
@@ -13,7 +14,9 @@ const RingSelector = ({ rings, onChange }: RingSelectorProps) => {
   const panelRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const allRings = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+  // Ring 12 first: it hangs nearest the top of the installation, so the grid
+  // reads clockwise from the top.
+  const allRings = [12, ...RING_GROUPS.all.filter(r => r !== 12)]
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -88,31 +91,8 @@ const RingSelector = ({ rings, onChange }: RingSelectorProps) => {
 
   const quickSelect = (preset: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    let selectedRings: number[] = []
-    switch (preset) {
-      case 'all':
-        selectedRings = allRings
-        break
-      case 'even':
-        selectedRings = [2, 4, 6, 8, 10, 12]
-        break
-      case 'odd':
-        selectedRings = [1, 3, 5, 7, 9, 11]
-        break
-      case 'left':
-        selectedRings = [1, 2, 3, 4, 5, 6]
-        break
-      case 'right':
-        selectedRings = [7, 8, 9, 10, 11, 12]
-        break
-      case 'center':
-        selectedRings = [4, 5, 6, 7, 8, 9]
-        break
-      case 'outer':
-        selectedRings = [1, 2, 3, 10, 11, 12]
-        break
-    }
-    onChange(selectedRings)
+    const group = RING_GROUPS[preset as RingGroupName]
+    onChange(group ? [...group] : [])
   }
 
   useEffect(() => {
@@ -139,7 +119,7 @@ const RingSelector = ({ rings, onChange }: RingSelectorProps) => {
         }}
         title="Select rings"
       >
-        Rings: {rings.length === 12 ? 'All' : rings.length === 0 ? 'None' : rings.join(', ')}
+        Rings: {rings.length === 0 ? 'None' : ringGroupName(rings) === 'all' ? 'All' : rings.join(', ')}
         <span className={`ring-selector-arrow ${isExpanded ? 'expanded' : ''}`}>▼</span>
       </button>
       {isExpanded && createPortal(
@@ -157,8 +137,10 @@ const RingSelector = ({ rings, onChange }: RingSelectorProps) => {
             <button onClick={(e) => quickSelect('odd', e)}>Odd</button>
             <button onClick={(e) => quickSelect('left', e)}>Left</button>
             <button onClick={(e) => quickSelect('right', e)}>Right</button>
-            <button onClick={(e) => quickSelect('center', e)}>Center</button>
-            <button onClick={(e) => quickSelect('outer', e)}>Outer</button>
+            <button onClick={(e) => quickSelect('top', e)}>Top</button>
+            <button onClick={(e) => quickSelect('bottom', e)}>Bottom</button>
+            <button onClick={(e) => quickSelect('b1', e)}>B1</button>
+            <button onClick={(e) => quickSelect('b2', e)}>B2</button>
           </div>
           <div className="ring-grid">
             {allRings.map(ring => (

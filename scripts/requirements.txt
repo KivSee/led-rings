@@ -1,2 +1,4 @@
 librosa
 numpy
+requests
+paho-mqtt>=2.0

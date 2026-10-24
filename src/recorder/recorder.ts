@@ -12,6 +12,7 @@ interface RecordedEffect {
   effectKey: string;
   params?: Record<string, any>;
   phase?: number;
+  phaseReverse?: boolean;
 }
 
 interface RecordedTimeframe {
@@ -24,6 +25,7 @@ interface RecordedTimeframe {
   rings: number[];
   mapping: string;
   phase?: number;
+  phaseReverse?: boolean;
   cycles?: CycleInfo[];
   effects: RecordedEffect[];
 }
@@ -149,7 +151,10 @@ class Recorder {
         mapping,
         effects: [],
       };
-      if (phaseValue) tf.phase = phaseValue;
+      if (phaseValue) {
+        tf.phase = Math.abs(phaseValue);
+        if (phaseValue < 0) tf.phaseReverse = true;
+      }
       if (cycles.length) tf.cycles = cycles;
       this.timeframes.push(tf);
       this.contextMap.set(contextKey, tf);
@@ -192,7 +197,10 @@ class Recorder {
         effectKey: "position_hue",
         params: { offset_factor: { linear: { start: 0, end: endHue - startHue } } },
       };
-      if (phaseValue) effect.phase = phaseValue;
+      if (phaseValue) {
+        effect.phase = Math.abs(phaseValue);
+        if (phaseValue < 0) effect.phaseReverse = true;
+      }
       tf.effects.push(effect);
       return;
     }
@@ -205,7 +213,10 @@ class Recorder {
       effectKey: normalizedKey,
     };
     if (params && Object.keys(params).length > 0) effect.params = params;
-    if (phaseValue) effect.phase = phaseValue;
+    if (phaseValue) {
+      effect.phase = Math.abs(phaseValue);
+      if (phaseValue < 0) effect.phaseReverse = true;
+    }
     tf.effects.push(effect);
   }
 
@@ -341,7 +352,7 @@ function detectDirection(steps: number[][]): MovementDirection | null {
 function detectPhase(
   ringColors: Map<number, string>,
   sortedRings: number[],
-): { color: string; phase: number } | null {
+): { color: string; phase: number; phaseReverse?: boolean } | null {
   if (sortedRings.length < 3) return null;
 
   const hues: number[] = [];
@@ -367,9 +378,12 @@ function detectPhase(
   const maxDeviation = Math.max(...diffs.map(d => Math.abs(d - avgDiff)));
   if (maxDeviation > 0.05) return null; // not a uniform progression
 
-  const phase = avgDiff * sortedRings.length;
-  const baseColor = ringColors.get(sortedRings[0])!;
-  return { color: baseColor, phase: Math.round(phase * 100) / 100 };
+  const phase = Math.round(Math.abs(avgDiff) * sortedRings.length * 100) / 100;
+  if (avgDiff >= 0) {
+    return { color: ringColors.get(sortedRings[0])!, phase };
+  }
+  // Decreasing hue = reversed phase; the last ring carries offset 0 (the base color)
+  return { color: ringColors.get(sortedRings[sortedRings.length - 1])!, phase, phaseReverse: true };
 }
 
 function hexToHue(hex: string): number {
@@ -530,10 +544,12 @@ function tryMergeGroup(group: RecordedTimeframe[]): RecordedTimeframe | null {
 
   let mergedColor = representative.color;
   let mergedPhase: number | undefined;
+  let mergedPhaseReverse = false;
   const phaseResult = detectPhase(ringColors, allRings);
   if (phaseResult) {
     mergedColor = phaseResult.color;
     mergedPhase = phaseResult.phase;
+    mergedPhaseReverse = phaseResult.phaseReverse === true;
   }
 
   // Build merged timeframe
@@ -552,6 +568,7 @@ function tryMergeGroup(group: RecordedTimeframe[]): RecordedTimeframe | null {
   };
   if (representative.hasExplicitColor) merged.hasExplicitColor = true;
   if (mergedPhase) merged.phase = mergedPhase;
+  if (mergedPhaseReverse) merged.phaseReverse = true;
   if (representative.cycles?.length) merged.cycles = representative.cycles;
   (merged as any).movement = {
     type: movement.type,

@@ -1,17 +1,18 @@
 import React, { useState, useRef, useEffect, useCallback, Component } from 'react'
 import Timeline from './components/Timeline'
 import TimeframePanel from './components/TimeframePanel'
+import PatternLibrary from './components/PatternLibrary'
+import type { ImportedPattern, PatternEdit } from './components/PatternLibrary'
 import PlaybackRingsPanel from './components/PlaybackRingsPanel'
 import Spectrogram from './components/Spectrogram'
 import { useViewRange } from './hooks/useViewRange'
 import { useUndoHistory } from './hooks/useUndoHistory'
 import { generateSequenceTs } from './generateSequenceTs'
-import { presetToTimeframes } from './presets'
 import { normalizeMovement } from './movementGenerators'
 import type { TimeframeMovement } from './movementGenerators'
-import type { PresetMetadata } from './presets'
 import SettingsPanel from './components/SettingsPanel'
 import { tryReuseHandle, grantPermissionAndGetFile, pickAndRememberAudioFile, supportsFileHandles } from './audioFileHandles'
+import { normalizeControlServerUrl } from './controlServerUrl'
 import './App.css'
 
 const CONTROL_SERVER_URL_STORAGE_KEY = 'kivsee-control-server-url'
@@ -79,6 +80,7 @@ export interface Timeframe {
   disabled?: boolean // When true, timeframe is excluded from playback and export
   mapping?: string // Segment mapping name from segments.json
   phase?: number // Phase intensity — offsets hue/brightness/motion per ring (0 = none)
+  phaseReverse?: boolean // Reverse phase direction: offsets run last→first ring, so left/right ring pairs mirror
   /** Movement pattern — distributes the effect across rings over time (accumulate, sweep, dissolve, bounce). */
   movement?: TimeframeMovement
   /** Optional list of cycle/cycleBeats wrapping this timeframe's content (outermost first) */
@@ -117,6 +119,8 @@ export interface Song {
   beatTimestampsMs?: number[]
   /** Ring numbers that have a lilum pendant mirroring them. Emits anim.mirrorToLilum([...]). */
   lilumRings?: number[]
+  /** Pattern-library ids hidden for THIS song only (global hides live in localStorage). */
+  hiddenPatterns?: string[]
 }
 
 const LAST_SONG_STORAGE_KEY = 'timelineManager:lastSong'
@@ -226,89 +230,7 @@ function App() {
   const {
     value: timeframes, setValue: setTimeframes, setValueSilent: setTimeframesSilent,
     checkpoint: checkpointTimeframes, undo: undoTimeframes, redo: redoTimeframes,
-  } = useUndoHistory<Timeframe[]>([
-    {
-      id: '1',
-      startTime: 0,
-      endTime: 8,
-      label: 'Fade In',
-      color: '#7c3aed',
-      rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      mapping: 'all',
-      effects: [{ id: 'e1', effectKey: 'fadeIn' }],
-    },
-    {
-      id: '2',
-      startTime: 8,
-      endTime: 20,
-      label: 'Pulse',
-      color: '#3b82f6',
-      rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      mapping: 'all',
-      cycles: [{ type: 'cycle' as const, beatsInCycle: 2 }],
-      effects: [{ id: 'e2', effectKey: 'pulse', params: { low: 0.2 } }],
-    },
-    {
-      id: '3',
-      startTime: 20,
-      endTime: 32,
-      label: 'Snake Chase',
-      color: '#10b981',
-      rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      mapping: 'centric',
-      effects: [{ id: 'e3', effectKey: 'snake', params: { tailLength: 0.4, cyclic: true } }],
-    },
-    {
-      id: '4',
-      startTime: 32,
-      endTime: 44,
-      label: 'Hue Wave',
-      color: '#f59e0b',
-      rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      mapping: 'arc',
-      effects: [
-        { id: 'e4a', effectKey: 'snakeInOut', params: { start: 0, end: 1 } },
-        { id: 'e4b', effectKey: 'hueShiftStartToEnd', params: { start: 0, end: 0.7 } },
-      ],
-    },
-    {
-      id: '5',
-      startTime: 44,
-      endTime: 52,
-      label: 'Fill Grow',
-      color: '#ec4899',
-      rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      mapping: 'all',
-      phase: 0.3,
-      effects: [{ id: 'e5', effectKey: 'snakeFillGrow' }],
-    },
-    {
-      id: '6',
-      startTime: 52,
-      endTime: 60,
-      label: 'Slow Fade',
-      color: '#ef4444',
-      rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      mapping: 'all',
-      effects: [
-        { id: 'e6a', effectKey: 'snakeSlowFast', params: { tailLength: 0.6 } },
-        { id: 'e6b', effectKey: 'fade', params: { start: 1, end: 0 } },
-      ],
-    },
-    {
-      id: '7',
-      startTime: 60,
-      endTime: 64,
-      label: 'Final Sweep',
-      color: '#06b6d4',
-      rings: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      mapping: 'updown',
-      effects: [
-        { id: 'e7a', effectKey: 'snakeHeadSin', params: { tailLength: 0.6, cyclic: true } },
-        { id: 'e7b', effectKey: 'hueShiftStartToEnd', params: { start: 0, end: 1 } },
-      ],
-    },
-  ])
+  } = useUndoHistory<Timeframe[]>([]) // Start empty: a true first open shows a clean timeline; the last-opened song is restored from localStorage on mount (see below).
 
   const [focusedTimeframeId, setFocusedTimeframeId] = useState<string | null>(null)
   const [selectedTimeframeIds, setSelectedTimeframeIds] = useState<Set<string>>(new Set())
@@ -326,12 +248,12 @@ function App() {
   const playbackSpeedRef = useRef(1.0)
   /** Control-server URL, editable at runtime via Settings (no rebuild needed to point at a different machine). */
   const [apiBase, setApiBaseState] = useState(
-    () => localStorage.getItem(CONTROL_SERVER_URL_STORAGE_KEY) ?? (import.meta as any).env?.VITE_API_URL ?? ''
+    () => normalizeControlServerUrl(localStorage.getItem(CONTROL_SERVER_URL_STORAGE_KEY) ?? (import.meta as any).env?.VITE_API_URL ?? '')
   )
   const setApiBase = useCallback((value: string) => {
-    const trimmed = value.trim()
-    setApiBaseState(trimmed)
-    if (trimmed) localStorage.setItem(CONTROL_SERVER_URL_STORAGE_KEY, trimmed)
+    const normalized = normalizeControlServerUrl(value)
+    setApiBaseState(normalized)
+    if (normalized) localStorage.setItem(CONTROL_SERVER_URL_STORAGE_KEY, normalized)
     else localStorage.removeItem(CONTROL_SERVER_URL_STORAGE_KEY)
   }, [])
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -387,9 +309,11 @@ function App() {
     setPendingView(null)
   }, [pendingView, songLengthBeats, viewActions])
 
-  // Resizable panel widths (px)
-  const [playbackPanelWidth, setPlaybackPanelWidth] = useState(720)
-  const [detailsPanelWidth, setDetailsPanelWidth] = useState(350)
+  // Resizable panel widths (px) — default responsively so the timeline never collapses
+  // and the right panel is never clipped on smaller screens (user can still drag-resize).
+  const _vw = typeof window !== 'undefined' ? window.innerWidth : 1440
+  const [playbackPanelWidth, setPlaybackPanelWidth] = useState(() => Math.round(Math.min(720, Math.max(380, _vw * 0.42))))
+  const [detailsPanelWidth, setDetailsPanelWidth] = useState(() => Math.round(Math.min(350, Math.max(280, _vw * 0.24))))
   const [spectrogramHeight, setSpectrogramHeight] = useState(180)
   const [spectrogramOpen, setSpectrogramOpen] = useState(true)
   const [headerHeight, setHeaderHeight] = useState(56)
@@ -629,13 +553,58 @@ function App() {
     setTimeframes([...timeframes, newTimeframe])
   }
 
-  const addTimeframesFromPreset = (preset: PresetMetadata) => {
+  // ── Pattern-library curation ──
+  // Per-song hides live on the song (song.hiddenPatterns, saved with it);
+  // global hides, imported patterns, and per-pattern edits persist in localStorage.
+  const [globalHiddenPatterns, setGlobalHiddenPatterns] = useState<string[]>(() => {
+    try { const v = JSON.parse(localStorage.getItem('kivsee:patternsHiddenGlobal') || '[]'); return Array.isArray(v) ? v.filter((x: unknown): x is string => typeof x === 'string') : [] } catch { return [] }
+  })
+  const [importedPatterns, setImportedPatterns] = useState<ImportedPattern[]>(() => {
+    try { const v = JSON.parse(localStorage.getItem('kivsee:patternsImported') || '[]'); return Array.isArray(v) ? (v as ImportedPattern[]) : [] } catch { return [] }
+  })
+  const [patternEdits, setPatternEdits] = useState<Record<string, PatternEdit>>(() => {
+    try { const v = JSON.parse(localStorage.getItem('kivsee:patternEdits') || '{}'); return v && typeof v === 'object' ? v : {} } catch { return {} }
+  })
+  useEffect(() => { try { localStorage.setItem('kivsee:patternsHiddenGlobal', JSON.stringify(globalHiddenPatterns)) } catch {} }, [globalHiddenPatterns])
+  useEffect(() => { try { localStorage.setItem('kivsee:patternsImported', JSON.stringify(importedPatterns)) } catch {} }, [importedPatterns])
+  useEffect(() => { try { localStorage.setItem('kivsee:patternEdits', JSON.stringify(patternEdits)) } catch {} }, [patternEdits])
+  const savePatternEdit = (id: string, patch: PatternEdit) =>
+    setPatternEdits((m) => ({ ...m, [id]: { ...m[id], ...patch } }))
+  const hidePatternForSong = (id: string) =>
+    setSong((s) => ({ ...s, hiddenPatterns: Array.from(new Set([...(s.hiddenPatterns ?? []), id])) }))
+  const restorePatternForSong = (id: string) =>
+    setSong((s) => ({ ...s, hiddenPatterns: (s.hiddenPatterns ?? []).filter((x) => x !== id) }))
+  const hidePatternGlobal = (id: string) =>
+    setGlobalHiddenPatterns((prev) => (prev.includes(id) ? prev : [...prev, id]))
+  const restorePatternGlobal = (id: string) =>
+    setGlobalHiddenPatterns((prev) => prev.filter((x) => x !== id))
+  const importPatterns = (patterns: ImportedPattern[]) => {
+    setImportedPatterns((prev) => {
+      const m = new Map(prev.map((p) => [p.id, p]))
+      for (const p of patterns) m.set(p.id, p)
+      return Array.from(m.values())
+    })
+    // Re-importing un-hides globally, so a removed pattern truly returns.
+    const ids = new Set(patterns.map((p) => p.id))
+    setGlobalHiddenPatterns((prev) => prev.filter((x) => !ids.has(x)))
+  }
+
+  /** Add a pattern's (possibly edited) timeframes to the timeline at the playhead. */
+  const addEditedTimeframesFromPattern = (tfs: Timeframe[], name: string) => {
     const snappedBeat = Math.round(currentTime)
-    const newTimeframes = presetToTimeframes(preset, snappedBeat, song.bpm)
-      .filter(tf => tf.endTime <= songLengthBeats)
-    if (newTimeframes.length > 0) {
-      setTimeframes(prev => [...prev, ...newTimeframes])
-      setFocusedTimeframeId(newTimeframes[0].id)
+    const stamp = Date.now()
+    const shifted = tfs
+      .map((tf, i) => ({
+        ...tf,
+        id: `${stamp}-${i}`,
+        label: tfs.length > 1 ? `${name} ${i + 1}` : name,
+        startTime: tf.startTime + snappedBeat,
+        endTime: tf.endTime + snappedBeat,
+      }))
+      .filter((tf) => tf.endTime <= songLengthBeats)
+    if (shifted.length > 0) {
+      setTimeframes(prev => [...prev, ...shifted])
+      setFocusedTimeframeId(shifted[0].id)
     }
   }
 
@@ -1006,6 +975,7 @@ function App() {
                 rings,
                 mapping: item.mapping,
                 phase: typeof item.phase === 'number' ? item.phase : undefined,
+                phaseReverse: item.phaseReverse === true ? true : undefined,
                 movement: normalizeMovement(item.movement),
                 cycles: normalizeCycles(item.cycles),
                 ...(effects && effects.length > 0 ? { effects } : legacy),
@@ -1131,6 +1101,7 @@ function App() {
                 rings: Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n)) : [1,2,3,4,5,6,7,8,9,10,11,12],
                 mapping: item.mapping,
                 phase: typeof item.phase === 'number' ? item.phase : undefined,
+                phaseReverse: item.phaseReverse === true ? true : undefined,
                 movement: normalizeMovement(item.movement),
                 cycles: normalizeCycles(item.cycles),
                 ...(effects && effects.length > 0 ? { effects } : {}),
@@ -1255,6 +1226,9 @@ function App() {
       lilumRings: Array.isArray(s.lilumRings)
         ? (s.lilumRings as unknown[]).map(Number).filter((n) => Number.isFinite(n) && n >= 1 && n <= 12)
         : undefined,
+      hiddenPatterns: Array.isArray(s.hiddenPatterns)
+        ? (s.hiddenPatterns as unknown[]).filter((x): x is string => typeof x === 'string')
+        : undefined,
     }
   }
 
@@ -1291,6 +1265,7 @@ function App() {
           rings,
           mapping: item.mapping,
           phase: typeof item.phase === 'number' ? item.phase : undefined,
+          phaseReverse: item.phaseReverse === true ? true : undefined,
           movement: normalizeMovement(item.movement),
           cycles: normalizeCycles(item.cycles),
           ...(effects && effects.length > 0 ? { effects } : {}),
@@ -1797,13 +1772,26 @@ function App() {
             className="song-meta-input"
             placeholder="e.g. 1, 2"
             title="Ring numbers with a lilum pendant. Each N mirrors ring N onto thing lilumN."
-            value={(song.lilumRings ?? []).join(', ')}
-            onChange={(e) => {
-              const rings = e.target.value
-                .split(',')
-                .map((t) => Number(t.trim()))
-                .filter((n) => Number.isFinite(n) && n >= 1 && n <= 12)
+            // Keep the raw text while editing (so "1," isn't reformatted to "1"); parse on blur.
+            value={numericEdit?.field === 'lilumRings' ? numericEdit.value : (song.lilumRings ?? []).join(', ')}
+            onFocus={() => setNumericEdit({ field: 'lilumRings', value: (song.lilumRings ?? []).join(', ') })}
+            onChange={(e) =>
+              setNumericEdit((prev) => (prev?.field === 'lilumRings' ? { ...prev, value: e.target.value } : null))
+            }
+            onBlur={() => {
+              if (numericEdit?.field !== 'lilumRings') return
+              const rings = [...new Set(
+                numericEdit.value
+                  .split(/[\s,]+/)
+                  .filter((t) => t !== '')
+                  .map(Number)
+                  .filter((n) => Number.isInteger(n) && n >= 1 && n <= 12)
+              )]
               handleSongChange({ lilumRings: rings.length > 0 ? rings : undefined })
+              setNumericEdit(null)
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') e.currentTarget.blur()
             }}
           />
         </label>
@@ -2128,14 +2116,31 @@ function App() {
           className="app-details-wrapper"
           style={{ width: detailsPanelWidth, minWidth: detailsPanelWidth }}
         >
-          <TimeframePanel
-            timeframe={focusedTimeframe}
-            onUpdate={handlePanelUpdate}
-            onClose={() => setFocusedTimeframeId(null)}
-            onApplyPreset={addTimeframesFromPreset}
-            onLoadCategoryPreview={loadCategoryPreview}
-            songLengthBeats={songLengthBeats}
-          />
+          {focusedTimeframe ? (
+            <TimeframePanel
+              timeframe={focusedTimeframe}
+              onUpdate={handlePanelUpdate}
+              onClose={() => setFocusedTimeframeId(null)}
+              songLengthBeats={songLengthBeats}
+            />
+          ) : (
+            <PatternLibrary
+              imported={importedPatterns}
+              globalHidden={globalHiddenPatterns}
+              songHidden={song.hiddenPatterns ?? []}
+              songName={song.name}
+              bpm={song.bpm}
+              onApplyEdited={addEditedTimeframesFromPattern}
+              patternEdits={patternEdits}
+              onSavePatternEdit={savePatternEdit}
+              onHideForSong={hidePatternForSong}
+              onHideGlobal={hidePatternGlobal}
+              onRestoreForSong={restorePatternForSong}
+              onRestoreGlobal={restorePatternGlobal}
+              onImport={importPatterns}
+              onLoadCategoryPreview={loadCategoryPreview}
+            />
+          )}
         </div>
       </div>
     </div>

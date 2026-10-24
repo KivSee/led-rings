@@ -1,10 +1,17 @@
-export const all = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-export const odd = [1, 3, 5, 7, 9, 11];
-export const even = [2, 4, 6, 8, 10, 12];
-export const left = [1, 2, 3, 4, 5, 6];
-export const right = [7, 8, 9, 10, 11, 12];
-export const center = [4, 5, 6, 7, 8, 9];
-export const outer = [1, 2, 3, 10, 11, 12];
+// Ring group members live in shared/ring-groups.ts so the UI code generator and
+// the runtime cannot drift apart. These re-exports keep the call shape that every
+// generated song uses: elements(all, ...), elements(center, ...), and so on.
+import { RING_GROUPS } from "../../shared/ring-groups";
+
+export const all = [...RING_GROUPS.all];
+export const odd = [...RING_GROUPS.odd];
+export const even = [...RING_GROUPS.even];
+export const left = [...RING_GROUPS.left];
+export const right = [...RING_GROUPS.right];
+export const top = [...RING_GROUPS.top];
+export const bottom = [...RING_GROUPS.bottom];
+export const b1 = [...RING_GROUPS.b1];
+export const b2 = [...RING_GROUPS.b2];
 
 export const segment_all = "all";
 export const segment_centric = "centric";
@@ -14,3 +21,4 @@ export const segment_ind = "ind";
 export const segment_b1 = "b1";
 export const segment_b2 = "b2";
 export const segment_rand = "rand";
+export const segment_rad = "rad";

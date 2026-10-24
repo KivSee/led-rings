@@ -5,6 +5,7 @@
 
 import { getMovementCodeGenEntries } from './movementGenerators'
 import type { TimeframeMovement, MovementWindow } from './movementGenerators'
+import { ringGroupName } from '../../shared/ring-groups'
 
 export type AnimationType = 'song' | 'trigger'
 
@@ -46,6 +47,7 @@ export interface Timeframe {
   disabled?: boolean
   mapping?: string
   phase?: number
+  phaseReverse?: boolean
   movement?: TimeframeMovement
   cycles?: TimeframeCycleEntry[]
   effects?: TimeframeEffectEntry[]
@@ -69,38 +71,15 @@ function getTimeframeEffects(tf: Timeframe): TimeframeEffectEntry[] {
   return entries
 }
 
-const RINGS_ALL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-const RINGS_EVEN = [2, 4, 6, 8, 10, 12]
-const RINGS_ODD = [1, 3, 5, 7, 9, 11]
-const RINGS_LEFT = [1, 2, 3, 4, 5, 6]
-const RINGS_RIGHT = [7, 8, 9, 10, 11, 12]
-const RINGS_CENTER = [4, 5, 6, 7, 8, 9]
-
-function sameRings(a: number[], b: number[]): boolean {
-  if (a.length !== b.length) return false
-  const sa = [...a].sort((x, y) => x - y)
-  const sb = [...b].sort((x, y) => x - y)
-  return sa.every((v, i) => v === sb[i])
-}
-
+/** Emits the `elements(...)` argument: a group name when the rings match one, else a literal array. */
 function ringsToElementsArg(rings: number[]): string {
-  if (sameRings(rings, RINGS_ALL)) return 'all'
-  if (sameRings(rings, RINGS_EVEN)) return 'even'
-  if (sameRings(rings, RINGS_ODD)) return 'odd'
-  if (sameRings(rings, RINGS_LEFT)) return 'left'
-  if (sameRings(rings, RINGS_RIGHT)) return 'right'
-  if (sameRings(rings, RINGS_CENTER)) return 'center'
-  return `[${rings.sort((a, b) => a - b).join(', ')}]`
+  return ringGroupName(rings) ?? `[${[...rings].sort((a, b) => a - b).join(', ')}]`
 }
 
 /** Returns a display label for the rings selection (e.g. "All", "Center") or comma-separated numbers. */
 export function ringsToDisplayLabel(rings: number[]): string {
-  if (sameRings(rings, RINGS_ALL)) return 'All'
-  if (sameRings(rings, RINGS_EVEN)) return 'Even'
-  if (sameRings(rings, RINGS_ODD)) return 'Odd'
-  if (sameRings(rings, RINGS_LEFT)) return 'Left'
-  if (sameRings(rings, RINGS_RIGHT)) return 'Right'
-  if (sameRings(rings, RINGS_CENTER)) return 'Center'
+  const group = ringGroupName(rings)
+  if (group) return group.charAt(0).toUpperCase() + group.slice(1)
   return [...rings].sort((a, b) => a - b).join(', ')
 }
 
@@ -113,6 +92,7 @@ const UI_MAPPING_TO_SEGMENT: Record<string, string> = {
   centric: 'segment_centric',
   updown: 'segment_updown',
   rand: 'segment_rand',
+  rad: 'segment_rad',
 }
 
 function mappingToSegment(mapping: string | undefined): string {
@@ -176,6 +156,11 @@ function formatFloatFunction(obj: unknown): string {
     const diff_per_step = typeof v.diff_per_step === 'number' ? v.diff_per_step : 0.25
     const first_step_value = typeof v.first_step_value === 'number' ? v.first_step_value : 0
     return `steps: { num_steps: ${formatParamValue(num_steps)}, diff_per_step: ${formatParamValue(diff_per_step)}, first_step_value: ${formatParamValue(first_step_value)} }`
+  }
+  if (o.half && typeof o.half === 'object') {
+    // f1 over the first half of t, f2 over the second (each sees its own 0..1)
+    const v = o.half as Record<string, unknown>
+    return `half: { f1: { ${formatFloatFunction(v.f1)} }, f2: { ${formatFloatFunction(v.f2)} } }`
   }
   return 'const_value: { value: 1 }'
 }
@@ -246,7 +231,7 @@ function emitSingleEffect(effectKey: string, params: Record<string, number | boo
   const args = formatEffectParams(params)
   const schemas: Record<string, { key: string }[]> = {
     brightness: [{ key: 'value' }],
-    fadeInOut: [{ key: 'high' }],
+    fadeInOut: [{ key: 'high' }, { key: 'low' }, { key: 'outLow' }],
     fadeOutIn: [{ key: 'low' }],
     blink: [{ key: 'low' }],
     pulse: [{ key: 'low' }, { key: 'staticPhase' }],
@@ -288,10 +273,11 @@ function indentBlock(block: string, spaces: number): string {
   return block.split('\n').map((line) => prefix + line).join('\n')
 }
 
-function wrapWithPhase(lines: string[], phaseValue: number | undefined): string[] {
+// Negative intensity tells the runtime phase() to reverse direction (offsets run last→first ring).
+function wrapWithPhase(lines: string[], phaseValue: number | undefined, reverse?: boolean): string[] {
   if (phaseValue == null || phaseValue <= 0 || lines.length === 0) return lines
   const block = lines.join('\n')
-  return [`phase(${formatParamValue(phaseValue)}, () => {
+  return [`phase(${formatParamValue(reverse ? -phaseValue : phaseValue)}, () => {
 ${indentBlock(block, 2)}
 });`]
 }
@@ -307,7 +293,7 @@ function emitInnerContent(tf: Timeframe, layer: EmitLayer, hueOffset?: number): 
       // Phase baked into hue directly (used for movement per-ring blocks)
       inner.push(...emitColor(tf, hueOffset))
     } else {
-      inner.push(...wrapWithPhase(emitColor(tf), tf.phase))
+      inner.push(...wrapWithPhase(emitColor(tf), tf.phase, tf.phaseReverse))
     }
   } else {
     const effectEntries = getTimeframeEffects(tf)
@@ -341,11 +327,15 @@ ${indentBlock(core, 2)}
 function emitTimeframeBody(tf: Timeframe, layer: EmitLayer): string | null {
   const segmentId = mappingToSegment(tf.mapping)
   const inner = emitInnerContent(tf, layer)
-  if (inner.length === 0) return null
 
   // Movement: emit separate beats() per ring with per-ring timing
   if (tf.movement) {
     const entries = getMovementCodeGenEntries(tf.startTime, tf.endTime, tf.rings, tf.movement)
+    // holdOff windows (Dark before start, Random + retire) are emitted in the
+    // modifiers layer even when the timeframe has no modifier effects of its
+    // own (e.g. only a snake), so the rings still go dark.
+    const hasHoldOff = layer === 'modifiers' && entries.some(e => e.windows.some(w => w.holdOff))
+    if (inner.length === 0 && !hasHoldOff) return null
     const sortedRings = [...tf.rings].sort((a, b) => a - b)
     const phasePerRing = (layer === 'color' && tf.phase && tf.phase > 0 && tf.hasExplicitColor !== false)
     const blocks: string[] = []
@@ -366,9 +356,12 @@ ${indentBlock(core, 6)}
     })`)
           continue
         }
+        if (inner.length === 0) continue
         // When phase is set on a color layer, bake hue offset per ring
+        const ringIdx = sortedRings.indexOf(entry.ringNum)
+        const phaseIdx = tf.phaseReverse ? sortedRings.length - 1 - ringIdx : ringIdx
         const ringInner = phasePerRing
-          ? emitInnerContent(tf, layer, (sortedRings.indexOf(entry.ringNum) / sortedRings.length) * tf.phase!)
+          ? emitInnerContent(tf, layer, (phaseIdx / sortedRings.length) * tf.phase!)
           : inner
         const effectLines = ringInner.join('\n')
         let core: string
@@ -405,6 +398,7 @@ ${indentBlock(core, 6)}
   }
 
   // No movement: single beats() block with all rings
+  if (inner.length === 0) return null
   const elementsArg = ringsToElementsArg(tf.rings)
   const effectLines = inner.join('\n')
   let core = `elements(${elementsArg}, () => {
@@ -492,17 +486,21 @@ import {
 import { elements, segment } from "${importPrefix}/objects/elements";
 import {
   all,
-  center,
+  b1,
+  b2,
+  bottom,
   even,
   left,
   odd,
   right,
+  top,
   segment_all,
   segment_arc,
   segment_b1,
   segment_b2,
   segment_centric,
   segment_ind,
+  segment_rad,
   segment_rand,
   segment_updown,
 } from "${importPrefix}/objects/ring-elements";
@@ -583,17 +581,21 @@ import {
 import { elements, segment } from "./objects/elements";
 import {
   all,
-  center,
+  b1,
+  b2,
+  bottom,
   even,
   left,
   odd,
   right,
+  top,
   segment_all,
   segment_arc,
   segment_b1,
   segment_b2,
   segment_centric,
   segment_ind,
+  segment_rad,
   segment_rand,
   segment_updown,
 } from "./objects/ring-elements";
