@@ -1,0 +1,131 @@
+{
+  "song": {
+    "name": "agent_story",
+    "lengthSeconds": 18,
+    "bpm": 120,
+    "startOffsetMs": 0,
+    "runStartTimeSeconds": 0,
+    "animationType": "song",
+    "audioFilePath": "agent_story.wav",
+    "lilumRings": [
+      1,
+      4,
+      5,
+      7,
+      10
+    ]
+  },
+  "timeframes": [
+    {
+      "id": "as-rainbow-snake",
+      "startTime": 0,
+      "endTime": 36,
+      "label": "Rainbow Snake (ind)",
+      "color": "#ff0000",
+      "hasExplicitColor": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "ind",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 4
+        }
+      ],
+      "effects": [
+        {
+          "id": "as-rainbow-hue",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "as-rainbow-snake-fx",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.6,
+            "cyclic": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "as-fade-in",
+      "startTime": 0,
+      "endTime": 2,
+      "label": "Fade In",
+      "color": "#ffffff",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "as-fade-in-fx",
+          "effectKey": "fadeIn",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "as-fade-out",
+      "startTime": 34,
+      "endTime": 36,
+      "label": "Fade Out",
+      "color": "#ffffff",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "as-fade-out-fx",
+          "effectKey": "fadeOut",
+          "params": {}
+        }
+      ]
+    }
+  ]
+}
