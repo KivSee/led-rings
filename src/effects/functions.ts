@@ -7,6 +7,8 @@ export type FloatFunction = {
     repeat?: RepeatFloatFunction;
     half?: HalfFloatFunction;
     comb2?: Comb2FloatFunction;
+    fixed_window?: FixedWindowFloatFunction;
+    moving_window?: MovingWindowFloatFunction;
 }
 
 export type ConstValueFloatFunction = {
@@ -46,4 +48,22 @@ export type  Comb2FloatFunction = {
     amount1: number;
     f2: FloatFunction;
     amount2: number;
+}
+
+/** func, stretched over x in start - end; outside_value elsewhere. With cyclic, x wraps around into the window. */
+export type  FixedWindowFloatFunction = {
+    start: number;
+    end: number;
+    cyclic?: boolean;
+    outside_value: number;
+    func: FloatFunction;
+}
+
+/** inside_value while x is between start(x) and end(x), outside_value elsewhere. */
+export type  MovingWindowFloatFunction = {
+    start: FloatFunction;
+    end: FloatFunction;
+    inside_value: number;
+    outside_value: number;
+    cyclic?: boolean;
 }
