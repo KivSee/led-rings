@@ -4,6 +4,7 @@
     "lengthSeconds": 79,
     "bpm": 64.725,
     "startOffsetMs": 3575,
+    "runStartTimeSeconds": 3.7171028163834556,
     "animationType": "song",
     "audioFilePath": "aladdin.wav"
   },
@@ -240,17 +241,6 @@
       "mapping": "all"
     },
     {
-      "id": "tf-8",
-      "startTime": 16,
-      "endTime": 16,
-      "label": "",
-      "color": "#000000",
-      "rings": [
-        1
-      ],
-      "mapping": "all"
-    },
-    {
       "id": "tf-9",
       "startTime": 16,
       "endTime": 18,
@@ -258,7 +248,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        1
+        11
       ],
       "mapping": "arc",
       "effects": [
@@ -285,7 +275,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        1
+        11
       ],
       "mapping": "all",
       "effects": [
@@ -305,7 +295,7 @@
       "label": "",
       "color": "#000000",
       "rings": [
-        2
+        10
       ],
       "mapping": "all"
     },
@@ -317,7 +307,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        2
+        10
       ],
       "mapping": "arc",
       "effects": [
@@ -344,7 +334,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        2
+        10
       ],
       "mapping": "all",
       "effects": [
@@ -364,7 +354,7 @@
       "label": "",
       "color": "#000000",
       "rings": [
-        3
+        9
       ],
       "mapping": "all"
     },
@@ -376,7 +366,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        3
+        9
       ],
       "mapping": "arc",
       "effects": [
@@ -403,7 +393,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        3
+        9
       ],
       "mapping": "all",
       "effects": [
@@ -423,7 +413,7 @@
       "label": "",
       "color": "#000000",
       "rings": [
-        4
+        8
       ],
       "mapping": "all"
     },
@@ -435,7 +425,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        4
+        8
       ],
       "mapping": "arc",
       "effects": [
@@ -462,7 +452,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        4
+        8
       ],
       "mapping": "all",
       "effects": [
@@ -482,7 +472,7 @@
       "label": "",
       "color": "#000000",
       "rings": [
-        5
+        7
       ],
       "mapping": "all"
     },
@@ -494,7 +484,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        5
+        7
       ],
       "mapping": "arc",
       "effects": [
@@ -521,7 +511,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        5
+        7
       ],
       "mapping": "all",
       "effects": [
@@ -610,17 +600,6 @@
       "mapping": "all"
     },
     {
-      "id": "tf-27",
-      "startTime": 24,
-      "endTime": 24,
-      "label": "",
-      "color": "#000000",
-      "rings": [
-        12
-      ],
-      "mapping": "all"
-    },
-    {
       "id": "tf-28",
       "startTime": 24,
       "endTime": 26,
@@ -675,7 +654,7 @@
       "label": "",
       "color": "#000000",
       "rings": [
-        11
+        1
       ],
       "mapping": "all"
     },
@@ -687,7 +666,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        11
+        1
       ],
       "mapping": "arc",
       "effects": [
@@ -714,7 +693,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        11
+        1
       ],
       "mapping": "all",
       "effects": [
@@ -734,7 +713,7 @@
       "label": "",
       "color": "#000000",
       "rings": [
-        10
+        2
       ],
       "mapping": "all"
     },
@@ -746,7 +725,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        10
+        2
       ],
       "mapping": "arc",
       "effects": [
@@ -773,7 +752,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        10
+        2
       ],
       "mapping": "all",
       "effects": [
@@ -793,7 +772,7 @@
       "label": "",
       "color": "#000000",
       "rings": [
-        9
+        3
       ],
       "mapping": "all"
     },
@@ -805,7 +784,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        9
+        3
       ],
       "mapping": "arc",
       "effects": [
@@ -832,7 +811,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        9
+        3
       ],
       "mapping": "all",
       "effects": [
@@ -852,7 +831,7 @@
       "label": "",
       "color": "#000000",
       "rings": [
-        8
+        4
       ],
       "mapping": "all"
     },
@@ -864,7 +843,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        8
+        4
       ],
       "mapping": "arc",
       "effects": [
@@ -891,7 +870,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        8
+        4
       ],
       "mapping": "all",
       "effects": [
@@ -911,7 +890,7 @@
       "label": "",
       "color": "#000000",
       "rings": [
-        7
+        5
       ],
       "mapping": "all"
     },
@@ -923,7 +902,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        7
+        5
       ],
       "mapping": "arc",
       "effects": [
@@ -950,7 +929,7 @@
       "color": "#3b82f6",
       "hasExplicitColor": false,
       "rings": [
-        7
+        5
       ],
       "mapping": "all",
       "effects": [
@@ -3153,8 +3132,15 @@
     }
   ],
   "windowSizes": {
-    "playbackPanelWidth": 380,
+    "playbackPanelWidth": 501,
     "detailsPanelWidth": 350,
-    "spectrogramHeight": 262
-  }
+    "spectrogramHeight": 262,
+    "headerHeight": 56
+  },
+  "spectrogramOpen": true,
+  "view": {
+    "startBeat": 21.22,
+    "beatsPerScreen": 64
+  },
+  "theme": "dark"
 }

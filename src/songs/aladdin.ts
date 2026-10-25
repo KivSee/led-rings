@@ -77,16 +77,8 @@ const aladdin = async () => {
       });
     })
 
-    beats(16, 16, () => {
-      elements([1], () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
-        });
-      });
-    })
-
     beats(16, 17, () => {
-      elements([2], () => {
+      elements([10], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
         });
@@ -94,7 +86,7 @@ const aladdin = async () => {
     })
 
     beats(16, 18, () => {
-      elements([3], () => {
+      elements([9], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
         });
@@ -102,7 +94,7 @@ const aladdin = async () => {
     })
 
     beats(16, 19, () => {
-      elements([4], () => {
+      elements([8], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
         });
@@ -110,7 +102,7 @@ const aladdin = async () => {
     })
 
     beats(16, 20, () => {
-      elements([5], () => {
+      elements([7], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
         });
@@ -133,16 +125,8 @@ const aladdin = async () => {
       });
     })
 
-    beats(24, 24, () => {
-      elements([12], () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
-        });
-      });
-    })
-
     beats(24, 25, () => {
-      elements([11], () => {
+      elements([1], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
         });
@@ -150,7 +134,7 @@ const aladdin = async () => {
     })
 
     beats(24, 26, () => {
-      elements([10], () => {
+      elements([2], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
         });
@@ -158,7 +142,7 @@ const aladdin = async () => {
     })
 
     beats(24, 27, () => {
-      elements([9], () => {
+      elements([3], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
         });
@@ -166,7 +150,7 @@ const aladdin = async () => {
     })
 
     beats(24, 28, () => {
-      elements([8], () => {
+      elements([4], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
         });
@@ -174,7 +158,7 @@ const aladdin = async () => {
     })
 
     beats(24, 29, () => {
-      elements([7], () => {
+      elements([5], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
         });
@@ -690,7 +674,7 @@ const aladdin = async () => {
     })
 
     beats(16, 18, () => {
-      elements([1], () => {
+      elements([11], () => {
         segment(segment_arc, () => {
           hueShiftStartToEnd({ start: 0, end: 0.2 })
         });
@@ -698,7 +682,7 @@ const aladdin = async () => {
     })
 
     beats(18, 24, () => {
-      elements([1], () => {
+      elements([11], () => {
         segment(segment_all, () => {
           staticHueShift({ value: 0.2 })
         });
@@ -706,7 +690,7 @@ const aladdin = async () => {
     })
 
     beats(17, 19, () => {
-      elements([2], () => {
+      elements([10], () => {
         segment(segment_arc, () => {
           hueShiftStartToEnd({ start: 0.2, end: 0.4 })
         });
@@ -714,7 +698,7 @@ const aladdin = async () => {
     })
 
     beats(19, 24, () => {
-      elements([2], () => {
+      elements([10], () => {
         segment(segment_all, () => {
           staticHueShift({ value: 0.4 })
         });
@@ -722,7 +706,7 @@ const aladdin = async () => {
     })
 
     beats(18, 20, () => {
-      elements([3], () => {
+      elements([9], () => {
         segment(segment_arc, () => {
           hueShiftStartToEnd({ start: 0.4, end: 0.6 })
         });
@@ -730,7 +714,7 @@ const aladdin = async () => {
     })
 
     beats(20, 24, () => {
-      elements([3], () => {
+      elements([9], () => {
         segment(segment_all, () => {
           staticHueShift({ value: 0.6 })
         });
@@ -738,7 +722,7 @@ const aladdin = async () => {
     })
 
     beats(19, 21, () => {
-      elements([4], () => {
+      elements([8], () => {
         segment(segment_arc, () => {
           hueShiftStartToEnd({ start: 0.6, end: 0.8 })
         });
@@ -746,7 +730,7 @@ const aladdin = async () => {
     })
 
     beats(21, 24, () => {
-      elements([4], () => {
+      elements([8], () => {
         segment(segment_all, () => {
           staticHueShift({ value: 0.8 })
         });
@@ -754,7 +738,7 @@ const aladdin = async () => {
     })
 
     beats(20, 22, () => {
-      elements([5], () => {
+      elements([7], () => {
         segment(segment_arc, () => {
           hueShiftStartToEnd({ start: 0.8, end: 1 })
         });
@@ -762,7 +746,7 @@ const aladdin = async () => {
     })
 
     beats(22, 24, () => {
-      elements([5], () => {
+      elements([7], () => {
         segment(segment_all, () => {
           staticHueShift({ value: 1 })
         });
@@ -802,7 +786,7 @@ const aladdin = async () => {
     })
 
     beats(25, 27, () => {
-      elements([11], () => {
+      elements([1], () => {
         segment(segment_arc, () => {
           hueShiftStartToEnd({ start: 0.2, end: 0.4 })
         });
@@ -810,7 +794,7 @@ const aladdin = async () => {
     })
 
     beats(27, 32, () => {
-      elements([11], () => {
+      elements([1], () => {
         segment(segment_all, () => {
           staticHueShift({ value: 0.4 })
         });
@@ -818,7 +802,7 @@ const aladdin = async () => {
     })
 
     beats(26, 28, () => {
-      elements([10], () => {
+      elements([2], () => {
         segment(segment_arc, () => {
           hueShiftStartToEnd({ start: 0.4, end: 0.6 })
         });
@@ -826,7 +810,7 @@ const aladdin = async () => {
     })
 
     beats(28, 32, () => {
-      elements([10], () => {
+      elements([2], () => {
         segment(segment_all, () => {
           staticHueShift({ value: 0.6 })
         });
@@ -834,7 +818,7 @@ const aladdin = async () => {
     })
 
     beats(27, 29, () => {
-      elements([9], () => {
+      elements([3], () => {
         segment(segment_arc, () => {
           hueShiftStartToEnd({ start: 0.6, end: 0.8 })
         });
@@ -842,7 +826,7 @@ const aladdin = async () => {
     })
 
     beats(29, 32, () => {
-      elements([9], () => {
+      elements([3], () => {
         segment(segment_all, () => {
           staticHueShift({ value: 0.8 })
         });
@@ -850,7 +834,7 @@ const aladdin = async () => {
     })
 
     beats(28, 30, () => {
-      elements([8], () => {
+      elements([4], () => {
         segment(segment_arc, () => {
           hueShiftStartToEnd({ start: 0.8, end: 1 })
         });
@@ -858,7 +842,7 @@ const aladdin = async () => {
     })
 
     beats(30, 32, () => {
-      elements([8], () => {
+      elements([4], () => {
         segment(segment_all, () => {
           staticHueShift({ value: 1 })
         });
@@ -866,7 +850,7 @@ const aladdin = async () => {
     })
 
     beats(29, 31, () => {
-      elements([7], () => {
+      elements([5], () => {
         segment(segment_arc, () => {
           hueShiftStartToEnd({ start: 1, end: 1.2 })
         });
@@ -874,7 +858,7 @@ const aladdin = async () => {
     })
 
     beats(31, 32, () => {
-      elements([7], () => {
+      elements([5], () => {
         segment(segment_all, () => {
           staticHueShift({ value: 1.2 })
         });
@@ -1348,7 +1332,7 @@ const aladdin = async () => {
     })
 
     beats(16, 18, () => {
-      elements([1], () => {
+      elements([11], () => {
         segment(segment_arc, () => {
           snakeFillGrow()
         });
@@ -1356,7 +1340,7 @@ const aladdin = async () => {
     })
 
     beats(17, 19, () => {
-      elements([2], () => {
+      elements([10], () => {
         segment(segment_arc, () => {
           snakeFillGrow()
         });
@@ -1364,7 +1348,7 @@ const aladdin = async () => {
     })
 
     beats(18, 20, () => {
-      elements([3], () => {
+      elements([9], () => {
         segment(segment_arc, () => {
           snakeFillGrow()
         });
@@ -1372,7 +1356,7 @@ const aladdin = async () => {
     })
 
     beats(19, 21, () => {
-      elements([4], () => {
+      elements([8], () => {
         segment(segment_arc, () => {
           snakeFillGrow()
         });
@@ -1380,7 +1364,7 @@ const aladdin = async () => {
     })
 
     beats(20, 22, () => {
-      elements([5], () => {
+      elements([7], () => {
         segment(segment_arc, () => {
           snakeFillGrow()
         });
@@ -1404,7 +1388,7 @@ const aladdin = async () => {
     })
 
     beats(25, 27, () => {
-      elements([11], () => {
+      elements([1], () => {
         segment(segment_arc, () => {
           snakeFillGrow()
         });
@@ -1412,7 +1396,7 @@ const aladdin = async () => {
     })
 
     beats(26, 28, () => {
-      elements([10], () => {
+      elements([2], () => {
         segment(segment_arc, () => {
           snakeFillGrow()
         });
@@ -1420,7 +1404,7 @@ const aladdin = async () => {
     })
 
     beats(27, 29, () => {
-      elements([9], () => {
+      elements([3], () => {
         segment(segment_arc, () => {
           snakeFillGrow()
         });
@@ -1428,7 +1412,7 @@ const aladdin = async () => {
     })
 
     beats(28, 30, () => {
-      elements([8], () => {
+      elements([4], () => {
         segment(segment_arc, () => {
           snakeFillGrow()
         });
@@ -1436,7 +1420,7 @@ const aladdin = async () => {
     })
 
     beats(29, 31, () => {
-      elements([7], () => {
+      elements([5], () => {
         segment(segment_arc, () => {
           snakeFillGrow()
         });
