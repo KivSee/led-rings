@@ -143,3 +143,10 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Song audio stays local (large, and not ours to redistribute)
+ui/public/*.wav
+ui/public/*.mp3
+
+# Sequences the Sequence Player renders, made by src/export-sequence.ts
+ui/public/*.sequence.json

@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Song Sync</title>
+    <style>
+      :root {
+        --bg: #0d0f14;
+        --panel: #161a22;
+        --line: #2a303c;
+        --text: #e6e8ee;
+        --muted: #8a92a3;
+        --wave: #3a4a66;
+        --beat: #4a5368;
+        --bar: #ffb020;
+        --head: #ff4d6d;
+        --accent: #4f8cff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      .wrap { max-width: 1400px; margin: 0 auto; padding: 16px; }
+      .row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-bottom: 12px; }
+      h1 { font-size: 18px; margin: 0 16px 0 0; }
+      label { color: var(--muted); display: flex; gap: 6px; align-items: center; }
+      select, input, button {
+        background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 6px;
+        padding: 5px 8px; font: inherit;
+      }
+      input[type=number] { width: 72px; }
+      input.time { width: 90px; }
+      button { cursor: pointer; }
+      button:hover { border-color: var(--muted); }
+      button.play { min-width: 92px; font-weight: 600; background: var(--accent); border-color: var(--accent); color: #fff; }
+      .readout { font-variant-numeric: tabular-nums; }
+      .readout b { font-size: 22px; }
+      .readout .muted { color: var(--muted); }
+      .beats { display: flex; gap: 6px; }
+      .beats span {
+        width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel);
+        display: flex; align-items: center; justify-content: center; color: var(--muted); font-weight: 600;
+      }
+      .beats span.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+      .beats span.on.down { background: var(--bar); border-color: var(--bar); color: #000; }
+      canvas { display: block; width: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+      #view { height: 240px; margin-bottom: 8px; }
+      #overview { height: 60px; }
+      .stage { display: flex; gap: 16px; align-items: flex-start; }
+      .main-col { flex: 1; min-width: 0; }
+      .sim-col { flex: none; width: 340px; }
+      #sim { width: 340px; height: 340px; background: #000; cursor: default; }
+      .sim-label { color: var(--muted); text-align: center; margin-top: 6px; font-size: 13px; }
+      @media (max-width: 1100px) {
+        .stage { flex-direction: column; }
+        .sim-col { width: 100%; max-width: 340px; margin: 0 auto; }
+      }
+      #coloringLane, #backgroundLane { height: 56px; margin-bottom: 8px; cursor: crosshair; }
+      #overrideLane, #transitionLane, #motionLane { height: 40px; margin-bottom: 8px; cursor: crosshair; }
+      .rings { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+      .rings button.ring.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+      .lane-label { font-weight: 600; margin: 4px 0; }
+      .lane-label .muted, .section-panel .muted { color: var(--muted); font-weight: 400; }
+      .section-panel { min-height: 34px; }
+      body.drawer-open .wrap { margin-right: 460px; }
+      .drawer {
+        position: fixed; top: 0; right: 0; bottom: 0; width: 460px; overflow-y: auto; z-index: 5;
+        background: var(--panel); border-left: 1px solid var(--line); padding: 14px 16px 24px;
+        box-shadow: -8px 0 24px rgba(0, 0, 0, 0.35);
+      }
+      .drawer h3 { font-size: 14px; margin: 16px 0 8px; }
+      .drawer .muted { color: var(--muted); }
+      .drawer-head { display: flex; gap: 8px; margin-bottom: 10px; }
+      .drawer-head input { flex: 1; font-weight: 600; font-size: 16px; }
+      .drawer-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+      .drawer-row input[type=range] { width: 260px; accent-color: var(--accent); }
+      .drawer-row output { width: 3ch; font-variant-numeric: tabular-nums; color: var(--muted); }
+      .drawer canvas.preview { width: 100%; aspect-ratio: 1; height: auto; margin-top: 8px; cursor: default; background: var(--bg); }
+      .drawer-layout { margin-top: 4px; }
+      .color-row { display: grid; grid-template-columns: 20px 14px 1fr; gap: 2px 8px; align-items: center; margin-bottom: 10px; }
+      .color-row .ch { grid-column: 3; display: grid; grid-template-columns: 44px 1fr 36px; gap: 6px; align-items: center; font-size: 12px; }
+      .color-row .ch input { width: 100%; accent-color: var(--accent); }
+      .color-row .ch output { font-variant-numeric: tabular-nums; color: var(--muted); }
+      .color-row .swatch.big { width: 18px; height: 18px; grid-row: span 3; }
+      .color-row .range-toggle input { width: auto; margin-right: 4px; }
+      .thumbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .thumb {
+        display: flex; flex-direction: column; gap: 4px; padding: 6px; text-align: left; font-size: 11px; line-height: 1.3;
+        background: var(--bg); border: 1px solid var(--line); border-radius: 8px; color: var(--text);
+      }
+      .thumb.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+      .thumb canvas { width: 100%; aspect-ratio: 1; height: auto; border: 0; background: transparent; }
+      .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: middle; margin-right: 6px; }
+      .help { color: var(--muted); margin-top: 12px; }
+      .help kbd {
+        background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px;
+        font: 12px ui-monospace, Menlo, monospace; color: var(--text);
+      }
+      .status { color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="row">
+        <h1>Song Sync</h1>
+        <label>Song <select id="song"></select></label>
+        <span class="status" id="status"></span>
+      </div>
+
+      <div class="row">
+        <button class="play" id="play">▶ Play</button>
+        <div class="readout"><b id="time">0:00.00</b> <span class="muted">/ <span id="duration">0:00</span></span></div>
+        <div class="readout"><b id="barbeat">bar 1 · beat 1</b> <span class="muted" id="beatnum">beat 0</span></div>
+        <div class="beats" id="beats"><span>1</span><span>2</span><span>3</span><span>4</span></div>
+      </div>
+
+      <div class="row">
+        <label>Go to bar <input type="number" id="goBar" min="1" value="1"></label>
+        <label>beat <input type="number" id="goBeat" min="0" value="0" title="beat number as used in beats(start, end)"></label>
+        <label>time <input class="time" id="goTime" placeholder="m:ss.s"></label>
+        <label>Speed
+          <select id="speed">
+            <option value="0.5">0.5×</option>
+            <option value="0.75">0.75×</option>
+            <option value="1" selected>1×</option>
+          </select>
+        </label>
+        <label>Visible bars
+          <select id="zoom">
+            <option value="2">2</option>
+            <option value="4">4</option>
+            <option value="8" selected>8</option>
+            <option value="16">16</option>
+            <option value="32">32</option>
+          </select>
+        </label>
+        <label title="Shift where bars start, if beat 0 is not a downbeat">Bar starts at beat
+          <select id="barOffset">
+            <option value="0" selected>0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="stage">
+        <div class="main-col">
+          <canvas id="view"></canvas>
+          <div class="lane-label">Coloring layer <span class="muted">· drag to add a section (snaps to bars), drag its edges to resize</span></div>
+          <canvas id="coloringLane"></canvas>
+          <div class="lane-label">Coloring overrides <span class="muted">· paint another coloring layer over a few bars to highlight a moment; the section's coloring returns after</span></div>
+          <canvas id="overrideLane"></canvas>
+          <div class="lane-label">Background layer <span class="muted">· a texture over the section, like sparkles</span></div>
+          <canvas id="backgroundLane"></canvas>
+          <div class="lane-label">Motion <span class="muted">· snakes and moving shapes, like rays shooting out of the center</span></div>
+          <canvas id="motionLane"></canvas>
+          <div class="lane-label">Transitions <span class="muted">· bring a scene in or take it out: fade, steps, or rings one by one</span></div>
+          <canvas id="transitionLane"></canvas>
+          <div class="row section-panel" id="sectionPanel"></div>
+          <canvas id="overview"></canvas>
+        </div>
+        <div class="sim-col">
+          <canvas id="sim"></canvas>
+          <div class="sim-label" id="simLabel"></div>
+        </div>
+      </div>
+
+      <div class="help">
+        <kbd>Space</kbd> play / pause ·
+        <kbd>←</kbd> <kbd>→</kbd> previous / next beat ·
+        <kbd>Shift</kbd>+<kbd>←</kbd> <kbd>→</kbd> previous / next bar ·
+        <kbd>Home</kbd> start ·
+        click the waveform to jump (snaps to the nearest beat, hold <kbd>Alt</kbd> for no snap) ·
+        <kbd>Delete</kbd> removes the selected section · double-click a section (or <b>Edit layer…</b>) to open
+        the coloring drawer.
+        Beat numbers are the ones <code>beats(start, end)</code> uses; a bar is 4 beats.
+      </div>
+    </div>
+    <aside id="drawer" class="drawer" hidden></aside>
+    <audio id="audio" preload="auto"></audio>
+    <script type="module" src="/src/sync/main.ts"></script>
+  </body>
+</html>

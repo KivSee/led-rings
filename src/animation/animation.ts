@@ -55,9 +55,24 @@ interface EffectWithElements {
     elements: number[];
 }
 
+/**
+ * A named part of the song, in beats (end exclusive). It can also fade in for fadeInBeats before startBeat and
+ * fade out for fadeOutBeats after endBeat, overlapping the sections before and after it.
+ */
+export interface Section {
+    name: string;
+    startBeat: number;
+    endBeat: number;
+    fadeInBeats: number;
+    fadeOutBeats: number;
+}
+
 export class Animation {
 
     private effects: EffectWithElements[] = [];
+
+    /** The song's named sections, in the order they were declared with section(). */
+    public sections: Section[] = [];
 
     // Ring numbers that have a lilum pendant mirroring them. Each entry N makes
     // getSequence() emit a `lilum${N}` thing with an exact copy of ring N's

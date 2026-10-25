@@ -442,6 +442,26 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // GET /api/read-file?path=... — read a text file from the repo (404 if it does not exist yet)
+  if (req.method === "GET" && pathname === "/api/read-file") {
+    const filePath = new URLSearchParams(url.split("?")[1] || "").get("path");
+    if (!filePath) {
+      send(res, 400, JSON.stringify({ error: "Missing path" }));
+      return;
+    }
+    const resolved = path.resolve(ROOT, filePath);
+    if (!resolved.startsWith(ROOT)) {
+      send(res, 400, JSON.stringify({ error: "Path must be within the repo" }));
+      return;
+    }
+    if (!fs.existsSync(resolved) || !fs.statSync(resolved).isFile()) {
+      send(res, 404, JSON.stringify({ error: "Not found" }));
+      return;
+    }
+    send(res, 200, JSON.stringify({ path: filePath, content: fs.readFileSync(resolved, "utf8") }));
+    return;
+  }
+
   // POST /api/save-file — save a file to the repo (e.g. generated .ts to src/songs/)
   if (req.method === "POST" && pathname === "/api/save-file") {
     const body = await parseBody(req);

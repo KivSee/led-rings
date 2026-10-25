@@ -52,6 +52,17 @@ export const beats = (startBeat: number, endBeat: number, cb: Function) => {
     als.run(newStore, cb);
 }
 
+/**
+ * A named part of the song from `start` to `end` (beats). It can fade in for `fadeIn` beats before `start` and fade
+ * out for `fadeOut` beats after `end`, overlapping the sections around it. Runs cb inside beats() over the whole
+ * span, fades included, and records the section so tools like the Sequence Player can show which one is playing.
+ */
+export const section = (name: string, span: { start: number; end: number; fadeIn?: number; fadeOut?: number }, cb: Function) => {
+    const { start, end, fadeIn = 0, fadeOut = 0 } = span;
+    als.getStore().animation.sections.push({ name, startBeat: start, endBeat: end, fadeInBeats: fadeIn, fadeOutBeats: fadeOut });
+    beats(start - fadeIn, end + fadeOut, cb);
+}
+
 export const cycle = (beatsInCycle: number, cb: Function) => {
     return cycleBeats(beatsInCycle, 0, beatsInCycle, cb);
 }
