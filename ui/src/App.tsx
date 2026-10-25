@@ -962,7 +962,8 @@ function App() {
               let endTime = Number(item.endTime)
               if (!Number.isFinite(startTime)) startTime = 0
               if (!Number.isFinite(endTime)) endTime = startTime + 4
-              if (endTime <= startTime) endTime = startTime + 4
+              // Zero-length timeframes have no effect (e.g. a stagger loop's i=0 pass); drop them
+              if (endTime <= startTime) return null
               let rings = Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n) && n >= 1 && n <= 12) : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
               if (rings.length === 0) rings = [1]
               return {
@@ -981,6 +982,7 @@ function App() {
                 ...(effects && effects.length > 0 ? { effects } : legacy),
               }
             })
+            .filter((tf): tf is NonNullable<typeof tf> => tf !== null)
           setTimeframes(mapped)
         } else if (!(parsed as { song?: unknown }).song) {
           console.error('Invalid file format: expected array of timeframes or { song, timeframes }')
@@ -1252,7 +1254,8 @@ function App() {
         let endTime = Number(item.endTime)
         if (!Number.isFinite(startTime)) startTime = 0
         if (!Number.isFinite(endTime)) endTime = startTime + 4
-        if (endTime <= startTime) endTime = startTime + 4
+        // Zero-length timeframes have no effect; drop them
+        if (endTime <= startTime) return null
         let rings = Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n) && n >= 1 && n <= 12) : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
         if (rings.length === 0) rings = [1]
         return {
@@ -1271,6 +1274,7 @@ function App() {
           ...(effects && effects.length > 0 ? { effects } : {}),
         } as Timeframe
       })
+      .filter((tf): tf is Timeframe => tf !== null)
     setTimeframes(mapped)
     setFocusedTimeframeId(null)
     setCurrentTime(0)
