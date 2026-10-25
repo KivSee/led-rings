@@ -416,7 +416,7 @@ const shemesh = async () => {
         beats(144 + k * 8, 152 + k * 8, () => addEffect({ timed_hue: { offset_factor: hueOf(ring) } })))));
     });
 
-    // Beat patterns, used by both choruses: a quarter or a half of a segment's pixels raised from the base half
+    // Beat patterns, used by both verses: a quarter or a half of a segment's pixels raised from the base half
     // brightness to full, the lit part changing on the beat.
     // One of `parts` equal parts of the segment (by relPos) lights up at a time, stepping to the next part every
     // stepBeats and round again: with 4 parts and 1 beat, a quarter of the pixels at a time, all 4 every 4
@@ -482,22 +482,22 @@ const shemesh = async () => {
         cycleBeats(2, k + 0.5, k + 0.5 + hitBeats, () =>
           addEffect({ timed_saturation: { mult_factor_decrease: { linear: { start: sat, end: 1 } } } }))))));
 
-    // Chorus 1, bars 49-64 (beats 192-256), fading in over the second half of bar 48 (beats 190-192): she sings and
+    // Verse 1, bars 49-65 (beats 192-260), fading in over the second half of bar 48 (beats 190-192): she sings and
     // the energy ramps up, but it is still before the main part and the energy peak, so it should hold something
     // back.
     // The base coloring: 4 hues stepping from yellow to orange, alternating ring by ring around the big ring (ring 1
     // the first hue, ring 2 the second, …, ring 5 the first again), so neighbouring rings always differ and the
     // pattern repeats 3 times around. Each ring is one solid color, paler toward the center of the big ring, on from
     // the start of the section's fade-in.
-    const CHORUS1_START = 192, CHORUS1_END = 260, CHORUS1_FADE_IN = 2;
-    const CHORUS1_YELLOW = 0.15, CHORUS1_ORANGE = 0.07, CHORUS1_HUES = 4;
+    const VERSE1_START = 192, VERSE1_END = 260, VERSE1_FADE_IN = 2;
+    const VERSE1_YELLOW = 0.15, VERSE1_ORANGE = 0.07, VERSE1_HUES = 4;
     // Half brightness, leaving room for beat effects to light pixels up to full.
-    const CHORUS1_BASE_VAL = 0.5;
-    section("chorus 1", { start: CHORUS1_START, end: CHORUS1_END, fadeIn: CHORUS1_FADE_IN }, () => {
+    const VERSE1_BASE_VAL = 0.5;
+    section("verse 1", { start: VERSE1_START, end: VERSE1_END, fadeIn: VERSE1_FADE_IN }, () => {
       all.forEach(ring => elements([ring], () => constColor({
-        hue: CHORUS1_YELLOW + (((ring - 1) % CHORUS1_HUES) / (CHORUS1_HUES - 1)) * (CHORUS1_ORANGE - CHORUS1_YELLOW),
+        hue: VERSE1_YELLOW + (((ring - 1) % VERSE1_HUES) / (VERSE1_HUES - 1)) * (VERSE1_ORANGE - VERSE1_YELLOW),
         sat: 1,
-        val: CHORUS1_BASE_VAL,
+        val: VERSE1_BASE_VAL,
       })));
       // Paler toward the d2 center: along rad, saturation is multiplied by 0.5 at the inner edge (relPos 0), rising
       // linearly to 1 at relPos 0.8, and stays full from there to the outer edge.
@@ -532,7 +532,7 @@ const shemesh = async () => {
       const ODD = all.filter(r => r % 2), EVEN = all.filter(r => r % 2 === 0);
       const quartet = (k: number) => all.filter(r => (r - 1) % 4 === k); // rings 1, 5, 9 / 2, 6, 10 / …
       const quartets = (on: (k: number, j: number) => boolean) => [0, 1, 2, 3].map(k => whenOn(quartet(k), "all", [0, 1, 2, 3].map(j => on(k, j))));
-      const CHORUS1_BARS: BeatGroup[][] = [
+      const VERSE1_BARS: BeatGroup[][] = [
         // 49: every ring filling along rad from the inner side, a quarter more each beat (to 0.25, 0.5, 0.75, 1).
         [g(all, "rad", FULL, [0.25, 0.5, 0.75, ALL])],
         // 50: the small rings of every d1 ring going out back towards the first one (ind, from the small ring at
@@ -553,83 +553,83 @@ const shemesh = async () => {
         // 57: only the sun rings, whole, lighting up in four layers from the sea upwards, a pair more each beat (3 and
         // 8, 2 and 9, 1 and 10, then 11 and 12); the bottom four rings stay dark (below).
         [[3, 8], [2, 9], [1, 10], [11, 12]].map((rings, k) => whenOn(rings, "all", [0, 1, 2, 3].map(j => j >= k))),
-        // 58: the sea (below, CHORUS1_SEA_BAR), no beat windows.
+        // 58: the sea (below, VERSE1_SEA_BAR), no beat windows.
         [],
-        // 59: "היי משם" (below, CHORUS1_HEY_BAR), no beat windows.
+        // 59: "היי משם" (below, VERSE1_HEY_BAR), no beat windows.
         [],
-        // 60: the low brightness travelling round from rings 2 and 3 (below, CHORUS1_PASS_BAR), no beat windows.
+        // 60: the low brightness travelling round from rings 2 and 3 (below, VERSE1_PASS_BAR), no beat windows.
         [],
-        // 61: "at the window" (below, CHORUS1_WINDOW_BAR), no beat windows.
+        // 61: "at the window" (below, VERSE1_WINDOW_BAR), no beat windows.
         [],
-        // 62: "a tree" (below, CHORUS1_TREE_BAR), no beat windows.
+        // 62: "a tree" (below, VERSE1_TREE_BAR), no beat windows.
         [],
-        // 63: "וילון", the curtain (below, CHORUS1_CURTAIN_BAR), no beat windows.
+        // 63: "וילון", the curtain (below, VERSE1_CURTAIN_BAR), no beat windows.
         [],
-        // 64 and 65: the scene lighting back up and turning back into the sun (below, CHORUS1_SUN_BACK), no beat
+        // 64 and 65: the scene lighting back up and turning back into the sun (below, VERSE1_SUN_BACK), no beat
         // windows.
         [],
       ];
-      CHORUS1_BARS.forEach((groups, k) => groups.forEach(grp => elements(grp.rings, () =>
-        beatWindow(grp.seg, CHORUS1_START + 4 * k, grp.start, grp.end))));
+      VERSE1_BARS.forEach((groups, k) => groups.forEach(grp => elements(grp.rings, () =>
+        beatWindow(grp.seg, VERSE1_START + 4 * k, grp.start, grp.end))));
 
       // Bar 59, "היי משם": everything stays as at the end of bar 58 (the sea fully revealed, the sky at full
-      // brightness, below), except the two rightmost rings (2 and 3, at 2:30 and 3:30): at the chorus' base
+      // brightness, below), except the two rightmost rings (2 and 3, at 2:30 and 3:30): at the verse' base
       // brightness, with a part of rad raised to full, from the center outwards, that shrinks back toward the center
       // each beat (0-0.75, 0-0.5, 0-0.25, then nothing).
-      const CHORUS1_HEY_BAR = CHORUS1_START + 4 * 10, HEY_RINGS = [2, 3], HEY_LIT = [0.75, 0.5, 0.25, 0];
+      const VERSE1_HEY_BAR = VERSE1_START + 4 * 10, HEY_RINGS = [2, 3], HEY_LIT = [0.75, 0.5, 0.25, 0];
       elements(HEY_RINGS, () => segment("rad", () => HEY_LIT.forEach((lit, j) => {
-        if (lit > 0) beats(CHORUS1_HEY_BAR + j, CHORUS1_HEY_BAR + j + 1, () =>
+        if (lit > 0) beats(VERSE1_HEY_BAR + j, VERSE1_HEY_BAR + j + 1, () =>
           addEffect({ position_brightness: { mult_factor_increase: { fixed_window: { start: 0, end: lit - 0.001, outside_value: 0, func: K(1) } } } }));
       })));
       // Bar 58, at full brightness like the end of bar 57: the bottom four rings (4-7) turn into the sea, blue (hue
       // 0.66), most saturated at the bottom and paler toward the top, near the sun, and the other eight (the sky) are
       // raised to full too.
-      const CHORUS1_SEA_BAR = CHORUS1_START + 4 * 9;
+      const VERSE1_SEA_BAR = VERSE1_START + 4 * 9;
       // Each depth: its rings and its color.
       const SEA: [number[], { hue: number; sat: number; val: number }][] = [
         [[4, 7], { hue: 0.66, sat: 0.85, val: 1 }],
         [[5, 6], { hue: 0.66, sat: 1, val: 1 }],
       ];
       // The bottom four rings stay dark through bar 57, while the sun rings light up above them.
-      elements([4, 5, 6, 7], () => beats(CHORUS1_SEA_BAR - 4, CHORUS1_SEA_BAR, () => fade({ start: 0, end: 0 })));
+      elements([4, 5, 6, 7], () => beats(VERSE1_SEA_BAR - 4, VERSE1_SEA_BAR, () => fade({ start: 0, end: 0 })));
       const SKY_RINGS = [8, 9, 10, 11, 12, 1, 2, 3];
       // The sky at full brightness through bar 58, and through bar 59 too except the rings saying "היי משם".
-      elements(SKY_RINGS, () => beats(CHORUS1_SEA_BAR, CHORUS1_SEA_BAR + 4, () =>
+      elements(SKY_RINGS, () => beats(VERSE1_SEA_BAR, VERSE1_SEA_BAR + 4, () =>
         addEffect({ timed_brightness: { mult_factor_increase: K(1) } })));
-      elements(SKY_RINGS.filter(r => !HEY_RINGS.includes(r)), () => beats(CHORUS1_HEY_BAR, CHORUS1_HEY_BAR + 4, () =>
+      elements(SKY_RINGS.filter(r => !HEY_RINGS.includes(r)), () => beats(VERSE1_HEY_BAR, VERSE1_HEY_BAR + 4, () =>
         addEffect({ timed_brightness: { mult_factor_increase: K(1) } })));
       // Bar 60: everything at full brightness (the sky raised, the sea fully revealed), with the low brightness of
       // rings 2 and 3 moving on as a vertical band from right to left across the whole big ring, one column a beat:
       // rings 1 and 4, then 12, 11, 5 and 6 (the middle), then 10 and 7, then 9 and 8 (the far left) drop to half.
-      const CHORUS1_PASS_BAR = CHORUS1_HEY_BAR + 4, PASS_LOW = [[1, 4], [12, 11, 5, 6], [10, 7], [9, 8]];
-      elements(SKY_RINGS, () => beats(CHORUS1_PASS_BAR, CHORUS1_END, () =>
+      const VERSE1_PASS_BAR = VERSE1_HEY_BAR + 4, PASS_LOW = [[1, 4], [12, 11, 5, 6], [10, 7], [9, 8]];
+      elements(SKY_RINGS, () => beats(VERSE1_PASS_BAR, VERSE1_END, () =>
         addEffect({ timed_brightness: { mult_factor_increase: K(1) } })));
 
       // The sea is revealed from each ring's outer edge inwards along rad (1.0 down to 0.0), a quarter more each beat
       // (from 0.75, 0.5, 0.25, then 0, to the edge): the sea's blue for the whole bar, what is not revealed yet a
       // darker blue (a window: brightness kept inside it, SEA_DIM of it outside).
       const SEA_REVEAL = [0.75, 0.5, 0.25, 0], SEA_DIM = 0.3;
-      // Bar 64 (CHORUS1_SUN_BACK): the scene's parts turn back into the sun's colors (the chorus' base) a part a beat,
+      // Bar 64 (VERSE1_SUN_BACK): the scene's parts turn back into the sun's colors (the verse' base) a part a beat,
       // from the top down: the tree, its stump, then the whole sea at once on the bar's last beat.
-      const CHORUS1_SUN_BACK = CHORUS1_START + 4 * 15;
-      const SEA_SUN_BACK = [CHORUS1_SUN_BACK + 3, CHORUS1_SUN_BACK + 3];
+      const VERSE1_SUN_BACK = VERSE1_START + 4 * 15;
+      const SEA_SUN_BACK = [VERSE1_SUN_BACK + 3, VERSE1_SUN_BACK + 3];
       SEA.forEach(([rings, color], depth) => elements(rings, () => {
         // Through bars 59-65 too, fully revealed there.
-        beats(CHORUS1_SEA_BAR, SEA_SUN_BACK[depth], () => constColor(color));
-        segment("rad", () => SEA_REVEAL.forEach((from, j) => beats(CHORUS1_SEA_BAR + j, CHORUS1_SEA_BAR + j + 1, () =>
+        beats(VERSE1_SEA_BAR, SEA_SUN_BACK[depth], () => constColor(color));
+        segment("rad", () => SEA_REVEAL.forEach((from, j) => beats(VERSE1_SEA_BAR + j, VERSE1_SEA_BAR + j + 1, () =>
           addEffect({ position_brightness: { mult_factor_decrease: { fixed_window: { start: from, end: ALL, outside_value: SEA_DIM, func: K(1) } } } }))));
       }));
       // Bar 60's travelling low brightness, after the sea's color so the color does not reset it.
       PASS_LOW.forEach((rings, j) => {
-        if (rings.length) elements(rings, () => beats(CHORUS1_PASS_BAR + j, CHORUS1_PASS_BAR + j + 1, () => fade({ start: 0.5, end: 0.5 })));
+        if (rings.length) elements(rings, () => beats(VERSE1_PASS_BAR + j, VERSE1_PASS_BAR + j + 1, () => fade({ start: 0.5, end: 0.5 })));
       });
       // Bar 61, "at the window": the sea and the sky stay lit as in bar 60 (the sky's full brightness above runs
       // through it), and rings 2 and 9, on opposite sides of the big ring, open like windows into the dark: a dark
       // gap opens in the middle of each along rad and widens to both edges a step each beat, until the ring is
       // dark on the last beat.
-      const CHORUS1_WINDOW_BAR = CHORUS1_PASS_BAR + 4, TREE_RINGS = [2, 9], BRANCH_RINGS = [3, 8];
+      const VERSE1_WINDOW_BAR = VERSE1_PASS_BAR + 4, TREE_RINGS = [2, 9], BRANCH_RINGS = [3, 8];
       // The window opens a beat early, on the last beat of bar 60.
-      const WINDOW_START = CHORUS1_WINDOW_BAR - 1;
+      const WINDOW_START = VERSE1_WINDOW_BAR - 1;
       const WINDOW_RINGS = [...TREE_RINGS, ...BRANCH_RINGS], WINDOW_OPEN = [0.125, 0.25, 0.375, 0.6];
       elements(WINDOW_RINGS, () => segment("rad", () => WINDOW_OPEN.forEach((w, j) =>
         beats(WINDOW_START + j, WINDOW_START + j + 1, () => addEffect({
@@ -641,9 +641,9 @@ const shemesh = async () => {
       // and the brightness (darker and brighter leaves). A soft glow drifts slowly through rand, lifting the leaves
       // it passes, so the tree shimmers. It is revealed like the window in bar 61 in reverse: the dark gap in the
       // middle of the ring narrows each beat until it is gone.
-      const CHORUS1_TREE_BAR = CHORUS1_WINDOW_BAR + 4, TREE_GREEN = { hue: 0.33, sat: 1, val: 1 };
+      const VERSE1_TREE_BAR = VERSE1_WINDOW_BAR + 4, TREE_GREEN = { hue: 0.33, sat: 1, val: 1 };
       // The tree comes a beat early, on the last beat of bar 61 (over the window's last, darkest step).
-      const TREE_START = CHORUS1_TREE_BAR - 1;
+      const TREE_START = VERSE1_TREE_BAR - 1;
       const along = (min: number, max: number, repeats: number, phase = 0) => ({ sin: { min, max, phase, repeats } });
       /** The texture shared by the tree and its branches: brightness varying along rand (darker and brighter
        *  leaves) and a soft glow drifting slowly through rand, so it shimmers; then revealed like the window in bar
@@ -661,7 +661,7 @@ const shemesh = async () => {
       };
       // The tree (rings 2 and 9): green, its hue nudged between yellow-green and blue-green and its saturation
       // varied along rand.
-      elements(TREE_RINGS, () => beats(TREE_START, CHORUS1_SUN_BACK + 1, () => {
+      elements(TREE_RINGS, () => beats(TREE_START, VERSE1_SUN_BACK + 1, () => {
         constColor(TREE_GREEN);
         segment(segment_rand, () => {
           addEffect({ position_hue: { offset_factor: along(-0.05, 0.04, 7) } });
@@ -672,7 +672,7 @@ const shemesh = async () => {
       // Its branches (rings 3 and 8, just below): brown wood, with about a third of the pixels (scattered along
       // rand, a window repeated three times) turned to the tree's green as leaves.
       const BRANCH_BROWN = { hue: 0.07, sat: 0.85, val: 0.75 };
-      elements(BRANCH_RINGS, () => beats(TREE_START, CHORUS1_SUN_BACK + 2, () => {
+      elements(BRANCH_RINGS, () => beats(TREE_START, VERSE1_SUN_BACK + 2, () => {
         constColor(BRANCH_BROWN);
         segment(segment_rand, () => addEffect({
           position_hue: { offset_factor: repeatFn(3, { fixed_window: { start: 0, end: 0.33, outside_value: 0, func: K(TREE_GREEN.hue - BRANCH_BROWN.hue) } }) },
@@ -682,9 +682,9 @@ const shemesh = async () => {
       // Bar 63, "וילון": a curtain over the whole scene (sky, tree, sea), which carries on underneath, on every ring
       // for 4 beats: CURTAIN_STRIPES dark and light stripes along rad (a window
       // repeated along it, dimmed to CURTAIN_DIM), the dark and light stripes swapping on every beat.
-      const CHORUS1_CURTAIN_BAR = CHORUS1_TREE_BAR + 4, CURTAIN_DIM = 0.3, CURTAIN_STRIPES = 10;
+      const VERSE1_CURTAIN_BAR = VERSE1_TREE_BAR + 4, CURTAIN_DIM = 0.3, CURTAIN_STRIPES = 10;
       // A beat early: from the last beat of bar 62 to the third beat of bar 63.
-      const CURTAIN_START = CHORUS1_CURTAIN_BAR - 1;
+      const CURTAIN_START = VERSE1_CURTAIN_BAR - 1;
       const curtainStripes = (odd: boolean) => segment("rad", () => addEffect({
         position_brightness: {
           mult_factor_decrease: repeatFn(CURTAIN_STRIPES / 2, {
@@ -696,13 +696,13 @@ const shemesh = async () => {
         for (let j = 0; j < 4; j++) beats(CURTAIN_START + j, CURTAIN_START + j + 1, () => curtainStripes(j % 2 === 1));
       });
       // Beat 251, after the curtain: the whole scene stays low, at CURTAIN_DIM.
-      elements(all, () => beats(CURTAIN_START + 4, CHORUS1_SUN_BACK, () => fade({ start: CURTAIN_DIM, end: CURTAIN_DIM })));
+      elements(all, () => beats(CURTAIN_START + 4, VERSE1_SUN_BACK, () => fade({ start: CURTAIN_DIM, end: CURTAIN_DIM })));
       // The 5 beats from bar 64: the scene lights back up from CURTAIN_DIM to full, while its parts turn back into the
       // sun (above). The sea rings, once back to the sun, at full like the sky.
-      const SUN_BACK_LIT = CHORUS1_SUN_BACK + 5;
-      SEA.forEach(([rings], depth) => elements(rings, () => beats(SEA_SUN_BACK[depth], CHORUS1_END, () =>
+      const SUN_BACK_LIT = VERSE1_SUN_BACK + 5;
+      SEA.forEach(([rings], depth) => elements(rings, () => beats(SEA_SUN_BACK[depth], VERSE1_END, () =>
         addEffect({ timed_brightness: { mult_factor_increase: K(1) } }))));
-      elements(all, () => beats(CHORUS1_SUN_BACK, SUN_BACK_LIT, () => fade({ start: CURTAIN_DIM, end: 1 })));
+      elements(all, () => beats(VERSE1_SUN_BACK, SUN_BACK_LIT, () => fade({ start: CURTAIN_DIM, end: 1 })));
       // Bar 65: the scene goes dark, a part more on each beat, each part a different static section (a position
       // window darkening it, kept to the end of the bar), so the light breaks up instead of whole rings switching
       // off. The odd rings: the pixel 0 side of every small ring (arc 0 - 0.3, pixels 10-2), then the opposite side
@@ -710,7 +710,7 @@ const shemesh = async () => {
       // the big ring (rad 0.5 - 1), then those on the inner half. The even rings take the outer half out first, so for
       // the first two beats neighbouring rings differ (whole small rings next to broken ones), and they meet again
       // on the third beat (pixels 3 and 9 of the inner half).
-      const CHORUS1_DARK_BAR = CHORUS1_SUN_BACK + 4;
+      const VERSE1_DARK_BAR = VERSE1_SUN_BACK + 4;
       const darkWindow = (seg: string, start: number, end: number) => segment(seg, () => addEffect({
         position_brightness: { mult_factor_decrease: { fixed_window: { start, end, outside_value: 1, func: K(0) } } },
       }));
@@ -719,10 +719,10 @@ const shemesh = async () => {
       const OUTER: DarkPart = ["rad", 0.5, ALL], INNER: DarkPart = ["rad", 0, 0.4995];
       ([[ODD, [PIXEL0_SIDE, FAR_SIDE, OUTER, INNER]], [EVEN, [OUTER, FAR_SIDE, PIXEL0_SIDE, INNER]]] as [number[], DarkPart[]][])
         .forEach(([rings, parts]) => elements(rings, () => parts.forEach(([seg, start, end], k) =>
-          beats(CHORUS1_DARK_BAR + k, CHORUS1_END, () => darkWindow(seg, start, end)))));
+          beats(VERSE1_DARK_BAR + k, VERSE1_END, () => darkWindow(seg, start, end)))));
     });
 
-    // The drum fill into chorus 1 (beats 190-192), on top of the party and the chorus fading in: 2 hits in beat 190
+    // The drum fill into verse 1 (beats 190-192), on top of the party and the verse fading in: 2 hits in beat 190
     // a quarter beat apart, then 5 quick ones in beat 191 an eighth apart (as heard in the audio, ~190.45, 190.7 and
     // ~191.45 to 191.95). On each hit two thirds of every small ring (segment b2, all but pixels 0, 3, 6, 9) go
     // dark and fades back in over the rest of the hit, a sharp strobe leaving only dots over the whole installation
@@ -735,69 +735,64 @@ const shemesh = async () => {
       beats(191.45, 192.075, () => cycle(0.125, drumPulse));
     });
 
-    // Party 2, bars 83-92 (beats 328-368): the party comes back, crazier in color and motion than the first one.
-    const PARTY2_START = 328, PARTY2_END = 368, PARTY2_BLOCK = 8, PARTY2_SPIN = 16, PARTY2_WINDOW_CYCLE = 2;
-    section("party 2", { start: PARTY2_START, end: PARTY2_END }, () => {
-      // Colors: a full rainbow around the big ring (ring r at hue (r - 1) / 12), each small ring with a hue
-      // gradient along arc (a sixth of the color wheel from pixel 0 to pixel 6), and the whole rainbow spinning
-      // once around the color wheel every PARTY2_SPIN beats.
-      all.forEach(ring => elements([ring], () => constColor({ hue: (ring - 1) / 12, sat: 1, val: 1 })));
-      elements(all, () => {
-        segment(segment_arc, () => addEffect({ position_hue: { offset_factor: L(0, 1 / 6 / (6 / 7)) } }));
-        cycle(PARTY2_SPIN, () => addEffect({ timed_hue: { offset_factor: L(0, 1) } }));
-      });
-      // The beat in the hue, like the first party but much bigger jumps: every PARTY2_BLOCK beats a timed hue shift
-      // stepping once per beat, a different pattern each time, up to the complementary color (0.5 away).
-      const BIG_ALTERNATE = repeatFn(4, stepsFn(2, 0, 0.5)); // the complementary color on every other beat
-      const BIG_ALTERNATE_OPPOSITE = repeatFn(4, stepsFn(2, 0.5, -0.5)); // the same, a beat apart
-      const PARTY2_BEAT_HUES: ((ring: number) => object)[] = [
-        () => stepsFn(8, -0.3, 0.09), // big staircase up
-        ring => (ring % 2 ? BIG_ALTERNATE : BIG_ALTERNATE_OPPOSITE), // odd and even rings flip in turns
-        () => stepsFn(8, 0.3, -0.09), // big staircase down
-        () => ({ half: { f1: stepsFn(4, -0.25, 0.17), f2: stepsFn(4, 0.26, -0.17) } }), // up 4 beats, down 4
-        () => BIG_ALTERNATE, // everything flips together
-      ];
-      PARTY2_BEAT_HUES.forEach((hueOf, k) => all.forEach(ring => elements([ring], () =>
-        beats(PARTY2_START + k * PARTY2_BLOCK, PARTY2_START + (k + 1) * PARTY2_BLOCK,
-          () => addEffect({ timed_hue: { offset_factor: hueOf(ring) } })))));
-      // Motion: moving windows like the first party's, but on arc instead of rad. Arc counts out from pixel 0 both
-      // ways round every small ring, so a window is a band in each small ring, the same on both sides of pixel 0,
-      // that slides, grows and closes. The windows below are written for 0-1 and mapped onto -0.02 - 0.87 (arc
-      // reaches 6/7, at pixel 6), a little past both ends so pixels 0 and 6 can be lit too. Every few bars the
-      // ends move a different way, repeating every PARTY2_WINDOW_CYCLE beats, and the rings are phased in a
-      // different group size: in a group of N, ring r runs (r - 1) mod N / N of a cycle behind. Each ring runs only
-      // whole cycles of a block and holds the starting window in any gap.
-      const onArc = (f: Fn) => shift(scale(f, 0.89), -0.02);
-      const arcWindow = (start: Fn, end: Fn) => segWindow(segment_arc, onArc(start), onArc(end));
-      // The motion over the section, in order: how the window's ends move, and the ring phase group size (ccw: the
-      // phase runs round the big ring the other way).
-      type Motion = { from: number; to: number; window: [Fn, Fn]; group: number; ccw?: boolean };
-      const PARTY2_MOTION: Motion[] = [
-        { from: 328, to: 336, window: [SWING(0, 0.5, 1), SWING(0.5, 1, 1)], group: 3 }, // slides out and back
-        { from: 336, to: 344, window: [K(0), SWING(0.25, 1)], group: 6 }, // grows and shrinks twice a cycle
-        // Bars 87-88: both ends close in to the middle and open again, rippling round the big ring clockwise.
-        { from: 344, to: 352, window: [SWING(0, 0.4, 1), SWING_DOWN(0.6, 1, 1)], group: 12 },
-        // Bars 89-90: a narrow band in the middle breathing twice a cycle, rippling round the other way.
-        { from: 352, to: 360, window: [SWING_DOWN(0.25, 0.45), SWING(0.55, 0.75)], group: 12, ccw: true },
-        { from: 360, to: 364, window: [SWING(0, 0.5), SWING(0.5, 1)], group: 4 }, // sways out and back twice a cycle
-        { from: 364, to: 368, window: [SWING(0, 0.75, 1), K(1)], group: 2 }, // the start sweeps out to the far end and back
-      ];
-      const holdWindow = (from: number, to: number) => { if (to > from) beats(from, to, () => arcWindow(K(0), K(0.5))); };
-      all.forEach(ring => elements([ring], () => PARTY2_MOTION.forEach(motion => {
-        // Delayed by the ring's phase in the group, running only whole cycles, holding the starting window around.
-        const [start, end] = motion.window;
-        const n = motion.group, step = motion.ccw ? (n - ((ring - 1) % n)) % n : (ring - 1) % n;
-        const from = motion.from + (step / n) * PARTY2_WINDOW_CYCLE;
-        const runEnd = from + Math.floor((motion.to - from) / PARTY2_WINDOW_CYCLE) * PARTY2_WINDOW_CYCLE;
-        holdWindow(motion.from, from);
-        beats(from, runEnd, () => cycle(PARTY2_WINDOW_CYCLE, () => arcWindow(start, end)));
-        holdWindow(runEnd, motion.to);
-      })));
+    // Chorus 1, bars 67-82 (beats 264-328), fading in over the 2 beats before it (beats 262-264).
+    // The coloring: the whole installation as one burning sun, hotter toward its center. Every ring at full
+    // saturation, its hue running along rad from orange on the inner side (facing the center of the
+    // big ring) to deep red on the outer side, so the 12 rings together make a glowing orange core with a red rim.
+    // The odd and even rings are a little apart (the even ones redder), so neighbouring rings still differ.
+    const CHORUS1_START = 264, CHORUS1_END = 328, CHORUS1_FADE_IN = 2, CHORUS1_SWING = 4;
+    // Each ring's inner (core) and outer (rim) hue; the rim goes past red into crimson (hue just under 1).
+    const CHORUS1_SUN: Record<"odd" | "even", { core: number; rim: number }> = {
+      odd: { core: 0.09, rim: 0 },
+      even: { core: 0.06, rim: -0.03 },
+    };
+    section("chorus 1", { start: CHORUS1_START, end: CHORUS1_END, fadeIn: CHORUS1_FADE_IN }, () => {
+      ([[ODD_RINGS, CHORUS1_SUN.odd], [EVEN_RINGS, CHORUS1_SUN.even]] as const).forEach(([rings, { core, rim }]) => elements([...rings], () => {
+        // Brightness 0: dark except where the effects below raise it.
+        constColor({ hue: core, sat: 1, val: 0 });
+        segment("rad", () => addEffect({ position_hue: { offset_factor: L(0, rim - core) } }));
+      }));
+      // Over the 2 beats of the fade-in, every ring at full, for the lightning below to strike in.
+      elements(all, () => beats(CHORUS1_START - CHORUS1_FADE_IN, CHORUS1_START, () =>
+        addEffect({ timed_brightness: { mult_factor_increase: K(1) } })));
+      // Then a light circling round the big ring: on every ring a window along rad from the inner side (0) out to an
+      // edge swinging on a sin from 0 to 1 and back every CHORUS1_SWING beats, so the light grows out from the inner side to the
+      // whole ring and shrinks back. Ring r's sin is (r - 1) / 12 of a swing behind ring 1 (phase by the index), a
+      // full swing across the 12 rings, so the biggest light moves clockwise round the big ring once a swing. A
+      // position window cannot change over time, so the window is a snake from just below 0 to its head, the head on
+      // the sin.
+      all.forEach(ring => elements([ring], () => beats(CHORUS1_START, CHORUS1_END, () => segment("rad", () => cycle(CHORUS1_SWING, () => {
+        const edge = { sin: { min: 0, max: 1, phase: -(ring - 1) / 12 - 0.25, repeats: 1 } };
+        addEffect({
+          snake_brightness: { head: edge, tail_length: shift(edge, 0.01), cyclic: false, mult_factor_increase: K(1) },
+        });
+      })))));
+      // Lit up from dark like lightning, in 2 groups on the 2 beats before the chorus: on the first beat half of every
+      // small ring strikes on (6 pixels in a row, along centric), the other half staying dark, and on the second beat
+      // the other half. The same half (pixels 0-5) on every ring.
+      elements(all, () => segment(segment_centric, () => {
+        const from = 0.5;
+        beats(CHORUS1_START - CHORUS1_FADE_IN, CHORUS1_START - CHORUS1_FADE_IN + 1, () => addEffect({
+          position_brightness: {
+            mult_factor_decrease: { fixed_window: { start: from - 0.001, end: from + 0.49, cyclic: true, outside_value: 1, func: K(0) } },
+          },
+        }));
+      }));
     });
 
-    // Chorus 2, bars 93-100 (beats 368-400): chorus 1 again, to be more interesting and energetic. No effects yet.
-    const CHORUS2_START = 368, CHORUS2_END = 400;
-    section("chorus 2", { start: CHORUS2_START, end: CHORUS2_END }, () => {
+    // Party 2, bars 83-92 (beats 328-368): the party comes back. No effects yet.
+    const PARTY2_START = 328, PARTY2_END = 368;
+    section("party 2", { start: PARTY2_START, end: PARTY2_END }, () => {
+    });
+
+    // Verse 2, bars 93-100 (beats 368-400), fading out over bar 101 (beats 400-404): verse 1 again, to be more interesting and energetic. No effects yet.
+    const VERSE2_START = 368, VERSE2_END = 400, VERSE2_FADE_OUT = 4;
+    section("verse 2", { start: VERSE2_START, end: VERSE2_END, fadeOut: VERSE2_FADE_OUT }, () => {
+    });
+
+    // Chorus 2, bars 103-118 (beats 408-472), fading in over the 2 beats before it (beats 406-408). No effects yet.
+    const CHORUS2_START = 408, CHORUS2_END = 472, CHORUS2_FADE_IN = 2;
+    section("chorus 2", { start: CHORUS2_START, end: CHORUS2_END, fadeIn: CHORUS2_FADE_IN }, () => {
     });
 
     // The colors of parties 3 and 4, one per ring (index ring - 1): sun colors from red to yellow (hue 0 - 0.15),
@@ -1008,6 +1003,16 @@ const shemesh = async () => {
           beats(PARTY4_TURN, PARTY4_END, () => cycle(PARTY4_BREATHE_BEATS, () => darkSnake(shift(w, 1, true), shift(scale(w, 2), 1, true))));
         });
       }));
+    });
+
+    // Chorus 3, bars 143-157 (beats 568-628), fading in over the 2 beats before it (beats 566-568). No effects yet.
+    const CHORUS3_START = 568, CHORUS3_END = 628, CHORUS3_FADE_IN = 2;
+    section("chorus 3", { start: CHORUS3_START, end: CHORUS3_END, fadeIn: CHORUS3_FADE_IN }, () => {
+    });
+
+    // Party 5, bars 158-176 (beats 628-704): the party once more, to the end of the song. No effects yet.
+    const PARTY5_START = 628, PARTY5_END = 704;
+    section("party 5", { start: PARTY5_START, end: PARTY5_END }, () => {
     });
 
     // BEAT_CHECK=1: a white flash on every beat on top, to check the sync with the audio. One 1-beat cycle over
