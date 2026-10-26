@@ -40,7 +40,7 @@ function colorRingPhase(timeframe: Timeframe, ringIndex: number): number {
 
 const BRIGHTNESS_KEYS = new Set(['brightness', 'fadeIn', 'fadeOut', 'fadeInOut', 'fadeOutIn', 'blink', 'pulse', 'fade'])
 const HUE_KEYS = new Set(['staticHueShift', 'hueShiftStartToEnd', 'hueShiftSin'])
-const MOTION_KEYS = new Set(['snakeHeadMove', 'staticSnake', 'snake', 'snakeHeadSin', 'snakeFillGrow', 'snakeInOut', 'snakeSlowFast', 'snakeTailShrinkGrow', 'snakeHeadSteps'])
+const MOTION_KEYS = new Set(['snakeHeadMove', 'staticSnake', 'snake', 'snakeHeadSin', 'snakeFillGrow', 'snakeInOut', 'snakeSlowFast', 'snakeTailShrinkGrow', 'snakeHeadSteps', 'snakeTurn'])
 const POSITION_BRIGHTNESS_KEYS = new Set(['position_brightness'])
 const POSITION_HUE_KEYS = new Set(['position_hue'])
 const POSITION_SATURATION_KEYS = new Set(['position_saturation'])
@@ -256,6 +256,15 @@ function legacyMotionToSnakeParams(
         head: { steps: { num_steps: steps, diff_per_step: 1 / steps, first_step_value: perRingPhase } },
         tailLength: { const_value: { value: tailLen } },
         cyclic: true,
+      }
+    }
+    case 'snakeTurn': {
+      const tailLen = typeof p.tailLength === 'number' ? p.tailLength : 0.5
+      const amp = (typeof p.speed === 'number' ? p.speed : 1) / Math.PI
+      return {
+        head: { sin: { min: perRingPhase - amp, max: perRingPhase + amp, phase: p.reverse === true ? 0.5 : 0, repeats: 0.5 } },
+        tailLength: { const_value: { value: tailLen } },
+        cyclic: p.cyclic !== false,
       }
     }
     default:
@@ -579,12 +588,16 @@ export function getPixelColor(
   // matching the C++ renderer.
   s = getSaturationMult(relPos, t, timeframe, ringIndex, s)
 
-  v = holdOff ? 0 : getBrightnessMult(relPos, t, timeframe, ringIndex, v)
   const snakeMask = hasMotionEffect(timeframe)
     ? getSnakeMask(relPos, t, 12, timeframe, ringIndex)
     : 1
-
-  v = v * snakeMask
+  if (timeframe.afterMotion) {
+    // Modifiers run after the snake, so Increase can re-light masked pixels
+    v = holdOff ? 0 : getBrightnessMult(relPos, t, timeframe, ringIndex, v * snakeMask)
+  } else {
+    v = holdOff ? 0 : getBrightnessMult(relPos, t, timeframe, ringIndex, v)
+    v = v * snakeMask
+  }
   return { h, s, v }
 }
 
@@ -616,17 +629,26 @@ export function getPixelColorMulti(
   // the C++ renderer's sequential effect list. Snake masks are applied after
   // all modifiers (the motion layer is emitted last in the generated sequence),
   // so a masked-off pixel is not re-lit by a later Increase.
+  // "Apply after snakes" timeframes (afterMotion) fold in after the mask, as
+  // the generated sequence emits their modifiers after the motion layer.
   let snakeMask = 1
-  for (const { timeframe, t, relPos, holdOff } of timeframesWithT) {
+  const foldModifiers = (entry: (typeof timeframesWithT)[number]) => {
+    const { timeframe, t, relPos, holdOff } = entry
     h = (h + getHueOffset(relPos, t, timeframe, ringIndex)) % 1
     if (h < 0) h += 1
     s = getSaturationMult(relPos, t, timeframe, ringIndex, s)
     v = holdOff ? 0 : getBrightnessMult(relPos, t, timeframe, ringIndex, v)
-    if (hasMotionEffect(timeframe)) {
-      snakeMask *= getSnakeMask(relPos, t, 12, timeframe, ringIndex)
+  }
+  for (const entry of timeframesWithT) {
+    if (!entry.timeframe.afterMotion) foldModifiers(entry)
+    if (hasMotionEffect(entry.timeframe)) {
+      snakeMask *= getSnakeMask(entry.relPos, entry.t, 12, entry.timeframe, ringIndex)
     }
   }
   v *= snakeMask
+  for (const entry of timeframesWithT) {
+    if (entry.timeframe.afterMotion) foldModifiers(entry)
+  }
   return { h, s, v }
 }
 

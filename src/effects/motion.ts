@@ -273,3 +273,37 @@ export const snakeHeadSteps = ({ steps, tailLength }: {
     };
   });
 }
+// Snake that turns around: it starts moving forward at `speed` (rotations per
+// timeframe), slows to a stop halfway, and finishes moving backward at the same
+// speed, ending where it started. Placed between a forward snake and a reversed
+// one with matching speed, the direction change is seamless. `reverse` turns
+// from backward to forward instead.
+export const snakeTurn = ({ tailLength, speed, cyclic, reverse }: {
+  tailLength?: number;
+  speed?: number;
+  cyclic?: boolean;
+  reverse?: boolean;
+}) => {
+  tagEffect("snakeTurn", { tailLength, speed, cyclic, reverse });
+  const amp = (speed ?? 1) / Math.PI;
+  addEffect((phase: number) => {
+    return {
+      snake: {
+        head: {
+          sin: {
+            min: phase - amp,
+            max: phase + amp,
+            phase: reverse ? 0.5 : 0,
+            repeats: 0.5,
+          },
+        },
+        tail_length: {
+          const_value: {
+            value: tailLength ?? 0.5,
+          },
+        },
+        cyclic: cyclic ?? true,
+      },
+    };
+  });
+};

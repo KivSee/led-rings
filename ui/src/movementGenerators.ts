@@ -25,6 +25,9 @@ export interface TimeframeMovement {
   /** Spread: rings stay dark from the timeframe start until their turn, so
    *  other layers (e.g. coloring) don't show on them before the spread reaches them. */
   darkBefore?: boolean
+  /** Spread + retire: rings stay dark from their retire time until the timeframe
+   *  end, so other layers don't show on them after they turn off. */
+  darkAfter?: boolean
   /** Sweep: ping-pong back and forth. */
   bounce?: boolean
   /** Random: each ring turns on at its step and stays on for the rest of the timeframe. */
@@ -45,7 +48,7 @@ export interface MovementTypeDef {
   extraParams: Array<{ key: MovementExtraKey; label: string }>
 }
 
-export type MovementExtraKey = 'retire' | 'bounce' | 'accumulate' | 'darkBefore' | 'untilTurn'
+export type MovementExtraKey = 'retire' | 'bounce' | 'accumulate' | 'darkBefore' | 'darkAfter' | 'untilTurn'
 
 export const MOVEMENT_TYPES: MovementTypeDef[] = [
   {
@@ -55,6 +58,8 @@ export const MOVEMENT_TYPES: MovementTypeDef[] = [
     extraParams: [
       { key: 'retire', label: 'Retire (diamond)' },
       { key: 'darkBefore', label: 'Dark before start' },
+      { key: 'darkAfter', label: 'Dark after retire' },
+      { key: 'untilTurn', label: 'Until turn (active only before its turn)' },
     ],
   },
   {
@@ -63,6 +68,7 @@ export const MOVEMENT_TYPES: MovementTypeDef[] = [
     description: 'One ring (or group) at a time, moving across.',
     extraParams: [
       { key: 'bounce', label: 'Bounce (ping-pong)' },
+      { key: 'retire', label: 'Retire (one pass, stay off after turn)' },
     ],
   },
   {
@@ -365,6 +371,11 @@ export function getMovementRingWindows(
     }
     case 'spread': {
       const s = startTime + step * bpr
+      if (movement.untilTurn) {
+        // Reverse of spread: ring is active from the start until its turn.
+        const until = Math.min(s, endTime)
+        return until > startTime ? [{ start: startTime, end: until }] : []
+      }
       const out: MovementWindow[] = []
       // Dark before start: hold the ring off until its turn.
       if (movement.darkBefore && s > startTime) {
@@ -372,10 +383,24 @@ export function getMovementRingWindows(
       }
       const e = movement.retire ? endTime - step * bpr : endTime
       if (s < e) out.push({ start: s, end: e })
+      // Dark after retire: hold the ring off from its retire time to the end.
+      if (movement.retire && movement.darkAfter) {
+        const offFrom = Math.max(e, startTime)
+        if (offFrom < endTime) out.push({ start: offFrom, end: endTime, holdOff: true })
+      }
       return out
     }
 
     case 'sweep': {
+      // Retire: a single pass — each ring plays its turn, then stays off.
+      if (movement.retire && !movement.bounce) {
+        const s = startTime + step * bpr
+        if (s >= endTime) return []
+        const turnEnd = Math.min(s + bpr, endTime)
+        const out: MovementWindow[] = [{ start: s, end: turnEnd }]
+        if (turnEnd < endTime) out.push({ start: turnEnd, end: endTime, holdOff: true })
+        return out
+      }
       if (movement.bounce) {
         const totalSteps = Math.max(1, 2 * numSteps - 2)
         const cycleBeats = totalSteps * bpr
@@ -525,6 +550,7 @@ export function normalizeMovement(raw: unknown): TimeframeMovement | undefined {
     beatsPerRing: bpr,
     retire: o.retire === true ? true : undefined,
     darkBefore: o.darkBefore === true ? true : undefined,
+    darkAfter: o.darkAfter === true ? true : undefined,
     bounce: o.bounce === true ? true : undefined,
     accumulate: o.accumulate === true ? true : undefined,
     untilTurn: o.untilTurn === true ? true : undefined,

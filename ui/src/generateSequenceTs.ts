@@ -43,6 +43,7 @@ export interface Timeframe {
   label: string
   color: string
   hasExplicitColor?: boolean
+  afterMotion?: boolean
   rings: number[]
   disabled?: boolean
   mapping?: string
@@ -183,7 +184,7 @@ function emitColor(tf: Timeframe, hueOffset = 0): string[] {
 
 const BRIGHTNESS_KEYS = new Set(['brightness', 'fadeIn', 'fadeOut', 'fadeInOut', 'fadeOutIn', 'blink', 'pulse', 'fade'])
 const HUE_KEYS = new Set(['staticHueShift', 'hueShiftStartToEnd', 'hueShiftSin'])
-const MOTION_KEYS = new Set(['snakeHeadMove', 'staticSnake', 'snake', 'snakeHeadSin', 'snakeFillGrow', 'snakeInOut', 'snakeSlowFast', 'snakeTailShrinkGrow', 'snakeHeadSteps'])
+const MOTION_KEYS = new Set(['snakeHeadMove', 'staticSnake', 'snake', 'snakeHeadSin', 'snakeFillGrow', 'snakeInOut', 'snakeSlowFast', 'snakeTailShrinkGrow', 'snakeHeadSteps', 'snakeTurn'])
 
 const POSITION_KEYS = new Set(['position_brightness', 'position_hue', 'position_saturation'])
 const SNAKE_KEYS = new Set(['snake_brightness', 'snake_hue', 'snake_saturation'])
@@ -261,7 +262,7 @@ function emitSingleEffect(effectKey: string, params: Record<string, number | boo
     }
     if (effectKey === 'snakeInOut') return [args ? `snakeInOut(${args})` : 'snakeInOut()']
     if (effectKey === 'snakeTailShrinkGrow') return ['snakeTailShrinkGrow()']
-    if (effectKey === 'snakeHeadMove' || effectKey === 'staticSnake' || effectKey === 'snake' || effectKey === 'snakeHeadSin' || effectKey === 'snakeSlowFast' || effectKey === 'snakeHeadSteps') {
+    if (effectKey === 'snakeHeadMove' || effectKey === 'staticSnake' || effectKey === 'snake' || effectKey === 'snakeHeadSin' || effectKey === 'snakeSlowFast' || effectKey === 'snakeHeadSteps' || effectKey === 'snakeTurn') {
       return [args ? `${effectKey}(${args})` : `${effectKey}()`]
     }
   }
@@ -439,9 +440,11 @@ export function generateSequenceTs(song: Song, timeframes: Timeframe[], importPr
     bodyBlocks = '    // Empty: add beats() blocks and content here.'
   } else {
     const colorBlocks = enabledTimeframes.map(tf => emitTimeframeBody(tf, 'color')).filter(Boolean) as string[]
-    const modifierBlocks = enabledTimeframes.map(tf => emitTimeframeBody(tf, 'modifiers')).filter(Boolean) as string[]
+    const modifierBlocks = enabledTimeframes.filter(tf => !tf.afterMotion).map(tf => emitTimeframeBody(tf, 'modifiers')).filter(Boolean) as string[]
     const motionBlocks = enabledTimeframes.map(tf => emitTimeframeBody(tf, 'motion')).filter(Boolean) as string[]
-    bodyBlocks = [...colorBlocks, ...modifierBlocks, ...motionBlocks].join('\n\n')
+    // "Apply after snakes" timeframes: their modifiers run after the motion layer, so Increase effects can re-light masked pixels
+    const afterMotionBlocks = enabledTimeframes.filter(tf => tf.afterMotion).map(tf => emitTimeframeBody(tf, 'modifiers')).filter(Boolean) as string[]
+    bodyBlocks = [...colorBlocks, ...modifierBlocks, ...motionBlocks, ...afterMotionBlocks].join('\n\n')
   }
 
   const escapedName = safeName.replace(/"/g, '\\"')
@@ -513,6 +516,7 @@ import {
   snakeSlowFast,
   snakeTailShrinkGrow,
   snakeHeadSteps,
+  snakeTurn,
   staticSnake,
 } from "${importPrefix}/effects/motion";
 import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "${importPrefix}/effects/hue";
@@ -549,9 +553,10 @@ export function generateSequenceRunnerTs(song: Song, timeframes: Timeframe[]): s
     bodyBlocks = '    // Empty: add beats() blocks and content here.'
   } else {
     const colorBlocks = enabledTimeframes.map(tf => emitTimeframeBody(tf, 'color')).filter(Boolean) as string[]
-    const modifierBlocks = enabledTimeframes.map(tf => emitTimeframeBody(tf, 'modifiers')).filter(Boolean) as string[]
+    const modifierBlocks = enabledTimeframes.filter(tf => !tf.afterMotion).map(tf => emitTimeframeBody(tf, 'modifiers')).filter(Boolean) as string[]
     const motionBlocks = enabledTimeframes.map(tf => emitTimeframeBody(tf, 'motion')).filter(Boolean) as string[]
-    bodyBlocks = [...colorBlocks, ...modifierBlocks, ...motionBlocks].join('\n\n')
+    const afterMotionBlocks = enabledTimeframes.filter(tf => tf.afterMotion).map(tf => emitTimeframeBody(tf, 'modifiers')).filter(Boolean) as string[]
+    bodyBlocks = [...colorBlocks, ...modifierBlocks, ...motionBlocks, ...afterMotionBlocks].join('\n\n')
   }
   const escapedName = safeName.replace(/"/g, '\\"')
   const isTrigger = animationType === 'trigger'
@@ -608,6 +613,7 @@ import {
   snakeSlowFast,
   snakeTailShrinkGrow,
   snakeHeadSteps,
+  snakeTurn,
   staticSnake,
 } from "./effects/motion";
 import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "./effects/hue";

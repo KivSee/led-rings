@@ -39,6 +39,7 @@ const MOTION_EFFECT_OPTIONS: { value: string; label: string }[] = [
   { value: 'snakeSlowFast', label: 'Snake Slow Fast' },
   { value: 'snakeTailShrinkGrow', label: 'Snake Tail Shrink Grow' },
   { value: 'snakeHeadSteps', label: 'Snake Head Steps' },
+  { value: 'snakeTurn', label: 'Snake Turn' },
 ]
 
 const POSITION_EFFECT_OPTIONS: { value: string; label: string }[] = [
@@ -84,6 +85,7 @@ const EFFECT_DESCRIPTIONS: Record<string, string> = {
   snakeSlowFast: 'Head sweeps with uneven speed — sine and ramp combined (slow, fast, slow)',
   snakeTailShrinkGrow: 'Head oscillates while the tail grows on the way in and shrinks on the way back',
   snakeHeadSteps: 'Head jumps through discrete positions instead of moving smoothly',
+  snakeTurn: 'Direction change: the head slows to a stop and comes back at the same speed, ending where it started. Put between a Snake and a reversed Snake with matching speed (no cycles on this timeframe)',
   // Position (varies per pixel by its Mapping relPos)
   position_brightness: 'Brightness varies by pixel position — the function is evaluated at each pixel’s relPos from the Mapping',
   position_hue: 'Hue offset varies by pixel position — a static gradient along the Mapping',
@@ -225,11 +227,12 @@ type EffectParamDef = {
 }
 
 const MOVEMENT_EXTRA_HINTS: Record<MovementExtraKey, string> = {
-  retire: 'Rings also turn off in activation order — spread: staggered end times (diamond shape); random: ring goes dark after its turn',
+  retire: 'Rings also turn off in activation order — spread: staggered end times (diamond shape); sweep/random: one pass, ring goes dark after its turn',
   bounce: 'Sweep ping-pongs back and forth instead of restarting from the first ring',
   accumulate: 'Rings stay on after their turn instead of turning off',
-  untilTurn: 'Reverse of accumulate: each ring plays from the start until its turn, then stops. With the same rings and timing as an Accumulate timeframe, it hands each ring over exactly when the accumulate turns it on',
+  untilTurn: 'Reverse of accumulate/spread: each ring plays from the start until its turn, then stops. With the same rings and timing as an Accumulate timeframe, it hands each ring over exactly when the accumulate turns it on',
   darkBefore: 'Rings stay fully off until the spread reaches them, hiding every other layer on them until then',
+  darkAfter: 'With Retire: rings stay fully off after they retire until the timeframe ends, hiding every other layer on them',
 }
 
 const EFFECT_PARAM_SCHEMAS: Record<string, EffectParamDef[]> = {
@@ -282,6 +285,12 @@ const EFFECT_PARAM_SCHEMAS: Record<string, EffectParamDef[]> = {
   snakeHeadSteps: [
     { key: 'steps', label: 'Steps', type: 'number', default: 4, min: 1, max: 32, step: 1, hint: 'Number of discrete positions the head jumps through' },
     { key: 'tailLength', label: 'Tail length', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01, hint: 'Length of the lit tail behind the head (fraction of the segment)' },
+  ],
+  snakeTurn: [
+    { key: 'tailLength', label: 'Tail length', type: 'number', default: 0.5, min: 0, max: 2, step: 0.01, hint: 'Length of the lit tail behind the head (fraction of the segment)' },
+    { key: 'speed', label: 'Speed', type: 'number', default: 1, min: 0, max: 8, step: 0.05, hint: 'Rotations per timeframe at the start and end; match the neighbouring snakes (timeframe beats ÷ their cycle beats)' },
+    { key: 'cyclic', label: 'Cyclic', type: 'boolean', default: true, hint: 'Wrap around the segment ends instead of stopping' },
+    { key: 'reverse', label: 'Reverse', type: 'boolean', default: false, hint: 'Turn from backward to forward instead' },
   ],
   // Position effects: params are FloatFunctions (by position in segment)
   position_brightness: [
@@ -748,6 +757,15 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, songLengthBeats }: Timef
               onChange={(e) => onUpdate({ hasExplicitColor: e.target.checked ? false : undefined })}
             />
             <span>No color (modifiers only)</span>
+          </label>
+          <label className="timeframe-panel-checkbox-label" title="Apply this timeframe's modifiers after all snakes instead of before. Brightness Increase effects can then light up pixels that a snake masked off (e.g. ripples or sparkles over a dark background).">
+            <input
+              type="checkbox"
+              className="timeframe-panel-checkbox"
+              checked={timeframe.afterMotion === true}
+              onChange={(e) => onUpdate({ afterMotion: e.target.checked ? true : undefined })}
+            />
+            <span>Apply after snakes</span>
           </label>
           <div className="timeframe-panel-phase-row">
             <label className="timeframe-panel-phase-label" title="Spreads the base hue across the selected rings: ring at position i of N gets hue offset i/N × phase. Affects only the base color — to spread an effect per ring, use that effect's own Phase field.">Color Phase</label>
@@ -1357,9 +1375,12 @@ const TimeframePanel = ({ timeframe, onUpdate, onClose, songLengthBeats }: Timef
                           if (checked && exclusive.includes(ep.key)) {
                             for (const k of exclusive) if (k !== ep.key) updates[k] = undefined
                           }
+                          // Sweep: bounce (ping-pong forever) and retire (one pass) are mutually exclusive
+                          if (checked && ep.key === 'bounce') updates.retire = undefined
+                          if (checked && ep.key === 'retire' && mv.type === 'sweep') updates.bounce = undefined
                           const updated = { ...mv, ...updates }
                           // Dark before start / until turn don't change the step timing; keep the user's beats/ring.
-                          if (ep.key === 'darkBefore' || ep.key === 'untilTurn') {
+                          if (ep.key === 'darkBefore' || ep.key === 'darkAfter' || ep.key === 'untilTurn') {
                             onUpdate({ movement: updated })
                             return
                           }
