@@ -1,6 +1,6 @@
 {
   "song": {
-    "name": "inequal",
+    "name": "inequal_sapir",
     "lengthSeconds": 312,
     "bpm": 150,
     "startOffsetMs": 0,
@@ -722,11 +722,82 @@
       ]
     },
     {
-      "id": "1792424643855",
+      "id": "sapir-1",
       "startTime": 228,
       "endTime": 324,
-      "label": "March",
-      "color": "#0aa0c0",
+      "label": "Spin Snake (top)",
+      "color": "#00fff0",
+      "hasExplicitColor": true,
+      "rings": [
+        1,
+        2,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 1.5
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-1-eff-0",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.6,
+            "cyclic": true,
+            "reverse": false
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "sapir-2",
+      "startTime": 228,
+      "endTime": 324,
+      "label": "Spin Snake (bottom)",
+      "color": "#ff00d6",
+      "hasExplicitColor": true,
+      "rings": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 1.5
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-2-eff-0",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.6,
+            "cyclic": true,
+            "reverse": true
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "sapir-3",
+      "startTime": 270,
+      "endTime": 276,
+      "label": "Spin Flash",
+      "color": "#808080",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
@@ -741,23 +812,16 @@
         11,
         12
       ],
-      "mapping": "centric",
-      "cycles": [
-        {
-          "type": "cycle",
-          "beatsInCycle": 2
-        }
-      ],
+      "mapping": "all",
       "effects": [
         {
-          "id": "eff-1792424728029-fx62s3h33vl",
+          "id": "sapir-3-eff-0",
           "effectKey": "snake_brightness",
           "params": {
             "head": {
-              "steps": {
-                "num_steps": 4,
-                "diff_per_step": 0.25,
-                "first_step_value": 0
+              "linear": {
+                "start": 0,
+                "end": 1
               }
             },
             "tail_length": {
@@ -765,10 +829,826 @@
                 "value": 0.5
               }
             },
-            "cyclic": false,
+            "cyclic": true,
+            "mult_factor_increase": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "sapir-3-eff-1",
+          "effectKey": "snake_saturation",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.5
+              }
+            },
+            "cyclic": true,
             "mult_factor_decrease": {
               "linear": {
                 "start": 1,
+                "end": 0.2
+              }
+            }
+          }
+        },
+        {
+          "id": "sapir-3-eff-2",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sapir-4",
+      "startTime": 315,
+      "endTime": 321.75,
+      "label": "Spin Flash",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "sapir-4-eff-0",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.5
+              }
+            },
+            "cyclic": true,
+            "mult_factor_increase": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "sapir-4-eff-1",
+          "effectKey": "snake_saturation",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.5
+              }
+            },
+            "cyclic": true,
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 1,
+                "end": 0.2
+              }
+            }
+          }
+        },
+        {
+          "id": "sapir-4-eff-2",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sapir-5",
+      "startTime": 282,
+      "endTime": 324,
+      "label": "B1 Blue Saw (even)",
+      "color": "#0d34ff",
+      "hasExplicitColor": true,
+      "rings": [
+        2,
+        4,
+        6,
+        8,
+        10,
+        12
+      ],
+      "mapping": "b1",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 1.5
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-5-eff-0",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "half": {
+                "f1": {
+                  "linear": {
+                    "start": 1.0,
+                    "end": 0.7
+                  }
+                },
+                "f2": {
+                  "linear": {
+                    "start": 0.7,
+                    "end": 0.35
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sapir-6",
+      "startTime": 354,
+      "endTime": 378,
+      "label": "Steps Color B1",
+      "color": "#0029ff",
+      "hasExplicitColor": true,
+      "rings": [
+        1
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "sapir-7",
+      "startTime": 354,
+      "endTime": 378,
+      "label": "Steps Color B1",
+      "color": "#ff00d6",
+      "hasExplicitColor": true,
+      "rings": [
+        2,
+        10,
+        11
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "sapir-8",
+      "startTime": 354,
+      "endTime": 378,
+      "label": "Steps Color B1",
+      "color": "#00fff0",
+      "hasExplicitColor": true,
+      "rings": [
+        4,
+        7,
+        8
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "sapir-9",
+      "startTime": 354,
+      "endTime": 378,
+      "label": "Steps Color B1",
+      "color": "#00b2ff",
+      "hasExplicitColor": true,
+      "rings": [
+        5
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "sapir-10",
+      "startTime": 354,
+      "endTime": 378,
+      "label": "Steps Color B2",
+      "color": "#004e49",
+      "hasExplicitColor": true,
+      "rings": [
+        1,
+        2,
+        10
+      ],
+      "mapping": "b2"
+    },
+    {
+      "id": "sapir-11",
+      "startTime": 354,
+      "endTime": 378,
+      "label": "Steps Color B2",
+      "color": "#4e0042",
+      "hasExplicitColor": true,
+      "rings": [
+        4,
+        5,
+        7,
+        8
+      ],
+      "mapping": "b2"
+    },
+    {
+      "id": "sapir-12",
+      "startTime": 354,
+      "endTime": 378,
+      "label": "Steps Color B2",
+      "color": "#00374e",
+      "hasExplicitColor": true,
+      "rings": [
+        11
+      ],
+      "mapping": "b2"
+    },
+    {
+      "id": "sapir-13",
+      "startTime": 354,
+      "endTime": 378,
+      "label": "Steps Pulse",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        4,
+        5,
+        7,
+        8,
+        10,
+        11
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 1.5
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-13-eff-0",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.4707
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "sapir-14",
+      "startTime": 354,
+      "endTime": 378,
+      "label": "Steps Arc Snake",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        4,
+        5,
+        7,
+        8,
+        10,
+        11
+      ],
+      "mapping": "arc",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 1.5
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-14-eff-0",
+          "effectKey": "snakeHeadSteps",
+          "params": {
+            "steps": 4,
+            "tailLength": 0.5
+          },
+          "phase": 7
+        }
+      ]
+    },
+    {
+      "id": "sapir-15",
+      "startTime": 354,
+      "endTime": 378,
+      "label": "Steps Updown Snake",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        4,
+        5,
+        7,
+        8,
+        10,
+        11
+      ],
+      "mapping": "updown",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-15-eff-0",
+          "effectKey": "snakeHeadSin",
+          "params": {
+            "tailLength": 2,
+            "cyclic": false
+          },
+          "phase": 0.3333333333333333
+        }
+      ]
+    },
+    {
+      "id": "sapir-16",
+      "startTime": 378,
+      "endTime": 420,
+      "label": "Steps Color B1",
+      "color": "#ff00d6",
+      "hasExplicitColor": true,
+      "rings": [
+        1,
+        2,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "sapir-17",
+      "startTime": 378,
+      "endTime": 420,
+      "label": "Steps Color B1",
+      "color": "#0029ff",
+      "hasExplicitColor": true,
+      "rings": [
+        3
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "sapir-18",
+      "startTime": 378,
+      "endTime": 420,
+      "label": "Steps Color B1",
+      "color": "#00b2ff",
+      "hasExplicitColor": true,
+      "rings": [
+        4,
+        5
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "sapir-19",
+      "startTime": 378,
+      "endTime": 420,
+      "label": "Steps Color B1",
+      "color": "#00fff0",
+      "hasExplicitColor": true,
+      "rings": [
+        6,
+        7,
+        8,
+        9
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "sapir-20",
+      "startTime": 378,
+      "endTime": 420,
+      "label": "Steps Color B2",
+      "color": "#004e49",
+      "hasExplicitColor": true,
+      "rings": [
+        1,
+        2,
+        3,
+        12
+      ],
+      "mapping": "b2"
+    },
+    {
+      "id": "sapir-21",
+      "startTime": 378,
+      "endTime": 420,
+      "label": "Steps Color B2",
+      "color": "#4e0042",
+      "hasExplicitColor": true,
+      "rings": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "mapping": "b2"
+    },
+    {
+      "id": "sapir-22",
+      "startTime": 378,
+      "endTime": 420,
+      "label": "Steps Color B2",
+      "color": "#000d4e",
+      "hasExplicitColor": true,
+      "rings": [
+        10
+      ],
+      "mapping": "b2"
+    },
+    {
+      "id": "sapir-23",
+      "startTime": 378,
+      "endTime": 420,
+      "label": "Steps Color B2",
+      "color": "#00374e",
+      "hasExplicitColor": true,
+      "rings": [
+        11
+      ],
+      "mapping": "b2"
+    },
+    {
+      "id": "sapir-24",
+      "startTime": 378,
+      "endTime": 420,
+      "label": "Steps Pulse",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 1.5
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-24-eff-0",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.4707
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "sapir-25",
+      "startTime": 378,
+      "endTime": 420,
+      "label": "Steps Arc Snake",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 1.5
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-25-eff-0",
+          "effectKey": "snakeHeadSteps",
+          "params": {
+            "steps": 4,
+            "tailLength": 0.5
+          },
+          "phase": 11
+        }
+      ]
+    },
+    {
+      "id": "sapir-26",
+      "startTime": 378,
+      "endTime": 420,
+      "label": "Steps Updown Snake",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "updown",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-26-eff-0",
+          "effectKey": "snakeHeadSin",
+          "params": {
+            "tailLength": 2,
+            "cyclic": false
+          },
+          "phase": 0.5
+        }
+      ]
+    },
+    {
+      "id": "sapir-27",
+      "startTime": 420,
+      "endTime": 492,
+      "label": "Chase Updown Split",
+      "color": "#ff00d6",
+      "hasExplicitColor": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "updown",
+      "effects": [
+        {
+          "id": "sapir-27-eff-0",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "half": {
+                "f1": {
+                  "const_value": {
+                    "value": 0
+                  }
+                },
+                "f2": {
+                  "const_value": {
+                    "value": 0.63
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sapir-28",
+      "startTime": 420,
+      "endTime": 492,
+      "label": "Chase Ind Steps",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "ind",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 18
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-28-eff-0",
+          "effectKey": "snakeHeadSteps",
+          "params": {
+            "steps": 12,
+            "tailLength": 0.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "sapir-29",
+      "startTime": 420,
+      "endTime": 492,
+      "label": "Chase B1 Snake",
+      "color": "#ffe500",
+      "hasExplicitColor": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b1",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-29-eff-0",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.15,
+            "cyclic": true,
+            "reverse": false
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "sapir-30",
+      "startTime": 420,
+      "endTime": 492,
+      "label": "Chase Glint",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 4.5
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-30-eff-0",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.15
+              }
+            },
+            "cyclic": true,
+            "mult_factor_increase": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sapir-31",
+      "startTime": 420,
+      "endTime": 492,
+      "label": "Chase Beat Flash (odd)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        3,
+        5,
+        7,
+        9,
+        11
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-31-eff-0",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_increase": {
+              "linear": {
+                "start": 0.9,
                 "end": 0
               }
             }
@@ -777,11 +1657,49 @@
       ]
     },
     {
-      "id": "1792425000321",
-      "startTime": 228,
-      "endTime": 274,
-      "label": "hue shift",
-      "color": "#787368",
+      "id": "sapir-32",
+      "startTime": 423,
+      "endTime": 492,
+      "label": "Chase Beat Flash (even)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        2,
+        4,
+        6,
+        8,
+        10,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-32-eff-0",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_increase": {
+              "linear": {
+                "start": 0.9,
+                "end": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sapir-33",
+      "startTime": 492,
+      "endTime": 588,
+      "label": "Chase Updown Split",
+      "color": "#00fff0",
+      "hasExplicitColor": true,
       "rings": [
         1,
         2,
@@ -796,40 +1714,614 @@
         11,
         12
       ],
-      "mapping": "centric",
-      "cycles": [
-        {
-          "type": "cycle",
-          "beatsInCycle": 4
-        }
-      ],
+      "mapping": "updown",
       "effects": [
         {
-          "id": "eff-1792425057098-7wcwg36pyer",
-          "effectKey": "timed_hue",
+          "id": "sapir-33-eff-0",
+          "effectKey": "position_hue",
           "params": {
             "offset_factor": {
-              "steps": {
-                "num_steps": 4,
-                "diff_per_step": 0.25,
-                "first_step_value": 0
+              "half": {
+                "f1": {
+                  "const_value": {
+                    "value": 0
+                  }
+                },
+                "f2": {
+                  "const_value": {
+                    "value": 0.15
+                  }
+                }
               }
             }
           }
         }
       ]
+    },
+    {
+      "id": "sapir-34",
+      "startTime": 492,
+      "endTime": 588,
+      "label": "Chase Ind Steps",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "ind",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 18
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-34-eff-0",
+          "effectKey": "snakeHeadSteps",
+          "params": {
+            "steps": 12,
+            "tailLength": 0.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "sapir-35",
+      "startTime": 492,
+      "endTime": 588,
+      "label": "Chase B1 Snake",
+      "color": "#ff007a",
+      "hasExplicitColor": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b1",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-35-eff-0",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.15,
+            "cyclic": true,
+            "reverse": true
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "sapir-36",
+      "startTime": 492,
+      "endTime": 588,
+      "label": "Chase Glint",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 4.5
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-36-eff-0",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 1,
+                "end": 0
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.15
+              }
+            },
+            "cyclic": true,
+            "mult_factor_increase": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sapir-37",
+      "startTime": 492,
+      "endTime": 588,
+      "label": "Chase Beat Flash (odd)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        3,
+        5,
+        7,
+        9,
+        11
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-37-eff-0",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_increase": {
+              "linear": {
+                "start": 0.9,
+                "end": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sapir-38",
+      "startTime": 495,
+      "endTime": 588,
+      "label": "Chase Beat Flash (even)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        2,
+        4,
+        6,
+        8,
+        10,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-38-eff-0",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_increase": {
+              "linear": {
+                "start": 0.9,
+                "end": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sapir-39",
+      "startTime": 468,
+      "endTime": 492,
+      "label": "Chase Saturation Steps",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "sapir-39-eff-0",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "steps": {
+                "first_step_value": 0.3,
+                "diff_per_step": 0.07777777777777778,
+                "num_steps": 4
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sapir-40",
+      "startTime": 492,
+      "endTime": 528,
+      "label": "Chase Saturation Steps",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "sapir-40-eff-0",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "steps": {
+                "first_step_value": 0.6111111111111112,
+                "diff_per_step": 0.07777777777777777,
+                "num_steps": 6
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sapir-41",
+      "startTime": 528,
+      "endTime": 588,
+      "label": "Chase Saturation Steps",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "sapir-41-eff-0",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "steps": {
+                "first_step_value": 1.0,
+                "diff_per_step": -0.07777777777777778,
+                "num_steps": 10
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sapir-42",
+      "startTime": 588,
+      "endTime": 756,
+      "label": "Finale Arc",
+      "color": "#ff00d6",
+      "hasExplicitColor": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-42-eff-0",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "half": {
+                "f1": {
+                  "half": {
+                    "f1": {
+                      "half": {
+                        "f1": {
+                          "const_value": {
+                            "value": 0.0
+                          }
+                        },
+                        "f2": {
+                          "const_value": {
+                            "value": 0.63
+                          }
+                        }
+                      }
+                    },
+                    "f2": {
+                      "half": {
+                        "f1": {
+                          "const_value": {
+                            "value": 0.63
+                          }
+                        },
+                        "f2": {
+                          "const_value": {
+                            "value": 0.0
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "f2": {
+                  "half": {
+                    "f1": {
+                      "const_value": {
+                        "value": 0.63
+                      }
+                    },
+                    "f2": {
+                      "const_value": {
+                        "value": 0.0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "sapir-42-eff-1",
+          "effectKey": "snakeInOut",
+          "params": {},
+          "phase": 0.5
+        }
+      ]
+    },
+    {
+      "id": "sapir-43",
+      "startTime": 756,
+      "endTime": 780,
+      "label": "Outro Arc",
+      "color": "#0029ff",
+      "hasExplicitColor": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "sapir-43-eff-0",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "half": {
+                "f1": {
+                  "half": {
+                    "f1": {
+                      "half": {
+                        "f1": {
+                          "const_value": {
+                            "value": 0.0
+                          }
+                        },
+                        "f2": {
+                          "const_value": {
+                            "value": 0.85
+                          }
+                        }
+                      }
+                    },
+                    "f2": {
+                      "half": {
+                        "f1": {
+                          "const_value": {
+                            "value": 0.85
+                          }
+                        },
+                        "f2": {
+                          "const_value": {
+                            "value": 0.0
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "f2": {
+                  "half": {
+                    "f1": {
+                      "const_value": {
+                        "value": 0.85
+                      }
+                    },
+                    "f2": {
+                      "const_value": {
+                        "value": 0.0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "sapir-43-eff-1",
+          "effectKey": "snakeInOut",
+          "params": {},
+          "phase": 0.5
+        }
+      ]
+    },
+    {
+      "id": "sapir-44",
+      "startTime": 588,
+      "endTime": 756,
+      "label": "Finale Hue Sweep",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "sapir-44-eff-0",
+          "effectKey": "hueShiftStartToEnd",
+          "params": {
+            "start": 0,
+            "end": -0.8
+          }
+        },
+        {
+          "id": "sapir-44-eff-1",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "steps": {
+                "first_step_value": 0.25,
+                "diff_per_step": 0.027777777777777776,
+                "num_steps": 28
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sapir-45",
+      "startTime": 762,
+      "endTime": 780,
+      "label": "Outro Fade",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "sapir-45-eff-0",
+          "effectKey": "fadeOut",
+          "params": {}
+        }
+      ]
     }
-  ],
-  "windowSizes": {
-    "playbackPanelWidth": 720,
-    "detailsPanelWidth": 424,
-    "spectrogramHeight": 338,
-    "headerHeight": 56
-  },
-  "spectrogramOpen": true,
-  "view": {
-    "startBeat": 0,
-    "beatsPerScreen": 128
-  },
-  "theme": "dark"
+  ]
 }
