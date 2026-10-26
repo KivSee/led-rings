@@ -1,10 +1,10 @@
 {
   "song": {
-    "name": "inequal_sapir",
+    "name": "inequal",
     "lengthSeconds": 312,
     "bpm": 150,
-    "startOffsetMs": 0,
-    "runStartTimeSeconds": 0,
+    "startOffsetMs": 3000,
+    "runStartTimeSeconds": 83.87104631350681,
     "animationType": "song",
     "audioFilePath": "inequal.wav",
     "lilumRings": [
@@ -41,8 +41,8 @@
       "phase": 0,
       "movement": {
         "type": "spread",
-        "direction": "edges-in",
-        "beatsPerRing": 12,
+        "direction": "bottom-top",
+        "beatsPerRing": 6,
         "darkBefore": true
       },
       "cycles": [
@@ -66,7 +66,7 @@
     {
       "id": "start-fade-first",
       "startTime": 0,
-      "endTime": 72,
+      "endTime": 36,
       "label": "Start Fade In (first fade)",
       "color": "#ffffff",
       "hasExplicitColor": false,
@@ -87,13 +87,13 @@
       "mapping": "all",
       "movement": {
         "type": "sweep",
-        "direction": "edges-in",
-        "beatsPerRing": 12
+        "direction": "bottom-top",
+        "beatsPerRing": 6
       },
       "cycles": [
         {
           "type": "cycle",
-          "beatsInCycle": 12
+          "beatsInCycle": 6
         }
       ],
       "effects": [
@@ -109,7 +109,7 @@
     },
     {
       "id": "start-fade-rest",
-      "startTime": 12,
+      "startTime": 6,
       "endTime": 72,
       "label": "Start Fade In (repeats)",
       "color": "#ffffff",
@@ -131,13 +131,13 @@
       "mapping": "all",
       "movement": {
         "type": "spread",
-        "direction": "edges-in",
-        "beatsPerRing": 12
+        "direction": "bottom-top",
+        "beatsPerRing": 6
       },
       "cycles": [
         {
           "type": "cycle",
-          "beatsInCycle": 12
+          "beatsInCycle": 6
         }
       ],
       "effects": [
@@ -148,6 +148,42 @@
             "high": 1,
             "low": 0.4
           }
+        }
+      ]
+    },
+    {
+      "id": "start-fade-out",
+      "startTime": 36,
+      "endTime": 72,
+      "label": "Start Fade Out",
+      "color": "#ffffff",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "sweep",
+        "direction": "top-bottom",
+        "beatsPerRing": 6,
+        "retire": true
+      },
+      "effects": [
+        {
+          "id": "start-fade-out-fx",
+          "effectKey": "fadeOut",
+          "params": {}
         }
       ]
     },
@@ -392,7 +428,7 @@
     {
       "id": "1784372446249",
       "startTime": 110,
-      "endTime": 144,
+      "endTime": 140,
       "label": "Slow Pulse",
       "color": "#dd224d",
       "hasExplicitColor": false,
@@ -429,52 +465,257 @@
       ]
     },
     {
-      "id": "dup-1784405534748-fl0a-r12",
-      "startTime": 72,
-      "endTime": 228,
-      "label": "B1 Color Right (12)",
-      "color": "#d51f1f",
-      "rings": [
-        12
-      ],
-      "mapping": "b1",
-      "effects": [
-        {
-          "id": "eff-1784367323592-l0fo3aytvh-87zn-r12",
-          "effectKey": "timed_hue",
-          "params": {
-            "offset_factor": {
-              "const_value": {
-                "value": 0
-              }
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": "dup-1784405534748-fl0a",
-      "startTime": 72,
-      "endTime": 228,
-      "label": "B1 Color Right (1-5)",
-      "color": "#d5d51f",
+      "id": "p2b-bridge",
+      "startTime": 140,
+      "endTime": 147,
+      "label": "Slow Pulse (bridge)",
+      "color": "#dd224d",
+      "hasExplicitColor": false,
       "rings": [
         1,
         2,
         3,
         4,
-        5
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
       ],
-      "mapping": "b1",
-      "phase": 0.8333333333333334,
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 7
+        }
+      ],
       "effects": [
         {
-          "id": "eff-1784367323592-l0fo3aytvh-87zn",
-          "effectKey": "timed_hue",
+          "id": "p2b-bridge-fx0",
+          "effectKey": "pulse",
           "params": {
-            "offset_factor": {
-              "const_value": {
-                "value": 0
+            "low": 0.25,
+            "staticPhase": 0.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "sapir-b1-a-0",
+      "startTime": 72,
+      "endTime": 145,
+      "label": "B1 Cool I (1,7)",
+      "color": "#e0f6ff",
+      "rings": [
+        1,
+        7
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "sapir-b1-a-1",
+      "startTime": 72,
+      "endTime": 145,
+      "label": "B1 Cool I (2,6,8,12)",
+      "color": "#4dd4ff",
+      "rings": [
+        2,
+        6,
+        8,
+        12
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "sapir-b1-a-2",
+      "startTime": 72,
+      "endTime": 145,
+      "label": "B1 Cool I (3,5,9,11)",
+      "color": "#186ff2",
+      "rings": [
+        3,
+        5,
+        9,
+        11
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "sapir-b1-a-3",
+      "startTime": 72,
+      "endTime": 145,
+      "label": "B1 Cool I (4,10)",
+      "color": "#4922e6",
+      "rings": [
+        4,
+        10
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "sapir-b1-b-0",
+      "startTime": 145,
+      "endTime": 224,
+      "label": "B1 Cool II (1,7)",
+      "color": "#f0f8ff",
+      "rings": [
+        1,
+        7
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "sapir-b1-b-1",
+      "startTime": 145,
+      "endTime": 224,
+      "label": "B1 Cool II (2,6,8,12)",
+      "color": "#26ffff",
+      "rings": [
+        2,
+        6,
+        8,
+        12
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "sapir-b1-b-2",
+      "startTime": 145,
+      "endTime": 224,
+      "label": "B1 Cool II (3,5,9,11)",
+      "color": "#0c3ff2",
+      "rings": [
+        3,
+        5,
+        9,
+        11
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "sapir-b1-b-3",
+      "startTime": 145,
+      "endTime": 224,
+      "label": "B1 Cool II (4,10)",
+      "color": "#f200e9",
+      "rings": [
+        4,
+        10
+      ],
+      "mapping": "b1"
+    },
+    {
+      "id": "p2b-b2",
+      "startTime": 144,
+      "endTime": 224,
+      "label": "B2 Blue (cont)",
+      "color": "#00aaff",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b2"
+    },
+    {
+      "id": "p2b-snake",
+      "startTime": 144,
+      "endTime": 224,
+      "label": "Second Part Snake (cont)",
+      "color": "#d63fe9",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 4
+        }
+      ],
+      "effects": [
+        {
+          "id": "p2b-snake-fx0",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true,
+            "reverse": false
+          }
+        },
+        {
+          "id": "p2b-snake-fx1",
+          "effectKey": "brightness",
+          "params": {
+            "value": 0.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "p2b-dim0",
+      "startTime": 143,
+      "endTime": 147,
+      "label": "Rebuild Dip",
+      "color": "#d63fe9",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "p2b-dim0-fx",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "half": {
+                "f1": {
+                  "linear": {
+                    "start": 1,
+                    "end": 0.3
+                  }
+                },
+                "f2": {
+                  "const_value": {
+                    "value": 0.3
+                  }
+                }
               }
             }
           }
@@ -482,22 +723,938 @@
       ]
     },
     {
-      "id": "dup-1784405542914-627i",
-      "startTime": 72,
-      "endTime": 228,
-      "label": "B1 Color Left",
-      "color": "#d51f1f",
+      "id": "p2b-dim",
+      "startTime": 147,
+      "endTime": 177,
+      "label": "Rebuild Hold",
+      "color": "#d63fe9",
+      "hasExplicitColor": false,
       "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
         6,
         7,
         8,
         9,
         10,
-        11
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "spread",
+        "direction": "center-out",
+        "beatsPerRing": 6,
+        "untilTurn": true
+      },
+      "effects": [
+        {
+          "id": "p2b-dim-fx",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0.3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "p2b-ramp",
+      "startTime": 147,
+      "endTime": 192,
+      "label": "Rebuild Ramp",
+      "color": "#d63fe9",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "spread",
+        "direction": "center-out",
+        "beatsPerRing": 6
+      },
+      "effects": [
+        {
+          "id": "p2b-ramp-fx",
+          "effectKey": "fade",
+          "params": {
+            "start": 0.4,
+            "end": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "p2b-slowpulse",
+      "startTime": 147,
+      "endTime": 195,
+      "label": "Slow Pulse (cont)",
+      "color": "#dd224d",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "p2b-slowpulse-fx",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.25,
+            "staticPhase": 0.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "p2b-flash",
+      "startTime": 147,
+      "endTime": 195,
+      "label": "Step Flash",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "movement": {
+        "type": "spread",
+        "direction": "center-out",
+        "beatsPerRing": 6
+      },
+      "cycles": [
+        {
+          "type": "cycleBeats",
+          "beatsInCycle": 6,
+          "startBeat": 0,
+          "endBeat": 0.5
+        }
+      ],
+      "effects": [
+        {
+          "id": "p2b-flash-fx",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_increase": {
+              "linear": {
+                "start": 0.35,
+                "end": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "p2b-satsteps-0",
+      "startTime": 147,
+      "endTime": 195,
+      "label": "Sat Steps Down (5+6)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        5,
+        6
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "p2b-satsteps-0-fx",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "steps": {
+                "first_step_value": 0.93,
+                "diff_per_step": -0.09,
+                "num_steps": 8
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "p2b-satsteps-1",
+      "startTime": 153,
+      "endTime": 195,
+      "label": "Sat Steps Down (4+7)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        4,
+        7
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "p2b-satsteps-1-fx",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "steps": {
+                "first_step_value": 0.84,
+                "diff_per_step": -0.09,
+                "num_steps": 7
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "p2b-satsteps-2",
+      "startTime": 159,
+      "endTime": 195,
+      "label": "Sat Steps Down (3+8)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        3,
+        8
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "p2b-satsteps-2-fx",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "steps": {
+                "first_step_value": 0.75,
+                "diff_per_step": -0.09,
+                "num_steps": 6
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "p2b-satsteps-3",
+      "startTime": 165,
+      "endTime": 195,
+      "label": "Sat Steps Down (2+9)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        2,
+        9
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "p2b-satsteps-3-fx",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "steps": {
+                "first_step_value": 0.66,
+                "diff_per_step": -0.09,
+                "num_steps": 5
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "p2b-satsteps-4",
+      "startTime": 171,
+      "endTime": 195,
+      "label": "Sat Steps Down (1+10)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        10
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "p2b-satsteps-4-fx",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "steps": {
+                "first_step_value": 0.57,
+                "diff_per_step": -0.09,
+                "num_steps": 4
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "p2b-satsteps-5",
+      "startTime": 177,
+      "endTime": 195,
+      "label": "Sat Steps Down (11+12)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "p2b-satsteps-5-fx",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "steps": {
+                "first_step_value": 0.48,
+                "diff_per_step": -0.09,
+                "num_steps": 3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "p2b-sathold",
+      "startTime": 195,
+      "endTime": 224,
+      "label": "Sat Hold",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "p2b-sathold-fx",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0.3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "p2b-pulse3",
+      "startTime": 195,
+      "endTime": 216,
+      "label": "Slow Pulse (3 beat)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 3
+        }
+      ],
+      "effects": [
+        {
+          "id": "p2b-pulse3-fx",
+          "effectKey": "pulse",
+          "params": {
+            "low": 0.25,
+            "staticPhase": 0.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "p2b-stepfade",
+      "startTime": 216,
+      "endTime": 224,
+      "label": "Stepped Fade Out",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "p2b-stepfade-fx",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "steps": {
+                "first_step_value": 0.8571,
+                "diff_per_step": -0.1429,
+                "num_steps": 6
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "drift-color",
+      "startTime": 224,
+      "endTime": 275,
+      "label": "Drift Colors",
+      "color": "#00ffff",
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "phase": 0.06,
+      "effects": [
+        {
+          "id": "drift-color-fx0",
+          "effectKey": "position_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0,
+                "end": 0.04
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "drift-still",
+      "startTime": 224,
+      "endTime": 228,
+      "label": "Drift Still",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "drift-still-fx0",
+          "effectKey": "staticSnake",
+          "params": {
+            "start": 1,
+            "end": 0.65
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "drift-still-b1",
+      "startTime": 224,
+      "endTime": 228,
+      "label": "Drift Still B1",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "afterMotion": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
       ],
       "mapping": "b1",
-      "phase": 1,
-      "phaseReverse": true
+      "effects": [
+        {
+          "id": "drift-still-b1-fx0",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_increase": {
+              "const_value": {
+                "value": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "p2b-spinin",
+      "startTime": 224,
+      "endTime": 228,
+      "label": "Spin Fade In (ease)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "afterMotion": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "p2b-spinin-fx",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "sin": {
+                "min": 0,
+                "max": 2,
+                "phase": 0.75,
+                "repeats": 0.25
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "drift-fwd",
+      "startTime": 228,
+      "endTime": 248,
+      "label": "Drift Snake",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 4
+        }
+      ],
+      "effects": [
+        {
+          "id": "drift-fwd-fx0",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.35,
+            "cyclic": true,
+            "reverse": false
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "drift-turn",
+      "startTime": 248,
+      "endTime": 252,
+      "label": "Drift Turn",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "drift-turn-fx0",
+          "effectKey": "snakeTurn",
+          "params": {
+            "tailLength": 0.35,
+            "speed": 1,
+            "cyclic": true
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "drift-rev",
+      "startTime": 252,
+      "endTime": 275,
+      "label": "Drift Snake (reversed)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 4
+        }
+      ],
+      "effects": [
+        {
+          "id": "drift-rev-fx0",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.35,
+            "cyclic": true,
+            "reverse": true
+          },
+          "phase": 1
+        }
+      ]
+    },
+    {
+      "id": "drift-ripple",
+      "startTime": 228,
+      "endTime": 275,
+      "label": "Drift Ripple",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "afterMotion": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "centric",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 1.5
+        }
+      ],
+      "effects": [
+        {
+          "id": "drift-ripple-fx0",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.2
+              }
+            },
+            "cyclic": false,
+            "mult_factor_increase": {
+              "linear": {
+                "start": 0,
+                "end": 0.8
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "drift-b1",
+      "startTime": 228,
+      "endTime": 275,
+      "label": "Drift B1 Beat",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "afterMotion": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "b1",
+      "cycles": [
+        {
+          "type": "cycleBeats",
+          "beatsInCycle": 1.5,
+          "startBeat": 0,
+          "endBeat": 0.75
+        }
+      ],
+      "effects": [
+        {
+          "id": "drift-b1-fx0",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_increase": {
+              "linear": {
+                "start": 1,
+                "end": 0.3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "drift-sparkle",
+      "startTime": 228,
+      "endTime": 275,
+      "label": "Drift Sparkle",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "afterMotion": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 6
+        }
+      ],
+      "effects": [
+        {
+          "id": "drift-sparkle-fx0",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.25
+              }
+            },
+            "cyclic": true,
+            "mult_factor_increase": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "drift-sparkle-fx1",
+          "effectKey": "snake_saturation",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.25
+              }
+            },
+            "cyclic": true,
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 1,
+                "end": 0.3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "drift-dim",
+      "startTime": 224,
+      "endTime": 275,
+      "label": "Drift Dim 70%",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "afterMotion": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "drift-dim-fx0",
+          "effectKey": "timed_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0.7
+              }
+            }
+          }
+        }
+      ]
     },
     {
       "id": "dup-1784405802604-b1ad",
@@ -536,265 +1693,9 @@
       ]
     },
     {
-      "id": "1792423097439",
-      "startTime": 216,
-      "endTime": 228,
-      "label": "Blink in fade",
-      "color": "#ffffff",
-      "hasExplicitColor": false,
-      "rings": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
-      ],
-      "mapping": "b1",
-      "cycles": [
-        {
-          "type": "cycle",
-          "beatsInCycle": 2
-        }
-      ],
-      "effects": [
-        {
-          "id": "eff-1792423994058-i61k274woll",
-          "effectKey": "pulse",
-          "params": {
-            "low": 0.5,
-            "staticPhase": 0
-          },
-          "phase": 0
-        }
-      ]
-    },
-    {
-      "id": "dup-1792423356227-1lh0",
-      "startTime": 144,
-      "endTime": 216,
-      "label": "Second Part Fade (copy)",
-      "color": "#d63fe9",
-      "hasExplicitColor": false,
-      "rings": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
-      ],
-      "mapping": "rand",
-      "phase": 0,
-      "movement": {
-        "type": "spread",
-        "direction": "center-out",
-        "beatsPerRing": 12
-      },
-      "effects": [
-        {
-          "id": "eff-1784364968608-r48c9z93ivp-vszj-oejc-cwwx",
-          "effectKey": "fade",
-          "params": {
-            "start": 0.2,
-            "end": 1
-          }
-        }
-      ]
-    },
-    {
-      "id": "dup-1792423449759-622f",
-      "startTime": 144,
-      "endTime": 198,
-      "label": "Slow Pulse (copy)",
-      "color": "#dd224d",
-      "hasExplicitColor": false,
-      "rings": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
-      ],
-      "mapping": "all",
-      "cycles": [
-        {
-          "type": "cycle",
-          "beatsInCycle": 6
-        }
-      ],
-      "effects": [
-        {
-          "id": "eff-1784405954679-pa8lqiuqa58-nbgz",
-          "effectKey": "pulse",
-          "params": {
-            "low": 0.25,
-            "staticPhase": 0.75
-          }
-        }
-      ]
-    },
-    {
-      "id": "dup-1792423881751-ekux",
-      "startTime": 198,
-      "endTime": 216,
-      "label": "Slow Pulse (copy)",
-      "color": "#dd224d",
-      "hasExplicitColor": false,
-      "rings": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
-      ],
-      "mapping": "all",
-      "cycles": [
-        {
-          "type": "cycle",
-          "beatsInCycle": 3
-        }
-      ],
-      "effects": [
-        {
-          "id": "eff-1784405954679-pa8lqiuqa58-nbgz-u2sn",
-          "effectKey": "pulse",
-          "params": {
-            "low": 0.25,
-            "staticPhase": 0
-          }
-        }
-      ]
-    },
-    {
-      "id": "1792424427137",
-      "startTime": 216,
-      "endTime": 228,
-      "label": "Fade",
-      "color": "#a81e0b",
-      "hasExplicitColor": false,
-      "rings": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
-      ],
-      "mapping": "all",
-      "effects": [
-        {
-          "id": "eff-1792424493627-h5qktn7s9kv",
-          "effectKey": "fadeOut"
-        }
-      ]
-    },
-    {
-      "id": "sapir-1",
-      "startTime": 228,
-      "endTime": 324,
-      "label": "Spin Snake (top)",
-      "color": "#00fff0",
-      "hasExplicitColor": true,
-      "rings": [
-        1,
-        2,
-        9,
-        10,
-        11,
-        12
-      ],
-      "mapping": "all",
-      "cycles": [
-        {
-          "type": "cycle",
-          "beatsInCycle": 1.5
-        }
-      ],
-      "effects": [
-        {
-          "id": "sapir-1-eff-0",
-          "effectKey": "snake",
-          "params": {
-            "tailLength": 0.6,
-            "cyclic": true,
-            "reverse": false
-          },
-          "phase": 1
-        }
-      ]
-    },
-    {
-      "id": "sapir-2",
-      "startTime": 228,
-      "endTime": 324,
-      "label": "Spin Snake (bottom)",
-      "color": "#ff00d6",
-      "hasExplicitColor": true,
-      "rings": [
-        3,
-        4,
-        5,
-        6,
-        7,
-        8
-      ],
-      "mapping": "all",
-      "cycles": [
-        {
-          "type": "cycle",
-          "beatsInCycle": 1.5
-        }
-      ],
-      "effects": [
-        {
-          "id": "sapir-2-eff-0",
-          "effectKey": "snake",
-          "params": {
-            "tailLength": 0.6,
-            "cyclic": true,
-            "reverse": true
-          },
-          "phase": 1
-        }
-      ]
-    },
-    {
       "id": "sapir-3",
       "startTime": 270,
-      "endTime": 276,
+      "endTime": 274,
       "label": "Spin Flash",
       "color": "#808080",
       "hasExplicitColor": false,
@@ -868,6 +1769,79 @@
           "params": {
             "mult_factor_decrease": {
               "linear": {
+                "start": 1,
+                "end": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sat-white",
+      "startTime": 274,
+      "endTime": 276,
+      "label": "Sat White Hold",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "sat-white-fx0",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "const_value": {
+                "value": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sat-restore",
+      "startTime": 276,
+      "endTime": 288,
+      "label": "Sat Restore",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "sat-restore-fx0",
+          "effectKey": "timed_saturation",
+          "params": {
+            "mult_factor_decrease": {
+              "linear": {
                 "start": 0,
                 "end": 1
               }
@@ -877,9 +1851,717 @@
       ]
     },
     {
+      "id": "shimmer-color-0",
+      "startTime": 275,
+      "endTime": 324,
+      "label": "Shimmer Colors (1,5,9)",
+      "color": "#00ffff",
+      "rings": [
+        1,
+        5,
+        9
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "shimmer-color-1",
+      "startTime": 275,
+      "endTime": 324,
+      "label": "Shimmer Colors (2,6,10)",
+      "color": "#00f0ff",
+      "rings": [
+        2,
+        6,
+        10
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "shimmer-color-2",
+      "startTime": 275,
+      "endTime": 324,
+      "label": "Shimmer Colors (3,7,11)",
+      "color": "#00e0ff",
+      "rings": [
+        3,
+        7,
+        11
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "shimmer-color-3",
+      "startTime": 275,
+      "endTime": 324,
+      "label": "Shimmer Colors (4,8,12)",
+      "color": "#00d0ff",
+      "rings": [
+        4,
+        8,
+        12
+      ],
+      "mapping": "all"
+    },
+    {
+      "id": "shimmer-hue",
+      "startTime": 275,
+      "endTime": 324,
+      "label": "Shimmer Hue Steps",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 1
+        }
+      ],
+      "effects": [
+        {
+          "id": "shimmer-hue-fx0",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "linear": {
+                "start": 0.015,
+                "end": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "shimmer-spread-1",
+      "startTime": 276,
+      "endTime": 324,
+      "label": "Shimmer Hue Spread (2,6,10)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        2,
+        6,
+        10
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "shimmer-spread-1-fx0",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "half": {
+                "f1": {
+                  "half": {
+                    "f1": {
+                      "linear": {
+                        "start": 0,
+                        "end": 0.03
+                      }
+                    },
+                    "f2": {
+                      "const_value": {
+                        "value": 0.03
+                      }
+                    }
+                  }
+                },
+                "f2": {
+                  "const_value": {
+                    "value": 0.03
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "shimmer-spread-2",
+      "startTime": 276,
+      "endTime": 324,
+      "label": "Shimmer Hue Spread (3,7,11)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        3,
+        7,
+        11
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "shimmer-spread-2-fx0",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "half": {
+                "f1": {
+                  "half": {
+                    "f1": {
+                      "linear": {
+                        "start": 0,
+                        "end": 0.06
+                      }
+                    },
+                    "f2": {
+                      "const_value": {
+                        "value": 0.06
+                      }
+                    }
+                  }
+                },
+                "f2": {
+                  "const_value": {
+                    "value": 0.06
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "shimmer-spread-3",
+      "startTime": 276,
+      "endTime": 324,
+      "label": "Shimmer Hue Spread (4,8,12)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        4,
+        8,
+        12
+      ],
+      "mapping": "all",
+      "effects": [
+        {
+          "id": "shimmer-spread-3-fx0",
+          "effectKey": "timed_hue",
+          "params": {
+            "offset_factor": {
+              "half": {
+                "f1": {
+                  "half": {
+                    "f1": {
+                      "linear": {
+                        "start": 0,
+                        "end": 0.089
+                      }
+                    },
+                    "f2": {
+                      "const_value": {
+                        "value": 0.089
+                      }
+                    }
+                  }
+                },
+                "f2": {
+                  "const_value": {
+                    "value": 0.089
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "shimmer-snake",
+      "startTime": 275,
+      "endTime": 324,
+      "label": "Shimmer Snake",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 4
+        }
+      ],
+      "effects": [
+        {
+          "id": "shimmer-snake-fx0",
+          "effectKey": "snake",
+          "params": {
+            "tailLength": 0.5,
+            "cyclic": true,
+            "reverse": false
+          },
+          "phase": 0.5
+        }
+      ]
+    },
+    {
+      "id": "shimmer-ripple",
+      "startTime": 275,
+      "endTime": 324,
+      "label": "Shimmer Ripple",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "afterMotion": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "all",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 1
+        }
+      ],
+      "effects": [
+        {
+          "id": "shimmer-ripple-fx0",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.2
+              }
+            },
+            "cyclic": false,
+            "mult_factor_increase": {
+              "linear": {
+                "start": 0,
+                "end": 0.8
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "shimmer-arc-a",
+      "startTime": 275,
+      "endTime": 324,
+      "label": "Shimmer Arc Halves (A)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "afterMotion": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "cycles": [
+        {
+          "type": "cycleBeats",
+          "beatsInCycle": 2,
+          "startBeat": 0,
+          "endBeat": 1
+        }
+      ],
+      "effects": [
+        {
+          "id": "shimmer-arc-a-fx0",
+          "effectKey": "position_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "half": {
+                "f1": {
+                  "const_value": {
+                    "value": 1
+                  }
+                },
+                "f2": {
+                  "const_value": {
+                    "value": 0.5
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "shimmer-arc-b",
+      "startTime": 275,
+      "endTime": 324,
+      "label": "Shimmer Arc Halves (B)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "afterMotion": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "cycles": [
+        {
+          "type": "cycleBeats",
+          "beatsInCycle": 2,
+          "startBeat": 1,
+          "endBeat": 2
+        }
+      ],
+      "effects": [
+        {
+          "id": "shimmer-arc-b-fx0",
+          "effectKey": "position_brightness",
+          "params": {
+            "mult_factor_decrease": {
+              "half": {
+                "f1": {
+                  "const_value": {
+                    "value": 0.5
+                  }
+                },
+                "f2": {
+                  "const_value": {
+                    "value": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "shimmer-arc-spin",
+      "startTime": 275,
+      "endTime": 324,
+      "label": "Shimmer Arc Spinner",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "afterMotion": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "arc",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 1
+        }
+      ],
+      "effects": [
+        {
+          "id": "shimmer-arc-spin-fx0",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.35
+              }
+            },
+            "cyclic": true,
+            "mult_factor_increase": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "shimmer-hue-chase",
+      "startTime": 275,
+      "endTime": 324,
+      "label": "Shimmer Hue Chase",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "centric",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 0.5
+        }
+      ],
+      "effects": [
+        {
+          "id": "shimmer-hue-chase-fx0",
+          "effectKey": "snake_hue",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.3
+              }
+            },
+            "cyclic": true,
+            "offset_factor": {
+              "const_value": {
+                "value": 0.02
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "shimmer-glitter-a",
+      "startTime": 275,
+      "endTime": 324,
+      "label": "Shimmer Glitter",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "afterMotion": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 12
+        }
+      ],
+      "effects": [
+        {
+          "id": "shimmer-glitter-a-fx0",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.1
+              }
+            },
+            "cyclic": true,
+            "mult_factor_increase": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "shimmer-glitter-a-fx1",
+          "effectKey": "snake_saturation",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.1
+              }
+            },
+            "cyclic": true,
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 1,
+                "end": 0.3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "shimmer-glitter-b",
+      "startTime": 275,
+      "endTime": 324,
+      "label": "Shimmer Glitter (2)",
+      "color": "#808080",
+      "hasExplicitColor": false,
+      "afterMotion": true,
+      "rings": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "mapping": "rand",
+      "cycles": [
+        {
+          "type": "cycle",
+          "beatsInCycle": 9
+        }
+      ],
+      "effects": [
+        {
+          "id": "shimmer-glitter-b-fx0",
+          "effectKey": "snake_brightness",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.1
+              }
+            },
+            "cyclic": true,
+            "mult_factor_increase": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "shimmer-glitter-b-fx1",
+          "effectKey": "snake_saturation",
+          "params": {
+            "head": {
+              "linear": {
+                "start": 0,
+                "end": 1
+              }
+            },
+            "tail_length": {
+              "const_value": {
+                "value": 0.1
+              }
+            },
+            "cyclic": true,
+            "mult_factor_decrease": {
+              "linear": {
+                "start": 1,
+                "end": 0.3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
       "id": "sapir-4",
       "startTime": 315,
-      "endTime": 321.75,
+      "endTime": 324,
       "label": "Spin Flash",
       "color": "#808080",
       "hasExplicitColor": false,
@@ -953,8 +2635,8 @@
           "params": {
             "mult_factor_decrease": {
               "linear": {
-                "start": 0,
-                "end": 1
+                "start": 1,
+                "end": 0
               }
             }
           }
@@ -967,7 +2649,6 @@
       "endTime": 324,
       "label": "B1 Blue Saw (even)",
       "color": "#0d34ff",
-      "hasExplicitColor": true,
       "rings": [
         2,
         4,
@@ -992,7 +2673,7 @@
               "half": {
                 "f1": {
                   "linear": {
-                    "start": 1.0,
+                    "start": 1,
                     "end": 0.7
                   }
                 },
@@ -1014,7 +2695,6 @@
       "endTime": 378,
       "label": "Steps Color B1",
       "color": "#0029ff",
-      "hasExplicitColor": true,
       "rings": [
         1
       ],
@@ -1026,7 +2706,6 @@
       "endTime": 378,
       "label": "Steps Color B1",
       "color": "#ff00d6",
-      "hasExplicitColor": true,
       "rings": [
         2,
         10,
@@ -1040,7 +2719,6 @@
       "endTime": 378,
       "label": "Steps Color B1",
       "color": "#00fff0",
-      "hasExplicitColor": true,
       "rings": [
         4,
         7,
@@ -1054,7 +2732,6 @@
       "endTime": 378,
       "label": "Steps Color B1",
       "color": "#00b2ff",
-      "hasExplicitColor": true,
       "rings": [
         5
       ],
@@ -1066,7 +2743,6 @@
       "endTime": 378,
       "label": "Steps Color B2",
       "color": "#004e49",
-      "hasExplicitColor": true,
       "rings": [
         1,
         2,
@@ -1080,7 +2756,6 @@
       "endTime": 378,
       "label": "Steps Color B2",
       "color": "#4e0042",
-      "hasExplicitColor": true,
       "rings": [
         4,
         5,
@@ -1095,7 +2770,6 @@
       "endTime": 378,
       "label": "Steps Color B2",
       "color": "#00374e",
-      "hasExplicitColor": true,
       "rings": [
         11
       ],
@@ -1214,7 +2888,6 @@
       "endTime": 420,
       "label": "Steps Color B1",
       "color": "#ff00d6",
-      "hasExplicitColor": true,
       "rings": [
         1,
         2,
@@ -1230,7 +2903,6 @@
       "endTime": 420,
       "label": "Steps Color B1",
       "color": "#0029ff",
-      "hasExplicitColor": true,
       "rings": [
         3
       ],
@@ -1242,7 +2914,6 @@
       "endTime": 420,
       "label": "Steps Color B1",
       "color": "#00b2ff",
-      "hasExplicitColor": true,
       "rings": [
         4,
         5
@@ -1255,7 +2926,6 @@
       "endTime": 420,
       "label": "Steps Color B1",
       "color": "#00fff0",
-      "hasExplicitColor": true,
       "rings": [
         6,
         7,
@@ -1270,7 +2940,6 @@
       "endTime": 420,
       "label": "Steps Color B2",
       "color": "#004e49",
-      "hasExplicitColor": true,
       "rings": [
         1,
         2,
@@ -1285,7 +2954,6 @@
       "endTime": 420,
       "label": "Steps Color B2",
       "color": "#4e0042",
-      "hasExplicitColor": true,
       "rings": [
         4,
         5,
@@ -1302,7 +2970,6 @@
       "endTime": 420,
       "label": "Steps Color B2",
       "color": "#000d4e",
-      "hasExplicitColor": true,
       "rings": [
         10
       ],
@@ -1314,7 +2981,6 @@
       "endTime": 420,
       "label": "Steps Color B2",
       "color": "#00374e",
-      "hasExplicitColor": true,
       "rings": [
         11
       ],
@@ -1445,7 +3111,6 @@
       "endTime": 492,
       "label": "Chase Updown Split",
       "color": "#ff00d6",
-      "hasExplicitColor": true,
       "rings": [
         1,
         2,
@@ -1529,7 +3194,6 @@
       "endTime": 492,
       "label": "Chase B1 Snake",
       "color": "#ffe500",
-      "hasExplicitColor": true,
       "rings": [
         1,
         2,
@@ -1699,7 +3363,6 @@
       "endTime": 588,
       "label": "Chase Updown Split",
       "color": "#00fff0",
-      "hasExplicitColor": true,
       "rings": [
         1,
         2,
@@ -1783,7 +3446,6 @@
       "endTime": 588,
       "label": "Chase B1 Snake",
       "color": "#ff007a",
-      "hasExplicitColor": true,
       "rings": [
         1,
         2,
@@ -2052,7 +3714,7 @@
           "params": {
             "mult_factor_decrease": {
               "steps": {
-                "first_step_value": 1.0,
+                "first_step_value": 1,
                 "diff_per_step": -0.07777777777777778,
                 "num_steps": 10
               }
@@ -2067,7 +3729,6 @@
       "endTime": 756,
       "label": "Finale Arc",
       "color": "#ff00d6",
-      "hasExplicitColor": true,
       "rings": [
         1,
         2,
@@ -2102,7 +3763,7 @@
                       "half": {
                         "f1": {
                           "const_value": {
-                            "value": 0.0
+                            "value": 0
                           }
                         },
                         "f2": {
@@ -2121,7 +3782,7 @@
                         },
                         "f2": {
                           "const_value": {
-                            "value": 0.0
+                            "value": 0
                           }
                         }
                       }
@@ -2137,7 +3798,7 @@
                     },
                     "f2": {
                       "const_value": {
-                        "value": 0.0
+                        "value": 0
                       }
                     }
                   }
@@ -2160,7 +3821,6 @@
       "endTime": 780,
       "label": "Outro Arc",
       "color": "#0029ff",
-      "hasExplicitColor": true,
       "rings": [
         1,
         2,
@@ -2195,7 +3855,7 @@
                       "half": {
                         "f1": {
                           "const_value": {
-                            "value": 0.0
+                            "value": 0
                           }
                         },
                         "f2": {
@@ -2214,7 +3874,7 @@
                         },
                         "f2": {
                           "const_value": {
-                            "value": 0.0
+                            "value": 0
                           }
                         }
                       }
@@ -2230,7 +3890,7 @@
                     },
                     "f2": {
                       "const_value": {
-                        "value": 0.0
+                        "value": 0
                       }
                     }
                   }
@@ -2323,5 +3983,17 @@
         }
       ]
     }
-  ]
+  ],
+  "windowSizes": {
+    "playbackPanelWidth": 720,
+    "detailsPanelWidth": 350,
+    "spectrogramHeight": 180,
+    "headerHeight": 56
+  },
+  "spectrogramOpen": false,
+  "view": {
+    "startBeat": 233.56,
+    "beatsPerScreen": 128
+  },
+  "theme": "dark"
 }
