@@ -1,0 +1,520 @@
+<title>Pi Effect Combinations</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a contact sheet of LED "stages" — summary matrix first, then filterable cards grouped by trigger and section. */
+:root {
+  --bg: #eceef2; --surface: #f8f9fb; --ink: #191c24; --muted: #5d6475; --line: #d3d7e0;
+  --accent: #c2410c; --stage: #06070a; --stage-line: #262a35;
+  --c-src: #b45309; --c-val: #4b5563; --c-hue: #7c3aed; --c-sat: #0f766e; --c-mask: #be123c;
+  --chip-bg: #e3e6ec; --heat: 194 65 12;
+  --f-display: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  --f-body: "IBM Plex Sans Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111318; --surface: #181b22; --ink: #e6e8ee; --muted: #9aa1b2; --line: #2b303b;
+  --accent: #fb923c; --stage: #050608; --stage-line: #2b303b;
+  --c-src: #fbbf24; --c-val: #cbd5e1; --c-hue: #c4b5fd; --c-sat: #5eead4; --c-mask: #fb7185;
+  --chip-bg: #232731; --heat: 251 146 60; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #111318; --surface: #181b22; --ink: #e6e8ee; --muted: #9aa1b2; --line: #2b303b;
+  --accent: #fb923c; --stage: #050608; --stage-line: #2b303b;
+  --c-src: #fbbf24; --c-val: #cbd5e1; --c-hue: #c4b5fd; --c-sat: #5eead4; --c-mask: #fb7185;
+  --chip-bg: #232731; --heat: 251 146 60; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 15px/1.45 var(--f-body); }
+.wrap { max-width: 1440px; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 28px; }
+h1 { font: 800 clamp(34px, 6vw, 56px)/0.95 var(--f-display); letter-spacing: 0.01em; margin: 0; text-wrap: balance; text-transform: uppercase; }
+h2 { font: 600 26px/1 var(--f-display); text-transform: uppercase; letter-spacing: 0.03em; margin: 0; }
+h3 { font: 600 13px/1.2 var(--f-body); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0; }
+.lede { max-width: 72ch; color: var(--muted); margin: 0; }
+.lede b { color: var(--ink); font-weight: 600; }
+header { display: grid; gap: 12px; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 22px; font: 500 13px var(--f-mono); color: var(--muted); }
+.facts span b { color: var(--ink); font-weight: 500; }
+
+/* usage matrix */
+.matrix-box { overflow-x: auto; border: 1px solid var(--line); background: var(--surface); border-radius: 6px; }
+table { border-collapse: collapse; font: 12px var(--f-mono); font-variant-numeric: tabular-nums; width: 100%; }
+th, td { padding: 6px 8px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
+th { font: 500 11px var(--f-mono); color: var(--muted); vertical-align: bottom; }
+thead th { writing-mode: vertical-rl; transform: rotate(180deg); text-align: left; height: 128px; padding: 8px 4px; }
+thead th:first-child { writing-mode: horizontal-tb; transform: none; text-align: left; height: auto; vertical-align: bottom; }
+tbody th { text-align: left; color: var(--ink); font: 600 13px var(--f-body); }
+tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
+td.z { color: var(--line); }
+td.newstyle, th.newstyle { box-shadow: inset 0 3px 0 var(--c-hue); }
+
+/* toolbar */
+.toolbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  padding-block: 10px; border-bottom: 1px solid var(--line); display: grid; gap: 8px; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.row > h3 { width: 74px; flex: none; }
+button, .chipbtn { font: 500 13px var(--f-body); color: var(--ink); background: var(--chip-bg); border: 1px solid transparent;
+  border-radius: 4px; padding: 4px 9px; cursor: pointer; }
+button:hover { border-color: var(--muted); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+input[type="search"] { font: 14px var(--f-body); padding: 5px 9px; border: 1px solid var(--line); border-radius: 4px;
+  background: var(--surface); color: var(--ink); min-width: 0; flex: 1 1 220px; max-width: 360px; }
+.count { font: 500 12px var(--f-mono); color: var(--muted); margin-left: auto; }
+
+/* gallery */
+.trig { display: grid; gap: 14px; }
+.trig-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.trig-head p { margin: 0; color: var(--muted); font-size: 14px; }
+.group-label { font: 500 12px var(--f-mono); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 14px; align-items: start; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; display: grid; min-width: 0; }
+.stage { position: relative; background: var(--stage); aspect-ratio: 1 / 1; max-width: 100%; cursor: zoom-in; }
+.stage canvas { width: 100%; height: 100%; display: block; }
+.stage .clock { position: absolute; left: 8px; bottom: 6px; font: 500 11px var(--f-mono); color: #8a91a3; font-variant-numeric: tabular-nums; }
+.stage .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--stage-line); }
+.stage .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: #e0e3ea; width: 0; }
+.body { padding: 10px 12px 12px; display: grid; gap: 8px; min-width: 0; }
+.title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.title strong { font: 600 16px var(--f-body); }
+.title .time { font: 12px var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.badges { display: flex; flex-wrap: wrap; gap: 5px; }
+.badge { font: 500 11px var(--f-mono); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--line); color: var(--muted); }
+.badge.new { border-color: var(--accent); color: var(--accent); }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip { font: 11px var(--f-mono); padding: 1px 6px; border-radius: 3px; background: var(--chip-bg); color: var(--ink); border-left: 3px solid var(--fam); }
+.stack { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; font: 11.5px/1.35 var(--f-mono); min-width: 0; }
+.stack li { display: grid; grid-template-columns: auto 1fr; gap: 0 6px; padding: 3px 0 3px 7px; border-left: 3px solid var(--fam); min-width: 0; }
+.stack li.accent { opacity: 0.62; }
+.stack .k { font-weight: 500; white-space: nowrap; }
+.stack .p { color: var(--muted); overflow-wrap: anywhere; min-width: 0; }
+.stack .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; border: 1px solid var(--line); }
+.more { justify-self: start; font-size: 12px; padding: 2px 8px; }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.toast { font: 12px var(--f-mono); color: var(--accent); align-self: center; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 12px var(--f-mono); color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--fam); margin-right: 5px; vertical-align: -1px; }
+.empty { color: var(--muted); padding: 24px 0; }
+
+[data-fam="src"] { --fam: var(--c-src); } [data-fam="val"] { --fam: var(--c-val); } [data-fam="hue"] { --fam: var(--c-hue); }
+[data-fam="sat"] { --fam: var(--c-sat); } [data-fam="mask"] { --fam: var(--c-mask); }
+
+/* large view */
+dialog { border: 1px solid var(--line); border-radius: 8px; padding: 0; background: var(--surface); color: var(--ink);
+  width: min(1100px, calc(100vw - 24px)); max-height: calc(100vh - 24px); }
+dialog::backdrop { background: rgb(0 0 0 / 0.6); }
+.dlg { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+.dlg .stage { cursor: default; }
+.dlg .side { padding: 14px 16px; display: grid; gap: 10px; align-content: start; overflow-y: auto; max-height: calc(100vh - 26px); min-width: 0; }
+.scrub { display: flex; gap: 8px; align-items: center; }
+.scrub input { flex: 1; min-width: 0; accent-color: var(--accent); }
+.scrub output { font: 12px var(--f-mono); min-width: 9ch; text-align: right; font-variant-numeric: tabular-nums; }
+@media (max-width: 760px) { .dlg { grid-template-columns: 1fr; } .dlg .side { max-height: none; } .row > h3 { width: 100%; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Pi Effect Combinations</h1>
+    <p class="lede">Every section below is cut from a sequence pulled off the Raspberry Pi's sequence service and played with a port of the ring renderer, on the real segment map. A section is a stretch where the same set of long-running effects is active; effects shorter than 1.5 s count as beat accents and are listed dimmed. The <b>category triggers</b> are generated at random in 30 s blocks and exist only on the Pi. <b>Shemesh</b> on the Pi is newer than the committed song file in chorus 1 and party 2.</p>
+    <div class="facts" id="facts"></div>
+  </header>
+
+  <section style="display:grid;gap:10px">
+    <h2>Effect usage per trigger</h2>
+    <p class="lede">Effect counts across all 12 rings of each trigger's Pi copy. The violet-topped columns are the modifier effects (snake / position / timed variants) that shemesh relies on and the category triggers never use.</p>
+    <div class="matrix-box"><table id="matrix"></table></div>
+    <div class="legend">
+      <span data-fam="src">sets color (const_color, rainbow)</span>
+      <span data-fam="val">brightness</span>
+      <span data-fam="hue">hue offset</span>
+      <span data-fam="sat">saturation</span>
+      <span data-fam="mask">snake mask (legacy, zeroes outside)</span>
+    </div>
+  </section>
+
+  <div class="toolbar" id="toolbar">
+    <div class="row"><h3>Trigger</h3><span id="f-trig" class="row"></span></div>
+    <div class="row"><h3>Uses</h3><span id="f-type" class="row"></span></div>
+    <div class="row"><h3>Find</h3>
+      <input type="search" id="q" placeholder="Section, segment or parameter, e.g. centric, steps, window" aria-label="Search sections">
+      <button id="f-new" aria-pressed="false">Newer on Pi</button>
+      <button id="f-shared" aria-pressed="false">Reused combos</button>
+      <span class="count" id="count"></span>
+    </div>
+  </div>
+
+  <main id="gallery" style="display:grid;gap:36px"></main>
+</div>
+
+<dialog id="dlg" aria-label="Section preview">
+  <div class="dlg">
+    <div class="stage" id="dlg-stage"><canvas></canvas><span class="clock"></span><span class="bar"><i></i></span></div>
+    <div class="side">
+      <div class="title"><strong id="dlg-title"></strong><span class="time" id="dlg-time"></span></div>
+      <div class="scrub">
+        <button id="dlg-play" aria-label="Pause">Pause</button>
+        <input type="range" id="dlg-pos" min="0" max="1000" value="0" aria-label="Position in section">
+        <output id="dlg-out"></output>
+      </div>
+      <div class="row">
+        <h3 style="width:auto">Speed</h3>
+        <button data-speed="0.25">¼×</button><button data-speed="0.5">½×</button><button data-speed="1" aria-pressed="true">1×</button>
+        <button id="dlg-close" style="margin-left:auto">Close</button>
+      </div>
+      <div class="chips" id="dlg-chips"></div>
+      <ul class="stack" id="dlg-stack"></ul>
+      <div class="actions"><button id="dlg-copy">Copy ring 1 effects as JSON</button><span class="toast" id="dlg-toast"></span></div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+const DATA = /*__DATA__*/null;
+
+// ---- renderer: a port of kivsee-render (ui/src/player/render.ts) -------------------------------------------
+function evalFloat(f, x) {
+  if (!f) return 0
+  if (f.const_value) return f.const_value.value ?? 0
+  if (f.linear) return (f.linear.start ?? 0) + x * ((f.linear.end ?? 0) - (f.linear.start ?? 0))
+  if (f.sin) { const { min = 0, max = 0, phase = 0, repeats = 0 } = f.sin; return ((Math.sin((x * repeats + phase) * 2 * Math.PI) + 1) / 2) * (max - min) + min }
+  if (f.steps) { const { num_steps = 0, diff_per_step = 0, first_step_value = 0 } = f.steps; return first_step_value + diff_per_step * Math.trunc(x * num_steps) }
+  if (f.repeat) return evalFloat(f.repeat.funcToRepeat, (x * (f.repeat.numberOfTimes ?? 0)) % 1)
+  if (f.half) return x < 0.5 ? evalFloat(f.half.f1, x * 2) : evalFloat(f.half.f2, (x - 0.5) * 2)
+  if (f.comb2) return (f.comb2.amount1 ?? 0) * evalFloat(f.comb2.f1, x) + (f.comb2.amount2 ?? 0) * evalFloat(f.comb2.f2, x)
+  if (f.fixed_window) {
+    const { start = 0, end = 0, cyclic, outside_value = 0, func } = f.fixed_window
+    const length = end - start
+    if (length <= 0) return outside_value
+    let t = x
+    if (cyclic) { const d = t - start; t = start + (d - Math.floor(d)) }
+    if (t < start || t > end) return outside_value
+    return evalFloat(func, (t - start) / length)
+  }
+  return 0
+}
+const SEGMENTS = {}
+for (const s of DATA.segments.segments) SEGMENTS[s.name] = s.pixels
+const NPIX = DATA.segments.numberOfPixels
+
+function snakeIndex(relPos, head, tailLength, cyclic) {
+  const tail = head - tailLength
+  let idx
+  if (cyclic && tail < 0) {
+    const w = tail + 1
+    if (relPos >= w) idx = (relPos - w) / tailLength
+    else if (relPos <= head) idx = (1 - w + relPos) / tailLength
+    else return undefined
+  } else {
+    if (relPos < tail || relPos > head) return undefined
+    idx = tailLength > 0 ? (relPos - tail) / tailLength : 1
+  }
+  return Math.min(1, Math.max(0, idx))
+}
+const snakeHead = (cfg, t) => { const h = evalFloat(cfg.head, t); return cfg.cyclic ? h - Math.trunc(h) : h }
+function applyMult(px, ch, cfg, x) {
+  if (cfg.mult_factor_increase) px[ch] = px[ch] + (1 - px[ch]) * evalFloat(cfg.mult_factor_increase, x)
+  else px[ch] *= evalFloat(cfg.mult_factor_decrease, x)
+}
+function renderEffect(e, seg, leds, t) {
+  if (e.const_color) {
+    const { hue = 0, sat = 0, val = 0 } = e.const_color.color ?? {}
+    for (const { index } of seg) { const px = leds[index]; px.hue = hue; px.sat = sat; px.val = val }
+  } else if (e.rainbow) {
+    const start = evalFloat(e.rainbow.hue_start, t), diff = evalFloat(e.rainbow.hue_end, t) - start
+    for (const { index, relPos } of seg) { const px = leds[index]; px.hue = start + diff * relPos; px.sat = 1; px.val = 1 }
+  } else if (e.brightness) {
+    const m = evalFloat(e.brightness.mult_factor, t); for (const { index } of seg) leds[index].val *= m
+  } else if (e.hue || e.timed_hue) {
+    const o = evalFloat((e.hue ?? e.timed_hue).offset_factor, t); for (const { index } of seg) leds[index].hue += o
+  } else if (e.saturation) {
+    const m = evalFloat(e.saturation.mult_factor, t); for (const { index } of seg) leds[index].sat *= m
+  } else if (e.timed_brightness || e.timed_saturation) {
+    const cfg = e.timed_brightness ?? e.timed_saturation, ch = e.timed_brightness ? 'val' : 'sat'
+    for (const { index } of seg) applyMult(leds[index], ch, cfg, t)
+  } else if (e.position_brightness || e.position_saturation) {
+    const cfg = e.position_brightness ?? e.position_saturation, ch = e.position_brightness ? 'val' : 'sat'
+    for (const { index, relPos } of seg) applyMult(leds[index], ch, cfg, relPos)
+  } else if (e.position_hue) {
+    for (const { index, relPos } of seg) leds[index].hue += evalFloat(e.position_hue.offset_factor, relPos)
+  } else if (e.snake_brightness || e.snake_saturation || e.snake_hue) {
+    const cfg = e.snake_brightness ?? e.snake_saturation ?? e.snake_hue
+    const head = snakeHead(cfg, t), tail = evalFloat(cfg.tail_length, t)
+    for (const { index, relPos } of seg) {
+      const idx = snakeIndex(relPos, head, tail, !!cfg.cyclic)
+      if (idx === undefined) continue
+      if (e.snake_hue) leds[index].hue += evalFloat(cfg.offset_factor, idx)
+      else applyMult(leds[index], e.snake_brightness ? 'val' : 'sat', cfg, idx)
+    }
+  } else if (e.snake) {
+    const head = snakeHead(e.snake, t), tail = evalFloat(e.snake.tail_length, t)
+    if (tail === 0) { for (const { index } of seg) leds[index].val = 0; return }
+    let next = Infinity, current = -Infinity
+    for (const { relPos } of seg) {
+      if (relPos > head && relPos < next) next = relPos
+      else if (relPos <= head && relPos > current) current = relPos
+    }
+    for (const { index, relPos } of seg) {
+      if (relPos === next) { leds[index].val *= 1 - (next - head) / (next - current); continue }
+      const h = e.snake.cyclic && relPos > head ? head + 1 : head
+      leds[index].val *= relPos > h || relPos < h - tail ? 0 : (relPos - (h - tail)) / tail
+    }
+  }
+}
+function effectRelTime(c, t) {
+  if (t < c.start_time || t >= c.end_time) return undefined
+  let rel = (t - c.start_time) / (c.end_time - c.start_time)
+  const repeats = c.repeat_num ?? 0
+  if (repeats > 0) {
+    const inCycle = (rel * repeats) % 1, start = c.repeat_start ?? 0, end = c.repeat_end ?? 0
+    if (inCycle < start || inCycle > end) return undefined
+    rel = (inCycle - start) / (end - start)
+  }
+  return rel
+}
+function renderRing(effects, t, leds) {
+  for (const px of leds) { px.hue = 0; px.sat = 0; px.val = 0 }
+  for (const e of effects) {
+    const rel = effectRelTime(e.effect_config, t)
+    if (rel === undefined) continue
+    const seg = SEGMENTS[e.effect_config.segments || 'all']
+    if (seg) renderEffect(e, seg, leds, rel)
+  }
+}
+function hsvToRgb(h, s, v) {
+  h = ((h % 1) + 1) % 1; s = Math.max(0, Math.min(1, s))
+  const vg = Math.pow(Math.max(0, Math.min(1, v)), 1 / 2.2)
+  if (s === 0) return [vg, vg, vg]
+  const i = Math.floor(h * 6), f = h * 6 - i, p = vg * (1 - s), q = vg * (1 - s * f), u = vg * (1 - s * (1 - f))
+  return [[vg, u, p], [q, vg, p], [p, vg, u], [p, q, vg], [u, p, vg], [vg, p, q]][i % 6]
+}
+
+// ---- installation layout (ui/src/components/RingVisualizationCanvas.tsx) ------------------------------------
+function layout(size) {
+  const k = size / 680, outerR = 268 * k, subR = 57 * k, pixR = 11 * k, c = size / 2, out = []
+  for (let b = 0; b < 12; b++) {
+    const bd = b * 30 - 60 + 15, ba = bd * Math.PI / 180, bx = c + outerR * Math.cos(ba), by = c + outerR * Math.sin(ba)
+    for (let s = 0; s < 12; s++) {
+      const sd = bd + 180 + (s - 2.5) * 30, sa = sd * Math.PI / 180, sx = bx + subR * Math.cos(sa), sy = by + subR * Math.sin(sa)
+      for (let p = 0; p < 12; p++) {
+        const pa = (sd + 180 + p * 30) * Math.PI / 180
+        out.push({ x: sx + pixR * Math.cos(pa), y: sy + pixR * Math.sin(pa), ring: b + 1, i: s * 12 + p })
+      }
+    }
+  }
+  return out
+}
+
+// ---- a stage: one canvas playing one card's window ---------------------------------------------------------
+const RINGS = Array.from({ length: 12 }, (_, i) => 'ring' + (i + 1))
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
+class Stage {
+  constructor(el, card) {
+    this.el = el; this.card = card; this.canvas = el.querySelector('canvas'); this.ctx = this.canvas.getContext('2d')
+    this.clock = el.querySelector('.clock'); this.bar = el.querySelector('.bar i')
+    this.len = card.end - card.start; this.pos = 0; this.speed = 1; this.playing = !reduceMotion
+    const seq = DATA.seqs[card.trigger]
+    this.rings = RINGS.map(r => (seq[r]?.effects ?? []).filter(e => e.effect_config.start_time < card.end && e.effect_config.end_time > card.start))
+    this.leds = Array.from({ length: NPIX }, () => ({ hue: 0, sat: 0, val: 0 }))
+    this.size = 0
+    // start a little into the window so the still frame shows something lit
+    this.pos = Math.min(this.len * 0.35, 4000)
+  }
+  resize() {
+    const dpr = Math.min(2, devicePixelRatio || 1), w = this.el.clientWidth
+    if (!w || w * dpr === this.size) return
+    this.size = Math.round(w * dpr); this.canvas.width = this.canvas.height = this.size; this.pts = layout(this.size)
+    this.dot = Math.max(1.2, this.size / 680 * 5.4)
+  }
+  draw() {
+    this.resize(); if (!this.size) return
+    const ctx = this.ctx, t = this.card.start + this.pos
+    ctx.fillStyle = '#06070a'; ctx.fillRect(0, 0, this.size, this.size)
+    const colors = []
+    for (let r = 0; r < 12; r++) {
+      renderRing(this.rings[r], t, this.leds)
+      colors.push(this.leds.map(px => px.val > 0.004 ? hsvToRgb(px.hue, px.sat, px.val) : null))
+    }
+    const d = this.dot
+    for (const p of this.pts) {
+      const c = colors[p.ring - 1][p.i]
+      if (!c) { ctx.fillStyle = '#15171d'; ctx.beginPath(); ctx.arc(p.x, p.y, d * 0.55, 0, 6.2832); ctx.fill(); continue }
+      const [r, g, b] = c.map(v => Math.round(v * 255))
+      ctx.fillStyle = `rgba(${r},${g},${b},0.22)`; ctx.beginPath(); ctx.arc(p.x, p.y, d * 1.9, 0, 6.2832); ctx.fill()
+      ctx.fillStyle = `rgb(${r},${g},${b})`; ctx.beginPath(); ctx.arc(p.x, p.y, d, 0, 6.2832); ctx.fill()
+    }
+    this.clock.textContent = fmtT(t)
+    this.bar.style.width = (100 * this.pos / this.len).toFixed(2) + '%'
+  }
+  tick(dt) { if (this.playing) this.pos = (this.pos + dt * this.speed) % this.len; this.draw() }
+}
+
+// ---- formatting ------------------------------------------------------------------------------------------------
+const fmtT = ms => { const s = ms / 1000, m = Math.floor(s / 60); return `${m}:${(s - m * 60).toFixed(1).padStart(4, '0')}` }
+const FAM = t => /const_color|constColor|rainbow/.test(t) ? 'src' : /sat/.test(t) ? 'sat' : /hue/.test(t) ? 'hue' : t === 'snake' ? 'mask' : 'val'
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
+function swatch(c) { if (!c) return ''; const [r, g, b] = hsvToRgb(c.hue ?? 0, c.sat ?? 0, Math.max(c.val ?? 0, 0.0001)).map(v => Math.round(v * 255)); return `<span class="sw" style="background:rgb(${r},${g},${b})"></span>` }
+function stackHtml(rows, limit) {
+  return rows.slice(0, limit ?? rows.length).map(r => `<li data-fam="${FAM(r.type)}" class="${r.accent ? 'accent' : ''}">
+    <span class="k">${esc(r.type)}@${esc(r.seg)}${r.cfg ? ' ' + esc(r.cfg) : ''}${r.n > 1 ? ` <span style="color:var(--accent)">×${r.n}</span>` : ''}</span>
+    <span class="p">${swatch(r.color)}${esc(r.p)}${r.accent ? ' · accent' : ''}</span></li>`).join('')
+}
+const chipsHtml = sig => sig.map(s => `<span class="chip" data-fam="${FAM(s.split('@')[0])}">${esc(s)}</span>`).join('')
+const cardTitle = c => `${c.group}${c.part ? ' · ' + c.part : ''}`
+async function copyJson(card, toast) {
+  const text = JSON.stringify(card.json, null, 2)
+  try { await navigator.clipboard.writeText(text); toast.textContent = `Copied ${card.json.length} effects` }
+  catch { toast.textContent = 'Clipboard blocked; JSON shown in the console'; console.log(text) }
+  setTimeout(() => toast.textContent = '', 2500)
+}
+
+// ---- page ------------------------------------------------------------------------------------------------------
+const TRIG_ORDER = ['shemesh', 'el_jaguar', 'jamaican_bam_bam', 'peter_the_wolf', 'alor', 'party', 'chill', 'mystery', 'psychedelic', 'background', 'sapir', 'random', 'idle', 'test']
+const TRIG_NOTE = {
+  shemesh: 'Song, 135 BPM. Sections are the named parts of the song file, split where the long-running effects change. Built almost entirely from modifier effects over one const_color.',
+  party: 'Random category trigger, 36 blocks of 30 s, each with a 0.5 s fade in and out.',
+  chill: 'Random category trigger, 17 blocks of 30 s.',
+  mystery: 'Random category trigger, 25 blocks of 30 s.',
+  psychedelic: 'Random category trigger, 24 blocks of 30 s.',
+  background: 'Random category trigger, 10 blocks of 30 s.',
+  el_jaguar: 'Song found only on the Pi, uploaded Oct 25 and played about 66 times on Oct 24–25. Mixes legacy snakes and brightness with snake/position modifiers, and uses fixed_window and comb2 heavily. Sections are where its long-running effects change.',
+  jamaican_bam_bam: 'Song found only on the Pi, uploaded Oct 25 and played about 100 times on Oct 24. Rainbow bases with hue drift, snake_brightness and snake_saturation, built on fixed_window and comb2.',
+  peter_the_wolf: 'Song found only on the Pi, uploaded Oct 25. Mostly const_color scenes with snake_brightness and position_hue.',
+  alor: 'Song found only on the Pi, with no song file in any repo. Built from const_color with hue, position_hue and position_brightness; sections are where its long-running effects change.',
+  sapir: 'Short trigger found only on the Pi: legacy snake over const_color with brightness fades.',
+  random: 'One 30 s loop from src/random.ts.',
+  idle: 'Idle loop: b1/b2 color breathing, then an arc snake.',
+  test: 'Test trigger exercising snakes on each segment.',
+}
+const MODIFIERS = ['timed_brightness', 'timed_hue', 'timed_saturation', 'position_brightness', 'position_hue', 'position_saturation', 'snake_brightness', 'snake_hue', 'snake_saturation']
+const TYPE_ORDER = ['const_color', 'rainbow', 'constColor', 'brightness', 'hue', 'snake', ...MODIFIERS]
+
+const facts = document.getElementById('facts')
+const nCombos = new Set(DATA.cards.map(c => c.sig.join('|'))).size
+facts.innerHTML = [
+  ['pulled', DATA.meta.fetched], ['triggers', TRIG_ORDER.length], ['sections', DATA.cards.length],
+  ['distinct combos', nCombos], ['shemesh effects newer on Pi', DATA.meta.piOnlyCount + ' per ring'],
+].map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('')
+
+// usage matrix
+const used = TYPE_ORDER.filter(t => TRIG_ORDER.some(tr => DATA.usage[tr][t]))
+const maxN = Math.max(...TRIG_ORDER.flatMap(tr => used.map(t => DATA.usage[tr][t] || 0)))
+document.getElementById('matrix').innerHTML =
+  `<thead><tr><th>trigger</th>${used.map(t => `<th class="${MODIFIERS.includes(t) ? 'newstyle' : ''}">${t}</th>`).join('')}</tr></thead><tbody>` +
+  TRIG_ORDER.map(tr => `<tr><th>${tr}</th>${used.map(t => {
+    const n = DATA.usage[tr][t] || 0
+    if (!n) return '<td class="z">·</td>'
+    const a = (0.08 + 0.55 * Math.sqrt(n / maxN)).toFixed(2)
+    return `<td style="background:rgb(var(--heat) / ${a})">${n}</td>`
+  }).join('')}</tr>`).join('') + '</tbody>'
+
+// filters
+const state = { trig: 'all', types: new Set(), q: '', newer: false, shared: false }
+const fTrig = document.getElementById('f-trig'), fType = document.getElementById('f-type')
+fTrig.innerHTML = ['all', ...TRIG_ORDER].map(t => `<button data-t="${t}" aria-pressed="${t === 'all'}">${t}</button>`).join('')
+fType.innerHTML = used.map(t => `<button data-ty="${t}" aria-pressed="false" class="chipbtn" data-fam="${FAM(t)}" style="border-left:3px solid var(--fam)">${t}</button>`).join('')
+fTrig.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.trig = b.dataset.t; fTrig.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); apply() })
+fType.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const t = b.dataset.ty; state.types.has(t) ? state.types.delete(t) : state.types.add(t); b.setAttribute('aria-pressed', state.types.has(t)); apply() })
+document.getElementById('q').addEventListener('input', e => { state.q = e.target.value.trim().toLowerCase(); apply() })
+for (const [id, key] of [['f-new', 'newer'], ['f-shared', 'shared']]) {
+  const b = document.getElementById(id)
+  b.addEventListener('click', () => { state[key] = !state[key]; b.setAttribute('aria-pressed', state[key]); apply() })
+}
+
+// cards
+const gallery = document.getElementById('gallery'), stages = new Map(), cardEls = []
+for (const tr of TRIG_ORDER) {
+  const cards = DATA.cards.filter(c => c.trigger === tr)
+  const sec = document.createElement('section'); sec.className = 'trig'; sec.dataset.trig = tr
+  sec.innerHTML = `<div class="trig-head"><h2>${tr}</h2><p>${TRIG_NOTE[tr]} ${cards.length} sections, ${fmtT(DATA.meta.durations[tr])} long.</p></div><div class="grid"></div>`
+  const grid = sec.querySelector('.grid')
+  for (const c of cards) {
+    const el = document.createElement('article'); el.className = 'card'; el.dataset.id = c.id
+    const LIMIT = 7
+    el.innerHTML = `
+      <div class="stage" role="button" tabindex="0" aria-label="Open ${esc(tr)} ${esc(cardTitle(c))} large"><canvas></canvas><span class="clock"></span><span class="bar"><i></i></span></div>
+      <div class="body">
+        <div class="title"><span class="group-label">${esc(tr)}</span><strong>${esc(cardTitle(c))}</strong>
+          <span class="time">${fmtT(c.start)}–${fmtT(c.end)} · ${((c.end - c.start) / 1000).toFixed(1)} s</span></div>
+        <div class="badges">${c.newer ? '<span class="badge new">newer on Pi</span>' : ''}${c.dark ? '<span class="badge">blackout, base color at val 0</span>' : ''}${c.shared > 1 ? `<span class="badge">combo used ${c.shared}×</span>` : ''}<span class="badge">${c.effects} effects, 12 rings</span></div>
+        <div class="chips">${chipsHtml(c.sig)}</div>
+        <h3>Ring 1 stack, in render order</h3>
+        <ul class="stack">${stackHtml(c.stack, LIMIT)}</ul>
+        ${c.stack.length > LIMIT ? `<button class="more">Show all ${c.stack.length} rows</button>` : ''}
+        <div class="actions"><button class="copy">Copy ring 1 effects as JSON</button><span class="toast"></span></div>
+      </div>`
+    el.querySelector('.more')?.addEventListener('click', ev => { el.querySelector('.stack').innerHTML = stackHtml(c.stack); ev.target.remove() })
+    el.querySelector('.copy').addEventListener('click', () => copyJson(c, el.querySelector('.toast')))
+    const st = el.querySelector('.stage')
+    st.addEventListener('click', () => openDialog(c))
+    st.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openDialog(c) } })
+    c.text = [tr, c.group, ...c.sig, ...c.stack.map(r => r.p + ' ' + r.cfg)].join(' ').toLowerCase()
+    grid.append(el); cardEls.push([c, el])
+  }
+  gallery.append(sec)
+}
+
+function apply() {
+  let n = 0
+  for (const [c, el] of cardEls) {
+    const ok = (state.trig === 'all' || c.trigger === state.trig) && [...state.types].every(t => c.types.includes(t)) &&
+      (!state.q || c.text.includes(state.q)) && (!state.newer || c.newer) && (!state.shared || c.shared > 1)
+    el.hidden = !ok; if (ok) n++
+  }
+  for (const sec of gallery.querySelectorAll('.trig')) sec.hidden = !sec.querySelector('.card:not([hidden])')
+  document.getElementById('count').textContent = `${n} of ${cardEls.length} sections`
+  let empty = document.getElementById('empty')
+  if (!n && !empty) { empty = document.createElement('p'); empty.id = 'empty'; empty.className = 'empty'; empty.textContent = 'No section matches these filters. Clear a filter to see more.'; gallery.append(empty) }
+  if (n && empty) empty.remove()
+}
+apply()
+
+// play only what is on screen
+const visible = new Set()
+const io = new IntersectionObserver(entries => {
+  for (const en of entries) {
+    const el = en.target.closest('.card'), c = DATA.cards.find(x => x.id === el.dataset.id)
+    if (en.isIntersecting) { if (!stages.has(el)) stages.set(el, new Stage(en.target, c)); visible.add(stages.get(el)); stages.get(el).draw() }
+    else visible.delete(stages.get(el))
+  }
+}, { rootMargin: '200px' })
+for (const [, el] of cardEls) io.observe(el.querySelector('.stage'))
+
+// large view
+const dlg = document.getElementById('dlg'), dlgPos = document.getElementById('dlg-pos'), dlgPlay = document.getElementById('dlg-play')
+let big = null
+function openDialog(c) {
+  const el = document.getElementById('dlg-stage')
+  big = new Stage(el, c); big.playing = true; big.size = 0
+  document.getElementById('dlg-title').textContent = `${c.trigger} · ${cardTitle(c)}`
+  document.getElementById('dlg-time').textContent = `${fmtT(c.start)}–${fmtT(c.end)}`
+  document.getElementById('dlg-chips').innerHTML = chipsHtml(c.sig)
+  document.getElementById('dlg-stack').innerHTML = stackHtml(c.stack)
+  document.getElementById('dlg-copy').onclick = () => copyJson(c, document.getElementById('dlg-toast'))
+  dlgPlay.textContent = 'Pause'
+  setSpeed(1)
+  dlg.showModal(); requestAnimationFrame(() => big && big.draw())
+}
+function setSpeed(s) { if (big) big.speed = s; dlg.querySelectorAll('[data-speed]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.speed === s)) }
+dlg.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click', () => setSpeed(+b.dataset.speed)))
+dlgPlay.addEventListener('click', () => { big.playing = !big.playing; dlgPlay.textContent = big.playing ? 'Pause' : 'Play' })
+dlgPos.addEventListener('input', () => { big.playing = false; dlgPlay.textContent = 'Play'; big.pos = big.len * dlgPos.value / 1000; big.draw() })
+document.getElementById('dlg-close').addEventListener('click', () => dlg.close())
+dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close() })
+dlg.addEventListener('close', () => { big = null })
+
+let last = performance.now(), acc = 0
+function loop(now) {
+  const dt = Math.min(100, now - last); last = now; acc += dt
+  if (acc >= 33) {
+    if (big) { big.tick(acc); dlgPos.value = Math.round(1000 * big.pos / big.len); document.getElementById('dlg-out').textContent = `${(big.pos / 1000).toFixed(2)} s` }
+    else if (!reduceMotion) for (const s of visible) s.tick(acc)
+    acc = 0
+  }
+  requestAnimationFrame(loop)
+}
+requestAnimationFrame(loop)
+addEventListener('resize', () => { for (const s of visible) s.draw() })
+</script>
