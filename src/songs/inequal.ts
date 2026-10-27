@@ -52,7 +52,7 @@ import {
 import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "../effects/hue";
 
 const inequal = async () => {
-  const anim = new Animation("inequal", 150, 312.00, 3000);
+  const anim = new Animation("inequal", 150, 312.00, 0);
   anim.sync(() => {
     beats(0, 72, () => {
       elements(all, () => {
@@ -162,7 +162,17 @@ const inequal = async () => {
       });
     })
 
-    beats(224, 275, () => {
+    beats(224, 252, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          phase(0.06, () => {
+            constColor({ hue: 0.5000, sat: 1.0000, val: 1.0000 })
+          });
+        });
+      });
+    })
+
+    beats(252, 272, () => {
       elements(all, () => {
         segment(segment_all, () => {
           phase(0.06, () => {
@@ -180,34 +190,98 @@ const inequal = async () => {
       });
     })
 
-    beats(275, 324, () => {
-      elements([1, 5, 9], () => {
+    beats(272, 324, () => {
+      elements([12], () => {
         segment(segment_all, () => {
-          constColor({ hue: 0.5000, sat: 1.0000, val: 1.0000 })
+          constColor({ hue: 0.7427, sat: 0.7170, val: 0.6235 })
         });
       });
     })
 
-    beats(275, 324, () => {
-      elements([2, 6, 10], () => {
+    beats(272, 324, () => {
+      elements([1], () => {
         segment(segment_all, () => {
-          constColor({ hue: 0.5098, sat: 1.0000, val: 1.0000 })
+          constColor({ hue: 0.4927, sat: 0.7170, val: 0.6235 })
         });
       });
     })
 
-    beats(275, 324, () => {
-      elements([3, 7, 11], () => {
+    beats(272, 324, () => {
+      elements([2], () => {
         segment(segment_all, () => {
-          constColor({ hue: 0.5203, sat: 1.0000, val: 1.0000 })
+          constColor({ hue: 0.9927, sat: 0.7170, val: 0.6235 })
         });
       });
     })
 
-    beats(275, 324, () => {
-      elements([4, 8, 12], () => {
+    beats(272, 324, () => {
+      elements([3], () => {
         segment(segment_all, () => {
-          constColor({ hue: 0.5307, sat: 1.0000, val: 1.0000 })
+          constColor({ hue: 0.7427, sat: 0.7170, val: 0.6235 })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([4], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.9927, sat: 0.7170, val: 0.6235 })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([5], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.4927, sat: 0.7170, val: 0.6235 })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.7427, sat: 0.7170, val: 0.6235 })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([7], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.4927, sat: 0.7170, val: 0.6235 })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([8], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.9927, sat: 0.7170, val: 0.6235 })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([9], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.4927, sat: 0.7170, val: 0.6235 })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([10], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.7427, sat: 0.7170, val: 0.6235 })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.9927, sat: 0.7170, val: 0.6235 })
         });
       });
     })
@@ -918,6 +992,112 @@ const inequal = async () => {
       });
     })
 
+    beats(32, 48, () => {
+      elements([11], () => {
+        segment(segment_b1, () => {
+          addEffect({ timed_hue: { offset_factor: { half: { f1: { half: { f1: { linear: { start: 0, end: -0.4 } }, f2: { const_value: { value: -0.4 } } } }, f2: { const_value: { value: -0.4 } } } } } })
+          addEffect({ timed_saturation: { mult_factor_increase: { half: { f1: { half: { f1: { linear: { start: 0, end: 0.3127 } }, f2: { const_value: { value: 0.3127 } } } }, f2: { const_value: { value: 0.3127 } } } } } })
+        });
+      });
+    })
+
+    beats(32, 48, () => {
+      elements([12], () => {
+        segment(segment_b1, () => {
+          addEffect({ timed_hue: { offset_factor: { half: { f1: { half: { f1: { linear: { start: 0, end: -0.46 } }, f2: { const_value: { value: -0.46 } } } }, f2: { const_value: { value: -0.46 } } } } } })
+          addEffect({ timed_saturation: { mult_factor_decrease: { half: { f1: { half: { f1: { linear: { start: 1, end: 0.8192 } }, f2: { const_value: { value: 0.8192 } } } }, f2: { const_value: { value: 0.8192 } } } } } })
+        });
+      });
+    })
+
+    beats(38, 54, () => {
+      elements([1], () => {
+        segment(segment_b1, () => {
+          addEffect({ timed_hue: { offset_factor: { half: { f1: { half: { f1: { linear: { start: 0, end: 0.381 } }, f2: { const_value: { value: 0.381 } } } }, f2: { const_value: { value: 0.381 } } } } } })
+          addEffect({ timed_saturation: { mult_factor_decrease: { half: { f1: { half: { f1: { linear: { start: 1, end: 0.1404 } }, f2: { const_value: { value: 0.1404 } } } }, f2: { const_value: { value: 0.1404 } } } } } })
+        });
+      });
+    })
+
+    beats(38, 54, () => {
+      elements([10], () => {
+        segment(segment_b1, () => {
+          addEffect({ timed_hue: { offset_factor: { half: { f1: { half: { f1: { linear: { start: 0, end: -0.467 } }, f2: { const_value: { value: -0.467 } } } }, f2: { const_value: { value: -0.467 } } } } } })
+        });
+      });
+    })
+
+    beats(44, 60, () => {
+      elements([2], () => {
+        segment(segment_b1, () => {
+          addEffect({ timed_hue: { offset_factor: { half: { f1: { half: { f1: { linear: { start: 0, end: 0.207 } }, f2: { const_value: { value: 0.207 } } } }, f2: { const_value: { value: 0.207 } } } } } })
+          addEffect({ timed_saturation: { mult_factor_decrease: { half: { f1: { half: { f1: { linear: { start: 1, end: 0.8192 } }, f2: { const_value: { value: 0.8192 } } } }, f2: { const_value: { value: 0.8192 } } } } } })
+        });
+      });
+    })
+
+    beats(44, 60, () => {
+      elements([9], () => {
+        segment(segment_b1, () => {
+          addEffect({ timed_hue: { offset_factor: { half: { f1: { half: { f1: { linear: { start: 0, end: 0.267 } }, f2: { const_value: { value: 0.267 } } } }, f2: { const_value: { value: 0.267 } } } } } })
+          addEffect({ timed_saturation: { mult_factor_increase: { half: { f1: { half: { f1: { linear: { start: 0, end: 0.3127 } }, f2: { const_value: { value: 0.3127 } } } }, f2: { const_value: { value: 0.3127 } } } } } })
+        });
+      });
+    })
+
+    beats(50, 66, () => {
+      elements([3], () => {
+        segment(segment_b1, () => {
+          addEffect({ timed_hue: { offset_factor: { half: { f1: { half: { f1: { linear: { start: 0, end: 0.1 } }, f2: { const_value: { value: 0.1 } } } }, f2: { const_value: { value: 0.1 } } } } } })
+          addEffect({ timed_saturation: { mult_factor_increase: { half: { f1: { half: { f1: { linear: { start: 0, end: 0.3127 } }, f2: { const_value: { value: 0.3127 } } } }, f2: { const_value: { value: 0.3127 } } } } } })
+        });
+      });
+    })
+
+    beats(50, 66, () => {
+      elements([8], () => {
+        segment(segment_b1, () => {
+          addEffect({ timed_hue: { offset_factor: { half: { f1: { half: { f1: { linear: { start: 0, end: 0.04 } }, f2: { const_value: { value: 0.04 } } } }, f2: { const_value: { value: 0.04 } } } } } })
+          addEffect({ timed_saturation: { mult_factor_decrease: { half: { f1: { half: { f1: { linear: { start: 1, end: 0.8192 } }, f2: { const_value: { value: 0.8192 } } } }, f2: { const_value: { value: 0.8192 } } } } } })
+        });
+      });
+    })
+
+    beats(56, 72, () => {
+      elements([4], () => {
+        segment(segment_b1, () => {
+          addEffect({ timed_hue: { offset_factor: { half: { f1: { half: { f1: { linear: { start: 0, end: 0.033 } }, f2: { const_value: { value: 0.033 } } } }, f2: { const_value: { value: 0.033 } } } } } })
+        });
+      });
+    })
+
+    beats(56, 72, () => {
+      elements([7], () => {
+        segment(segment_b1, () => {
+          addEffect({ timed_hue: { offset_factor: { half: { f1: { half: { f1: { linear: { start: 0, end: -0.119 } }, f2: { const_value: { value: -0.119 } } } }, f2: { const_value: { value: -0.119 } } } } } })
+          addEffect({ timed_saturation: { mult_factor_decrease: { half: { f1: { half: { f1: { linear: { start: 1, end: 0.1404 } }, f2: { const_value: { value: 0.1404 } } } }, f2: { const_value: { value: 0.1404 } } } } } })
+        });
+      });
+    })
+
+    beats(62, 72, () => {
+      elements([5], () => {
+        segment(segment_b1, () => {
+          addEffect({ timed_hue: { offset_factor: { half: { f1: { linear: { start: 0, end: -0.233 } }, f2: { const_value: { value: -0.233 } } } } } })
+          addEffect({ timed_saturation: { mult_factor_increase: { half: { f1: { linear: { start: 0, end: 0.3127 } }, f2: { const_value: { value: 0.3127 } } } } } })
+        });
+      });
+    })
+
+    beats(62, 72, () => {
+      elements([6], () => {
+        segment(segment_b1, () => {
+          addEffect({ timed_hue: { offset_factor: { half: { f1: { linear: { start: 0, end: -0.293 } }, f2: { const_value: { value: -0.293 } } } } } })
+          addEffect({ timed_saturation: { mult_factor_decrease: { half: { f1: { linear: { start: 1, end: 0.8192 } }, f2: { const_value: { value: 0.8192 } } } } } })
+        });
+      });
+    })
+
     beats(72, 120, () => {
       elements([1], () => {
         segment(segment_rand, () => {
@@ -1238,7 +1418,7 @@ const inequal = async () => {
       cycle(7, () => {
         elements(all, () => {
           segment(segment_all, () => {
-            pulse({ low: 0.25, staticPhase: 0.25 })
+            pulse({ low: 0.5, staticPhase: 0.25 })
           });
         });
       });
@@ -1257,7 +1437,7 @@ const inequal = async () => {
     beats(143, 147, () => {
       elements(all, () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { half: { f1: { linear: { start: 1, end: 0.3 } }, f2: { const_value: { value: 0.3 } } } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { half: { f1: { linear: { start: 1, end: 0.6 } }, f2: { const_value: { value: 0.6 } } } } } })
         });
       });
     })
@@ -1265,7 +1445,7 @@ const inequal = async () => {
     beats(147, 171, () => {
       elements([1], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.3 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.6 } } } })
         });
       });
     })
@@ -1273,7 +1453,7 @@ const inequal = async () => {
     beats(147, 165, () => {
       elements([2], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.3 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.6 } } } })
         });
       });
     })
@@ -1281,7 +1461,7 @@ const inequal = async () => {
     beats(147, 159, () => {
       elements([3], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.3 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.6 } } } })
         });
       });
     })
@@ -1289,7 +1469,7 @@ const inequal = async () => {
     beats(147, 153, () => {
       elements([4], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.3 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.6 } } } })
         });
       });
     })
@@ -1297,7 +1477,7 @@ const inequal = async () => {
     beats(147, 153, () => {
       elements([7], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.3 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.6 } } } })
         });
       });
     })
@@ -1305,7 +1485,7 @@ const inequal = async () => {
     beats(147, 159, () => {
       elements([8], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.3 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.6 } } } })
         });
       });
     })
@@ -1313,7 +1493,7 @@ const inequal = async () => {
     beats(147, 165, () => {
       elements([9], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.3 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.6 } } } })
         });
       });
     })
@@ -1321,7 +1501,7 @@ const inequal = async () => {
     beats(147, 171, () => {
       elements([10], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.3 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.6 } } } })
         });
       });
     })
@@ -1329,7 +1509,7 @@ const inequal = async () => {
     beats(147, 177, () => {
       elements([11], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.3 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.6 } } } })
         });
       });
     })
@@ -1337,7 +1517,7 @@ const inequal = async () => {
     beats(147, 177, () => {
       elements([12], () => {
         segment(segment_all, () => {
-          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.3 } } } })
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: 0.6 } } } })
         });
       });
     })
@@ -1345,7 +1525,7 @@ const inequal = async () => {
     beats(171, 192, () => {
       elements([1], () => {
         segment(segment_all, () => {
-          fade({ start: 0.4, end: 1 })
+          fade({ start: 0.6, end: 1 })
         });
       });
     })
@@ -1353,7 +1533,7 @@ const inequal = async () => {
     beats(165, 192, () => {
       elements([2], () => {
         segment(segment_all, () => {
-          fade({ start: 0.4, end: 1 })
+          fade({ start: 0.6, end: 1 })
         });
       });
     })
@@ -1361,7 +1541,7 @@ const inequal = async () => {
     beats(159, 192, () => {
       elements([3], () => {
         segment(segment_all, () => {
-          fade({ start: 0.4, end: 1 })
+          fade({ start: 0.6, end: 1 })
         });
       });
     })
@@ -1369,7 +1549,7 @@ const inequal = async () => {
     beats(153, 192, () => {
       elements([4], () => {
         segment(segment_all, () => {
-          fade({ start: 0.4, end: 1 })
+          fade({ start: 0.6, end: 1 })
         });
       });
     })
@@ -1377,7 +1557,7 @@ const inequal = async () => {
     beats(147, 192, () => {
       elements([5], () => {
         segment(segment_all, () => {
-          fade({ start: 0.4, end: 1 })
+          fade({ start: 0.6, end: 1 })
         });
       });
     })
@@ -1385,7 +1565,7 @@ const inequal = async () => {
     beats(147, 192, () => {
       elements([6], () => {
         segment(segment_all, () => {
-          fade({ start: 0.4, end: 1 })
+          fade({ start: 0.6, end: 1 })
         });
       });
     })
@@ -1393,7 +1573,7 @@ const inequal = async () => {
     beats(153, 192, () => {
       elements([7], () => {
         segment(segment_all, () => {
-          fade({ start: 0.4, end: 1 })
+          fade({ start: 0.6, end: 1 })
         });
       });
     })
@@ -1401,7 +1581,7 @@ const inequal = async () => {
     beats(159, 192, () => {
       elements([8], () => {
         segment(segment_all, () => {
-          fade({ start: 0.4, end: 1 })
+          fade({ start: 0.6, end: 1 })
         });
       });
     })
@@ -1409,7 +1589,7 @@ const inequal = async () => {
     beats(165, 192, () => {
       elements([9], () => {
         segment(segment_all, () => {
-          fade({ start: 0.4, end: 1 })
+          fade({ start: 0.6, end: 1 })
         });
       });
     })
@@ -1417,7 +1597,7 @@ const inequal = async () => {
     beats(171, 192, () => {
       elements([10], () => {
         segment(segment_all, () => {
-          fade({ start: 0.4, end: 1 })
+          fade({ start: 0.6, end: 1 })
         });
       });
     })
@@ -1425,7 +1605,7 @@ const inequal = async () => {
     beats(177, 192, () => {
       elements([11], () => {
         segment(segment_all, () => {
-          fade({ start: 0.4, end: 1 })
+          fade({ start: 0.6, end: 1 })
         });
       });
     })
@@ -1433,7 +1613,7 @@ const inequal = async () => {
     beats(177, 192, () => {
       elements([12], () => {
         segment(segment_all, () => {
-          fade({ start: 0.4, end: 1 })
+          fade({ start: 0.6, end: 1 })
         });
       });
     })
@@ -1442,7 +1622,7 @@ const inequal = async () => {
       cycle(6, () => {
         elements(all, () => {
           segment(segment_all, () => {
-            pulse({ low: 0.25, staticPhase: 0.25 })
+            pulse({ low: 0.5, staticPhase: 0.25 })
           });
         });
       });
@@ -1628,7 +1808,7 @@ const inequal = async () => {
       cycle(3, () => {
         elements(all, () => {
           segment(segment_all, () => {
-            pulse({ low: 0.25, staticPhase: 0.25 })
+            pulse({ low: 0.5, staticPhase: 0.25 })
           });
         });
       });
@@ -1642,10 +1822,27 @@ const inequal = async () => {
       });
     })
 
-    beats(224, 275, () => {
+    beats(224, 252, () => {
       elements(all, () => {
         segment(segment_all, () => {
           addEffect({ position_hue: { offset_factor: { linear: { start: 0, end: 0.04 } } } })
+        });
+      });
+    })
+
+    beats(252, 272, () => {
+      elements(all, () => {
+        segment(segment_all, () => {
+          addEffect({ position_hue: { offset_factor: { linear: { start: 0, end: 0.04 } } } })
+        });
+      });
+    })
+
+    beats(252, 272, () => {
+      elements(all, () => {
+        segment(segment_rad, () => {
+          addEffect({ position_hue: { offset_factor: { fixed_window: { start: 0.5, end: 1, outside_value: 0, func: { const_value: { value: 0.22 } } } } } })
+          addEffect({ position_saturation: { mult_factor_decrease: { fixed_window: { start: 0.5, end: 1, outside_value: 1, func: { linear: { start: 0.55, end: 1 } } } } } })
         });
       });
     })
@@ -1684,6 +1881,294 @@ const inequal = async () => {
       });
     })
 
+    beats(272, 324, () => {
+      elements([12], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_hue: { offset_factor: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([12], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: 0.25 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([12], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: -0.504 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([1], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_hue: { offset_factor: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([1], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: 0.25 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([1], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: -0.504 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([2], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_hue: { offset_factor: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([2], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: 0.25 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([2], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: -0.504 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([3], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_hue: { offset_factor: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([3], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: 0.25 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([3], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: -0.504 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([4], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_hue: { offset_factor: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([4], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: 0.25 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([4], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: -0.504 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([5], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_hue: { offset_factor: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([5], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: 0.25 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([5], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: -0.504 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([6], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_hue: { offset_factor: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([6], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: 0.25 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([6], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: -0.504 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([7], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_hue: { offset_factor: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([7], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: 0.25 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([7], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: -0.504 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([8], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_hue: { offset_factor: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([8], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: 0.25 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([8], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: -0.504 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([9], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_hue: { offset_factor: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.504 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([9], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: 0.25 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([9], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: -0.504 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([10], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_hue: { offset_factor: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -0.25 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([10], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: 0.25 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([10], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: -0.504 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([11], () => {
+        segment(segment_all, () => {
+          addEffect({ timed_hue: { offset_factor: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: -0.504 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -0.254 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([11], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: 0.25 } } } })
+        });
+      });
+    })
+
+    beats(272, 324, () => {
+      elements([11], () => {
+        segment(segment_arc, () => {
+          addEffect({ snake_hue: { head: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: 0.75 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: 0.5 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, tail_length: { comb2: { f1: { fixed_window: { start: 0, end: 0.0481, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.0481, end: 0.1058, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1058, end: 0.1635, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.1635, end: 0.2212, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2212, end: 0.2788, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.2788, end: 0.3365, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3365, end: 0.3942, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.3942, end: 0.4519, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.4519, end: 0.5096, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5096, end: 0.5673, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.5673, end: 0.625, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.625, end: 0.6827, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.6827, end: 0.7404, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7404, end: 0.7981, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.7981, end: 0.8558, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.8558, end: 0.9135, outside_value: 0, func: { const_value: { value: 0.25 } } } }, amount1: 1, f2: { comb2: { f1: { fixed_window: { start: 0.9135, end: 0.9712, outside_value: 0, func: { const_value: { value: -1 } } } }, amount1: 1, f2: { fixed_window: { start: 0.9712, end: 1, outside_value: 0, func: { const_value: { value: -1 } } } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, amount2: 1 } }, cyclic: true, offset_factor: { const_value: { value: -0.504 } } } })
+        });
+      });
+    })
+
     beats(275, 324, () => {
       cycle(1, () => {
         elements(all, () => {
@@ -1694,32 +2179,38 @@ const inequal = async () => {
       });
     })
 
-    beats(276, 324, () => {
-      elements([2, 6, 10], () => {
-        segment(segment_all, () => {
-          addEffect({ timed_hue: { offset_factor: { half: { f1: { half: { f1: { linear: { start: 0, end: 0.03 } }, f2: { const_value: { value: 0.03 } } } }, f2: { const_value: { value: 0.03 } } } } } })
-        });
-      });
-    })
-
-    beats(276, 324, () => {
-      elements([3, 7, 11], () => {
-        segment(segment_all, () => {
-          addEffect({ timed_hue: { offset_factor: { half: { f1: { half: { f1: { linear: { start: 0, end: 0.06 } }, f2: { const_value: { value: 0.06 } } } }, f2: { const_value: { value: 0.06 } } } } } })
-        });
-      });
-    })
-
-    beats(276, 324, () => {
-      elements([4, 8, 12], () => {
-        segment(segment_all, () => {
-          addEffect({ timed_hue: { offset_factor: { half: { f1: { half: { f1: { linear: { start: 0, end: 0.089 } }, f2: { const_value: { value: 0.089 } } } }, f2: { const_value: { value: 0.089 } } } } } })
-        });
-      });
-    })
-
     beats(275, 324, () => {
+      cycle(5, () => {
+        elements(all, () => {
+          segment(segment_centric, () => {
+            brightness({ value: 0.5 })
+          });
+        });
+      });
+    })
+
+    beats(275, 280, () => {
       cycle(0.5, () => {
+        elements(all, () => {
+          segment(segment_centric, () => {
+            addEffect({ snake_hue: { head: { linear: { start: 0, end: 1 } }, tail_length: { const_value: { value: 0.3 } }, cyclic: true, offset_factor: { const_value: { value: 0.02 } } } })
+          });
+        });
+      });
+    })
+
+    beats(280, 285, () => {
+      cycle(1, () => {
+        elements(all, () => {
+          segment(segment_centric, () => {
+            addEffect({ snake_hue: { head: { linear: { start: 0, end: 1 } }, tail_length: { const_value: { value: 0.3 } }, cyclic: true, offset_factor: { const_value: { value: 0.02 } } } })
+          });
+        });
+      });
+    })
+
+    beats(285, 324, () => {
+      cycle(1.5, () => {
         elements(all, () => {
           segment(segment_centric, () => {
             addEffect({ snake_hue: { head: { linear: { start: 0, end: 1 } }, tail_length: { const_value: { value: 0.3 } }, cyclic: true, offset_factor: { const_value: { value: 0.02 } } } })
@@ -2204,12 +2695,10 @@ const inequal = async () => {
     })
 
     beats(275, 324, () => {
-      cycle(4, () => {
+      cycle(5, () => {
         elements(all, () => {
-          segment(segment_all, () => {
-            phase(0.5, () => {
-              snake({ tailLength: 0.5, cyclic: true, reverse: false })
-            });
+          segment(segment_centric, () => {
+            snakeSlowFast({ tailLength: 1 })
           });
         });
       });
@@ -2386,8 +2875,28 @@ const inequal = async () => {
       });
     })
 
-    beats(275, 324, () => {
+    beats(275, 280, () => {
       cycle(1, () => {
+        elements(all, () => {
+          segment(segment_all, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0, end: 1 } }, tail_length: { const_value: { value: 0.2 } }, cyclic: false, mult_factor_increase: { linear: { start: 0, end: 0.8 } } } })
+          });
+        });
+      });
+    })
+
+    beats(280, 285, () => {
+      cycle(1.25, () => {
+        elements(all, () => {
+          segment(segment_all, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0, end: 1 } }, tail_length: { const_value: { value: 0.2 } }, cyclic: false, mult_factor_increase: { linear: { start: 0, end: 0.8 } } } })
+          });
+        });
+      });
+    })
+
+    beats(285, 324, () => {
+      cycle(1.5, () => {
         elements(all, () => {
           segment(segment_all, () => {
             addEffect({ snake_brightness: { head: { linear: { start: 0, end: 1 } }, tail_length: { const_value: { value: 0.2 } }, cyclic: false, mult_factor_increase: { linear: { start: 0, end: 0.8 } } } })
@@ -2416,7 +2925,7 @@ const inequal = async () => {
       });
     })
 
-    beats(275, 324, () => {
+    beats(275, 280, () => {
       cycle(1, () => {
         elements(all, () => {
           segment(segment_arc, () => {
@@ -2426,7 +2935,27 @@ const inequal = async () => {
       });
     })
 
-    beats(275, 324, () => {
+    beats(280, 285, () => {
+      cycle(1.25, () => {
+        elements(all, () => {
+          segment(segment_arc, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0, end: 1 } }, tail_length: { const_value: { value: 0.35 } }, cyclic: true, mult_factor_increase: { linear: { start: 0, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(285, 324, () => {
+      cycle(1.5, () => {
+        elements(all, () => {
+          segment(segment_arc, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0, end: 1 } }, tail_length: { const_value: { value: 0.35 } }, cyclic: true, mult_factor_increase: { linear: { start: 0, end: 1 } } } })
+          });
+        });
+      });
+    })
+
+    beats(275, 288, () => {
       cycle(12, () => {
         elements(all, () => {
           segment(segment_rand, () => {
@@ -2437,7 +2966,18 @@ const inequal = async () => {
       });
     })
 
-    beats(275, 324, () => {
+    beats(288, 324, () => {
+      cycle(6, () => {
+        elements(all, () => {
+          segment(segment_rand, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0, end: 1 } }, tail_length: { const_value: { value: 0.25 } }, cyclic: true, mult_factor_increase: { linear: { start: 0, end: 1 } } } })
+            addEffect({ snake_saturation: { head: { linear: { start: 0, end: 1 } }, tail_length: { const_value: { value: 0.25 } }, cyclic: true, mult_factor_decrease: { linear: { start: 1, end: 0.3 } } } })
+          });
+        });
+      });
+    })
+
+    beats(275, 282, () => {
       cycle(9, () => {
         elements(all, () => {
           segment(segment_rand, () => {
