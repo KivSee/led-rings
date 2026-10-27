@@ -163,6 +163,35 @@ function formatFloatFunction(obj: unknown): string {
     const v = o.half as Record<string, unknown>
     return `half: { f1: { ${formatFloatFunction(v.f1)} }, f2: { ${formatFloatFunction(v.f2)} } }`
   }
+  if (o.comb2 && typeof o.comb2 === 'object') {
+    // amount1 * f1 + amount2 * f2
+    const v = o.comb2 as Record<string, unknown>
+    const a1 = typeof v.amount1 === 'number' ? v.amount1 : 1
+    const a2 = typeof v.amount2 === 'number' ? v.amount2 : 1
+    return `comb2: { f1: { ${formatFloatFunction(v.f1)} }, amount1: ${formatParamValue(a1)}, f2: { ${formatFloatFunction(v.f2)} }, amount2: ${formatParamValue(a2)} }`
+  }
+  if (o.repeat && typeof o.repeat === 'object') {
+    const v = o.repeat as Record<string, unknown>
+    const n = typeof v.numberOfTimes === 'number' ? v.numberOfTimes : 1
+    return `repeat: { numberOfTimes: ${formatParamValue(n)}, funcToRepeat: { ${formatFloatFunction(v.funcToRepeat)} } }`
+  }
+  if (o.fixed_window && typeof o.fixed_window === 'object') {
+    // func stretched over start..end, outside_value elsewhere
+    const v = o.fixed_window as Record<string, unknown>
+    const start = typeof v.start === 'number' ? v.start : 0
+    const end = typeof v.end === 'number' ? v.end : 1
+    const outside = typeof v.outside_value === 'number' ? v.outside_value : 0
+    const cyclic = v.cyclic === true ? ', cyclic: true' : ''
+    return `fixed_window: { start: ${formatParamValue(start)}, end: ${formatParamValue(end)}${cyclic}, outside_value: ${formatParamValue(outside)}, func: { ${formatFloatFunction(v.func)} } }`
+  }
+  if (o.moving_window && typeof o.moving_window === 'object') {
+    // inside_value between start(x) and end(x), outside_value elsewhere
+    const v = o.moving_window as Record<string, unknown>
+    const inside = typeof v.inside_value === 'number' ? v.inside_value : 1
+    const outside = typeof v.outside_value === 'number' ? v.outside_value : 0
+    const cyclic = v.cyclic === true ? ', cyclic: true' : ''
+    return `moving_window: { start: { ${formatFloatFunction(v.start)} }, end: { ${formatFloatFunction(v.end)} }, inside_value: ${formatParamValue(inside)}, outside_value: ${formatParamValue(outside)}${cyclic} }`
+  }
   return 'const_value: { value: 1 }'
 }
 

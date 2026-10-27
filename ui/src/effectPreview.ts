@@ -58,6 +58,9 @@ type Sin = { min: number; max: number; phase: number; repeats: number }
 type Steps = { num_steps: number; diff_per_step: number; first_step_value: number }
 type Half = { f1: FloatFunc; f2: FloatFunc }
 type Comb2 = { f1: FloatFunc; amount1: number; f2: FloatFunc; amount2: number }
+type Repeat = { numberOfTimes: number; funcToRepeat: FloatFunc }
+type FixedWindow = { start: number; end: number; cyclic?: boolean; outside_value?: number; func: FloatFunc }
+type MovingWindow = { start: FloatFunc; end: FloatFunc; inside_value?: number; outside_value?: number; cyclic?: boolean }
 
 type FloatFunc = {
   const_value?: ConstValue
@@ -67,6 +70,9 @@ type FloatFunc = {
   steps?: Steps
   half?: Half
   comb2?: Comb2
+  repeat?: Repeat
+  fixed_window?: FixedWindow
+  moving_window?: MovingWindow
 }
 
 /** Evaluate a float function at normalized time t in [0, 1]. */
@@ -92,12 +98,31 @@ export function evalFloat(t: number, f: FloatFunc | undefined): number {
     return t < 0.5 ? evalFloat(t * 2, f.half.f1) : evalFloat((t - 0.5) * 2, f.half.f2)
   }
   if (f.comb2 !== undefined) {
-    const v1 = evalFloat(t, f.comb2.f1)
-    const v2 = evalFloat(t, f.comb2.f2)
-    const a1 = f.comb2.amount1
-    const a2 = f.comb2.amount2
-    const sum = a1 + a2
-    return sum === 0 ? 0 : (a1 * v1 + a2 * v2) / sum
+    // weighted sum, as the renderer does (comb2.h) -- not an average
+    return (f.comb2.amount1 ?? 0) * evalFloat(t, f.comb2.f1) + (f.comb2.amount2 ?? 0) * evalFloat(t, f.comb2.f2)
+  }
+  if (f.repeat !== undefined) {
+    return evalFloat((t * (f.repeat.numberOfTimes ?? 0)) % 1, f.repeat.funcToRepeat)
+  }
+  if (f.fixed_window !== undefined) {
+    // func stretched over start..end; outside_value elsewhere; cyclic wraps t into the window (fixed_window.h)
+    const { start = 0, end = 0, cyclic, outside_value = 0, func } = f.fixed_window
+    const length = end - start
+    if (length <= 0) return outside_value
+    let x = t
+    if (cyclic) { const fromStart = x - start; x = start + (fromStart - Math.floor(fromStart)) }
+    if (x < start || x > end) return outside_value
+    return evalFloat((x - start) / length, func)
+  }
+  if (f.moving_window !== undefined) {
+    // inside_value while t is between start(t) and end(t) (moving_window.h)
+    const { inside_value = 0, outside_value = 0, cyclic } = f.moving_window
+    const start = evalFloat(t, f.moving_window.start)
+    const end = evalFloat(t, f.moving_window.end)
+    if (end < start) return outside_value
+    let x = t
+    if (cyclic) { const fromStart = x - start; x = start + (fromStart - Math.floor(fromStart)) }
+    return x >= start && x <= end ? inside_value : outside_value
   }
   return 0
 }
