@@ -1,0 +1,93 @@
+{
+  "party5": {
+    "0": {
+      "option": "Sparse breaths, 15%",
+      "variation": 0,
+      "speed": "medium",
+      "hit": "offbeat"
+    },
+    "1": {
+      "option": "Sparse rain, 15%",
+      "variation": 0,
+      "speed": "medium",
+      "hit": "offbeat"
+    },
+    "2": {
+      "option": "Starfield ×4, small, on the beat",
+      "variation": 0,
+      "speed": "fast",
+      "hit": "offbeat"
+    },
+    "3": {
+      "option": "Fireflies",
+      "variation": 0,
+      "speed": "medium",
+      "hit": "offbeat"
+    },
+    "4": {
+      "option": "Starfield ×1, tiny, on the beat",
+      "variation": 0,
+      "speed": "fast",
+      "hit": "offbeat"
+    },
+    "overlay": {
+      "roles": "AAAB",
+      "blocks": {
+        "0": [
+          "Inner / outer by role"
+        ],
+        "1": [
+          "Fade: beat steps, square / the rest"
+        ],
+        "2": [
+          "Fade: snakes spin out, square / the rest"
+        ],
+        "3": [
+          "Fade: ripple out, square / the rest"
+        ]
+      }
+    }
+  },
+  "chorus3": {
+    "0": {
+      "option": "Arc breath odd-even",
+      "variation": 0,
+      "speed": "medium",
+      "hit": "beat"
+    },
+    "1": {
+      "option": "Bounce wave",
+      "variation": 0,
+      "speed": "medium",
+      "hit": "beat"
+    },
+    "2": {
+      "option": "Ticks odd-even",
+      "variation": 0,
+      "speed": "fast",
+      "hit": "beat"
+    }
+  },
+  "verse2": {
+    "0": {
+      "option": "Sun core, warm band",
+      "variation": 0,
+      "speed": "medium",
+      "hit": "beat"
+    },
+    "1": {
+      "option": "Petals, slow drift",
+      "variation": 0,
+      "speed": "fast",
+      "hit": "beat"
+    }
+  },
+  "flow": {
+    "0": {
+      "option": "Comets along all ×2, pale",
+      "variation": 0,
+      "speed": "medium",
+      "hit": "beat"
+    }
+  }
+}

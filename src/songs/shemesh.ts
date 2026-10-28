@@ -42,6 +42,7 @@ import {
   staticSnake,
 } from "../effects/motion";
 import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "../effects/hue";
+import { galleryMix, galleryOverlay, galleryRange, type MixPick, type OverlayPick } from "./shemesh-gallery-options";
 
 const shemesh = async () => {
   const anim = new Animation("shemesh", 135, 321.47, 0, [3096,3544,3992,4440,4888,5336,5784,6232,6680,7128,7576,8024,8472,8920,9368,9816,10264,10712,11160,11608,12056,12504,12952,13400,13848,14296,14744,15192,15640,16088,16536,16984,17432,17880,18328,18776,19224,19672,20120,20568,21016,21464,21912,22360,22808,23256,23704,24152,24600,25048,25496,25944,26392,26840,27288,27736,28184,28632,29080,29528,29976,30424,30872,31320,31768,32216,32664,33112,33560,34008,34456,34904,35352,35800,36248,36696,37144,37592,38040,38488,38936,39384,39832,40280,40728,41176,41624,42072,42520,42968,43416,43864,44312,44760,45208,45656,46104,46552,47000,47448,47896,48344,48792,49240,49688,50136,50584,51032,51480,51928,52376,52824,53272,53720,54168,54616,55064,55512,55960,56408,56856,57304,57752,58200,58648,59096,59544,59992,60440,60888,61336,61784,62232,62680,63128,63576,64024,64472,64920,65368,65816,66264,66712,67160,67608,68056,68493,68941,69389,69827,70275,70723,71160,71608,72056,72493,72941,73389,73827,74275,74723,75171,75608,76056,76493,76941,77389,77827,78275,78723,79160,79608,80045,80493,80941,81389,81827,82296,82723,83171,83619,84067,84504,84952,85400,85848,86285,86733,87171,87619,88056,88493,88941,89389,89827,90275,90712,91160,91608,92056,92493,92941,93389,93837,94275,94723,95171,95608,96056,96504,96941,97389,97827,98275,98723,99171,99608,100056,100493,100941,101389,101837,102275,102723,103160,103608,104056,104504,104941,105389,105827,106275,106723,107171,107608,108056,108493,108941,109389,109837,110275,110723,111160,111608,112045,112504,112941,113389,113827,114275,114712,115171,115608,116056,116493,116941,117389,117837,118285,118733,119171,119619,120056,120504,120952,121389,121837,122285,122723,123171,123608,124056,124504,124952,125389,125837,126275,126723,127160,127608,128056,128504,128941,129389,129837,130285,130723,131171,131619,132056,132504,132952,133389,133837,134275,134723,135171,135619,136056,136504,136952,137389,137827,138275,138723,139171,139608,140056,140504,140941,141389,141837,142275,142723,143171,143619,144056,144504,144941,145389,145837,146275,146723,147171,147608,148067,148515,148963,149389,149837,150275,150723,151171,151608,152056,152504,152941,153389,153827,154275,154723,155171,155608,156056,156504,156941,157389,157837,158275,158723,159160,159608,160056,160504,160941,161389,161827,162275,162723,163171,163608,164056,164504,164952,165389,165837,166275,166723,167160,167608,168045,168493,168941,169389,169827,170275,170712,171160,171608,172056,172493,172941,173389,173827,174275,174723,175160,175608,176045,176493,176941,177389,177827,178275,178723,179160,179608,180056,180493,180941,181389,181837,182296,182744,183160,183608,184056,184504,184952,185389,185837,186275,186723,187171,187608,188056,188504,188941,189389,189837,190275,190723,191160,191608,192056,192504,192941,193389,193837,194285,194723,195171,195608,196056,196493,196952,197389,197837,198275,198723,199171,199608,200056,200504,200952,201400,201837,202285,202723,203171,203608,204056,204504,204941,205389,205837,206275,206723,207171,207608,208056,208504,208941,209389,209837,210285,210723,211160,211608,212067,212525,212963,213389,213837,214275,214723,215160,215608,216056,216493,216941,217389,217827,218275,218723,219171,219608,220056,220493,220941,221379,221837,222275,222723,223160,223608,224056,224504,224941,225389,225827,226275,226712,227171,227608,228056,228493,228941,229379,229837,230275,230723,231160,231608,232056,232504,232941,233389,233827,234275,234723,235171,235608,236056,236493,236941,237389,237827,238275,238723,239160,239608,240056,240515,240952,241400,241837,242285,242723,243171,243608,244056,244504,244952,245389,245837,246285,246723,247171,247608,248056,248504,248941,249389,249837,250275,250723,251171,251619,252067,252504,252952,253400,253837,254285,254733,255171,255619,256067,256504,256952,257389,257837,258285,258723,259171,259619,260056,260493,260952,261389,261837,262275,262723,263171,263619,264056,264504,264952,265400,265837,266285,266733,267171,267619,268067,268504,268952,269389,269837,270285,270723,271171,271619,272067,272504,272941,273389,273837,274275,274723,275171,275619,276056,276493,276941,277389,277837,278285,278723,279171,279619,280056,280504,280952,281389,281827,282285,282723,283181,283619,284067,284504,284952,285400,285837,286285,286723,287171,287608,288056,288504,288941,289389,289837,290285,290723,291171,291619,292067,292504,292952,293400,293837,294285,294723,295171,295619,296067,296504,296952,297389,297827,298285,298723,299171,299619,300056,300504,300952,301389,301837,302285,302733,303171,303619,304067,304504,304952,305400,305837,306285,306723,307171,307619,308056,308504,308952,309400,309837,310285,310733,311171,311619,312067,312504,312952,313389,313837,314285,314723]);
@@ -119,6 +120,16 @@ const shemesh = async () => {
           stars(k, peak, STAR_FADE_START + i * step, STAR_FADE_START + (i + 1) * step, 1 - (i + 0.5) / STAR_FADE_STEPS);
       }));
       elements(STAR_PEAK.map(([ring]) => ring), () => beats(0, 4, () => fade({ start: 0, end: 1 })));
+      // The 6 bottom rings come in over the first 4 bars from their outer side: along rad the sky shows only from an
+      // edge moving steadily from the outer side (1) to the inner side (0), so the lit part grows from 1 - 1 to 0 - 1.
+      // Inside the edge is blacked out by a dark snake from 0 up to just below it.
+      const BOTTOM_IN = 16;
+      elements([3, 4, 5, 6, 7, 8], () => beats(0, BOTTOM_IN, () => segment("rad", () => {
+        addEffect({ snake_brightness: {
+          head: { linear: { start: 0.999, end: -0.001 } }, tail_length: { linear: { start: 1.009, end: 0.009 } }, cyclic: false,
+          mult_factor_decrease: { const_value: { value: 0 } },
+        } });
+      })));
     });
 
     // Sun up, beats 64-116: the sun moves across the sky, from ring 9 over the top to ring 1. It fades in from beat
@@ -722,6 +733,12 @@ const shemesh = async () => {
         addEffect({ timed_brightness: { mult_factor_increase: L(1, 1 - lastFlashAt(VERSE1_END)) } });
         addEffect({ timed_saturation: { mult_factor_decrease: L(LAST_FLASH_SAT, LAST_FLASH_SAT + (1 - LAST_FLASH_SAT) * lastFlashAt(VERSE1_END)) } });
       }));
+      // The whole verse, over everything else: a small pulse on every beat, the scene dipping to VERSE1_PULSE on the
+      // beat and coming back up linearly to full in the first quarter of the beat.
+      const VERSE1_PULSE = 0.75;
+      elements(all, () => beats(VERSE1_START, VERSE1_END, () => cycle(1, () => addEffect({
+        timed_brightness: { mult_factor_decrease: { half: { f1: { half: { f1: L(VERSE1_PULSE, 1), f2: K(1) } }, f2: K(1) } } },
+      }))));
     });
 
     // Bar 66, up to the chorus' fade-in: the last flash of verse 1 (bar 65) fading out on its own, after the verse.
@@ -820,7 +837,7 @@ const shemesh = async () => {
       const CHORUS1_RAYS_START = CHORUS1_START + CHORUS1_CIRCLE_PHRASES * CHORUS1_PHRASE;
       const RAY_BAR = 0.5, RAY_GROUPS = 2, RAY_CYCLE = 2;
       // Where the core ends and the rays start along rad, and how long a ray takes to fade (twice its growing).
-      const RAY_FROM = 0.6, RAY_FADE = 2 * RAY_BAR;
+      const RAY_FROM = 0.4, RAY_FADE = 2 * RAY_BAR;
       const rayWindow = (start: number, end: number) => addEffect({
         position_brightness: { mult_factor_increase: { fixed_window: { start, end, outside_value: 0, func: K(1) } } },
       });
@@ -852,6 +869,31 @@ const shemesh = async () => {
         beats(CHORUS1_FILL_START + CHORUS1_FILL, CHORUS1_FILL_START + CHORUS1_FILL + CHORUS1_UNFILL, () =>
           addEffect({ snake_brightness: { head: K(1.005), tail_length: L(1.015, 0), cyclic: false, mult_factor_increase: K(1) } }));
       }));
+      // Bars 75-79 (beats 296-316), over the rays and the fill: dark confetti, a snake on rand a third of the pixels
+      // long, jumping a quarter of rand back on every off-beat (half a beat late; a lap a bar, the other way to the
+      // shine), dimming the pixels it covers down to DARK_CONFETTI and back on a sin, so the lit parts get moving
+      // darker specks. It comes after the rays, core and fill so it dims them too. When the steps end it stops where it
+      // is and fades out over CONFETTI_FADE beats, in CONFETTI_FADE_STEPS windows of weakening strength (a snake's
+      // strength is a function along the snake, not of time).
+      const DARK_CONFETTI = 0.15, CONFETTI_FADE = 2, CONFETTI_FADE_STEPS = 8;
+      const CONFETTI_START = CHORUS1_RAYS_START + 0.5, CONFETTI_END = CHORUS1_FILL_START + 4.5;
+      /** The dark confetti snake, its head at `head`, at strength `s` (1 full, 0 none). */
+      const confetti = (head: object, s: number) =>
+        addEffect({
+          snake_brightness: {
+            head, tail_length: K(0.35), cyclic: true,
+            mult_factor_decrease: { sin: { min: 1 - s * (1 - DARK_CONFETTI), max: 1, phase: 0.25, repeats: 1 } },
+          },
+        });
+      elements(all, () => segment(segment_rand, () => {
+        beats(CONFETTI_START, CONFETTI_END, () => cycle(4, () => confetti(
+          { steps: { num_steps: 4, first_step_value: 1, diff_per_step: -0.25 } }, 1)));
+        // The last step of a cycle: the head at 0.25.
+        for (let k = 0; k < CONFETTI_FADE_STEPS; k++) {
+          const from = CONFETTI_END + k * CONFETTI_FADE / CONFETTI_FADE_STEPS;
+          beats(from, from + CONFETTI_FADE / CONFETTI_FADE_STEPS, () => confetti(K(0.25), 1 - (k + 0.5) / CONFETTI_FADE_STEPS));
+        }
+      }));
       // Lit up from dark like lightning, in 2 groups on the 2 beats before the chorus: on the first beat half of every
       // small ring strikes on (6 pixels in a row, along centric), the other half staying dark, and on the second beat
       // the other half. The same half (pixels 0-5) on every ring.
@@ -878,13 +920,15 @@ const shemesh = async () => {
       // its tail. The rings are phased in groups of 2, 4 or 6 (changing
       // every block): in a group of N, ring r is (r - 1) mod N / N of a lap behind, so the snakes ripple round the big
       // ring. All the snakes are cyclic, so a phase only shifts the head and nothing is cut.
+      // Similar mappings are grouped, so each holds for 4 bars: rad out and in (bars 83-86), then inside every small
+      // ring, centric and arc (bars 87-90), then round the big ring on ind (bars 91-92).
       const PARTY2_SNAKES: [string, number, number][] = [
         // [segment, length, direction]
         ["rad", 0.35, 1], // pulses out from the inner side to the outer side
-        [segment_centric, 0.5, 1], // round every small ring
         ["rad", 0.35, -1], // pulses in from the outer side
-        [segment_ind, 0.4, 1], // round the big ring through the small rings
+        [segment_centric, 0.5, 1], // round every small ring
         [segment_arc, 0.5, 1], // from pixel 0 down both sides of every small ring
+        [segment_ind, 0.4, 1], // round the big ring through the small rings
       ];
       const PARTY2_PHASE_GROUPS = [2, 4, 6, 2, 4];
       PARTY2_SNAKES.forEach(([seg, tail, dir], k) => {
@@ -914,9 +958,59 @@ const shemesh = async () => {
       })));
     });
 
-    // Verse 2, bars 93-100 (beats 368-400), fading out over bar 101 (beats 400-404): verse 1 again, to be more interesting and energetic. No effects yet.
+    // Verse 2, bars 93-100 (beats 368-400), fading out over bar 101 (beats 400-404): warm, sunny coloring, every ring
+    // lit, picked in the gallery (ui/gallery.html, src/songs/shemesh-gallery-options.ts): bars 93-96 a yellow core and
+    // red rim on every ring with a slightly warmer band spinning round every small ring on each beat, bars 97-100 every
+    // small ring orange at pixel 0 to gold round both sides, drifting slowly warmer and back. The second coloring runs
+    // on over bar 101, fading out.
     const VERSE2_START = 368, VERSE2_END = 400, VERSE2_FADE_OUT = 4;
+    const VERSE2_FLOW: Record<number, MixPick> = { 0: { option: "Comets along all ×2, pale", speed: "medium", hit: "beat" } };
+    const VERSE2_MIX: Record<number, MixPick> = {
+      0: { option: "Sun core, warm band", speed: "medium", hit: "beat" },
+      1: { option: "Petals, slow drift", speed: "fast", hit: "beat" },
+    };
     section("verse 2", { start: VERSE2_START, end: VERSE2_END, fadeOut: VERSE2_FADE_OUT }, () => {
+      galleryMix("verse2", VERSE2_MIX, { tail: VERSE2_FADE_OUT });
+      // Beats 383-386, "raise your head up": the light climbs the big ring. Ring r's height h runs from 0 at the bottom
+      // to 1 at the top; it dims to RAISE_LOW + (1 - RAISE_LOW) h² (the bottom rings nearly black, the top ones still
+      // lit), starting RAISE_DELAY h beats in and taking RAISE_DIM beats, so the bottom goes dark first and the
+      // darkness creeps upward; the top rings also lift a little brighter (RAISE_TOP h³). Held, then back to the
+      // coloring over the last RAISE_BACK beat, ending at RAISE_END.
+      const RAISE = 383, RAISE_END = 386, RAISE_LOW = 0.04, RAISE_DELAY = 1, RAISE_DIM = 0.8, RAISE_TOP = 0.3, RAISE_BACK = 1;
+      all.forEach(ring => elements([ring], () => {
+        const h = (Math.cos(((ring + 0.5) * Math.PI) / 6) + 1) / 2;
+        const low = RAISE_LOW + (1 - RAISE_LOW) * h * h, top = RAISE_TOP * h * h * h;
+        const dimFrom = RAISE + RAISE_DELAY * h, dimTo = dimFrom + RAISE_DIM, backFrom = RAISE_END - RAISE_BACK;
+        const both = (dec: object, inc: object) => {
+          addEffect({ timed_brightness: { mult_factor_decrease: dec } });
+          addEffect({ timed_brightness: { mult_factor_increase: inc } });
+        };
+        beats(dimFrom, dimTo, () => both(L(1, low), L(0, top)));
+        beats(dimTo, backFrom, () => both(K(low), K(top)));
+        beats(backFrom, RAISE_END, () => both(L(low, 1), L(top, 0)));
+      }));
+      // Beats 386-389, the same inward: on every ring the light gathers to its inner side (towards the center of the
+      // installation) and its outside goes dark. A dark snake on rad with its head past the rim and its tail growing
+      // inward to IN_REACH over IN_DIM beats, darkest (IN_LOW) over its outer half and fading to nothing at its inner end, so the
+      // darkness creeps in from the outside; held, then the tail shrinking back out over the last IN_BACK beat.
+      const IN_START = RAISE_END, IN_END = 389, IN_REACH = 0.85, IN_LOW = 0.04, IN_DIM = 1.6, IN_BACK = 1;
+      elements(all, () => segment("rad", () => {
+        const dark = (tail: object) => addEffect({
+          snake_brightness: { head: K(1.01), tail_length: tail, cyclic: false, mult_factor_decrease: { half: { f1: L(1, IN_LOW), f2: K(IN_LOW) } } },
+        });
+        beats(IN_START, IN_START + IN_DIM, () => dark(L(0, IN_REACH)));
+        beats(IN_START + IN_DIM, IN_END - IN_BACK, () => dark(K(IN_REACH)));
+        beats(IN_END - IN_BACK, IN_END, () => dark(L(IN_REACH, 0)));
+      }));
+      // Beats 390-399, "light is flowing": the flow picked in the gallery (its part "Verse 2
+      // flow"): 2 comets running along all through every ring's small rings, a lap every 1.25 beats, paling the colors
+      // almost to white where they pass, on the verse's coloring. Faster (fast) over beats 393-399, where they stop;
+      // the last beat is the verse's coloring alone.
+      const FLOW_FAST: [number, number] = [393, 399];
+      galleryRange("flow", VERSE2_FLOW[0], 390, FLOW_FAST[0]);
+      galleryRange("flow", { ...VERSE2_FLOW[0], speed: "fast" }, FLOW_FAST[0], FLOW_FAST[1]);
+      // Bar 101: the verse fades out, last, so everything above fades with it.
+      elements(all, () => beats(VERSE2_END, VERSE2_END + VERSE2_FADE_OUT, () => fade({ start: 1, end: 0 })));
     });
 
     // Chorus 2, bars 103-118 (beats 408-472), fading in over the 2 beats before it (beats 406-408): chorus 1 again,
@@ -963,7 +1057,7 @@ const shemesh = async () => {
       // every 2 beats (the even rings a beat after the odd ones). The ray's head moves on a comb like the circle's, with
       // other cycles: steadily out over its beat (linear), plus a sin of CHORUS2_RAY_SURGE either way twice in that
       // beat, so each ray shoots out in two spurts.
-      const CHORUS2_RAYS = CHORUS2_START + 2 * CHORUS2_PHRASE, CHORUS2_RAY = 0.2, CHORUS2_RAY_FROM = 0.6;
+      const CHORUS2_RAYS = CHORUS2_START + 2 * CHORUS2_PHRASE, CHORUS2_RAY = 0.2, CHORUS2_RAY_FROM = 0.4;
       const CHORUS2_RAY_SURGE = 0.05;
       const rayHead = {
         comb2: {
@@ -1205,17 +1299,21 @@ const shemesh = async () => {
 
     // Chorus 3, bars 143-157 (beats 568-628), fading in over the 2 beats before it (beats 566-568): a happy, ecstatic
     // rainbow with many things going on. The rings are dark except where snakes light them. Every CHORUS3_BLOCK beats
-    // (4 bars) a different layout of the big rings, its groups doing different things (1-3 snakes each, on different
-    // segments), mostly slow, a lap every 2 bars, with a few parts ticking on the beats.
+    // (4 bars) a different layout of the big rings, its groups doing different things. Bars 1-12 are the options
+    // picked for them in the gallery (CHORUS3_MIX); bars 13-15 the triangle rays.
     const CHORUS3_START = 568, CHORUS3_END = 628, CHORUS3_FADE_IN = 2, CHORUS3_BLOCK = 16;
+    // The options picked in the gallery for chorus 3's blocks (by block, 0 = bars 1-4).
+    const CHORUS3_MIX: Record<number, MixPick> = {
+      0: { option: "Arc breath odd-even", speed: "medium", hit: "beat" },
+      1: { option: "Bounce wave", speed: "medium", hit: "beat" },
+      2: { option: "Ticks odd-even", speed: "fast", hit: "beat" },
+    };
     section("chorus 3", { start: CHORUS3_START, end: CHORUS3_END, fadeIn: CHORUS3_FADE_IN }, () => {
       /** A snake on the segment in use, raising brightness from 0 at its tail end to `peak` at its head. */
       const lit = (head: object, tail: number, cyclic = true, peak = 1) =>
         addEffect({ snake_brightness: { head, tail_length: K(tail), cyclic, mult_factor_increase: L(0, peak) } });
       /** A head going once round the segment in use per cycle, starting `at` (backwards with `dir` -1). */
       const lap = (at: number, dir = 1): Fn => (dir > 0 ? L(at, at + 1) : L(at + 1, at));
-      /** Dim confetti on rand, a lap every bar. */
-      const confetti = () => segment(segment_rand, () => cycle(4, () => lit(lap(0), 0.15, true, 0.4)));
       const block = (b: number) => [CHORUS3_START + b * CHORUS3_BLOCK, Math.min(CHORUS3_START + (b + 1) * CHORUS3_BLOCK, CHORUS3_END)];
       /** The rainbow for block `b`: ring r starts (r - 1) / 12 round the hue circle, so the big ring is a rainbow, the
        * full circle again along `seg` so the snakes run through every color, the hues turning a quarter over the block. */
@@ -1223,46 +1321,6 @@ const shemesh = async () => {
         constColor({ hue: (ring - 1) / 12, sat: 1, val: 0 });
         segment(seg, () => addEffect({ position_hue: { offset_factor: L(0, 1) } }));
         addEffect({ timed_hue: { offset_factor: L(0, 0.25) } });
-      })));
-
-      // Bars 1-4, a wave round the big ring: on centric every small ring has 2 snakes half a lap apart, going round once
-      // every 2 bars, and a wave passes clockwise round the big ring once a bar (ring r (r - 1) / 12 of a bar after
-      // ring 1). Where the wave is, it throws the snakes forward by up to CHORUS3_WAVE of a lap and stretches their
-      // tails, then lets them fall back, so the spinning ripples from ring to ring round the circle.
-      const CHORUS3_WAVE = 0.3;
-      rainbow(0, segment_centric);
-      beats(block(0)[0], block(0)[1], () => all.forEach(ring => elements([ring], () => segment(segment_centric, () =>
-        cycle(8, () => [0, 0.5].forEach(at => {
-          const wave = (min: number, max: number) => ({ sin: { min, max, phase: -(ring - 1) / 12, repeats: 2 } });
-          addEffect({ snake_brightness: {
-            head: { comb2: { f1: lap(at + 1), amount1: 1, f2: wave(-CHORUS3_WAVE, CHORUS3_WAVE), amount2: 1 } },
-            tail_length: wave(0.15, 0.5),
-            cyclic: true,
-            mult_factor_increase: L(0, 1),
-          } });
-        }))))));
-
-      // Bars 5-8, every third: rings 1, 4, 7, 10 (a square) are clock hands, a band of 3 small rings (ind) ticking one
-      // small ring on every beat, each ring a quarter round from the one before. The other 8 rings breathe on arc (a
-      // light growing from pixel 0 of every small ring round both sides and back) every 2 bars, the pairs between the
-      // hands (2-3, 5-6, 8-9, 11-12) a quarter of a breath apart, so the breathing goes round, with dim confetti.
-      rainbow(1, segment_ind);
-      beats(block(1)[0], block(1)[1], () => {
-        [1, 4, 7, 10].forEach((ring, i) => elements([ring], () => segment(segment_ind, () =>
-          lit({ steps: { num_steps: CHORUS3_BLOCK, diff_per_step: 1 / 12, first_step_value: i / 4 } }, 0.25))));
-        [[2, 3], [5, 6], [8, 9], [11, 12]].forEach((rings, j) => elements(rings, () => {
-          segment(segment_arc, () => cycle(8, () => lit({ sin: { min: 0, max: 1, phase: -j / 4 - 0.25, repeats: 1 } }, 0.5, false)));
-          confetti();
-        }));
-      });
-
-      // Bars 9-12, alternate: on all (round every d1 ring through its small rings) the odd rings' snakes go forward and
-      // the even rings' backward, a lap every 2 bars, ring r (r - 1) / 12 of a lap after ring 1, so the two spirals turn
-      // against each other round the big ring. Dim confetti over all of it.
-      rainbow(2, segment_all);
-      beats(block(2)[0], block(2)[1], () => all.forEach(ring => elements([ring], () => {
-        segment(segment_all, () => cycle(8, () => lit(lap((ring - 1) / 12, ring % 2 ? 1 : -1), 0.5)));
-        confetti();
       })));
 
       // Bars 13-15, triangles: the rings in 4 triangles (1, 5, 9 / 2, 6, 10 / 3, 7, 11 / 4, 8, 12) shoot a ray along rad
@@ -1275,6 +1333,21 @@ const shemesh = async () => {
         segment(segment_all, () => cycle(8, () => [0, 1, 2].forEach(k => lit(lap(k / 3), 0.12))));
       })));
 
+      // The 2 beats before the chorus (beats 566-568) introduce its colors, in 2 groups: on the first beat the odd rings
+      // light up in the colors the chorus starts with (ring r (r - 1) / 12 round the hue circle, the rainbow along arc,
+      // as in its first block), on the second beat the even rings; each flashes on at full and settles to about half
+      // by the chorus.
+      [ODD_RINGS, EVEN_RINGS].forEach((rings, k) => rings.forEach(ring => elements([ring], () =>
+        beats(CHORUS3_START - CHORUS3_FADE_IN + k, CHORUS3_START, () => {
+          constColor({ hue: (ring - 1) / 12, sat: 1, val: 1 });
+          segment(segment_arc, () => addEffect({ position_hue: { offset_factor: L(0, 1) } }));
+          fade({ start: 1, end: k ? 0.6 : 0.4 });
+        }))));
+
+      // Bars 1-12: the options picked in the gallery (ui/gallery.html, src/songs/shemesh-gallery-options.ts) for the
+      // first 3 blocks, each over its 4 bars.
+      galleryMix("chorus3", CHORUS3_MIX);
+
       // The beats and the bars on top: every beat the whole scene lifts a little, to CHORUS3_BEAT, dropping back over
       // half a beat, and every bar's downbeat it flashes to CHORUS3_BAR, fading over the beat.
       const CHORUS3_BEAT = 0.15, CHORUS3_BAR = 0.5;
@@ -1284,9 +1357,46 @@ const shemesh = async () => {
       }));
     });
 
-    // Party 5, bars 158-176 (beats 628-704): the party once more, to the end of the song. No effects yet.
+    // Party 5, bars 158-176 (beats 628-704): the party once more, to the end of the song, dark and sparse: the options
+    // picked for it in the gallery (ui/gallery.html, src/songs/shemesh-gallery-options.ts), a block of 4 bars each (the
+    // last 3), all hitting on the off-beats: sparse breaths, sparse rain, a busy starfield, fireflies, then a single
+    // starfield to the end.
     const PARTY5_START = 628, PARTY5_END = 704;
+    const PARTY5_MIX: Record<number, MixPick> = {
+      0: { option: "Sparse breaths, 15%", speed: "medium", hit: "offbeat" },
+      1: { option: "Sparse rain, 15%", speed: "medium", hit: "offbeat" },
+      2: { option: "Starfield ×4, small, on the beat", speed: "fast", hit: "offbeat" },
+      3: { option: "Fireflies", speed: "medium", hit: "offbeat" },
+      4: { option: "Starfield ×1, tiny, on the beat", speed: "fast", hit: "offbeat" },
+    };
+    // On top, overlays showing the roles of the bars, AAAB in every 4 bars (3 bars of A, then a bar of B): in A bars
+    // rings 1, 4, 7, 10 (a square) light up, in B bars the other 8, fading out a different way in every block; the
+    // first block lights the inner side of every ring in A bars and the outer side in B bars. Picked in the gallery too.
+    const PARTY5_OVERLAY: OverlayPick = {
+      roles: "AAAB",
+      blocks: {
+        0: ["Inner / outer by role"],
+        1: ["Fade: beat steps, square / the rest"],
+        2: ["Fade: snakes spin out, square / the rest"],
+        3: ["Fade: ripple out, square / the rest"],
+      },
+    };
     section("party 5", { start: PARTY5_START, end: PARTY5_END }, () => {
+      // From beat 670, where a bright yellow wave passes out along rad (below), the scene turns YELLOW to the end:
+      // its options from there on again in yellow instead of the rainbow (a wave cannot color only the pixels it
+      // passes). Then the role overlays on top, and the wave lifting the pixels it passes to full, brightest at its
+      // front, from every ring's inner side past its rim.
+      const WAVE_START = 670, WAVE_END = 677, YELLOW = 0.14, WAVE_TAIL = 0.6;
+      const blockStart = (k: number) => PARTY5_START + 16 * k;
+      galleryMix("party5", { 0: PARTY5_MIX[0], 1: PARTY5_MIX[1] });
+      galleryRange("party5", PARTY5_MIX[2], blockStart(2), WAVE_START);
+      galleryRange("party5", PARTY5_MIX[2], WAVE_START, blockStart(3), { hue: YELLOW });
+      galleryRange("party5", PARTY5_MIX[3], blockStart(3), blockStart(4), { hue: YELLOW });
+      galleryRange("party5", PARTY5_MIX[4], blockStart(4), PARTY5_END, { hue: YELLOW });
+      galleryOverlay("party5", PARTY5_OVERLAY);
+      elements(all, () => beats(WAVE_START, WAVE_END, () => segment("rad", () => addEffect({
+        snake_brightness: { head: L(0, 1 + WAVE_TAIL), tail_length: K(WAVE_TAIL), cyclic: false, mult_factor_increase: L(0, 1) },
+      }))));
     });
 
     // BEAT_CHECK=1: a white flash on every beat on top, to check the sync with the audio. One 1-beat cycle over

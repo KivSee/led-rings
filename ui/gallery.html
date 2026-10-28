@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Option Gallery</title>
+    <style>
+      :root {
+        --bg: #0d0f14;
+        --panel: #161a22;
+        --line: #2a303c;
+        --text: #e6e8ee;
+        --muted: #8a92a3;
+        --bar: #ffb020;
+        --accent: #4f8cff;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+      .wrap { max-width: 1600px; margin: 0 auto; padding: 16px; }
+      .top {
+        position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 10px 0; border-bottom: 1px solid var(--line);
+        display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center;
+      }
+      h1 { font-size: 18px; margin: 0 8px 0 0; }
+      button, select {
+        background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; font: inherit; cursor: pointer;
+      }
+      button:hover { border-color: var(--muted); }
+      button.play { min-width: 92px; font-weight: 600; background: var(--accent); border-color: var(--accent); color: #fff; }
+      label { color: var(--muted); display: flex; gap: 6px; align-items: center; }
+      input[type=range] { width: 220px; accent-color: var(--accent); }
+      .readout { font-variant-numeric: tabular-nums; min-width: 15ch; }
+      .readout b { font-size: 18px; }
+      .muted { color: var(--muted); }
+      .beats { display: flex; gap: 4px; }
+      .beats span { width: 22px; height: 22px; border-radius: 5px; border: 1px solid var(--line); background: var(--panel); }
+      .beats span.on { background: var(--accent); border-color: var(--accent); }
+      .beats span.on.down { background: var(--bar); border-color: var(--bar); }
+      #picked { color: var(--bar); flex-basis: 100%; min-height: 1.4em; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card, 260px)), 1fr)); gap: 12px; }
+      h2 { font-size: 16px; margin: 22px 0 10px; color: var(--text); }
+      .filters { display: flex; flex-wrap: wrap; gap: 6px; flex-basis: 100%; }
+      .filters button { font-size: 13px; padding: 3px 10px; border-radius: 14px; }
+      .filters button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+      .speeds { display: flex; gap: 4px; }
+      .speeds button { flex: 1; font-size: 12px; padding: 2px 6px; color: var(--muted); }
+      .speeds button.on { color: var(--text); border-color: var(--accent); background: #1d2a44; }
+      .speeds button.own { background: var(--accent); color: #fff; }
+      .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+      .card.picked { border-color: var(--bar); box-shadow: 0 0 0 1px var(--bar); }
+      .card canvas { width: 100%; aspect-ratio: 1; background: #000; border-radius: 6px; cursor: zoom-in; display: block; }
+      .card .head { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+      .card .name { font-weight: 600; }
+      .card .num { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 4px; }
+      .card .desc { color: var(--muted); font-size: 12px; line-height: 1.35; }
+      .star { padding: 1px 8px; font-size: 13px; }
+      .card.picked .star { background: var(--bar); border-color: var(--bar); color: #000; }
+      #focus {
+        position: fixed; inset: 0; background: rgba(0, 0, 0, 0.88); z-index: 5; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px;
+      }
+      #focus.open { display: flex; }
+      #focus canvas { width: min(86vh, 94vw); aspect-ratio: 1; background: #000; border-radius: 8px; }
+      #focus .title { font-size: 18px; font-weight: 600; }
+      #focus .desc { color: var(--muted); max-width: 760px; text-align: center; }
+      .comp { display: flex; gap: 12px; align-items: flex-start; flex-basis: 100%; }
+      #compCanvas { width: 150px; aspect-ratio: 1; background: #000; border-radius: 6px; cursor: zoom-in; flex: none; }
+      .comp-side { flex: 1; min-width: 0; }
+      .comp-head { display: flex; gap: 12px; align-items: center; margin-bottom: 6px; }
+      .slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px; }
+      .slot { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; display: flex; gap: 6px; align-items: center; min-width: 0; }
+      .slot.now { border-color: var(--bar); }
+      .slot .bars { color: var(--muted); font-size: 12px; flex: none; }
+      .slot .pick { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .slot .pick.current { color: var(--muted); font-style: italic; }
+      .slot button { padding: 0 6px; font-size: 12px; }
+      .use { display: flex; gap: 4px; align-items: center; font-size: 12px; color: var(--muted); }
+      .use button { flex: 1; font-size: 12px; padding: 2px 4px; }
+      .use button.on { background: var(--bar); border-color: var(--bar); color: #000; font-weight: 600; }
+      .vars-btn { font-size: 12px; padding: 2px 6px; }
+      #vars { position: fixed; inset: 0; z-index: 4; background: rgba(13, 15, 20, 0.97); overflow-y: auto; padding: 16px; display: none; }
+      #vars.open { display: block; }
+      .vars-head { display: flex; gap: 12px; align-items: baseline; margin-bottom: 12px; position: sticky; top: -16px; background: var(--bg); padding: 8px 0; z-index: 1; }
+      .vars-head b { font-size: 17px; }
+      .vars-head button { margin-left: auto; }
+      .ov-note { margin: 14px 0 10px; }
+      .help { color: var(--muted); margin-top: 16px; }
+      .help kbd { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; font: 12px ui-monospace, Menlo, monospace; color: var(--text); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="top">
+        <h1>Option Gallery</h1>
+        <label>Part <select id="part"></select></label>
+        <label title="options: pick an option for each block · overlays: effects on top of your mix that show the roles of the bars">Mode <select id="mode"></select></label>
+        <label id="rolesLabel" title="The roles of every 4 bars, from the start of the part">Roles <select id="roles"></select></label>
+        <span class="muted" id="what"></span>
+        <button class="play" id="play">▶ Play</button>
+        <div class="readout"><b id="barbeat">bar – · beat –</b></div>
+        <div class="beats" id="beats"><span></span><span></span><span></span><span></span></div>
+        <input type="range" id="scrub" step="0.01" aria-label="Position" />
+        <label title="full: lit, colorful scenes · darker: mostly dark, sparse pixels here and there">Style <select id="style"></select></label>
+        <label>Speed <select id="speed"></select></label>
+        <label title="When the beat-level hits fall: on the beat, half a beat later, every half beat, or every other beat">Hit <select id="hit"></select></label>
+        <label>Card size
+          <select id="size">
+            <option value="200px">small</option>
+            <option value="260px" selected>medium</option>
+            <option value="360px">large</option>
+          </select>
+        </label>
+        <span class="muted" id="status"></span>
+        <div class="comp">
+          <canvas id="compCanvas" title="Your mix: each block plays its candidate, or the song as it is now. Click to see it big."></canvas>
+          <div class="comp-side">
+            <div class="comp-head"><b>Your mix</b>
+              <label>Loop <select id="loop"></select></label>
+            </div>
+            <div class="slots" id="slots"></div>
+          </div>
+        </div>
+        <div class="filters" id="filters"></div>
+        <div id="picked"></div>
+      </div>
+      <div id="grid"></div>
+      <div id="ovgrid"></div>
+      <div class="help">
+        Every card plays the whole part with the music, rendered the way the ring controllers draw them. Use a
+        card's 1-4 buttons to make it (at its speed) the candidate for that 4-bar block; "Your mix" at the top plays
+        the blocks with their candidates, and the song as it is now for the others. Loop the whole part or one block. Switch parts at the top; each part keeps its own candidates. Style picks the kind of options shown: full (lit, colorful) or
+        darker (mostly dark, with sparse pixels here and there); the song as it is now shows in both. Mode "overlays" shows effects that play on top of your mix to
+        show the roles of the bars (Roles: the pattern of every 4 bars, e.g. AAAB); use one and it goes into your mix.
+        Hit picks when the beat-level hits fall (on the beat, the
+        off-beat, twice a beat or every two beats); it goes with a candidate when you use one for a block.
+        A card's "variations" button shows 8 variations of it (turned, rotated, mirrored, phased differently, other
+        colors), each of which can be used for a block too, so the blocks can share a vibe and still differ. Filter by category at the top. Set the speed for
+        every card at the top, or per card with its own buttons (slow doubles every cycle, fast halves them). Star the
+        ones you like and tell Claude their numbers; the picks list shows each one's speed. <kbd>Space</kbd> play / pause · <kbd>←</kbd> <kbd>→</kbd> previous / next bar ·
+        click a card to see it big, <kbd>Esc</kbd> to close.
+      </div>
+    </div>
+    <div id="vars">
+      <div class="vars-head">
+        <b id="varsTitle"></b><span class="muted" id="varsInfo"></span>
+        <button id="varsClose">Close (Esc)</button>
+      </div>
+      <div class="grid" id="varsGrid"></div>
+    </div>
+    <div id="focus"><div class="title" id="focusTitle"></div><canvas id="focusCanvas"></canvas><div class="desc" id="focusDesc"></div></div>
+    <audio id="audio" preload="auto" loop></audio>
+    <script type="module" src="/src/gallery/main.ts"></script>
+  </body>
+</html>
