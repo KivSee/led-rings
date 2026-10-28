@@ -184,9 +184,12 @@ const PlaybackRingsPanel = ({
               </svg>
             </button>
           </label>
-          <div className="playback-brightness-group">
-            <span className={`playback-brightness-dot${brightnessConnected ? ' connected' : ''}`} title={brightnessConnected ? 'MQTT broker connected' : 'MQTT broker not connected'} />
-            <span className="playback-brightness-label">Brightness</span>
+          {/* Live: the rings' brightness (MQTT). Otherwise: the simulation's own brightness, never sent to the rings. */}
+          <div className="playback-brightness-group" title={liveMode ? 'Brightness of the real rings (MQTT)' : 'Brightness of the simulation only — turn on Live to control the rings'}>
+            {liveMode && (
+              <span className={`playback-brightness-dot${brightnessConnected ? ' connected' : ''}`} title={brightnessConnected ? 'MQTT broker connected' : 'MQTT broker not connected'} />
+            )}
+            <span className="playback-brightness-label">{liveMode ? 'Brightness' : 'Sim brightness'}</span>
             <input
               type="range"
               className="playback-brightness-slider"
@@ -194,7 +197,7 @@ const PlaybackRingsPanel = ({
               max={1}
               step={0.01}
               value={brightness}
-              disabled={!brightnessConnected}
+              disabled={liveMode && !brightnessConnected}
               onChange={(e) => onBrightnessChange(parseFloat(e.target.value))}
             />
             <input
@@ -204,7 +207,7 @@ const PlaybackRingsPanel = ({
               max={1}
               step={0.01}
               value={brightnessInput ?? brightness.toFixed(2)}
-              disabled={!brightnessConnected}
+              disabled={liveMode && !brightnessConnected}
               onChange={(e) => setBrightnessInput(e.target.value)}
               onBlur={() => {
                 const n = parseFloat(brightnessInput ?? '')

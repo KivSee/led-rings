@@ -16,6 +16,7 @@ import { normalizeControlServerUrl } from './controlServerUrl'
 import './App.css'
 
 const CONTROL_SERVER_URL_STORAGE_KEY = 'kivsee-control-server-url'
+const SIM_BRIGHTNESS_STORAGE_KEY = 'kivsee-sim-brightness'
 
 export class AppErrorBoundary extends Component<{ children: React.ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null }
@@ -263,8 +264,16 @@ function App() {
   const [audioReconnectHandle, setAudioReconnectHandle] = useState<any>(null)
   const [controlServerAvailable, setControlServerAvailable] = useState(false)
   const [sendSequenceLoading, setSendSequenceLoading] = useState(false)
+  // Brightness of the real rings (MQTT, via the control server) — the slider drives it in Live mode.
   const [brightness, setBrightnessState] = useState(1.0)
   const [brightnessConnected, setBrightnessConnected] = useState(false)
+  // Brightness of the simulation only — the slider drives it when not in Live mode.
+  const [simBrightness, setSimBrightness] = useState(() => {
+    try {
+      const v = parseFloat(localStorage.getItem(SIM_BRIGHTNESS_STORAGE_KEY) ?? '')
+      return Number.isFinite(v) ? Math.max(0, Math.min(1, v)) : 1
+    } catch { return 1 }
+  })
   const [detectBeatsLoading, setDetectBeatsLoading] = useState(false)
   const [detectBeatsProgress, setDetectBeatsProgress] = useState<string | null>(null)
   const [detectBeatsScope, setDetectBeatsScope] = useState<'full' | 'range'>('full')
@@ -2054,9 +2063,15 @@ function App() {
                 audio.currentTime = 0
               }
             }}
-            brightness={brightness}
+            brightness={liveMode ? brightness : simBrightness}
             brightnessConnected={brightnessConnected}
             onBrightnessChange={(v) => {
+              if (!liveMode) {
+                // simulation only: never sent to the rings
+                setSimBrightness(v)
+                try { localStorage.setItem(SIM_BRIGHTNESS_STORAGE_KEY, String(v)) } catch { /* ignore */ }
+                return
+              }
               setBrightnessState(v)
               fetch(`${apiBase}/api/brightness`, {
                 method: 'POST',

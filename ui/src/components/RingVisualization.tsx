@@ -1,6 +1,11 @@
 import React from 'react'
 import segmentsData from '../segments.json'
 import { getPixelColor, getPixelColorMulti, hsvToRgbString } from '../effectPreview'
+
+/** Screen color of a pixel as the rings show it: the firmware lights an LED at value² × global brightness
+ *  (esp32-animations renderer.cpp), so dim values fall off much faster than linearly. */
+const ledColor = (h: number, s: number, v: number, globalBrightness: number) =>
+  hsvToRgbString(h, s, Math.max(0, v) * Math.max(0, v) * globalBrightness)
 import type { Timeframe } from '../App'
 import { getTimeframeEffects } from '../App'
 import { getMovementRingT } from '../movementGenerators'
@@ -231,7 +236,7 @@ const RingVisualization = ({
           const hsv = tfWithT.length === 1
             ? getPixelColor(tfWithT[0].relPos, tfWithT[0].t, tfWithT[0].timeframe, bigRingIdx, tfWithT[0].holdOff)
             : getPixelColorMulti(tfWithT, bigRingIdx)
-          colors[pixelIndex] = hsvToRgbString(hsv.h, hsv.s, hsv.v * globalBrightness)
+          colors[pixelIndex] = ledColor(hsv.h, hsv.s, hsv.v, globalBrightness)
         }
       }
       pixelColors.set(ringNumber, colors)
@@ -284,7 +289,7 @@ const RingVisualization = ({
       const tVal = ringT == null ? singleT : (typeof ringT === 'number' ? ringT : ringT.t)
       const holdOff = typeof ringT === 'object' && ringT?.holdOff === true
       const hsv = getPixelColor(tfRelPos, tVal, singleTf, subRingIndex, holdOff)
-      return hsvToRgbString(hsv.h, hsv.s, hsv.v)
+      return ledColor(hsv.h, hsv.s, hsv.v, globalBrightness)
     }
     return relPosToColor(pixel.relPos)
   }
