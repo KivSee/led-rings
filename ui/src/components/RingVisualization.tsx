@@ -1,6 +1,8 @@
 import React from 'react'
 import segmentsData from '../segments.json'
 import { getPixelColor, getPixelColorMulti, hsvToRgbString } from '../effectPreview'
+import { renderRing, PIXELS_PER_RING, type HSV, type ThingSequence } from '../player/render'
+import { buildSection, isRotation, rotationSteps, type Sequence } from '../../../src/lab/sectionLab'
 
 /** Screen color of a pixel as the rings show it: the firmware lights an LED at value² × global brightness
  *  (esp32-animations renderer.cpp), so dim values fall off much faster than linearly. */
@@ -10,6 +12,54 @@ import type { Timeframe } from '../App'
 import { getTimeframeEffects } from '../App'
 import { getMovementRingT } from '../movementGenerators'
 import RingVisualizationCanvas from './RingVisualizationCanvas'
+
+// Section Lab sections are drawn with the renderer the rings use, built at an arbitrary beat length (they are
+// defined in beats, so the tempo does not matter for the picture).
+const SECTION_BEAT_MS = 1000
+const sectionCache = new Map<string, Sequence>()
+const toHex = (c: HSV) => {
+  const h = (((c.hue % 1) + 1) % 1) * 6, i = Math.floor(h), f = h - i, v = c.val, s = c.sat
+  const p = v * (1 - s), q = v * (1 - s * f), t = v * (1 - s * (1 - f))
+  const [r, g, b] = [[v, t, p], [q, v, p], [p, v, t], [p, q, v], [t, p, v], [v, p, q]][i % 6]
+  return '#' + [r, g, b].map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join('')
+}
+/** A rotation section as plain timeframes (a color and a segment per ring per step), for the preview: it blends
+ *  with the timeframes around it like the timeline it replaced. */
+function expandRotation(tf: Timeframe): Timeframe[] {
+  const spec = tf.labSection
+  if (!isRotation(spec)) return [tf]
+  const out: Timeframe[] = []
+  // as on the rings: the starting color for the whole span, the rotation as a hue offset per step, then the segment
+  rotationSteps(spec, tf.startTime, tf.endTime).forEach(steps => steps.forEach((st, k) => {
+    const c0 = steps[0].color
+    if (k === 0) out.push({ id: `${tf.id}-c${st.ring}`, startTime: tf.startTime, endTime: tf.endTime, label: tf.label, color: toHex(c0), rings: [st.ring], mapping: 'all' } as Timeframe)
+    const offset = Math.round((st.color.hue - c0.hue) * 1e6) / 1e6
+    if (offset !== 0) out.push({
+      id: `${tf.id}-h${st.ring}-${k}`, startTime: st.from, endTime: st.to, label: tf.label, color: '#808080', hasExplicitColor: false,
+      rings: [st.ring], mapping: 'all',
+      effects: [{ id: `${tf.id}-h${st.ring}-${k}-fx`, effectKey: 'timed_hue', params: { offset_factor: { const_value: { value: offset } } } }],
+    } as Timeframe)
+    if (st.segment) out.push({
+      id: `${tf.id}-s${st.ring}-${k}`, startTime: st.from, endTime: st.to, label: tf.label, color: '#808080', hasExplicitColor: false,
+      rings: [st.ring], mapping: spec.segment.mapping,
+      effects: [{ id: `${tf.id}-s${st.ring}-${k}-fx`, effectKey: 'snake_hue', params: { head: { const_value: { value: st.segment.head } }, tail_length: { const_value: { value: spec.segment.tail } }, cyclic: true, offset_factor: { const_value: { value: st.segment.shift } } } }],
+    } as Timeframe)
+  }))
+  return out
+}
+
+function sectionLeds(tf: Timeframe, ringNumber: number, beat: number): HSV[] {
+  const key = `${tf.startTime}|${tf.endTime}|${JSON.stringify(tf.labSection)}`
+  let seq = sectionCache.get(key)
+  if (!seq) {
+    if (sectionCache.size > 20) sectionCache.clear()
+    seq = buildSection(tf.labSection as import('../../../src/lab/sectionLab').SectionSpec, tf.startTime, tf.endTime, SECTION_BEAT_MS, 0)
+    sectionCache.set(key, seq)
+  }
+  const leds: HSV[] = Array.from({ length: PIXELS_PER_RING }, () => ({ hue: 0, sat: 0, val: 0 }))
+  renderRing(seq[`ring${ringNumber}`] as unknown as ThingSequence, beat * SECTION_BEAT_MS, leds)
+  return leds
+}
 import './RingVisualization.css'
 
 interface RingVisualizationProps {
@@ -182,11 +232,14 @@ const RingVisualization = ({
     return segmentRelPosMap.get(mappingName)?.get(pixelIndex) ?? null
   }, [segmentRelPosMap])
 
+  // Rotation sections expanded into the plain timeframes they stand for (preview only)
+  const previewTimeframes = React.useMemo(() => (timeframes ?? []).flatMap(expandRotation), [timeframes])
+
   // Build a big-ring-number → active timeframes lookup. Used in multi mode.
   const ringToTimeframes = React.useMemo(() => {
     const map: Map<number, Timeframe[]> = new Map()
     if (!multiMode) return map
-    for (const tf of timeframes!) {
+    for (const tf of previewTimeframes) {
       for (const ring of tf.rings) {
         if (computeRingT(tf, currentTime!, ring) != null) {
           const arr = map.get(ring)
@@ -196,7 +249,7 @@ const RingVisualization = ({
       }
     }
     return map
-  }, [multiMode, timeframes, currentTime])
+  }, [multiMode, previewTimeframes, currentTime])
 
   // Pre-compute all pixel colors for multi mode. Keyed on timeframes + currentTime so
   // React only recomputes when something actually changed. Avoids 1728 per-pixel
@@ -209,7 +262,14 @@ const RingVisualization = ({
       const ringNumber = bigRingIdx + 1
       const ringTfs = ringToTimeframes.get(ringNumber)
       const colors: string[] = new Array(144)
-      if (!ringTfs || ringTfs.length === 0) {
+      const sectionTf = ringTfs?.find(tf => tf.labSection && !isRotation(tf.labSection))
+      if (sectionTf) {
+        const leds = sectionLeds(sectionTf, ringNumber, currentTime!)
+        for (let pixelIndex = 0; pixelIndex < 144; pixelIndex++) {
+          const px = leds[pixelIndex]
+          colors[pixelIndex] = px ? ledColor(px.hue, px.sat, px.val, globalBrightness) : 'rgb(0,0,0)'
+        }
+      } else if (!ringTfs || ringTfs.length === 0) {
         colors.fill('rgb(0,0,0)')
       } else {
         // Pre-compute ringT for each timeframe once (same for all pixels in this ring)
@@ -260,6 +320,13 @@ const RingVisualization = ({
     return slots
   }, [mapping])
 
+  // A focused section marker (single mode): render each ring once per frame, not once per pixel.
+  // Declared before the multi-mode return: hooks must run on every render, whatever the mode.
+  const singleSection = React.useMemo(() => {
+    if (!singleTf?.labSection || isRotation(singleTf.labSection) || currentTime === undefined || computeT(singleTf, currentTime) == null) return null
+    return Array.from({ length: 12 }, (_, i) => sectionLeds(singleTf, i + 1, currentTime))
+  }, [singleTf, currentTime])
+
   // --- Multi-big-ring playback mode: canvas rendering ---
   if (multiMode) {
     return (
@@ -281,6 +348,10 @@ const RingVisualization = ({
   // Uses the rainbow gradient over the chosen mapping, or single-timeframe effect preview.
   const singleT = singleTf && currentTime !== undefined ? (computeT(singleTf, currentTime) ?? 0) : 0
   const singlePixelColor = (pixel: { index: number; relPos: number }, subRingIndex: number): string => {
+    if (singleSection) {
+      const px = singleSection[subRingIndex]?.[pixel.index]
+      return px ? ledColor(px.hue, px.sat, px.val, globalBrightness) : 'rgb(0, 0, 0)'
+    }
     if (singleTfHasEffects && singleTf) {
       const tfMapping = singleTf.mapping || 'all'
       const tfRelPos = getRelPosForMapping(pixel.index, tfMapping)

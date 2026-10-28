@@ -133,6 +133,12 @@ export class Animation {
         });
     }
 
+    /** Append ready-made effects (with their own effect_config) to one ring, after everything added so far.
+     *  Used for Section Lab sections, which are built directly in the renderer's format. */
+    public addRawEffects(ring: number, effects: Effect[]) {
+        for (const effect of effects) this.effects.push({ effect, elements: [ring] });
+    }
+
     public getSequence(): SequencePerThing {
         const seqPerThing: SequencePerThing = {};
         this.effects.forEach(effectWithElements => {

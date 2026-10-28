@@ -44,6 +44,8 @@ export interface Timeframe {
   color: string
   hasExplicitColor?: boolean
   afterMotion?: boolean
+  /** Section Lab section: this timeframe is a section marker built from the spec (see src/lab/sectionLab.ts). */
+  labSection?: object
   rings: number[]
   disabled?: boolean
   mapping?: string
@@ -355,6 +357,11 @@ ${indentBlock(core, 2)}
 }
 
 function emitTimeframeBody(tf: Timeframe, layer: EmitLayer): string | null {
+  // a rotation section adds its effects in the color and modifier layers, at this timeframe's place
+  if (tf.labSection && (tf.labSection as { kind?: string }).kind === 'rotation') {
+    if (layer === 'motion') return null
+    return `    sectionLayer(anim, ${tf.startTime}, ${tf.endTime}, ${JSON.stringify(tf.labSection)}, '${layer === 'color' ? 'color' : 'modifiers'}');`
+  }
   const segmentId = mappingToSegment(tf.mapping)
   const inner = emitInnerContent(tf, layer)
 
@@ -458,7 +465,12 @@ function toIdentifier(name: string): string {
 }
 
 export function generateSequenceTs(song: Song, timeframes: Timeframe[], importPrefix = '..'): string {
-  const enabledTimeframes = timeframes.filter(tf => !tf.disabled)
+  // Section Lab sections are built by labSection(...) after the regular blocks, not as effects of their own
+  const isMixSection = (tf: Timeframe) => !!tf.labSection && (tf.labSection as { kind?: string }).kind !== 'rotation'
+  const enabledTimeframes = timeframes.filter(tf => !tf.disabled && !isMixSection(tf))
+  const usesSectionLayer = timeframes.some(tf => !tf.disabled && !!tf.labSection && !isMixSection(tf))
+  const sectionCalls = timeframes.filter(tf => !tf.disabled && isMixSection(tf))
+    .map(tf => `  labSection(anim, ${tf.startTime}, ${tf.endTime}, ${JSON.stringify(tf.labSection)});\n`).join('')
   const safeName = (song.name || 'sequence').trim() || 'sequence'
   const totalTimeSeconds = song.lengthSeconds
   const startOffsetMs = song.startOffsetMs ?? 0
@@ -549,14 +561,14 @@ import {
   staticSnake,
 } from "${importPrefix}/effects/motion";
 import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "${importPrefix}/effects/hue";
-
+${sectionCalls || usesSectionLayer ? `import { ${[sectionCalls ? 'labSection' : '', usesSectionLayer ? 'sectionLayer' : ''].filter(Boolean).join(', ')} } from "${importPrefix}/lab/labSection";\n` : ''}
 const ${fnName} = async () => {
   const anim = ${animationCtor};
   anim.sync(() => {
 ${bodyBlocks}
   });
 
-${mirrorCall}  console.log("sending sequence");
+${sectionCalls}${mirrorCall}  console.log("sending sequence");
   await sendSequence("${escapedName}", anim.getSequence());
   if (!process.env.SEND_ONLY) {
     ${runCall}
@@ -571,7 +583,12 @@ ${mirrorCall}  console.log("sending sequence");
 
 /** Generates TS that only builds the animation and writes { triggerName, sequence } to process.env.TMP_SEQUENCE_OUT (for control-server send-sequence). */
 export function generateSequenceRunnerTs(song: Song, timeframes: Timeframe[]): string {
-  const enabledTimeframes = timeframes.filter(tf => !tf.disabled)
+  // Section Lab sections are built by labSection(...) after the regular blocks, not as effects of their own
+  const isMixSection = (tf: Timeframe) => !!tf.labSection && (tf.labSection as { kind?: string }).kind !== 'rotation'
+  const enabledTimeframes = timeframes.filter(tf => !tf.disabled && !isMixSection(tf))
+  const usesSectionLayer = timeframes.some(tf => !tf.disabled && !!tf.labSection && !isMixSection(tf))
+  const sectionCalls = timeframes.filter(tf => !tf.disabled && isMixSection(tf))
+    .map(tf => `  labSection(anim, ${tf.startTime}, ${tf.endTime}, ${JSON.stringify(tf.labSection)});\n`).join('')
   const safeName = (song.name || 'sequence').trim() || 'sequence'
   const totalTimeSeconds = song.lengthSeconds
   const startOffsetMs = song.startOffsetMs ?? 0
@@ -646,7 +663,7 @@ import {
   staticSnake,
 } from "./effects/motion";
 import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "./effects/hue";
-
+${sectionCalls || usesSectionLayer ? `import { ${[sectionCalls ? 'labSection' : '', usesSectionLayer ? 'sectionLayer' : ''].filter(Boolean).join(', ')} } from "./lab/labSection";\n` : ''}
 const ${fnName} = async () => {
   const anim = ${animationCtor};
   anim.sync(() => {

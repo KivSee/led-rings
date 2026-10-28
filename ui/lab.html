@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Section Lab</title>
+    <style>
+      :root {
+        --bg: #0d0f14; --panel: #161a22; --line: #2a303c; --text: #e6e8ee; --muted: #8a92a3;
+        --bar: #ffb020; --accent: #4f8cff; --star: #ffd24a;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+      .wrap { max-width: 1500px; margin: 0 auto; padding: 16px; }
+      header { position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 10px 0 12px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+      .row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+      .row + .row { margin-top: 10px; }
+      h1 { font-size: 18px; margin: 0 8px 0 0; }
+      .section-name { color: var(--bar); font-weight: 600; }
+      .muted { color: var(--muted); }
+      button, select { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 5px 9px; font: inherit; cursor: pointer; }
+      button:hover, select:hover { border-color: var(--muted); }
+      button.play { min-width: 92px; font-weight: 600; background: var(--accent); border-color: var(--accent); color: #fff; }
+      .readout { font-variant-numeric: tabular-nums; }
+      .readout b { font-size: 20px; }
+      .beats { display: inline-flex; gap: 4px; vertical-align: middle; }
+      .beats i { width: 12px; height: 12px; border-radius: 3px; background: var(--line); display: inline-block; }
+      .beats i.on { background: var(--bar); }
+      .palettes { display: flex; flex-wrap: wrap; gap: 8px; }
+      .pal { display: flex; align-items: center; gap: 8px; padding: 5px 9px; }
+      .pal.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+      .sw { display: inline-flex; gap: 2px; }
+      .sw span { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+      .hint { font-size: 12px; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+      .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+      .card.starred { border-color: var(--star); }
+      .card canvas { width: 100%; aspect-ratio: 1; border-radius: 8px; background: #000; cursor: zoom-in; display: block; }
+      .card .top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+      .card h2 { font-size: 15px; margin: 0; }
+      .star { background: none; border: none; font-size: 20px; padding: 0 2px; color: var(--muted); line-height: 1; }
+      .card.starred .star { color: var(--star); }
+      .card p { margin: 0; font-size: 12.5px; color: var(--muted); }
+      .card .meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; }
+      .picks { margin-top: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+      .picks h3 { margin: 0 0 6px; font-size: 14px; }
+      .picks ol { margin: 0 0 8px; padding-left: 20px; }
+      .big { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center; z-index: 5; cursor: zoom-out; }
+      .big[hidden] { display: none; }
+      .big canvas { width: min(92vh, 92vw); aspect-ratio: 1; }
+      .big .cap { position: absolute; top: 16px; left: 0; right: 0; text-align: center; font-weight: 600; }
+      .warn { color: #ff8a7a; }
+      .mix { display: grid; grid-template-columns: minmax(260px, 420px) 1fr; gap: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 18px; }
+      @media (max-width: 760px) { .mix { grid-template-columns: 1fr; } }
+      .mix-view canvas { width: 100%; aspect-ratio: 1; border-radius: 8px; background: #000; display: block; }
+      .mix-now { margin-top: 6px; font-weight: 600; color: var(--bar); min-height: 1.4em; }
+      .mix h3 { margin: 0 0 8px; font-size: 15px; }
+      .mix ol { padding-left: 22px; margin: 8px 0; }
+      .mix li { margin: 3px 0; }
+      .mix li.now { color: var(--bar); font-weight: 600; }
+      .mix li button { padding: 0 6px; margin-left: 4px; font-size: 12px; }
+      .family h2 { font-size: 15px; margin: 18px 0 8px; color: var(--muted); font-weight: 600; letter-spacing: 0.02em; }
+      .card .add { padding: 2px 8px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="row">
+          <h1>Section Lab</h1>
+          <span><span id="songName"></span> · <span class="section-name" id="sectionName"></span> <span class="muted" id="sectionRange"></span></span>
+          <button class="play" id="play">▶ Play</button>
+          <button id="restart" title="Back to the section start">⏮ Start</button>
+          <span class="readout">bar <b id="bar">1</b><span class="muted" id="barOf"></span></span>
+          <span class="beats" id="beats"><i></i><i></i><i></i><i></i></span>
+          <span class="muted hint" id="audioState"></span>
+        </div>
+        <div class="row">
+          <span class="muted">Palette</span>
+          <div class="palettes" id="palettes"></div>
+        </div>
+        <div class="row hint muted" id="paletteSource"></div>
+        <div class="row">
+          <span class="muted">Section shape</span>
+          <label class="muted"><input type="checkbox" id="shapeBuildUp" checked> build-up</label>
+          <label class="muted"><input type="checkbox" id="shapeFadeOut" checked> fade-out (last 2 bars)</label>
+          <label class="muted"><input type="checkbox" id="shapePeak" checked> peak accent</label>
+          <label class="muted">rises peak on <select id="shapePeakOffset"></select></label>
+          <span class="muted hint">motion runs slow → fast into every peak</span>
+        </div>
+      </header>
+      <section class="mix">
+        <div class="mix-view">
+          <canvas id="mixCanvas"></canvas>
+          <div class="mix-now" id="mixNow"></div>
+        </div>
+        <div class="mix-side">
+          <h3>Mix <span class="muted hint">(＋ a card to add it; they take turns through the section)</span></h3>
+          <div class="row">
+            <label class="muted">each <select id="mixBars"><option value="1">1 bar</option><option value="2" selected>2 bars</option><option value="3">3 bars</option></select></label>
+            <label class="muted">transition <select id="mixTransition"></select></label>
+          </div>
+          <p class="muted hint" id="mixTransitionHint"></p>
+          <label class="muted"><input type="checkbox" id="mixShuffle" checked> swap ring colors at every switch</label>
+          <ol id="mixList"></ol>
+          <button id="mixClear">Clear mix</button>
+          <button id="copySpec" title="Copy the section settings to paste to Claude, who places them on the song's section marker">Copy for song</button>
+          <span class="muted hint" id="copiedSpec"></span>
+        </div>
+      </section>
+      <div id="families"></div>
+      <div class="picks">
+        <h3>Picks <span class="muted hint">(★ a card to add it)</span></h3>
+        <ol id="picks"></ol>
+        <button id="copyPicks">Copy picks</button> <span class="muted hint" id="copied"></span>
+      </div>
+    </div>
+    <div class="big" id="big" hidden><div class="cap" id="bigCap"></div><canvas id="bigCanvas"></canvas></div>
+    <audio id="audio" preload="auto"></audio>
+    <script type="module" src="/src/lab/main.ts"></script>
+  </body>
+</html>

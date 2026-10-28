@@ -34,11 +34,12 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      // Song Sync and the Sequence Player are pages next to the main app.
+      // Song Sync, the Sequence Player and the Section Lab are pages next to the main app.
       input: {
         main: 'index.html',
         sync: 'sync.html',
         player: 'player.html',
+        lab: 'lab.html',
       },
     },
   },

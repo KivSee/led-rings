@@ -79,6 +79,8 @@ export interface Timeframe {
   hasExplicitColor?: boolean // When false, no constColor is emitted (timeframe only has modifiers/motion)
   /** When true, this timeframe's modifiers are applied after all snakes, so Increase effects can re-light pixels a snake masked off. */
   afterMotion?: boolean
+  /** Section Lab section marker: built from this spec instead of its own effects (src/lab/sectionLab.ts) */
+  labSection?: import('../../src/lab/sectionLab').SectionSpec | import('../../src/lab/sectionLab').RotationSpec
   rings: number[] // Array of ring numbers (1-12) that participate
   disabled?: boolean // When true, timeframe is excluded from playback and export
   mapping?: string // Segment mapping name from segments.json
@@ -985,6 +987,7 @@ function App() {
                 color: typeof item.color === 'string' ? item.color : '#3b82f6',
                 hasExplicitColor: item.hasExplicitColor !== false ? undefined : false,
                 afterMotion: item.afterMotion === true ? true : undefined,
+                labSection: item.labSection && typeof item.labSection === 'object' ? item.labSection : undefined,
                 rings,
                 mapping: item.mapping,
                 phase: typeof item.phase === 'number' ? item.phase : undefined,
@@ -1113,6 +1116,7 @@ function App() {
                 color: typeof item.color === 'string' ? item.color : '#3b82f6',
                 hasExplicitColor: item.hasExplicitColor !== false ? undefined : false,
                 afterMotion: item.afterMotion === true ? true : undefined,
+                labSection: item.labSection && typeof item.labSection === 'object' ? item.labSection : undefined,
                 rings: Array.isArray(item.rings) ? item.rings.map((r: any) => Number(r)).filter((n: number) => !isNaN(n)) : [1,2,3,4,5,6,7,8,9,10,11,12],
                 mapping: item.mapping,
                 phase: typeof item.phase === 'number' ? item.phase : undefined,
@@ -1279,6 +1283,7 @@ function App() {
           color: typeof item.color === 'string' ? item.color : '#3b82f6',
           hasExplicitColor: item.hasExplicitColor !== false ? undefined : false,
           afterMotion: item.afterMotion === true ? true : undefined,
+          labSection: item.labSection && typeof item.labSection === 'object' ? item.labSection : undefined,
           rings,
           mapping: item.mapping,
           phase: typeof item.phase === 'number' ? item.phase : undefined,
