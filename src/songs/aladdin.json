@@ -1,10 +1,10 @@
 {
   "song": {
     "name": "aladdin",
-    "lengthSeconds": 79,
+    "lengthSeconds": 76,
     "bpm": 64.725,
-    "startOffsetMs": 3575,
-    "runStartTimeSeconds": 3.7171028163834556,
+    "startOffsetMs": 575,
+    "runStartTimeSeconds": 0.7171028163834556,
     "animationType": "song",
     "audioFilePath": "aladdin.wav"
   },

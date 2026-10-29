@@ -82,7 +82,7 @@ const ringParty = (i: number) => {
 }
 
 const testSequence = async () => {
-  const testAnimation = new Animation("buttons", 95, 316, 3081);
+  const testAnimation = new Animation("buttons", 95, 313, 81);
   testAnimation.sync(() => {
 
     beats(0, 96, () => {

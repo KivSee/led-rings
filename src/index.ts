@@ -56,7 +56,7 @@ const turnOffRand = (numberRingsOn: number) => {
 };
 
 const testSequence = async () => {
-  const testAnimation = new Animation("aladdin", 64.725, 79, 3575);
+  const testAnimation = new Animation("aladdin", 64.725, 76, 575);
   testAnimation.sync(() => {
     beats(0, 16, () => {
       elements(all, () => {

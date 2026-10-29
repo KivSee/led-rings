@@ -51,7 +51,7 @@ import {
 import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "../effects/hue";
 
 const aladdin = async () => {
-  const anim = new Animation("aladdin", 64.725, 79.00, 3575);
+  const anim = new Animation("aladdin", 64.725, 76.00, 575);
   anim.sync(() => {
     beats(0, 16, () => {
       elements(all, () => {
