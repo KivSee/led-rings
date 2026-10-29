@@ -4099,7 +4099,7 @@
     {
       "id": "finale",
       "startTime": 392,
-      "endTime": 520,
+      "endTime": 514,
       "label": "finale",
       "color": "#ff00d6",
       "labSection": {
@@ -4176,7 +4176,7 @@
             },
             {
               "from": 504,
-              "to": 520,
+              "to": 514,
               "buildUp": false,
               "fadeOut": true,
               "peak": false,
@@ -4228,7 +4228,7 @@
           },
           {
             "from": 504,
-            "to": 520,
+            "to": 514,
             "texture": "fin-cascade",
             "mapping": "rad × centric",
             "palette": "finale-bloom",

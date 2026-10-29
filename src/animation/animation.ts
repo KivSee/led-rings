@@ -81,6 +81,11 @@ export class Animation {
     // segment aliases that let position-based effects resolve on the pendant.
     private lilumRings: number[] = [];
 
+    // How many times the rings play the animation: 0 loops it until the next
+    // one starts (triggers). Songs play once (playOnce()), so the rings go dark
+    // at the end instead of starting the song over while the audio runs on.
+    private numRepeats = 0;
+
     constructor(
         public name: string,
         public bpm: number,
@@ -94,6 +99,11 @@ export class Animation {
     public mirrorToLilum(rings: number | number[]) {
         const list = Array.isArray(rings) ? rings : [rings];
         for (const r of list) if (!this.lilumRings.includes(r)) this.lilumRings.push(r);
+    }
+
+    /** Play the animation once: after totalTimeSeconds the rings stay dark. */
+    public playOnce() {
+        this.numRepeats = 1;
     }
 
     public sync(cb: Function) {
@@ -148,7 +158,7 @@ export class Animation {
                     seqPerThing[thingName] = {
                         effects: [],
                         duration_ms: this.totalTimeSeconds * 1000,
-                        num_repeats: 0,
+                        num_repeats: this.numRepeats,
                     };
                 }
                 seqPerThing[thingName].effects.push(effectWithElements.effect);

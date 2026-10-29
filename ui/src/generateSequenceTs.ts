@@ -504,6 +504,8 @@ export function generateSequenceTs(song: Song, timeframes: Timeframe[], importPr
     : ''
   const animationCtor = `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)}, ${startOffsetMs}${beatTimestampsArg})`
   const mirrorCall = mirrorToLilumCall(song.lilumRings)
+  // a song plays once (the rings go dark at its end instead of starting it over); a trigger loops
+  const playOnceCall = isTrigger ? '' : '  anim.playOnce();\n'
   const runCall = isTrigger
     ? `await trigger("${escapedName}"${startOffsetMs > 0 ? `, ${startOffsetMs / 1000}` : ''});`
     : `await startSong("${startSongName}", 0);`
@@ -568,7 +570,7 @@ const ${fnName} = async () => {
 ${bodyBlocks}
   });
 
-${sectionCalls}${mirrorCall}  console.log("sending sequence");
+${sectionCalls}${mirrorCall}${playOnceCall}  console.log("sending sequence");
   await sendSequence("${escapedName}", anim.getSequence());
   if (!process.env.SEND_ONLY) {
     ${runCall}
@@ -611,6 +613,7 @@ export function generateSequenceRunnerTs(song: Song, timeframes: Timeframe[]): s
     : ''
   const animationCtor = `new Animation("${escapedName}", ${song.bpm}, ${totalTimeSeconds.toFixed(2)}, ${startOffsetMs}${beatTimestampsArg})`
   const mirrorCall = mirrorToLilumCall(song.lilumRings)
+  const playOnceCall = isTrigger ? '' : '  anim.playOnce();\n'
   const fnName = toIdentifier(safeName)
   return `// Runner: builds sequence and writes to TMP_SEQUENCE_OUT.
 import * as fs from "fs";
@@ -669,7 +672,7 @@ const ${fnName} = async () => {
   anim.sync(() => {
 ${bodyBlocks}
   });
-${mirrorCall}  const outPath = process.env.TMP_SEQUENCE_OUT || ".tmp-sequence-out.json";
+${mirrorCall}${playOnceCall}  const outPath = process.env.TMP_SEQUENCE_OUT || ".tmp-sequence-out.json";
   fs.writeFileSync(outPath, JSON.stringify({ triggerName: "${escapedName}", sequence: anim.getSequence() }));
 };
 
