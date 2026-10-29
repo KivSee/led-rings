@@ -1,0 +1,62 @@
+[
+  {
+    "option": 16,
+    "name": "Fire and gold: accent flecks + a + small ring",
+    "desc": "fire and gold; every ring the same: mottled field, accent flecks, a chase round the big ring; the side small rings pulsing. Timing: together."
+  },
+  {
+    "option": 56,
+    "name": "Fire and gold: white glitter + a",
+    "desc": "fire and gold; the odd and the even rings (swapped: the main and accent colors traded): mottled field, white glitter, a chase round the big ring. Timing: together."
+  },
+  {
+    "option": 60,
+    "name": "Deep sea and cyan: dark flecks / white glitter + small ring",
+    "desc": "deep sea and cyan; the top half and the bottom half (split): mottled field, dark flecks | with accent dots field, white glitter, spinners round every small ring; the side small rings pulsing. Timing: quartets."
+  },
+  {
+    "option": 93,
+    "name": "Sunset and sky: dark flecks + ripples + small ring",
+    "desc": "sunset and sky; rings 1, 4, 7, 10 and the rest (echo: half a cycle apart): glowing from the inner side field, dark flecks, ripples along rad; the inner small ring spinning. Timing: quartets."
+  },
+  {
+    "option": 94,
+    "name": "Forest and gold: white glitter",
+    "desc": "forest and gold; rings 1, 4, 7, 10 and the rest (swapped: the main and accent colors traded): plain field, white glitter. Timing: together."
+  },
+  {
+    "option": 111,
+    "name": "Ocean and gold: accent flecks / dark flecks + blooms + small ring",
+    "desc": "ocean and gold; rings 1, 4, 7, 10 and the rest (split): glowing from the inner side field, accent flecks, blooms | mottled field, dark flecks, a comet; the outer small ring spinning. Timing: round."
+  },
+  {
+    "option": 114,
+    "name": "Forest and gold: colorful twinkles / popping dots + small ring",
+    "desc": "forest and gold; rings 1, 4, 7, 10 and the rest (split): mottled field, colorful twinkles | with accent dots field, popping dots, spinners round every small ring; the inner small ring spinning. Timing: alternate."
+  },
+  {
+    "option": 123,
+    "name": "Sunset and sky: accent flecks + a + small ring",
+    "desc": "sunset and sky; the rings at the sides (2, 3, 8, 9) and the top and bottom ones (echo: half a cycle apart): mottled field, accent flecks, a chase round the big ring; the side small rings pulsing. Timing: round."
+  },
+  {
+    "option": 128,
+    "name": "Blue and lime: accent flecks / dark flecks + a + small ring",
+    "desc": "blue and lime; the rings at the sides (2, 3, 8, 9) and the top and bottom ones (split): glowing from the inner side field, accent flecks, a comet | mottled field, dark flecks, ripples along rad; the outer small ring spinning. Timing: alternate."
+  },
+  {
+    "option": 132,
+    "name": "Violet and teal: white glitter + spinners + small ring",
+    "desc": "violet and teal; the rings at the sides (2, 3, 8, 9) and the top and bottom ones (swapped: the main and accent colors traded): mottled field, white glitter, spinners round every small ring; the outer small ring spinning. Timing: together."
+  },
+  {
+    "option": 136,
+    "name": "Fire and gold: dark flecks / white glitter + a",
+    "desc": "fire and gold; the rings at the sides (2, 3, 8, 9) and the top and bottom ones (split): mottled field, dark flecks, a chase round the big ring | with accent dots field, white glitter. Timing: mirror."
+  },
+  {
+    "option": 186,
+    "name": "Fire and gold: dark flecks + ripples + small ring",
+    "desc": "fire and gold; the mirror pairs taking turns from the top (12 and 11, 2 and 9, 4 and 7 / the others) (echo: half a cycle apart): glowing from the inner side field, dark flecks, ripples along rad; the side small rings pulsing. Timing: mirror."
+  }
+]

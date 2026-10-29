@@ -21,9 +21,9 @@ const K = (value: number) => ({ const_value: { value } });
 const sin = (min: number, max: number, phase: number, repeats = 1) => ({ sin: { min, max, phase, repeats } });
 
 // The groupings: which group (0, 1 or 2) each ring is in.
-interface Grouping { name: string; desc: string; group: (r: number) => number; groups: number }
+export interface Grouping { name: string; desc: string; group: (r: number) => number; groups: number }
 const PAIR = (r: number) => [[12, 11], [1, 10], [2, 9], [3, 8], [4, 7], [5, 6]].findIndex(p => p.includes(r));
-const GROUPINGS: Grouping[] = [
+export const GROUPINGS: Grouping[] = [
   { name: "Odd and even", desc: "the odd and the even rings", group: r => r % 2, groups: 2 },
   { name: "Top and bottom", desc: "the top half and the bottom half", group: r => (height(r) > 0.5 ? 0 : 1), groups: 2 },
   { name: "Every third", desc: "rings 1, 4, 7, 10 and the rest", group: r => ((r - 1) % 3 === 0 ? 0 : 1), groups: 2 },
