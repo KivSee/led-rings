@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Background Gallery</title>
+    <style>
+      :root {
+        --bg: #0d0f14;
+        --panel: #161a22;
+        --line: #2a303c;
+        --text: #e6e8ee;
+        --muted: #8a92a3;
+        --star: #ffb020;
+        --accent: #4f8cff;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+      .wrap { max-width: 1600px; margin: 0 auto; padding: 16px; }
+      .top {
+        position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 10px 0; border-bottom: 1px solid var(--line);
+        display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center;
+      }
+      h1 { font-size: 18px; margin: 0 8px 0 0; }
+      button, select {
+        background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; font: inherit; cursor: pointer;
+      }
+      button:hover { border-color: var(--muted); }
+      button.play { min-width: 92px; font-weight: 600; background: var(--accent); border-color: var(--accent); color: #fff; }
+      label { color: var(--muted); display: flex; gap: 6px; align-items: center; }
+      .muted { color: var(--muted); }
+      .filters { display: flex; flex-wrap: wrap; gap: 6px; flex-basis: 100%; }
+      .filters button { font-size: 13px; padding: 3px 10px; border-radius: 14px; }
+      .filters button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+      #picks { flex-basis: 100%; color: var(--star); min-height: 1.4em; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card, 240px)), 1fr)); gap: 12px; margin-top: 14px; }
+      .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+      .card.picked { border-color: var(--star); box-shadow: 0 0 0 1px var(--star); }
+      .card canvas { width: 100%; aspect-ratio: 1; background: #000; border-radius: 6px; cursor: zoom-in; display: block; }
+      .card .head { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+      .card .name { font-weight: 600; }
+      .card .num { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 4px; }
+      .card .desc { color: var(--muted); font-size: 12px; line-height: 1.35; }
+      .star { padding: 1px 8px; font-size: 13px; flex: none; }
+      .card.picked .star { background: var(--star); border-color: var(--star); color: #000; }
+      #focus {
+        position: fixed; inset: 0; background: rgba(0, 0, 0, 0.88); z-index: 5; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px;
+      }
+      #focus.open { display: flex; }
+      #focus canvas { width: min(84vh, 94vw); aspect-ratio: 1; background: #000; border-radius: 8px; }
+      #focus .title { font-size: 18px; font-weight: 600; }
+      #focus .desc { color: var(--muted); max-width: 760px; text-align: center; }
+      .help { color: var(--muted); margin-top: 16px; }
+      .help kbd { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; font: 12px ui-monospace, Menlo, monospace; color: var(--text); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="top">
+        <h1>Background Gallery</h1>
+        <button class="play" id="play">❚❚ Pause</button>
+        <span class="muted" id="clock"></span>
+        <label>Card size
+          <select id="size">
+            <option value="180px">small</option>
+            <option value="240px" selected>medium</option>
+            <option value="340px">large</option>
+          </select>
+        </label>
+        <button id="clear">Clear stars</button>
+        <span class="muted" id="status"></span>
+        <div class="filters" id="filters"></div>
+        <div id="picks"></div>
+      </div>
+      <div class="grid" id="grid"></div>
+      <div class="help">
+        Every card loops its background option, rendered the way the ring controllers draw it. Each option mixes a
+        layout (how the 12 rings are grouped and timed), a coloring, a decoration (a still pattern over the coloring) and
+        a movement (snakes on a mapping, or a breath). Filter by layout at the top. Star the ones you like: the stars are
+        saved for Claude (src/background-picks.json), so just say "use my picks". <kbd>Space</kbd> pause / play ·
+        click a card to see it big, <kbd>Esc</kbd> to close.
+      </div>
+    </div>
+    <div id="focus"><div class="title" id="focusTitle"></div><canvas id="focusCanvas"></canvas><div class="desc" id="focusDesc"></div></div>
+    <script type="module" src="/src/background-gallery/main.ts"></script>
+  </body>
+</html>
