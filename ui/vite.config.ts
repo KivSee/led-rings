@@ -91,6 +91,23 @@ function galleryApi(): Plugin {
           }
         })
       })
+      // POST /api/background-picks?set=<n>, body: the options starred in the background gallery
+      // (ui/background-gallery.html?set=<n>), saved for src/background.ts (set 1) or src/background<n>.ts.
+      server.middlewares.use('/api/background-picks', (req, res) => {
+        const set = new URL(req.url ?? '', 'http://localhost').searchParams.get('set') ?? '1'
+        const file = /^\d+$/.test(set) && set !== '1' ? `src/background${set}-picks.json` : 'src/background-picks.json'
+        let body = ''
+        req.on('data', chunk => { body += chunk })
+        req.on('end', () => {
+          try {
+            fs.writeFileSync(path.join(root, file), JSON.stringify(JSON.parse(body), null, 2) + '\n')
+            res.end('saved')
+          } catch (e) {
+            res.statusCode = 400
+            res.end(String(e))
+          }
+        })
+      })
       server.middlewares.use('/api/gallery', (req, res) => {
         const q = new URL(req.url ?? '', 'http://localhost').searchParams
         const id = nextId++
@@ -128,6 +145,7 @@ export default defineConfig({
         sync: 'sync.html',
         player: 'player.html',
         gallery: 'gallery.html',
+        background: 'background-gallery.html',
       },
     },
   },

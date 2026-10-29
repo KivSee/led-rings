@@ -1,0 +1,92 @@
+[
+  {
+    "option": 1,
+    "name": "Blue to violet: ripples out / blooms",
+    "desc": "the odd and the even rings (same colors): blue to violet with plain, ripples out; blue to violet with gear teeth, blooms. Timing: mirror."
+  },
+  {
+    "option": 2,
+    "name": "Teal to blue & Deep sea: blooms + small ring",
+    "desc": "the odd and the even rings (same movement): teal to blue with gear teeth, blooms; deep sea with gear teeth, blooms; the outer small ring spinning. Timing: mirror."
+  },
+  {
+    "option": 18,
+    "name": "Rainbow in every ring & Rainbow round: 2 spinners / chase round the ring + small ring",
+    "desc": "the odd and the even rings (matching): rainbow in every ring with half moons, 2 spinners; rainbow round with rings along rad, chase round the ring; the inner and outer small rings spinning opposite ways. Timing: round."
+  },
+  {
+    "option": 21,
+    "name": "Blue to violet & Lavender: 2 spinners / drifting shadows + small ring",
+    "desc": "the odd and the even rings (matching): blue to violet with mottled, 2 spinners; lavender with inner glow, drifting shadows; the side small rings pulsing. Timing: mirror."
+  },
+  {
+    "option": 28,
+    "name": "Rainbow in every ring: blooms / color waves",
+    "desc": "the odd and the even rings (same colors): rainbow in every ring with gear teeth, blooms; rainbow in every ring with mottled, color waves. Timing: mirror."
+  },
+  {
+    "option": 58,
+    "name": "Rainbow in every ring: comet / 2 spinners + small ring",
+    "desc": "the odd and the even rings (same colors): rainbow in every ring with plain, comet; rainbow in every ring with gear teeth, 2 spinners; the inner and outer small rings spinning opposite ways. Timing: together."
+  },
+  {
+    "option": 60,
+    "name": "Deep sea & Indigo to sea: 2 spinners / chase round the ring + small ring",
+    "desc": "the odd and the even rings (matching): deep sea with mottled, 2 spinners; indigo to sea with inner glow, chase round the ring; the outer small ring spinning. Timing: mirror."
+  },
+  {
+    "option": 67,
+    "name": "Two tones: chase round the ring / drifting shadows + small ring",
+    "desc": "the odd and the even rings (same colors): two tones with half moons, chase round the ring; two tones with rings along rad, drifting shadows; the inner and outer small rings spinning opposite ways. Timing: mirror."
+  },
+  {
+    "option": 74,
+    "name": "Sunset & Forest: comet",
+    "desc": "the top half and the bottom half (same movement): sunset with dots, comet; forest with dots, comet. Timing: quartets."
+  },
+  {
+    "option": 106,
+    "name": "Rainbow round: twinkles / ripples in + small ring",
+    "desc": "the top half and the bottom half (same colors): rainbow round with 3 spots a ring, twinkles; rainbow round with plain, ripples in; the inner small ring spinning. Timing: mirror."
+  },
+  {
+    "option": 116,
+    "name": "Rainbow round & Rainbow in every ring: comet + small ring",
+    "desc": "the top half and the bottom half (same movement): rainbow round with half moons, comet; rainbow in every ring with half moons, comet; the inner and outer small rings spinning opposite ways. Timing: together."
+  },
+  {
+    "option": 130,
+    "name": "Deep sea: color waves / twinkles + small ring",
+    "desc": "the top half and the bottom half (same colors): deep sea with rings along rad, color waves; deep sea with dots, twinkles; the side small rings pulsing. Timing: mirror."
+  },
+  {
+    "option": 166,
+    "name": "Rainbow round: ripples in / drifting shadows",
+    "desc": "rings 1, 4, 7, 10 and the rest (same colors): rainbow round with rings along rad, ripples in; rainbow round with dots, drifting shadows. Timing: alternate."
+  },
+  {
+    "option": 175,
+    "name": "Forest: color waves / 2 spinners",
+    "desc": "rings 1, 4, 7, 10 and the rest (same colors): forest with gear teeth, color waves; forest with mottled, 2 spinners. Timing: together."
+  },
+  {
+    "option": 221,
+    "name": "Blue to violet & Lavender: 2 spinners",
+    "desc": "the rings at the sides (2, 3, 8, 9) and the top and bottom ones (same movement): blue to violet with dots, 2 spinners; lavender with dots, 2 spinners. Timing: mirror."
+  },
+  {
+    "option": 228,
+    "name": "Rainbow in every ring & Rainbow round: blooms / twinkles + small ring",
+    "desc": "the rings at the sides (2, 3, 8, 9) and the top and bottom ones (matching): rainbow in every ring with rings along rad, blooms; rainbow round with dots, twinkles; the side small rings pulsing. Timing: mirror."
+  },
+  {
+    "option": 304,
+    "name": "Sunset: color waves / twinkles / comet",
+    "desc": "3 groups, every third ring (1, 4, 7, 10 / 2, 5, 8, 11 / 3, 6, 9, 12) (same colors): sunset with gear teeth, color waves; sunset with mottled, twinkles; sunset with inner glow, comet. Timing: round."
+  },
+  {
+    "option": 358,
+    "name": "Rainbow in every ring: comet / 2 spinners",
+    "desc": "the mirror pairs taking turns from the top (12 and 11, 2 and 9, 4 and 7 / the others) (same colors): rainbow in every ring with dots, comet; rainbow in every ring with 3 spots a ring, 2 spinners. Timing: mirror."
+  }
+]

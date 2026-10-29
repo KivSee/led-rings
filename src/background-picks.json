@@ -1,0 +1,102 @@
+[
+  {
+    "option": 2,
+    "name": "Teal to blue, gear teeth, blooms",
+    "desc": "Teal to blue coloring, gear teeth, blooms; every ring the same, at the same time."
+  },
+  {
+    "option": 5,
+    "name": "Forest, half moons, 2 spinners",
+    "desc": "Forest coloring, half moons, 2 spinners; every ring the same, at the same time."
+  },
+  {
+    "option": 6,
+    "name": "Rainbow round, rings along rad, twinkles",
+    "desc": "Rainbow round coloring, rings along rad, twinkles; every ring the same, at the same time."
+  },
+  {
+    "option": 11,
+    "name": "Blue to violet, rings along rad, ripples in",
+    "desc": "Blue to violet coloring, rings along rad, ripples in; every ring the same, at the same time."
+  },
+  {
+    "option": 19,
+    "name": "Lavender, rings along rad, twinkles",
+    "desc": "Lavender coloring, rings along rad, twinkles; the left and right halves mirror each other, timed from the bottom up."
+  },
+  {
+    "option": 22,
+    "name": "Teal to blue, inner glow, twinkles",
+    "desc": "Teal to blue coloring, inner glow, twinkles; the left and right halves mirror each other, timed from the bottom up."
+  },
+  {
+    "option": 24,
+    "name": "Sunset, rings along rad, ripples in",
+    "desc": "Sunset coloring, rings along rad, ripples in; the left and right halves mirror each other, timed from the bottom up."
+  },
+  {
+    "option": 28,
+    "name": "Rainbow in every ring, gear teeth, blooms",
+    "desc": "Rainbow in every ring coloring, gear teeth, blooms; the left and right halves mirror each other, timed from the bottom up."
+  },
+  {
+    "option": 38,
+    "name": "Rainbow in every ring, dots, chase round the ring",
+    "desc": "Rainbow in every ring coloring, dots, chase round the ring; odd and even rings half a cycle apart, turning opposite ways."
+  },
+  {
+    "option": 43,
+    "name": "Indigo to sea, dots, ripples out",
+    "desc": "Indigo to sea coloring, dots, ripples out; odd and even rings half a cycle apart, turning opposite ways."
+  },
+  {
+    "option": 48,
+    "name": "Rainbow in every ring, inner glow, twinkles",
+    "desc": "Rainbow in every ring coloring, inner glow, twinkles; odd and even rings half a cycle apart, turning opposite ways."
+  },
+  {
+    "option": 50,
+    "name": "Deep sea, rings along rad, ripples in",
+    "desc": "Deep sea coloring, rings along rad, ripples in; odd and even rings half a cycle apart, turning opposite ways."
+  },
+  {
+    "option": 53,
+    "name": "Indigo to sea, inner glow, ripples in",
+    "desc": "Indigo to sea coloring, inner glow, ripples in; 4 groups (1, 5, 9 / 2, 6, 10 / …) a quarter of a cycle apart."
+  },
+  {
+    "option": 61,
+    "name": "Blue to violet, dots, comet",
+    "desc": "Blue to violet coloring, dots, comet; 4 groups (1, 5, 9 / 2, 6, 10 / …) a quarter of a cycle apart."
+  },
+  {
+    "option": 64,
+    "name": "Sunset, gear teeth, twinkles",
+    "desc": "Sunset coloring, gear teeth, twinkles; 4 groups (1, 5, 9 / 2, 6, 10 / …) a quarter of a cycle apart."
+  },
+  {
+    "option": 74,
+    "name": "Sunset, dots, comet",
+    "desc": "Sunset coloring, dots, comet; the top half and the bottom half half a cycle apart, turning opposite ways."
+  },
+  {
+    "option": 80,
+    "name": "Deep sea, half moons, chase round the ring",
+    "desc": "Deep sea coloring, half moons, chase round the ring; the top half and the bottom half half a cycle apart, turning opposite ways."
+  },
+  {
+    "option": 82,
+    "name": "Teal to blue, gear teeth, ripples in",
+    "desc": "Teal to blue coloring, gear teeth, ripples in; the top half and the bottom half half a cycle apart, turning opposite ways."
+  },
+  {
+    "option": 99,
+    "name": "Lavender, rings along rad, blooms",
+    "desc": "Lavender coloring, rings along rad, blooms; each ring a twelfth of a cycle behind the one before, so it goes round the big ring."
+  },
+  {
+    "option": 100,
+    "name": "Deep sea, dots, comet",
+    "desc": "Deep sea coloring, dots, comet; each ring a twelfth of a cycle behind the one before, so it goes round the big ring."
+  }
+]
