@@ -46,10 +46,12 @@ Example: `http://localhost:5173/lab.html?song=inequal&name=chase&from=280&to=392
   2026-10-28 counts at 150 BPM, ×1.5).
 - Section map: intro 0–48 · B1 48–96 · Rebuild 96–144 · Drift 149.33–183.33 · drum rotation from 181.33 ·
   Shimmer 183.33–216 · starry middle 216–280 (lab section) · Chase 280–392 (lab section: Night sky, 7 four-bar
-  blocks, build-up 280–312, fade-out 384–392) · finale 392–520 (lab section, outro included).
+  blocks, build-up 280–312, fade-out 384–392) · finale 392–514 (lab section, outro included); dark to the end (520).
 - finale (option set `finale`, lab `lab.html?song=inequal&name=finale`): inner sections breakdown 392–408 (no bass,
-  color bed), rise 408–440, drop 440–472 (bass back at 440), 472–504, outro 504–520 (last hit at 504, silent from
-  ~512; stepped fade 512–520). It replaced Sapir's Finale Arc, Finale Hue Sweep, Outro Arc and Outro Fade.
+  fades in on a color bed), rise 408–440, drop 440–472 (bass back at 440), 472–504, outro 504–514 (last hit at 504,
+  the music decays to −25 dB by 512; stepped fade 506–514). It replaced Sapir's Finale Arc, Finale Hue Sweep, Outro
+  Arc and Outro Fade. Vocal phrase 408–504 (`VOCAL` in sectionLab.ts); the vocal blocks play without beat hits.
+- Songs play once (`anim.playOnce()`, num_repeats 1): looping restarted the intro when the audio outran the timeline.
   Finale options combine mappings (`'ind × centric'`: a snake per mapping) and zones (a window on one mapping cleared
   so another pattern plays there alone; b1 = every third pixel, its own segment).
 - Lab links: `at=<beat>` opens at a beat (the cue: play, ⏮ and the loop start there); `spec=<JSON>` loads a recipe.
