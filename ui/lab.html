@@ -26,6 +26,11 @@
       button.play { min-width: 92px; font-weight: 600; background: var(--accent); border-color: var(--accent); color: #fff; }
       .readout { font-variant-numeric: tabular-nums; }
       .readout b { font-size: 20px; }
+      .seek-row { margin-top: 8px; }
+      #seek { flex: 1 1 320px; min-width: 200px; accent-color: var(--bar); }
+      .cues { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+      .cues button { padding: 3px 8px; font-variant-numeric: tabular-nums; }
+      .cues button.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
       .beats { display: inline-flex; gap: 4px; vertical-align: middle; }
       .beats i { width: 12px; height: 12px; border-radius: 3px; background: var(--line); display: inline-block; }
       .beats i.on { background: var(--bar); }
@@ -93,11 +98,17 @@
         <h1>Section Lab</h1>
         <span><span id="songName"></span> · <span class="section-name" id="sectionName"></span> <span class="muted" id="sectionRange"></span></span>
         <button class="play" id="play">▶ Play</button>
-        <button id="restart" title="Back to the section start">⏮ Start</button>
+        <button id="restart" title="Back to where play starts (the cue)">⏮ Cue</button>
         <span class="readout">bar <b id="bar">1</b><span class="muted" id="barOf"></span></span>
         <span class="readout" title="the song's beat number (the section's beat / its beats)">beat <b id="songBeat">0</b><span class="muted" id="beatOf"></span></span>
         <span class="beats" id="beats"><i></i><i></i><i></i><i></i></span>
         <span class="muted hint" id="audioState"></span>
+      </div>
+      <div class="row seek-row">
+        <input type="range" id="seek" min="0" max="1" step="1" value="0" title="Drag to play from any beat: play, ⏮ and the loop start there">
+        <span class="muted">play from</span>
+        <span class="cues" id="cues"></span>
+        <span class="readout muted" title="where play, ⏮ and the loop start">cue <b id="cueBeat"></b></span>
       </div>
       <header>
         <div class="row">
@@ -108,11 +119,12 @@
         <div class="row">
           <span class="muted">Section shape</span>
           <label class="muted"><input type="checkbox" id="shapeBuildUp" checked> build-up</label>
+          <label class="muted"><input type="checkbox" id="shapeFadeIn"> fade-in (first 4 bars)</label>
           <label class="muted"><input type="checkbox" id="shapeFadeOut" checked> fade-out (last 2 bars)</label>
           <label class="muted"><input type="checkbox" id="shapePeak" checked> peak accent</label>
           <label class="muted">rises peak on <select id="shapePeakOffset"></select></label>
           <label class="muted"><input type="checkbox" id="shapePace" checked> slow → fast motion into every peak</label>
-          <label class="muted">base color <select id="shapeBase"><option value="0.45">dim (45%)</option><option value="0.7">medium (70%)</option><option value="1">full</option></select></label>
+          <label class="muted">base color <select id="shapeBase"><option value="0.45">dim (45%)</option><option value="0.7">medium (70%)</option><option value="0.85">bed (85%)</option><option value="1">full</option></select></label>
         </div>
         <div class="row" id="shapePartsRow" hidden>
           <span class="muted">Shape per section</span>
@@ -151,6 +163,8 @@
           <button id="mixClear">Clear mix</button>
           <button id="copySpec" title="Copy the section settings to paste to Claude, who places them on the song's section marker">Copy for song</button>
           <span class="muted hint" id="copiedSpec"></span>
+          <button id="loadSpec" title="Replace the lab's settings with the song's recipe for this section" hidden>Load from song</button>
+          <span class="muted hint" id="specState"></span>
         </div>
       </section>
       <div id="families"></div>

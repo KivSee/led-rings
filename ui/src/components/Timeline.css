@@ -331,6 +331,27 @@
   transform: scale(1.1);
 }
 
+.lab-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  transition: all 0.2s;
+  opacity: 0.7;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.lab-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  opacity: 1;
+}
+
 .delete-button {
   background: rgba(255, 255, 255, 0.2);
   border: none;

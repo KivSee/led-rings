@@ -49,6 +49,17 @@ interface TimelineProps {
   onSeekToBeat?: (beat: number) => void
   /** Detected beat timestamps in milliseconds. When present, seconds labels use actual detected times. */
   beatTimestampsMs?: number[]
+  /** The song's file name (src/songs/<name>.json), for opening its lab sections in the Section Lab. */
+  songName?: string
+}
+
+/** Opens a lab section in the Section Lab, with its recipe as the editor has it (saved or not). */
+const openInLab = (songName: string, tf: Timeframe) => {
+  const name = tf.label?.trim() || tf.id
+  try {
+    localStorage.setItem('section-lab:recipe', JSON.stringify({ song: songName, name, from: tf.startTime, to: tf.endTime, spec: tf.labSection }))
+  } catch { /* the lab falls back to the song file */ }
+  window.open(`/lab.html?song=${encodeURIComponent(songName)}&name=${encodeURIComponent(name)}&from=${tf.startTime}&to=${tf.endTime}&recipe=1`, '_blank')
 }
 
 const beatToSeconds = (beat: number, bpm: number, beatTimestampsMs?: number[]): number => {
@@ -62,7 +73,7 @@ const beatToSeconds = (beat: number, bpm: number, beatTimestampsMs?: number[]): 
   return (beat / bpm) * 60
 }
 
-const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onUpdateSilent, onUpdateSilentBatch, onCheckpoint, onDelete, onAdd, onCopy, onPaste, hasClipboard, focusedTimeframeId, onFocusedTimeframeChange, selectedTimeframeIds, onSelectedTimeframeIdsChange, currentTime, onCurrentTimeChange, viewStartBeat, beatsPerScreen, onScrollTo, onZoomAt, onPanBy: _onPanBy, onSeekToBeat, beatTimestampsMs }: TimelineProps) => {
+const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onUpdateSilent, onUpdateSilentBatch, onCheckpoint, onDelete, onAdd, onCopy, onPaste, hasClipboard, focusedTimeframeId, onFocusedTimeframeChange, selectedTimeframeIds, onSelectedTimeframeIdsChange, currentTime, onCurrentTimeChange, viewStartBeat, beatsPerScreen, onScrollTo, onZoomAt, onPanBy: _onPanBy, onSeekToBeat, beatTimestampsMs, songName }: TimelineProps) => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingField, setEditingField] = useState<'label' | 'startTime' | 'endTime' | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -773,6 +784,15 @@ const Timeline = ({ timeframes, songLengthBeats, bpm, onUpdate, onUpdateSilent, 
                       >
                         {timeframe.label}
                       </span>
+                    )}
+                    {songName && timeframe.labSection && timeframe.labSection.kind !== 'rotation' && (
+                      <button
+                        className="lab-button"
+                        onClick={() => openInLab(songName, timeframe)}
+                        title="Open this section in the Section Lab with its recipe"
+                      >
+                        lab
+                      </button>
                     )}
                     {onCopy && (
                       <button

@@ -39,7 +39,7 @@ export type Tint = 'white' | 'next' | 'third' | string
 // --- speed, hit timing and variations (after the Option Gallery on main, shemesh-gallery-options.ts) -------------
 
 export type Speed = 'slow' | 'medium' | 'fast'
-export type Hit = 'beat' | 'offbeat' | 'twice' | 'two'
+export type Hit = 'beat' | 'offbeat' | 'twice' | 'two' | 'none'
 /** How an option is played: its speed, when its beat-level hits fall, and which variation. */
 export interface Timing { speed?: Speed; hit?: Hit; variation?: number }
 /** Every cycle (turns, waves, bar patterns) takes `factor` times as long. */
@@ -47,12 +47,14 @@ export const SPEEDS: { id: Speed; name: string; factor: number }[] = [
   { id: 'slow', name: 'slow', factor: 2 }, { id: 'medium', name: 'medium', factor: 1 }, { id: 'fast', name: 'fast', factor: 0.5 },
 ]
 /** The beat-level hits (cycles of a beat or less, steps, events of a beat or less) are `scale` beats apart, and the
- *  whole option is shifted `off` beats late. */
+ *  whole option is shifted `off` beats late. 'none' leaves the option's flashes and flicks of a beat or less out (to
+ *  let something else carry the rhythm, e.g. a vocal). */
 export const HITS: { id: Hit; name: string; scale: number; off: number }[] = [
   { id: 'beat', name: 'on the beat', scale: 1, off: 0 },
   { id: 'offbeat', name: 'off-beat', scale: 1, off: 0.5 },
   { id: 'twice', name: 'twice a beat', scale: 0.5, off: 0 },
   { id: 'two', name: 'every 2 beats', scale: 2, off: 0 },
+  { id: 'none', name: 'no beat hits', scale: 1, off: 0 },
 ]
 /** The same option turned the other way, moved round the installation, mirrored, phased differently across the
  *  rings, its colors nudged round the wheel. */
@@ -70,7 +72,7 @@ function resolveTiming(t?: Timing) {
   const v = VARIATIONS[t?.variation ?? 0] ?? VARIATIONS[0]
   const hit = HITS.find(h => h.id === (t?.hit ?? 'beat')) ?? HITS[0]
   const speed = SPEEDS.find(s => s.id === (t?.speed ?? 'medium')) ?? SPEEDS[1]
-  return { speed: speed.factor, hit: hit.scale, off: hit.off, dir: v.dir ?? 1, rot: v.rot ?? 0, mirror: !!v.mirror, spread: v.spread ?? 1, hue: v.hue ?? 0 }
+  return { speed: speed.factor, hit: hit.scale, off: hit.off, hits: hit.id !== 'none', dir: v.dir ?? 1, rot: v.rot ?? 0, mirror: !!v.mirror, spread: v.spread ?? 1, hue: v.hue ?? 0 }
 }
 /** "fast, off-beat, v3" — the parts that differ from the defaults. */
 export function timingLabel(t?: Timing): string {
@@ -88,8 +90,9 @@ export interface TexCtx {
    *  tintable texture goes toward (null = white) */
   ctx: LabContext; i: number; ring: number; x: number; y: number; c: HSV; next: HSV; third: HSV; tint: HSV | null; mapping: string
   from: number; to: number; amount: number
-  /** the timing's factors: beats per cycle-level step (speed: 0.5 fast … 2 slow) and per beat-level hit */
-  speed: number; hit: number
+  /** the timing's factors: beats per cycle-level step (speed: 0.5 fast … 2 slow) and per beat-level hit; hits false
+   *  when the option plays without beat hits (cycle() then leaves out events of a beat or less) */
+  speed: number; hit: number; hits: boolean
   /** an effect over the span (or a part of it) */
   fx: (seg: string, body: Record<string, unknown>, opts?: { from?: number; to?: number; every?: number; window?: [number, number] }) => EffectJson
   /** scale an increase / hue factor, or a decrease factor, by the amount */
@@ -156,6 +159,10 @@ export const PALETTES: Palette[] = [
     colors: [hsv(0.743, 0.8, 0.8), hsv(0.86, 0.9, 0.9), hsv(0.493, 0.8, 0.8)] },
   { id: 'night', name: 'Night sky', source: 'neutral starry: indigo and deep blue with cyan',
     colors: [hsv(0.68, 0.85, 0.5), hsv(0.62, 0.95, 0.45), hsv(0.52, 0.7, 0.75)] },
+  { id: 'finale-bloom', name: 'Finale bloom', source: 'Into the Finale with an orange spark and a cyan counterpoint, for the drop',
+    colors: [hsv(0.86, 1, 1), hsv(0.75, 1, 1), hsv(0.06, 1, 1), hsv(0.5, 1, 1)] },
+  { id: 'dusk', name: 'Dusk', source: 'the breakdown: violet and rose over deep blue',
+    colors: [hsv(0.75, 0.9, 0.9), hsv(0.95, 0.75, 0.9), hsv(0.64, 1, 0.85)] },
 ]
 
 // rings clockwise from the top, and an irregular color layout over them (no two neighbours alike)
@@ -214,7 +221,7 @@ function texCtx(ctx: LabContext, i: number, c: HSV, next: HSV, mapping: string, 
   const tintCols = ctx.tintColors ?? cols
   const tint = !ctx.tint || ctx.tint === 'white' ? null : ctx.tint === 'next' ? next : ctx.tint === 'third' ? third : tintCols[Number(ctx.tint) % tintCols.length] ?? null
   return {
-    ctx, i: vi, ring, x: r4(Math.sin(angle)), y: r4(-Math.cos(angle)), c, next, third, tint, mapping, from, to, amount, speed: tm.speed, hit: tm.hit,
+    ctx, i: vi, ring, x: r4(Math.sin(angle)), y: r4(-Math.cos(angle)), c, next, third, tint, mapping, from, to, amount, speed: tm.speed, hit: tm.hit, hits: tm.hits,
     fx: (seg, body, o = {}) => effect(ctx, seg, o.from ?? from, o.to ?? to, body, o.every, o.window),
     inc: f => (amount >= 1 ? f : comb(f, amount, cnst(0), 1)),
     dec: f => (amount >= 1 ? f : comb(f, amount, cnst(1), r4(1 - amount))),
@@ -289,6 +296,7 @@ function texCtx(ctx: LabContext, i: number, c: HSV, next: HSV, mapping: string, 
       return out
     },
     cycle: (seg, periodBeats, onBeat, lengthBeats, body) => {
+      if (!tm.hits && lengthBeats <= 1) return []
       // beat-level cycles and events follow the hit timing, longer ones the speed
       const k = periodBeats <= 1 ? tm.hit : tm.speed
       const period = periodBeats * k, on = onBeat * k
@@ -331,6 +339,75 @@ const RING_GROUPS: { id: string; name: string; desc: string; n: number; overlay?
   { id: 'squares', name: 'Squares turn', desc: 'every third ring lit, the next square on every beat', n: 3, on: (t, k) => t.i % 3 === k },
   { id: 'triangles', name: 'Triangles turn', desc: 'every fourth ring lit, the next triangle on every beat', n: 4, on: (t, k) => t.i % 4 === k },
   { id: 'halves', name: 'Halves swap', desc: 'the right half for 2 beats, then the left half', n: 4, on: (t, k) => (k < 2) === RIGHT_HALF.includes(t.ring) },
+]
+
+// --- Finale helpers: several mappings at once, and zones ------------------------------------------------------------
+
+/** The mappings of a combined option ('ind × centric'): each of its snakes runs on one of them. */
+const maps = (t: TexCtx) => t.mapping.split(' × ')
+/** A part of the ring's pixels, as a window on one mapping: `w(inside, outside)` is `inside` on the zone. */
+interface Zone { seg: string; w: (inside: FloatFn, outside: number) => FloatFn }
+/** The low and high half of a mapping (inner/outer on rad, the two vertical halves on updown, a random half on rand). */
+const halves = (seg: string): [Zone, Zone] => [
+  { seg, w: (f, o) => win(0, 0.5, f, o) },
+  { seg, w: (f, o) => win(0.5, 1.01, f, o) },
+]
+/** The odd small rings (small ring k sits at k/11 on ind). */
+const ODD_SMALL: Zone = { seg: 'ind', w: (f, o) => rep(5.5, win(0.25, 0.75, f, o)) }
+/** Clear a zone to a flat glow: whatever lit it before is gone, so what is drawn there next has it to itself. */
+const clearZone = (t: TexCtx, z: Zone, level: number) => [
+  t.fx(z.seg, { position_brightness: { mult_factor_decrease: t.dec(z.w(cnst(0), 1)) } }),
+  t.fx(z.seg, { position_brightness: { mult_factor_increase: t.inc(z.w(cnst(level), 0)) } }),
+]
+/** Every third pixel (b1) cleared to a flat glow: the b1 pixels are a segment of their own, so timed effects on them
+ *  play apart from the other two thirds (b2). */
+const clearB1 = (t: TexCtx, level: number) => [
+  t.fx('b1', { timed_brightness: { mult_factor_decrease: t.dec(cnst(0)) } }),
+  t.fx('b1', { timed_brightness: { mult_factor_increase: t.inc(cnst(level)) } }),
+]
+/** The Finale's vocal phrase, found in the audio (center-channel harmonics, 300–3000 Hz, per phrase): 16 beats from
+ *  408 to 504 (song beats) — a held C# from beat 0, a held F# from beat 4, then a falling C#–B–G# figure on beats 9,
+ *  9.5 and 10, answered on 13, 13.5 and 14. Each note turns a few big rings' hue (`shift`, a third of the way round
+ *  the color wheel: magenta goes cyan) and lets it glide back: 3 and 2 rings on the held notes' entrances, one per
+ *  note of the figure (stepping clockwise, the answer back). The rings are placed from `a`, which alternates between
+ *  two places phrase by phrase. */
+const VOCAL = { from: 408, to: 504, phrase: 16, shift: -0.33, places: [0, 2] }
+const VOCAL_NOTES: { at: number; len: number; held?: boolean; rings: (a: number) => number[] }[] = [
+  { at: 0, len: 4, held: true, rings: a => [a, a + 4, a + 8] },
+  { at: 4, len: 4, held: true, rings: a => [a + 1, a + 7] },
+  { at: 9, len: 0.5, rings: a => [a + 2] },
+  { at: 9.5, len: 0.5, rings: a => [a + 3] },
+  { at: 10, len: 1, rings: a => [a + 4] },
+  { at: 13, len: 0.5, rings: a => [a + 10] },
+  { at: 13.5, len: 0.5, rings: a => [a + 9] },
+  { at: 14, len: 1, rings: a => [a + 8] },
+]
+/** The vocal notes that light this ring and start in the span: [from, to, held], song beats. */
+function vocalNotes(t: TexCtx): [number, number, boolean][] {
+  const out: [number, number, boolean][] = []
+  for (let p = VOCAL.from, n = 0; p < VOCAL.to; p += VOCAL.phrase, n++) {
+    const a = VOCAL.places[n % VOCAL.places.length]
+    for (const v of VOCAL_NOTES) {
+      const from = p + v.at
+      if (from < t.from || from >= t.to || !v.rings(a).some(r => r % 12 === t.i)) continue
+      out.push([from, Math.min(from + v.len, t.to), !!v.held])
+    }
+  }
+  return out
+}
+/** A vocal note on this ring: its hue jumps by VOCAL.shift and glides back over the note (a held note holds it for the
+ *  first half), with a lift of `lift` (to `rest` by the end). */
+const vocalNote = (t: TexCtx, [from, to, held]: [number, number, boolean], lift: number, rest: number) => {
+  const s = VOCAL.shift
+  return [
+    t.fx('all', { timed_hue: { offset_factor: t.inc(held ? half(cnst(s), lin(s, 0)) : lin(s, 0)) } }, { from, to }),
+    t.fx('all', { timed_brightness: { mult_factor_increase: t.inc(lin(lift, rest)) } }, { from, to }),
+  ]
+}
+/** A white-tipped snake: brightness over the tail, saturation drained at the head. */
+const whiteSnake = (t: TexCtx, seg: string, head: FloatFn, tail: number, lift: number, cyclic = true) => [
+  t.fx(seg, { snake_brightness: { head, tail_length: cnst(tail), cyclic, mult_factor_increase: t.inc(lin(0, lift)) } }),
+  t.fx(seg, { snake_saturation: { head, tail_length: cnst(r4(tail / 3)), cyclic, mult_factor_decrease: t.dec(lin(1, 0.25)) } }),
 ]
 
 export const TEXTURES: Texture[] = [
@@ -908,6 +985,334 @@ export const TEXTURES: Texture[] = [
       const S = t.ctx.fromBeat, len = t.ctx.toBeat - S
       return [t.fx('all', { timed_hue: { offset_factor: t.inc(lin(r4((0.1 * (t.from - S)) / len), r4((0.1 * (t.to - S)) / len))) } })]
     } },
+
+  // ===== Finale (392–504): a color bed through the breakdown (392–408) and the rise, full color on the drop (440).
+  // Snakes on several mappings at once, and zones: a window on one mapping clears part of the pixels so another
+  // pattern plays there alone. Combined options name their mappings 'first × second'.
+
+  // the vocal phrase (408–504): a guide showing only its events, and the overlay that plays them over the section
+  { id: 'fin-vocal-guide', set: 'finale', name: 'Vocal guide', family: 'Finale · vocal', inspiration: 'the vocal phrase found in the audio (408–504)',
+    description: 'Only the vocal notes, on black, to check them against the music: the held notes light 3 rings (408, 424, …) and then 2 (412, 428, …), the short notes of the falling figure one ring each (417, 417.5, 418 clockwise, answered on 421, 421.5, 422); each lit ring turns a third of the way round the color wheel and glides back. Two sets of rings, taking turns phrase by phrase. Dark before 408.',
+    mappings: ['all'],
+    build: t => [dimAll(t, 0), ...vocalNotes(t).reduce<EffectJson[]>((out, note) => out.concat(vocalNote(t, note, 1, note[2] ? 0.3 : 0.15)), [])] },
+
+  // on the bed: color moving, little dimming
+  { id: 'fin-orbit-tide', set: 'finale', name: 'Orbit and tide', family: 'Finale · bed', inspiration: 'Drift inner/outer split + Comet orbit',
+    description: 'The next color washes in and out along the first mapping every 2 bars while a soft comet circles on the second.',
+    mappings: ['rad × ind', 'updown × ind', 'arc × centric', 'rad × centric'],
+    build: t => {
+      const [m1, m2] = maps(t)
+      return [
+        t.fx(m1, { snake_hue: { head: t.wave(0.25, 0.85, 2 * BAR, 0.75), tail_length: cnst(1), cyclic: false, offset_factor: t.inc(cnst(toward(t, t.next))) } }),
+        dimAll(t, 0.7),
+        t.fx(m2, { snake_brightness: { head: t.head(2 * BAR, t.i / 12), tail_length: cnst(0.35), cyclic: true, mult_factor_increase: t.inc(lin(0, 0.7)) } }),
+      ]
+    } },
+  { id: 'fin-aurora', set: 'finale', name: 'Aurora', family: 'Finale · bed', inspiration: 'shemesh ind hue snakes',
+    description: 'A curtain blending to the next color and back drifts along the first mapping, with a soft shimmer wandering through the pixels.',
+    mappings: ['updown × rand', 'rad × rand', 'centric × rand', 'arc × rand'],
+    build: t => {
+      const [m1, m2] = maps(t), d = toward(t, t.next)
+      return [
+        t.fx(m1, { snake_hue: { head: t.head(4 * BAR, t.i / 12), tail_length: cnst(1), cyclic: true, offset_factor: t.inc(half(lin(0, d), lin(d, 0))) } }),
+        dimAll(t, 0.7),
+        t.fx(m2, { snake_brightness: { head: t.head(2 * BAR, ph(t.i, 0.37)), tail_length: cnst(0.5), cyclic: true, mult_factor_increase: t.inc(half(lin(0, 0.55), lin(0.55, 0))) } }),
+      ]
+    } },
+  { id: 'fin-sky-sea', set: 'finale', name: 'Sky and sea', family: 'Finale · bed', inspiration: 'shemesh rad windows',
+    description: 'Two halves of the mapping doing different things: stars twinkle in one, the other takes the next color with waves rolling through it every 2 beats.',
+    mappings: ['updown', 'rad', 'arc'],
+    build: t => {
+      const [, sea] = halves(t.mapping)
+      return [
+        ...stars(t, 'rand', BAR, ph(t.i, 0.37), 0.07, 0.9),
+        ...clearZone(t, sea, 0.55),
+        t.fx(t.mapping, { position_hue: { offset_factor: t.inc(sea.w(cnst(toward(t, t.next)), 0)) } }),
+        ...t.cycle(t.mapping, 2, 0, 2, { snake_brightness: { head: lin(0.7, 1.2), tail_length: cnst(0.2), cyclic: false, mult_factor_increase: t.inc(lin(0, 0.7)) } }),
+      ]
+    } },
+  { id: 'fin-core-rim', set: 'finale', name: 'Core and rim', family: 'Finale · bed', inspiration: 'Pinwheel + Halo ripple',
+    description: 'In one half of the mapping the small rings spin a two-armed pinwheel in the next color; in the other half ripples run outward on every beat.',
+    mappings: ['rad', 'arc', 'updown'],
+    build: t => {
+      const [core, rim] = halves(t.mapping)
+      return [
+        t.fx('centric', { snake_brightness: { head: t.head(BAR / 2, t.i / 24), tail_length: cnst(0.25), cyclic: true, mult_factor_increase: t.inc(lin(0, 0.8)) } }),
+        t.fx('centric', { snake_brightness: { head: t.head(BAR / 2, t.i / 24 + 0.5), tail_length: cnst(0.25), cyclic: true, mult_factor_increase: t.inc(lin(0, 0.8)) } }),
+        t.fx(t.mapping, { position_hue: { offset_factor: t.inc(core.w(cnst(toward(t, t.next)), 0)) } }),
+        ...clearZone(t, rim, 0.5),
+        ...t.cycle(t.mapping, 1, 0, 1, { snake_brightness: { head: lin(0.6, 1.15), tail_length: cnst(0.1), cyclic: false, mult_factor_increase: t.inc(lin(0, 0.8)) } }),
+      ]
+    } },
+  { id: 'fin-lanterns', set: 'finale', name: 'Lanterns', family: 'Finale · bed', inspiration: 'Option Gallery ind windows (el_jaguar)',
+    description: 'The odd small rings are lanterns in the next color, glowing up every other beat; on the even ones a slow comet circles each small ring.',
+    mappings: ['ind'],
+    build: t => [
+      t.fx('centric', { snake_brightness: { head: t.head(BAR, t.i / 12), tail_length: cnst(0.4), cyclic: true, mult_factor_increase: t.inc(lin(0, 0.7)) } }),
+      ...clearZone(t, ODD_SMALL, 0.45),
+      t.fx('ind', { position_hue: { offset_factor: t.inc(ODD_SMALL.w(cnst(toward(t, t.next)), 0)) } }),
+      ...t.cycle('ind', 2, 0, 1, { position_brightness: { mult_factor_increase: t.inc(ODD_SMALL.w(cnst(0.6), 0)) } }),
+    ] },
+  { id: 'fin-breath', set: 'finale', name: 'Two-color breath', family: 'Finale · pixel weave', inspiration: 'Option Gallery b1/b2 colors (el_jaguar)',
+    description: 'Every third pixel breathes toward the third color while the rest breathe toward the next one, half a cycle apart, every 2 bars: the pixels shimmer between colors.',
+    mappings: ['b1 × b2'],
+    build: t => [
+      t.fx('b2', { timed_hue: { offset_factor: t.inc(t.wave(0, toward(t, t.next), 2 * BAR, 0.75)) } }),
+      t.fx('b1', { timed_hue: { offset_factor: t.inc(t.wave(0, toward(t, t.third), 2 * BAR, 0.25)) } }),
+      t.fx('b1', { timed_brightness: { mult_factor_increase: t.inc(t.wave(0, 0.4, 2 * BAR, 0.25)) } }),
+    ] },
+
+  // woven snakes: one snake per mapping, crossing
+  { id: 'fin-woven', set: 'finale', name: 'Woven snakes', family: 'Finale · woven snakes', inspiration: 'shemesh ind + centric snakes',
+    description: 'A long glow sweeps round on the first mapping every 2 bars while short white-tipped snakes run the other way on the second, twice a bar; where they cross it flares.',
+    mappings: ['ind × centric', 'rad × centric', 'updown × ind', 'arc × centric'],
+    build: t => {
+      const [m1, m2] = maps(t)
+      return [
+        dimAll(t, 0.55),
+        t.fx(m1, { snake_brightness: { head: t.head(2 * BAR, t.i / 12), tail_length: cnst(0.45), cyclic: true, mult_factor_increase: t.inc(lin(0, 0.6)) } }),
+        ...whiteSnake(t, m2, t.head(BAR / 2, t.i / 12, true), 0.2, 0.85),
+      ]
+    } },
+  { id: 'fin-braid', set: 'finale', name: 'Color braid', family: 'Finale · woven snakes', inspiration: 'Double helix, across two mappings',
+    description: 'A band of the next color turns one way on the first mapping, a band of the third color the other way on the second; white heads lead the second.',
+    mappings: ['centric × ind', 'arc × rad', 'updown × centric', 'ind × rad'],
+    build: t => {
+      const [m1, m2] = maps(t), h2 = t.head(BAR, t.i / 12, true)
+      return [
+        t.fx(m1, { snake_hue: { head: t.head(BAR, t.i / 12), tail_length: cnst(0.35), cyclic: true, offset_factor: t.inc(cnst(toward(t, t.next))) } }),
+        t.fx(m2, { snake_hue: { head: h2, tail_length: cnst(0.3), cyclic: true, offset_factor: t.inc(cnst(toward(t, t.third))) } }),
+        t.fx(m2, { snake_saturation: { head: h2, tail_length: cnst(0.06), cyclic: true, mult_factor_decrease: t.dec(lin(1, 0.3)) } }),
+      ]
+    } },
+  { id: 'fin-mesh', set: 'finale', name: 'Three-way mesh', family: 'Finale · woven snakes', inspiration: 'bam bam rand snakes + shemesh ind',
+    description: 'Three snakes, three mappings, three channels: light drifting through the pixels (rand), a white sweep round the small rings (ind) and a color band spinning in each small ring (centric).',
+    mappings: ['rand × ind × centric'],
+    build: t => [
+      dimAll(t, 0.6),
+      t.fx('rand', { snake_brightness: { head: t.head(BAR, ph(t.i, 0.41)), tail_length: cnst(0.3), cyclic: true, mult_factor_increase: t.inc(lin(0, 0.6)) } }),
+      t.fx('ind', { snake_saturation: { head: t.head(2 * BAR, t.i / 12), tail_length: cnst(0.12), cyclic: true, mult_factor_decrease: t.dec(lin(1, 0.2)) } }),
+      t.fx('centric', { snake_hue: { head: t.head(BAR / 2, t.i / 12, true), tail_length: cnst(0.3), cyclic: true, offset_factor: t.inc(cnst(toward(t, t.next))) } }),
+    ] },
+  { id: 'fin-crossfire', set: 'finale', name: 'Crossfire', family: 'Finale · woven snakes', inspiration: 'Ping-pong × Scanner',
+    description: 'Two bands bounce along two mappings, one every 2 beats in the next color, one every 3 beats in the third: three against two, meeting every 6 beats.',
+    mappings: ['updown × rad', 'arc × updown', 'rad × arc'],
+    build: t => {
+      const [m1, m2] = maps(t)
+      return [
+        dimAll(t, 0.3),
+        t.fx(m1, { snake_brightness: { head: t.wave(0.1, 1.1, 2, 0.75), tail_length: cnst(0.25), cyclic: false, mult_factor_increase: t.inc(lin(0, 1)) } }),
+        t.fx(m1, { snake_hue: { head: t.wave(0.1, 1.1, 2, 0.75), tail_length: cnst(0.25), cyclic: false, offset_factor: t.inc(cnst(toward(t, t.next))) } }),
+        t.fx(m2, { snake_brightness: { head: t.wave(0.1, 1.1, 3, 0.25), tail_length: cnst(0.25), cyclic: false, mult_factor_increase: t.inc(lin(0, 1)) } }),
+        t.fx(m2, { snake_hue: { head: t.wave(0.1, 1.1, 3, 0.25), tail_length: cnst(0.25), cyclic: false, offset_factor: t.inc(cnst(toward(t, t.third))) } }),
+      ]
+    } },
+  { id: 'fin-cascade', set: 'finale', name: 'Cascade', family: 'Finale · woven snakes', inspiration: 'peter_the_wolf updown snakes, phased',
+    description: 'Colored snakes fall down each ring once a bar, each ring a twelfth later, so the fall rolls round the circle; a slow white sweep crosses them on the second mapping.',
+    mappings: ['updown × ind', 'rad × centric', 'arc × ind'],
+    build: t => {
+      const [m1, m2] = maps(t), head = t.head(BAR, t.i / 12)
+      return [
+        dimAll(t, 0.35),
+        t.fx(m1, { snake_brightness: { head, tail_length: cnst(0.4), cyclic: true, mult_factor_increase: t.inc(lin(0, 1)) } }),
+        t.fx(m1, { snake_hue: { head, tail_length: cnst(0.4), cyclic: true, offset_factor: t.inc(lin(toward(t, t.next), 0)) } }),
+        t.fx(m2, { snake_saturation: { head: t.head(4 * BAR, 0), tail_length: cnst(0.15), cyclic: true, mult_factor_decrease: t.dec(lin(1, 0.3)) } }),
+      ]
+    } },
+
+  // zones: a window on one mapping, something different on each side of it
+  { id: 'fin-half-sparkle', set: 'finale', name: 'Half spin, half sparkle', family: 'Finale · zones', inspiration: 'bam bam rand snakes',
+    description: 'A random half of the pixels takes the next color and sparkles; the other half spins with the small rings.',
+    mappings: ['rand'],
+    build: t => {
+      const [a] = halves('rand')
+      return [
+        t.fx('centric', { snake_brightness: { head: t.head(BAR / 2, t.i / 12), tail_length: cnst(0.35), cyclic: true, mult_factor_increase: t.inc(lin(0, 0.9)) } }),
+        ...clearZone(t, a, 0.3),
+        t.fx('rand', { position_hue: { offset_factor: t.inc(a.w(cnst(toward(t, t.next)), 0)) } }),
+        // a snake through the random order of zone a only: sparkles that stay on its pixels
+        ...t.cycle('rand', BAR, 0, BAR, { snake_brightness: { head: lin(0, 0.56), tail_length: cnst(0.06), cyclic: false, mult_factor_increase: t.inc(lin(0, 1)) } }),
+        ...t.cycle('rand', BAR, 0, BAR, { snake_saturation: { head: lin(0, 0.56), tail_length: cnst(0.03), cyclic: false, mult_factor_decrease: t.dec(lin(1, 0.3)) } }),
+      ]
+    } },
+  { id: 'fin-odd-even', set: 'finale', name: 'Odd and even', family: 'Finale · zones', inspiration: 'Checker + Clock hand',
+    description: 'The odd small rings flash in the third color on every beat; across the even ones a white-tipped hand sweeps round once a bar.',
+    mappings: ['ind'],
+    build: t => [
+      dimAll(t, 0.35),
+      ...whiteSnake(t, 'ind', t.head(BAR, t.i / 12), 0.3, 1),
+      ...clearZone(t, ODD_SMALL, 0.15),
+      t.fx('ind', { position_hue: { offset_factor: t.inc(ODD_SMALL.w(cnst(toward(t, t.third)), 0)) } }),
+      ...t.cycle('ind', 1, 0, 0.5, { position_brightness: { mult_factor_increase: t.inc(ODD_SMALL.w(cnst(0.9), 0)) } }),
+    ] },
+  { id: 'fin-shutter', set: 'finale', name: 'Shutter', family: 'Finale · zones', inspiration: 'shemesh rad masks',
+    description: 'A dark shade covers half of each ring and turns once every 2 bars; under it white stars, outside it the small rings spin.',
+    mappings: ['ind', 'centric', 'updown'],
+    build: t => [
+      t.fx('centric', { snake_brightness: { head: t.head(BAR / 2, t.i / 12), tail_length: cnst(0.3), cyclic: true, mult_factor_increase: t.inc(lin(0, 0.9)) } }),
+      t.fx(t.mapping, { snake_brightness: { head: t.head(2 * BAR, t.i / 12, true), tail_length: cnst(0.5), cyclic: true, mult_factor_decrease: t.dec(cnst(0.12)) } }),
+      ...stars(t, 'rand', BAR, ph(t.i, 0.37), 0.06, 0.9),
+    ] },
+  { id: 'fin-iris', set: 'finale', name: 'Iris', family: 'Finale · zones', inspiration: 'shemesh rad snakes (masks)',
+    description: 'An iris opens and closes along the mapping every 2 bars: outside it dark, inside a color helix turning.',
+    mappings: ['rad', 'updown', 'arc'],
+    build: t => {
+      const out: EffectJson[] = []
+      for (const [rev, target] of [[false, t.next], [true, t.third]] as [boolean, HSV][]) {
+        const head = t.head(BAR, t.i / 12, rev)
+        out.push(
+          t.fx('centric', { snake_hue: { head, tail_length: cnst(0.3), cyclic: true, offset_factor: t.inc(cnst(toward(t, target))) } }),
+          t.fx('centric', { snake_brightness: { head, tail_length: cnst(0.3), cyclic: true, mult_factor_increase: t.inc(lin(0.2, 0.9)) } }),
+        )
+      }
+      // the shade: from the edge (1.2) in to between 0.85 and 0.25 of the mapping
+      out.push(t.fx(t.mapping, { snake_brightness: { head: cnst(1.2), tail_length: t.wave(0.35, 0.95, 2 * BAR, 0.75), cyclic: false, mult_factor_decrease: t.dec(cnst(0.1)) } }))
+      return out
+    } },
+  { id: 'fin-spotlight', set: 'finale', name: 'Spotlight', family: 'Finale · zones', inspiration: 'Chase Ind Steps, as a mask',
+    description: 'Only a quarter of each ring is lit, stepping a twelfth on every beat; inside it the small rings spin white-tipped arms.',
+    mappings: ['ind', 'centric'],
+    build: t => [
+      ...whiteSnake(t, 'centric', t.head(BAR / 2, t.i / 12), 0.3, 1),
+      ...t.stepped(t.mapping, 12, t.i / 12, head => ({ snake_brightness: { head, tail_length: cnst(0.75), cyclic: true, mult_factor_decrease: t.dec(cnst(0.1)) } })),
+    ] },
+
+  // pixel weave: every third pixel (b1) against the rest (b2)
+  { id: 'fin-weave-pulse', set: 'finale', name: 'Weave pulse', family: 'Finale · pixel weave', inspiration: 'Option Gallery b1/b2 colors (el_jaguar)',
+    description: 'A snake runs the mapping on two thirds of the pixels; every third pixel holds the third color and pulses on every beat.',
+    mappings: ['centric', 'ind', 'rad', 'updown'],
+    build: t => [
+      dimAll(t, 0.45),
+      t.fx(t.mapping, { snake_brightness: { head: t.head(BAR, t.i / 12), tail_length: cnst(0.4), cyclic: true, mult_factor_increase: t.inc(lin(0, 1)) } }),
+      // (without beat hits every third pixel glows steadily instead)
+      ...clearB1(t, t.hits ? 0.2 : 0.55),
+      t.fx('b1', { timed_hue: { offset_factor: t.inc(cnst(toward(t, t.third))) } }),
+      ...t.cycle('b1', 1, 0, 0.6, { timed_brightness: { mult_factor_increase: t.inc(lin(0.9, 0)) } }),
+    ] },
+  { id: 'fin-weave-glitter', set: 'finale', name: 'Weave glitter', family: 'Finale · pixel weave', inspiration: 'White glitter, on b1',
+    description: 'A color wheel turns slowly through the ring while every third pixel flicks white on the off-beats.',
+    mappings: ['ind', 'centric', 'arc', 'rad'],
+    build: t => {
+      const d = toward(t, t.next)
+      return [
+        t.fx(t.mapping, { snake_hue: { head: t.head(2 * BAR, t.i / 12), tail_length: cnst(1), cyclic: true, offset_factor: t.inc(half(lin(0, d), lin(d, 0))) } }),
+        ...t.cycle('b1', 1, 0.5, 0.35, { timed_saturation: { mult_factor_decrease: t.dec(lin(0, 1)) } }),
+        ...t.cycle('b1', 1, 0.5, 0.35, { timed_brightness: { mult_factor_increase: t.inc(lin(1, 0)) } }),
+      ]
+    } },
+  { id: 'fin-pulse-grid', set: 'finale', name: 'Pulse grid', family: 'Finale · pixel weave', inspiration: 'Offbeat pump, split by pixel',
+    description: 'Every third pixel in the next color pumps on the beat; the rest pump on the off-beat.',
+    mappings: ['b1 × b2'],
+    build: t => [
+      t.fx('b1', { timed_hue: { offset_factor: t.inc(cnst(toward(t, t.next))) } }),
+      ...t.cycle('b1', 1, 0, 0.5, { timed_brightness: { mult_factor_decrease: t.dec(lin(1, 0.3)) } }),
+      ...t.cycle('b1', 1, 0.5, 0.5, { timed_brightness: { mult_factor_decrease: t.dec(cnst(0.3)) } }),
+      ...t.cycle('b2', 1, 0, 0.5, { timed_brightness: { mult_factor_decrease: t.dec(cnst(0.35)) } }),
+      ...t.cycle('b2', 1, 0.5, 0.5, { timed_brightness: { mult_factor_decrease: t.dec(lin(1, 0.35)) } }),
+    ] },
+  { id: 'fin-weave-steps', set: 'finale', name: 'Weave steps', family: 'Finale · pixel weave', inspiration: 'bam bam hue steps',
+    description: 'Two thirds of the pixels step through the palette on every beat (own, next, third, next); every third pixel holds the ring\'s own color, a little brighter.',
+    mappings: ['b1 × b2'],
+    build: t => [
+      ...t.cycle('b2', BAR, 0, BAR, { timed_hue: { offset_factor: t.inc(half(half(cnst(0), cnst(toward(t, t.next))), half(cnst(toward(t, t.third)), cnst(toward(t, t.next))))) } }),
+      t.fx('b1', { timed_brightness: { mult_factor_increase: t.inc(cnst(0.3)) } }),
+    ] },
+
+  // the drop
+  { id: 'fin-supernova', set: 'finale', name: 'Supernova', family: 'Finale · drop', inspiration: 'Meteor shower + Pinwheel + b1 flashes',
+    description: 'On every downbeat a white ring bursts out across the installation; between them the small rings spin and every third pixel flashes on the off-beats.',
+    mappings: ['rad', 'updown'],
+    build: t => [
+      dimAll(t, 0.45),
+      t.fx('centric', { snake_brightness: { head: t.head(BAR / 2, t.i / 24), tail_length: cnst(0.3), cyclic: true, mult_factor_increase: t.inc(lin(0, 0.85)) } }),
+      ...t.cycle('b1', 1, 0.5, 0.5, { timed_brightness: { mult_factor_increase: t.inc(lin(0.8, 0)) } }),
+      ...t.cycle(t.mapping, BAR, 0, 1, { snake_brightness: { head: lin(-0.1, 1.3), tail_length: cnst(0.3), cyclic: false, mult_factor_increase: t.inc(lin(0, 1)) } }),
+      ...t.cycle(t.mapping, BAR, 0, 1, { snake_saturation: { head: lin(-0.1, 1.3), tail_length: cnst(0.3), cyclic: false, mult_factor_decrease: t.dec(lin(1, 0.15)) } }),
+    ] },
+  { id: 'fin-hyperspin', set: 'finale', name: 'Hyperspin', family: 'Finale · drop', inspiration: 'Orbit dots, sped up',
+    description: 'Two arms whirl round every small ring twice a beat, while a band of the next color sweeps round the big ring once a bar.',
+    mappings: ['centric × ind', 'centric × rad', 'arc × ind'],
+    build: t => {
+      const [m1, m2] = maps(t)
+      return [
+        dimAll(t, 0.35),
+        t.fx(m1, { snake_brightness: { head: t.head(0.5, t.i / 12), tail_length: cnst(0.25), cyclic: true, mult_factor_increase: t.inc(lin(0, 1)) } }),
+        t.fx(m1, { snake_brightness: { head: t.head(0.5, t.i / 12 + 0.5), tail_length: cnst(0.25), cyclic: true, mult_factor_increase: t.inc(lin(0, 1)) } }),
+        t.fx(m2, { snake_hue: { head: t.head(BAR, t.i / 12), tail_length: cnst(0.35), cyclic: true, offset_factor: t.inc(cnst(toward(t, t.next))) } }),
+      ]
+    } },
+  { id: 'fin-kaleido', set: 'finale', name: 'Kaleidoscope', family: 'Finale · drop', inspiration: 'Rosette petals + Spinning split',
+    description: 'Six petals on every small ring flick between two positions on every beat, over a sector of the next color turning round the big ring once a bar.',
+    mappings: ['centric × ind', 'centric × rad'],
+    build: t => {
+      const [, m2] = maps(t)
+      return [
+        t.fx(m2, { snake_hue: { head: t.head(BAR, t.i / 12), tail_length: cnst(0.5), cyclic: true, offset_factor: t.inc(cnst(toward(t, t.next))) } }),
+        dimAll(t, 0.3),
+        // without beat hits the petals hold still
+        ...(t.hits ? [] : [t.fx('centric', { position_brightness: { mult_factor_increase: t.inc(rep(6, winC(0, 0.45, cnst(1)))) } })]),
+        ...t.cycle('centric', 2, 0, 1, { position_brightness: { mult_factor_increase: t.inc(rep(6, winC(0, 0.45, cnst(1)))) } }),
+        ...t.cycle('centric', 2, 1, 1, { position_brightness: { mult_factor_increase: t.inc(rep(6, winC(0.5, 0.45, cnst(1)))) } }),
+      ]
+    } },
+  { id: 'fin-lighthouse', set: 'finale', name: 'Lighthouse', family: 'Finale · drop', inspiration: 'shemesh ind snakes + Glint',
+    description: 'A wide beam with a white core turns round each ring once a bar; outside the beam, every third pixel glows in the third color.',
+    mappings: ['ind', 'updown', 'rad'],
+    build: t => {
+      const head = t.head(BAR, t.i / 12)
+      return [
+        dimAll(t, 0.25),
+        t.fx('b1', { timed_hue: { offset_factor: t.inc(cnst(toward(t, t.third))) } }),
+        t.fx('b1', { timed_brightness: { mult_factor_increase: t.inc(cnst(0.35)) } }),
+        t.fx(t.mapping, { snake_brightness: { head, tail_length: cnst(0.35), cyclic: true, mult_factor_increase: t.inc(half(lin(0, 1), cnst(1))) } }),
+        t.fx(t.mapping, { snake_saturation: { head, tail_length: cnst(0.08), cyclic: true, mult_factor_decrease: t.dec(lin(1, 0.15)) } }),
+      ]
+    } },
+  { id: 'fin-twin-zones', set: 'finale', name: 'Twin zones', family: 'Finale · drop', inspiration: 'Ricochet, by zone',
+    description: 'The two halves of the mapping trade places every 2 beats: one half dark with a white snake racing round the small rings, the other in full next color.',
+    mappings: ['updown', 'rad', 'arc', 'rand'],
+    build: t => {
+      const [a, b] = halves(t.mapping), d = toward(t, t.next)
+      const out: EffectJson[] = [...whiteSnake(t, 'centric', t.head(BAR / 4, t.i / 12), 0.25, 1)]
+      for (const [on, z, other] of [[0, a, b], [2, b, a]] as [number, Zone, Zone][]) {
+        out.push(
+          ...t.cycle(z.seg, BAR, on, 2, { position_brightness: { mult_factor_decrease: t.dec(other.w(cnst(0.25), 1)) } }),
+          ...t.cycle(z.seg, BAR, on, 2, { position_hue: { offset_factor: t.inc(z.w(cnst(d), 0)) } }),
+          ...t.cycle(z.seg, BAR, on, 2, { position_brightness: { mult_factor_increase: t.inc(z.w(cnst(1), 0)) } }),
+        )
+      }
+      return out
+    } },
+
+  // overlays (lay these over any option with the lab's Overlays row)
+  { id: 'ov-fin-vocal', set: 'finale', name: 'Vocal phrase', family: 'Finale · overlays', inspiration: 'the vocal phrase found in the audio (408–504)',
+    description: 'Follows the vocal from 408 on a few rings at a time: each held note turns 3 rings, then 2, a third of the way round the color wheel (magenta goes cyan), holding it and gliding back; each note of the falling figure (417, 417.5, 418, answered on 421, …) does it on one ring. Two sets of rings, taking turns phrase by phrase.',
+    mappings: ['all'],
+    build: t => vocalNotes(t).reduce<EffectJson[]>((out, note) => out.concat(vocalNote(t, note, note[2] ? 0.5 : 0.35, 0)), []) },
+  { id: 'ov-fin-burst', set: 'finale', name: 'Downbeat burst', family: 'Finale · overlays', inspiration: 'Meteor shower',
+    description: 'A white ring bursts out from the center across the installation on every downbeat.',
+    mappings: ['rad'],
+    build: t => [
+      ...t.cycle('rad', BAR, 0, 1, { snake_brightness: { head: lin(-0.1, 1.3), tail_length: cnst(0.3), cyclic: false, mult_factor_increase: t.inc(lin(0, 1)) } }),
+      ...t.cycle('rad', BAR, 0, 1, { snake_saturation: { head: lin(-0.1, 1.3), tail_length: cnst(0.3), cyclic: false, mult_factor_decrease: t.dec(lin(1, 0.15)) } }),
+    ] },
+  { id: 'ov-fin-pixel-sparkle', set: 'finale', name: 'Pixel sparkle', family: 'Finale · overlays', inspiration: 'White glitter, on b1',
+    description: 'Every third pixel flicks white on the off-beats.',
+    mappings: ['b1'],
+    build: t => [
+      ...t.cycle('b1', 1, 0.5, 0.3, { timed_saturation: { mult_factor_decrease: t.dec(lin(0, 1)) } }),
+      ...t.cycle('b1', 1, 0.5, 0.3, { timed_brightness: { mult_factor_increase: t.inc(lin(1, 0)) } }),
+    ] },
+  { id: 'ov-fin-shade', set: 'finale', name: 'Turning shade', family: 'Finale · overlays', inspiration: 'Shutter',
+    description: 'A soft shade over half of each ring, turning once every 2 bars.',
+    mappings: ['ind', 'updown', 'rad'],
+    build: t => [t.fx(t.mapping, { snake_brightness: { head: t.head(2 * BAR, t.i / 12, true), tail_length: cnst(0.5), cyclic: true, mult_factor_decrease: t.dec(cnst(0.35)) } })] },
+  { id: 'ov-fin-tint-wash', set: 'finale', name: 'Rising tint', family: 'Finale · overlays', inspiration: 'Finale Hue Sweep',
+    description: 'Each bar the rings slide toward the tint color and snap back on the downbeat.',
+    mappings: ['all'], tintable: true,
+    build: t => t.tint
+      ? [...t.cycle('all', BAR, 0, BAR, { timed_hue: { offset_factor: t.inc(lin(0, toward(t, t.tint))) } })]
+      : [...t.cycle('all', BAR, 0, BAR, { timed_saturation: { mult_factor_decrease: t.dec(lin(1, 0.4)) } })] },
 ]
 
 function rep(n: number, f: FloatFn): FloatFn { return { repeat: { numberOfTimes: n, funcToRepeat: f } } }
@@ -920,6 +1325,8 @@ function winC(start: number, width: number, func: FloatFn, outside = 0): FloatFn
 
 export interface Shape {
   buildUp: boolean; fadeOut: boolean
+  /** fading in from black over the first 4 bars (in parts: over each fading-in part, up to 4 bars) */
+  fadeIn?: boolean
   /** a slight brightening rising into every peak (on unless false) */
   peak?: boolean
   /** where the rises peak, in beats after the section start (mod a bar; 0 = on the bar lines) */
@@ -934,7 +1341,7 @@ export interface Shape {
    *  section's; adjacent parts with build-up rise as one, and peaks run on through adjacent parts */
   parts?: ShapePart[]
 }
-export interface ShapePart { from: number; to: number; buildUp?: boolean; fadeOut?: boolean; peak?: boolean; base?: number; pace?: number }
+export interface ShapePart { from: number; to: number; buildUp?: boolean; fadeIn?: boolean; fadeOut?: boolean; peak?: boolean; base?: number; pace?: number }
 export interface Overlay { id: string; mapping?: string; from?: number; to?: number; tint?: Tint }
 /** One texture placed over [from, to) beats; amount(beat) gives its strength per beat (1 = full). */
 export interface Placement {
@@ -1094,6 +1501,11 @@ export function compose(ctx: LabContext, placements: Placement[], shape: Shape, 
     }
     const fadeOut = (a: number, len: number) =>
       fx.push(effect(ctx, 'all', a, a + len, { timed_brightness: { mult_factor_decrease: { steps: { num_steps: len, diff_per_step: r4(-1 / len), first_step_value: r4(1 - 1 / len) } } } }))
+    // the fade-in: smooth from black, over everything (textures, overlays, transitions)
+    const fadeInBeats = 4 * BAR
+    const fadeIn = (a: number, len: number) => fx.push(effect(ctx, 'all', a, a + len, { timed_brightness: { mult_factor_decrease: lin(0, 1) } }))
+    if (!parts) { if (shape.fadeIn) fadeIn(S, Math.min(fadeInBeats, E - S)) }
+    else for (const p of parts) if (p.fadeIn ?? (shape.fadeIn && p.from === S)) fadeIn(p.from, Math.min(fadeInBeats, p.to - p.from))
     if (!parts) {
       if (shape.peak !== false && E - fadeBeats > S) peaks(S, E - fadeBeats)
       if (shape.fadeOut) fadeOut(E - fadeBeats, fadeBeats)

@@ -2133,6 +2133,7 @@ function App() {
               onPanBy={viewActions.panBy}
               onSeekToBeat={handleSeekToBeat}
               beatTimestampsMs={song.beatTimestampsMs}
+              songName={(song.name || '').trim() || undefined}
             />
           </div>
         </div>

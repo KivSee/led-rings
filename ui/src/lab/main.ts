@@ -10,8 +10,11 @@ import { BAR, compose, HITS, PACE, mixPlacements, PALETTES, SPEEDS, TEXTURES, ti
 
 interface SongJson {
   song: { name: string; bpm: number; startOffsetMs?: number; audioFilePath?: string }
-  timeframes?: { label?: string; startTime: number; endTime: number }[]
+  timeframes?: { label?: string; startTime: number; endTime: number; labSection?: SectionSpec | { kind: 'rotation' } }[]
 }
+/** What the editor's "lab" button hands over: the section as the editor has it (saved or not). */
+const RECIPE_HANDOFF_KEY = 'section-lab:recipe'
+interface RecipeHandoff { song: string; name: string; from: number; to: number; spec?: SectionSpec }
 
 const BEATS_PER_BAR = BAR
 const CONTROL_SERVER_URL_STORAGE_KEY = 'kivsee-control-server-url'
@@ -28,7 +31,7 @@ let toBeat = Number(params.get('to') ?? 280)
 let storeKey = ''
 // which option set leads (textures with that `set`; the rest are under "options from other sections"), and the
 // section's inner divisions (beats where the music changes), offered as start points for overlays
-const optionSet = params.get('set') ?? (/chase/i.test(sectionName) ? 'chase' : 'starry')
+const optionSet = params.get('set') ?? (/chase/i.test(sectionName) ? 'chase' : /finale/i.test(sectionName) ? 'finale' : 'starry')
 // (from the URL, else as last opened)
 let marks = (params.get('marks') ?? '').split(',').map(Number).filter(n => Number.isFinite(n) && n > 0)
 const inSet = (t: Texture) => (t.set ?? 'starry') === optionSet
@@ -39,13 +42,16 @@ let beatMs = 400, offsetMs = 0
 
 // --- state (kept in localStorage) ----------------------------------------------------------------------------------
 
-// defaults per option set: starry middle sat on a dim bed with a build-up; the Chase runs at full color on the beat
-let paletteId = optionSet === 'chase' ? 'after' : 'rebuild'
+// defaults per option set: starry middle sat on a dim bed with a build-up; the Chase runs at full color on the beat;
+// the Finale keeps a color bed (base 0.85) through its breakdown
+let paletteId = optionSet === 'chase' ? 'after' : optionSet === 'finale' ? 'into-finale' : 'rebuild'
 const mappingFor: Record<string, string> = {}
 let picks: string[] = []
 let shape: Shape = optionSet === 'chase'
   ? { buildUp: false, fadeOut: false, peak: false, peakOffset: 0, base: 1, pace: 0, overlays: [] }
-  : { buildUp: true, fadeOut: true, peak: true, peakOffset: 0 }
+  : optionSet === 'finale'
+    ? { buildUp: false, fadeOut: false, peak: false, peakOffset: 0, base: 0.85, pace: 0, overlays: [] }
+    : { buildUp: true, fadeOut: true, peak: true, peakOffset: 0 }
 type Choice = { id: string; mapping: string; timing?: Timing; palette?: string }
 let mix: Choice[] = []
 let mixBars = 2
@@ -367,11 +373,11 @@ const overlayOn = (id: string) => sections().map(([a]) =>
 
 // --- the shape per inner section ------------------------------------------------------------------------------------
 
-type PartKey = 'buildUp' | 'fadeOut' | 'peak' | 'pace' | 'base'
-/** One part per inner section with the whole section's settings: build-up and peaks all through, the fade-out only
- *  in the last part (as the whole section's shape plays). */
+type PartKey = 'buildUp' | 'fadeIn' | 'fadeOut' | 'peak' | 'pace' | 'base'
+/** One part per inner section with the whole section's settings: build-up and peaks all through, the fade-in only in
+ *  the first part and the fade-out only in the last (as the whole section's shape plays). */
 const partsFromShape = (): ShapePart[] => sections().map(([from, to]) => ({
-  from, to, buildUp: shape.buildUp, fadeOut: shape.fadeOut && to === toBeat, peak: shape.peak !== false,
+  from, to, buildUp: shape.buildUp, ...(shape.fadeIn && from === fromBeat ? { fadeIn: true } : {}), fadeOut: shape.fadeOut && to === toBeat, peak: shape.peak !== false,
   pace: shape.pace ?? PACE, base: shape.base ?? 0.45,
 }))
 /** The parts snapped to the current inner sections (each takes the settings of the part covering its start); none
@@ -382,19 +388,21 @@ function snapParts() {
   const old = shape.parts, whole = partsFromShape()
   shape = { ...shape, parts: secs.map(([from, to], k) => ({ ...whole[k], ...(old.find(o => o.from <= from && from < o.to) ?? {}), from, to })) }
 }
-/** Set one setting in every part (the whole-section controls); fade-out goes to the last part only. */
+/** Set one setting in every part (the whole-section controls); fade-in goes to the first part only, fade-out to the
+ *  last. */
 function setAllParts(k: PartKey, value: boolean | number) {
   if (!shape.parts) return
-  shape = { ...shape, parts: shape.parts.map(p => ({ ...p, [k]: k === 'fadeOut' ? value && p.to === toBeat : value })) }
+  shape = { ...shape, parts: shape.parts.map(p => ({ ...p, [k]: k === 'fadeOut' ? value && p.to === toBeat : k === 'fadeIn' ? value && p.from === fromBeat : value })) }
 }
 const PART_ROWS: { k: PartKey; name: string; title: string }[] = [
   { k: 'buildUp', name: 'build-up', title: 'brightness rising through the part (adjacent parts with build-up rise as one)' },
+  { k: 'fadeIn', name: 'fade-in', title: 'fading in from black over the part (up to its first 4 bars)' },
   { k: 'fadeOut', name: 'fade-out', title: 'fading to black over the last 2 bars of the part' },
   { k: 'peak', name: 'peak accent', title: 'a slight brightening into every peak' },
   { k: 'pace', name: 'slow → fast', title: 'slow → fast motion into every peak' },
   { k: 'base', name: 'base color', title: 'brightness of the rings\' base color' },
 ]
-const BASES: [number, string][] = [[0.45, 'dim'], [0.7, 'medium'], [1, 'full']]
+const BASES: [number, string][] = [[0.45, 'dim'], [0.7, 'medium'], [0.85, 'bed'], [1, 'full']]
 /** The shape per inner section: a row per setting, a checkbox (base color: a select) per inner section. */
 function renderShapeParts() {
   const secs = sections()
@@ -427,13 +435,14 @@ $('shapeParts').onclick = ev => {
   save(); refresh()
 }
 
-/** Overlay toggles: each overlay of this section's set, on or off per inner section, with one tint per overlay. */
+/** Overlay toggles: each overlay (this section's set first, then the other sets'), on or off per inner section, with
+ *  one tint per overlay. */
 function renderOverlays() {
   const secs = sections()
   // snap overlays saved with other edges (e.g. before the marks moved) to the sections
   for (const id of new Set((shape.overlays ?? []).map(o => o.id))) setOverlay(id, overlayOn(id), shape.overlays!.find(o => o.id === id)!.tint)
   $('overlays').innerHTML = ''
-  for (const t of TEXTURES.filter(x => isOverlay(x) && inSet(x))) {
+  for (const t of [...TEXTURES.filter(x => isOverlay(x) && inSet(x)), ...TEXTURES.filter(x => isOverlay(x) && !inSet(x))]) {
     const mine = (shape.overlays ?? []).filter(o => o.id === t.id)
     const on = overlayOn(t.id)
     const row = document.createElement('div')
@@ -489,6 +498,55 @@ const sectionSpec = (): SectionSpec => {
   if (picked.length) spec.blocks = picked.map(([from, to]) => { const c = blockPick[`${from}-${to}`]; const tr = blockTrans[`${from}-${to}`]; return { from, to, texture: c.id, mapping: c.mapping, ...extras(c), ...(tr ? { transition: tr } : {}) } })
   return spec
 }
+/** The song's recipe for this section (its marker's labSection), if it has one. */
+let songSpec: SectionSpec | undefined
+/** Takes a recipe as the lab's settings: palette, mix, transition, shape, blocks, shuffle; the marks (unless the URL
+ *  gives them) are the starts of the shape's parts. */
+function applySpec(spec: SectionSpec) {
+  type SpecChoice = { texture: string; mapping: string; timing?: Timing; palette?: string }
+  const known = (c: SpecChoice) => TEXTURES.some(t => t.id === c.texture)
+  const choice = (c: SpecChoice): Choice => ({ id: c.texture, mapping: c.mapping, ...(c.timing ? { timing: c.timing } : {}), ...(c.palette ? { palette: c.palette } : {}) })
+  if (PALETTES.some(p => p.id === spec.palette)) paletteId = spec.palette
+  mix = (spec.mix ?? []).filter(known).map(choice)
+  if ([1, 2, 3, 4, 8].includes(spec.barsEach)) mixBars = spec.barsEach
+  if (TRANSITIONS.some(t => t.id === spec.transition)) mixTransition = spec.transition
+  shape = { ...spec.shape }
+  shuffleColors = spec.shuffleColors !== false
+  if (!params.has('marks') && shape.parts?.length) marks = shape.parts.slice(1).map(p => p.from)
+  blockPick = {}
+  for (const k of Object.keys(blockTrans)) delete blockTrans[k]
+  const specBlocks = (spec.blocks ?? []).filter(known)
+  for (const b of specBlocks) {
+    blockPick[`${b.from}-${b.to}`] = choice(b)
+    if (b.transition) blockTrans[`${b.from}-${b.to}`] = b.transition
+  }
+  // the block layout whose blocks are the recipe's
+  const keys = specBlocks.map(b => `${b.from}-${b.to}`)
+  if (keys.length) for (const layout of ['marks', '4', '8'] as BlockLayout[]) {
+    blockLayout = layout
+    const have = new Set(blocks().map(blockKey))
+    if (keys.every(k => have.has(k))) break
+  }
+  else if (blockLayout === 'marks' && !marks.length) blockLayout = '4'
+  cache.clear()
+}
+/** JSON with sorted keys, so two specs compare by content. */
+const canon = (x: unknown): string => Array.isArray(x) ? `[${x.map(canon).join(',')}]`
+  : x && typeof x === 'object' ? `{${Object.keys(x).filter(k => (x as Record<string, unknown>)[k] !== undefined).sort().map(k => `${JSON.stringify(k)}:${canon((x as Record<string, unknown>)[k])}`).join(',')}}`
+  : JSON.stringify(x)
+const sameAsSong = () => {
+  if (!songSpec) return true
+  const { seed: _s, kind: _k, ...song } = songSpec
+  return canon(song) === canon(sectionSpec())
+}
+$('loadSpec').onclick = () => {
+  if (!songSpec) return
+  applySpec(songSpec)
+  save()
+  showRange()
+  renderOverlays()
+  refresh()
+}
 $('copySpec').onclick = async () => {
   const text = `Section Lab spec for ${songName} · ${sectionName} (${fromBeat}–${toBeat}):
 ${JSON.stringify(sectionSpec())}`
@@ -500,7 +558,7 @@ peakSel.onchange = () => { shape = { ...shape, peakOffset: Number(peakSel.value)
 trans.innerHTML = TRANSITIONS.map(t => `<option value="${t.id}">${t.name}</option>`).join('')
 bars.onchange = () => { mixBars = Number(bars.value); save(); refresh() }
 trans.onchange = () => { mixTransition = trans.value as Transition; save(); refresh() }
-for (const [id, k] of [['shapeBuildUp', 'buildUp'], ['shapeFadeOut', 'fadeOut'], ['shapePeak', 'peak']] as const) {
+for (const [id, k] of [['shapeBuildUp', 'buildUp'], ['shapeFadeIn', 'fadeIn'], ['shapeFadeOut', 'fadeOut'], ['shapePeak', 'peak']] as const) {
   const box = $<HTMLInputElement>(id)
   box.onchange = () => { shape = { ...shape, [k]: box.checked }; setAllParts(k, box.checked); save(); refresh() }
 }
@@ -541,6 +599,7 @@ function refresh() {
   $<HTMLInputElement>('mixShuffle').checked = shuffleColors
   trans.value = mixTransition
   $<HTMLInputElement>('shapeBuildUp').checked = shape.buildUp
+  $<HTMLInputElement>('shapeFadeIn').checked = !!shape.fadeIn
   $<HTMLInputElement>('shapeFadeOut').checked = shape.fadeOut
   $<HTMLInputElement>('shapePeak').checked = shape.peak !== false
   peakSel.value = String(shape.peakOffset ?? 0)
@@ -548,6 +607,8 @@ function refresh() {
   baseSel.value = String(shape.base ?? 0.45)
   renderShapeParts()
   renderMix()
+  $<HTMLButtonElement>('loadSpec').hidden = !songSpec
+  $('specState').textContent = !songSpec ? 'the song has no recipe for this section yet' : sameAsSong() ? 'same as the song' : 'differs from the song'
 }
 
 $('big').onclick = () => { $('big').hidden = true; bigTexture = null }
@@ -564,15 +625,18 @@ let pausedAt = 0
 const startMs = () => offsetMs + fromBeat * beatMs
 const endMs = () => offsetMs + toBeat * beatMs
 const playing = () => (hasAudio ? !audio.paused : clockStart > 0)
+// the cue: the beat play starts from, ⏮ returns to and the loop comes back to (the seek bar and "play from" set it)
+let cueBeat = 0
+const cueMs = () => offsetMs + cueBeat * beatMs
 
 function now(): number {
   if (hasAudio) {
     let t = audio.currentTime * 1000
-    if (!audio.paused && (t >= endMs() || t < startMs() - 50)) { audio.currentTime = startMs() / 1000; t = startMs() }
+    if (!audio.paused && (t >= endMs() || t < startMs() - 50)) { audio.currentTime = cueMs() / 1000; t = cueMs() }
     return audio.paused ? pausedAt : t
   }
   if (!clockStart) return pausedAt
-  return startMs() + ((performance.now() - clockStart) % (endMs() - startMs()))
+  return cueMs() + ((performance.now() - clockStart) % (endMs() - cueMs()))
 }
 
 $('play').onclick = async () => {
@@ -580,18 +644,44 @@ $('play').onclick = async () => {
     pausedAt = now()
     if (hasAudio) audio.pause(); else clockStart = 0
   } else if (hasAudio) {
-    if (audio.currentTime * 1000 < startMs() || audio.currentTime * 1000 >= endMs()) audio.currentTime = startMs() / 1000
+    if (audio.currentTime * 1000 < startMs() || audio.currentTime * 1000 >= endMs()) audio.currentTime = cueMs() / 1000
     await audio.play()
   } else {
-    clockStart = performance.now() - (pausedAt - startMs())
+    clockStart = performance.now() - (Math.max(pausedAt, cueMs()) - cueMs())
   }
   $('play').textContent = playing() ? '⏸ Pause' : '▶ Play'
 }
-$('restart').onclick = () => {
-  pausedAt = startMs()
-  if (hasAudio) audio.currentTime = startMs() / 1000
+/** Move the playhead to the cue (playing on from there if playing). */
+function toCue() {
+  pausedAt = cueMs()
+  if (hasAudio) audio.currentTime = cueMs() / 1000
   else if (clockStart) clockStart = performance.now()
 }
+$('restart').onclick = toCue
+/** Set the cue to a beat of the section and jump there. */
+function setCue(beat: number) {
+  cueBeat = Math.min(toBeat - 1, Math.max(fromBeat, Math.round(beat)))
+  toCue()
+  renderCues()
+}
+/** The seek bar's range and the "play from" buttons: the section start and each inner section's. */
+function renderCues() {
+  const seek = $<HTMLInputElement>('seek')
+  seek.min = String(fromBeat)
+  seek.max = String(toBeat - 1)
+  $('cueBeat').textContent = String(cueBeat)
+  $('cues').innerHTML = sections().map(([a, b]) => `<button data-beat="${a}" title="play ${a}–${b}"${a === cueBeat ? ' class="on"' : ''}>${a}</button>`).join('')
+}
+$('cues').onclick = ev => {
+  const b = (ev.target as HTMLElement).closest<HTMLButtonElement>('button[data-beat]')
+  if (b) setCue(Number(b.dataset.beat))
+}
+// dragging the seek bar sets the cue; otherwise it follows the playhead
+let seeking = false
+const seekBar = $<HTMLInputElement>('seek')
+seekBar.onpointerdown = () => { seeking = true }
+seekBar.onpointerup = () => { seeking = false }
+seekBar.oninput = () => setCue(Number(seekBar.value))
 
 function frame() {
   const t = now()
@@ -601,6 +691,7 @@ function frame() {
   $('beatOf').textContent = ` · ${Math.floor(beatInSection) + 1} / ${toBeat - fromBeat}`
   const beat = Math.floor(beatInSection) % BEATS_PER_BAR
   $('beats').querySelectorAll('i').forEach((el, i) => el.classList.toggle('on', i === beat))
+  if (!seeking) seekBar.value = String(fromBeat + Math.floor(beatInSection))
   for (const { texture, canvas, visible } of cards) if (visible) drawRings(canvas, cardSequence(texture), t)
   if (bigTexture) drawRings($<HTMLCanvasElement>('bigCanvas'), cardSequence(bigTexture), t)
   if (varsTexture) varCards.forEach(({ canvas }, n) => drawRings(canvas, cardSequence(varsTexture!, n), t))
@@ -632,26 +723,54 @@ async function audioUrl(file: string): Promise<string | null> {
   return null
 }
 
+function showRange() {
+  const nBars = (toBeat - fromBeat) / BEATS_PER_BAR
+  $('sectionRange').textContent = `beats ${fromBeat}–${toBeat} · ${nBars} bars` + (marks.length ? ` · changes at ${marks.join(', ')}` : '')
+  $('barOf').textContent = ` / ${nBars}`
+  renderCues()
+}
+
 async function init() {
   const file = songFiles[`../../../src/songs/${songName}.json`]
   if (!file) { $('songName').innerHTML = `<span class="warn">no song "${songName}"</span>`; return }
   const json = await file()
   const s = json.song
   const marker = json.timeframes?.find(t => (t.label ?? '').trim().toLowerCase() === sectionName.trim().toLowerCase())
-  if (marker) { fromBeat = marker.startTime; toBeat = marker.endTime }
+  // opened from the editor (recipe=1): the section as the editor has it, else as the song file has it
+  let handoff: RecipeHandoff | undefined
+  if (params.get('recipe') === '1') {
+    try {
+      const h = JSON.parse(localStorage.getItem(RECIPE_HANDOFF_KEY) ?? 'null') as RecipeHandoff | null
+      if (h && h.song === songName && h.name.trim().toLowerCase() === sectionName.trim().toLowerCase()) handoff = h
+    } catch { /* blocked storage */ }
+  }
+  if (handoff) { fromBeat = handoff.from; toBeat = handoff.to }
+  else if (marker) { fromBeat = marker.startTime; toBeat = marker.endTime }
+  const recipe = handoff ? handoff.spec : marker?.labSection
+  if (recipe && (recipe as { kind?: string }).kind !== 'rotation') songSpec = recipe as SectionSpec
+  // a recipe in the link (spec=<JSON>, e.g. picks to examine): taken over the saved state, once
+  let linked: SectionSpec | undefined
+  try { linked = params.has('spec') ? JSON.parse(params.get('spec')!) as SectionSpec : undefined } catch { /* not JSON */ }
   storeKey = `section-lab:v3:${songName}:${fromBeat}-${toBeat}`
+  // the lab's own state, unless opened from the editor or never opened here; then the song's recipe
+  let hasSaved = false
+  try { hasSaved = localStorage.getItem(storeKey) !== null } catch { /* blocked storage */ }
   load()
+  if (linked) applySpec(linked)
+  else if (songSpec && (params.get('recipe') === '1' || !hasSaved)) applySpec(songSpec)
   save()
-  history.replaceState(null, '', `?song=${encodeURIComponent(songName)}&name=${encodeURIComponent(sectionName)}${marker ? '' : `&from=${fromBeat}&to=${toBeat}`}` +
-    (params.has('set') ? `&set=${encodeURIComponent(optionSet)}` : '') + (marks.length ? `&marks=${marks.join(',')}` : ''))
+  const atMarker = marker && marker.startTime === fromBeat && marker.endTime === toBeat
+  history.replaceState(null, '', `?song=${encodeURIComponent(songName)}&name=${encodeURIComponent(sectionName)}${atMarker ? '' : `&from=${fromBeat}&to=${toBeat}`}` +
+    (params.has('set') ? `&set=${encodeURIComponent(optionSet)}` : '') + (params.has('marks') && marks.length ? `&marks=${marks.join(',')}` : ''))
   beatMs = 60000 / s.bpm
   offsetMs = s.startOffsetMs ?? 0
-  pausedAt = startMs()
+  // play from the section start, or from the beat in the link (at=440)
+  const at = Number(params.get('at'))
+  cueBeat = Number.isFinite(at) && at > fromBeat && at < toBeat ? Math.round(at) : fromBeat
+  pausedAt = cueMs()
   $('songName').textContent = s.name
   $('sectionName').textContent = sectionName
-  const nBars = (toBeat - fromBeat) / BEATS_PER_BAR
-  $('sectionRange').textContent = `beats ${fromBeat}–${toBeat} · ${nBars} bars` + (marks.length ? ` · changes at ${marks.join(', ')}` : '')
-  $('barOf').textContent = ` / ${nBars}`
+  showRange()
   peakSel.innerHTML = [0, 1, 2, 3].map(o => { const first = fromBeat + (o === 0 ? BEATS_PER_BAR : o); return `<option value="${o}">${first}, ${first + BEATS_PER_BAR}, …</option>` }).join('')
   peakSel.value = String(shape.peakOffset ?? 0)
   const url = await audioUrl(s.audioFilePath ?? `${songName}.wav`)
