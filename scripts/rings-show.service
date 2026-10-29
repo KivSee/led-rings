@@ -1,6 +1,6 @@
 # systemd unit for the show controller (scripts/rings_show.py) on the Raspberry Pi.
 # Runs it in a terminal window on the desktop (visible over VNC) and appends its log
-# to /home/pi/rings_show.log.
+# to /home/pi/rings_show.log. Control page: http://<pi>:8090/ (SHOW_UI_PORT).
 #
 # Install:
 #   scp scripts/rings_show.py pi@<pi>:/home/pi/autostart/

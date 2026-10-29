@@ -5,18 +5,25 @@ Cycle (the live show opens with the first song in SONG_ORDER, then step 1)
   1. Trigger phase (PHASE_SECONDS): a trigger from TRIGGER_LIST plays and RFID is
      live (boxes show "ready").
   2. No interaction: when the phase ends, the next song in SONG_ORDER plays (skipping
-     it if it is the song that just played), then the next trigger starts.
-  3. First chip (A): "agent" plays at once and A is remembered. Until agent ends plus
+     it if it is the song that just played), then after a dark pause of SONG_GAP_SECONDS
+     the next trigger starts.
+  3. First chip (A): agent (AGENT_SONG) plays at once and A is remembered. Until agent ends plus
      SECOND_CHIP_GRACE seconds, a different chip (B) may be tapped (boxes show a
      rainbow). More taps of A do nothing. The trigger phase clock is paused while
      agent plays.
-  4. Second chip (B != A) in time: agent is cut, "agent_story" plays (boxes show
-     confetti), then the song picked for the pair (A, B) (boxes off), then the next
+  4. Second chip (B != A) in time: agent is cut, an agent_story (one of
+     STORY_SONGS, at random) plays (boxes show confetti), then the song picked for the pair (A, B) (boxes off), then the next
      trigger.
   5. No second chip in time: A is forgotten and the trigger we were on resumes with
      the time it had left.
-  RFID is ignored while agent_story or a song plays. Brightness is left to the
+  RFID is ignored while agent_story or a song plays, and in the pause after a song. Brightness is left to the
   retained "brightness" topic (Home Assistant); this script never touches it.
+
+Control page (http://<pi>:SHOW_UI_PORT/): shows what plays and the next song.
+  Play now: during a trigger phase (or the pause after a song), ends it and plays the next song at once.
+  Stop: a song stops and the next trigger starts (so does the pause after a song); agent / agent_story stop and the
+    trigger we were on resumes (chip and pair song dropped).
+  Next song: pick any song from SONG_ORDER to play next; the order continues after it.
 
 Pair -> song uses rendezvous hashing over the two chip UIDs (order-independent):
 a pair always gets the same song, pairs spread evenly over the songs, and adding a
@@ -28,25 +35,29 @@ song's name while it plays, {} once it has ended.
 Usage
   python scripts/rings_show.py                 # run the show (Ctrl+C to quit)
   python scripts/rings_show.py --selftest      # run the scenario tests, no network
-  TRIGGER_SERVICE_URL / MQTT_BROKER env vars override the defaults (localhost).
+  TRIGGER_SERVICE_URL / MQTT_BROKER / SHOW_UI_PORT env vars override the defaults.
 """
 
 import hashlib
 import json
 import os
 import queue
+import random
 import sys
+import threading
 import time
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 # --- show configuration -------------------------------------------------------
 
-TRIGGER_LIST = ["psychedelic", "mystery", "random", "chill", "party", "background"]
-SONG_ORDER = ["aladdin", "buttons", "loop", "shemesh", "inequal"]
+TRIGGER_LIST = ["background", "background2", "background3"]
+SONG_ORDER = ["aladdin", "buttons", "loop", "shemesh", "inequal", "el_jaguar", "jamaican_bam_bam"]
 PHASE_SECONDS = 3 * 60
-AGENT_SONG = "agent"
-STORY_SONG = "agent_story"
+AGENT_SONG = "agent1"
+STORY_SONGS = ["agent_story1", "agent_story2"]   # one picked at random per second chip
 SECOND_CHIP_GRACE = 10.0      # seconds after agent ends to tap the second chip
 SONG_START_TIMEOUT = 20.0     # a song that never shows up on the trigger topic counts as ended
+SONG_GAP_SECONDS = 3.0        # dark pause after a song before the next trigger starts
 TRIGGER_RESEND_GUARD = 3.0    # don't re-send a trigger more often than this
 
 TRIGGER_SERVICE_URL = os.environ.get("TRIGGER_SERVICE_URL", "http://localhost:8083")
@@ -54,6 +65,7 @@ MQTT_BROKER = os.environ.get("MQTT_BROKER", "localhost")
 MQTT_TRIGGER_TOPIC = "trigger"
 MQTT_RFID_TOPIC = "sensors/rfid"
 NUM_BOXES = 5
+SHOW_UI_PORT = int(os.environ.get("SHOW_UI_PORT", "8090"))
 
 # Box LEDs (esp32-Kivsee-box/include/LED_control.h): master_state 0 = off, 1 = confetti
 # (random warm sparkles), 2 = color: color 1-5 solid hue with a chasing glow, color > 127
@@ -84,11 +96,13 @@ def pick_song(chip_a, chip_b, songs):
 class Show:
     def __init__(self, actions, now, start_with_song=False):
         self.a = actions
-        self.mode = "trigger"            # trigger | agent | story | song
+        self.mode = "trigger"            # trigger | agent | story | song | gap (dark pause after a song)
+        self.gap_until = None            # when the pause after a song ends
         self.trig_idx = 0
         self.phase_left = PHASE_SECONDS  # seconds left in the current trigger phase
         self.phase_since = None          # when the phase clock last (re)started; None = paused
         self.order_idx = 0               # next song in SONG_ORDER
+        self.next_pick = None            # song picked on the control page to play next
         self.last_song = None
         self.chip_a = None               # first chip, waiting for a second one
         self.window_until = None         # second-chip deadline once agent has ended
@@ -149,13 +163,22 @@ class Show:
         if not ok:
             self._song_ended(now, song)
 
-    def _next_order_song(self):
+    def _peek_order_song(self):
+        """(next song, order_idx after it), without advancing."""
+        if self.next_pick is not None:
+            return self.next_pick, SONG_ORDER.index(self.next_pick) + 1
+        idx = self.order_idx
         for _ in range(len(SONG_ORDER)):
-            song = SONG_ORDER[self.order_idx % len(SONG_ORDER)]
-            self.order_idx += 1
+            song = SONG_ORDER[idx % len(SONG_ORDER)]
+            idx += 1
             if song != self.last_song or len(SONG_ORDER) == 1:
-                return song
-        return SONG_ORDER[0]
+                return song, idx
+        return SONG_ORDER[0], self.order_idx
+
+    def _next_order_song(self):
+        song, self.order_idx = self._peek_order_song()
+        self.next_pick = None
+        return song
 
     def _forget_chip(self):
         self.chip_a = None
@@ -165,8 +188,8 @@ class Show:
     def on_chip(self, now, uid):
         # The box halts each chip after reading it, so one tap = one message.
         uid = str(uid)
-        if self.mode in ("story", "song"):
-            log(f"chip {uid} ignored ({self.mode} playing)")
+        if self.mode in ("story", "song", "gap"):
+            log(f"chip {uid} ignored ({'pause after a song' if self.mode == 'gap' else self.mode + ' playing'})")
             return
         if self.chip_a is None:
             # first chip: agent now, trigger clock paused
@@ -185,7 +208,7 @@ class Show:
         self._forget_chip()
         if self.mode == "trigger":
             self._pause_phase(now)
-        self._play(now, STORY_SONG, "story")
+        self._play(now, random.choice(STORY_SONGS), "story")
 
     def on_trigger_status(self, now, name):
         """name = trigger_name on the 'trigger' topic, or None for {}."""
@@ -201,6 +224,7 @@ class Show:
             self.a.trigger(self.trigger_name())
 
     def _song_ended(self, now, song):
+        played = self.expect_seen
         self.expect = None
         if self.mode == "agent":
             # agent finished without a second chip: resume the trigger, keep the window open a bit
@@ -213,12 +237,82 @@ class Show:
         elif self.mode == "song":
             self.last_song = song
             self.trig_idx += 1
+            if played and SONG_GAP_SECONDS > 0:
+                # a dark pause (the rings cleared when the song ended) before the next trigger
+                self.mode = "gap"
+                self.gap_until = now + SONG_GAP_SECONDS
+                log(f"'{song}' ended, {SONG_GAP_SECONDS:.0f}s pause")
+            else:
+                self._start_trigger(now, fresh=True)
+
+    # -- control page --
+    def play_now(self, now):
+        """Cut the trigger phase (or the pause after a song) and play the next song. Only between songs."""
+        if self.mode not in ("trigger", "gap"):
+            return False, f"not between songs ({self.mode} playing)"
+        if self.mode == "gap":
+            self.trig_idx -= 1  # the song's end moves the rotation on again
+        self._forget_chip()
+        self.phase_since = None
+        song = self._next_order_song()
+        log(f"play now: '{song}' (control page)")
+        self._play(now, song, "song")
+        return True, f"playing {song}"
+
+    def stop(self, now):
+        """Stop what plays: a song goes on to the next trigger; agent or agent_story go back
+        to the trigger we were on, with its time left, dropping the chip and the pair song."""
+        if self.mode == "trigger":
+            return False, "nothing playing"
+        if self.mode == "gap":
+            log("pause after the song skipped (control page)")
             self._start_trigger(now, fresh=True)
+            return True, "pause skipped"
+        song = self.expect
+        log(f"stop '{song}' (control page)")
+        self.expect = None
+        self.pair_song = None
+        self._forget_chip()
+        if self.mode == "song":
+            self.last_song = song
+            self.trig_idx += 1
+            self._start_trigger(now, fresh=True)
+        else:
+            self._start_trigger(now, fresh=False)
+        return True, f"stopped {song}"
+
+    def set_next(self, song):
+        if song not in SONG_ORDER:
+            return False, f"unknown song '{song}'"
+        self.next_pick = song
+        log(f"next song set to '{song}' (control page)")
+        return True, f"next song: {song}"
+
+    def state(self, now):
+        phase_left = None
+        if self.mode == "trigger":
+            phase_left = max(0.0, self.phase_left - self._phase_elapsed(now))
+        return {
+            "mode": self.mode,
+            "trigger": self.trigger_name() if self.mode == "trigger" else None,
+            "playing": self.expect if self.mode not in ("trigger", "gap") else None,
+            "trigger_next": self.trigger_name() if self.mode == "gap" else None,
+            "phase_left": phase_left,
+            "phase_paused": self.mode == "trigger" and self.phase_since is None,
+            "waiting_chip": self.chip_a is not None,
+            "next_song": self._peek_order_song()[0],
+            "next_picked": self.next_pick is not None,
+            "last_song": self.last_song,
+            "songs": SONG_ORDER,
+        }
 
     def tick(self, now):
         if self.expect is not None and not self.expect_seen and now - self.expect_since > SONG_START_TIMEOUT:
             log(f"'{self.expect}' never started, moving on")
             self._song_ended(now, self.expect)
+            return
+        if self.mode == "gap" and now >= self.gap_until:
+            self._start_trigger(now, fresh=True)
             return
         if self.mode != "trigger":
             return
@@ -265,6 +359,160 @@ class LiveActions:
             self.mqtt.publish(f"{MQTT_RFID_TOPIC}/box{n}/leds", payload, retain=True)
 
 
+# --- control page ---------------------------------------------------------------
+
+CONTROL_PAGE = """<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rings Show</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px; background: #111; color: #eee; font: 16px system-ui, sans-serif; }
+  main { max-width: 480px; margin: 0 auto; }
+  h1 { font-size: 18px; color: #888; font-weight: 500; margin: 0 0 12px; }
+  .status { background: #1c1c1c; border-radius: 10px; padding: 14px; margin-bottom: 14px; }
+  .mode { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: #888; }
+  .now { font-size: 26px; font-weight: 600; margin: 4px 0; }
+  .sub { color: #aaa; font-size: 14px; }
+  button { font: inherit; color: inherit; cursor: pointer; border: 0; border-radius: 10px; }
+  .controls { display: flex; gap: 8px; margin-bottom: 18px; }
+  .controls button { padding: 18px; font-size: 20px; font-weight: 600; }
+  #play { flex: 1; background: #2a7; }
+  #stop { background: #a33; padding-left: 26px; padding-right: 26px; }
+  #play:disabled, #stop:disabled { background: #333; color: #777; cursor: default; }
+  h2 { font-size: 14px; color: #888; font-weight: 500; margin: 0 0 8px; }
+  .songs { display: grid; gap: 8px; }
+  .song { text-align: left; padding: 14px; background: #1c1c1c; display: flex; justify-content: space-between; }
+  .song.next { background: #234; outline: 2px solid #48f; }
+  .song.playing { background: #2a2a1a; }
+  .tag { font-size: 12px; color: #8af; }
+  .song.playing .tag { color: #db6; }
+  #msg { min-height: 20px; color: #f88; font-size: 14px; margin-top: 12px; }
+</style></head>
+<body><main>
+<h1>Rings Show</h1>
+<div class="status"><div class="mode" id="mode">connecting...</div><div class="now" id="now"></div><div class="sub" id="sub"></div></div>
+<div class="controls"><button id="play" disabled>Play now</button><button id="stop" disabled>Stop</button></div>
+<h2>Next song (tap to choose)</h2>
+<div class="songs" id="songs"></div>
+<div id="msg"></div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+let st = null;
+const fmt = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+const LABEL = { trigger: 'Between songs', agent: 'Agent', story: 'Agent story', song: 'Playing song', gap: 'Pause after the song' };
+
+function render() {
+  if (!st) return;
+  $('mode').textContent = LABEL[st.mode] || st.mode;
+  if (st.mode === 'trigger') {
+    $('now').textContent = st.trigger;
+    $('sub').textContent = (st.phase_paused ? 'paused, ' : '') + fmt(st.phase_left) + ' until ' + st.next_song
+      + (st.waiting_chip ? ' (waiting for a second chip)' : '');
+  } else if (st.mode === 'gap') {
+    $('now').textContent = 'rings dark';
+    $('sub').textContent = 'then ' + st.trigger_next + ', then ' + st.next_song;
+  } else {
+    $('now').textContent = st.playing || '';
+    $('sub').textContent = st.mode === 'song' ? 'then a background, then ' + st.next_song : 'then the pair song';
+  }
+  const between = st.mode === 'trigger' || st.mode === 'gap';
+  $('play').disabled = !between;
+  $('play').textContent = between ? 'Play ' + st.next_song + ' now' : 'Play now (between songs only)';
+  $('stop').disabled = st.mode === 'trigger';
+  $('songs').replaceChildren(...st.songs.map(name => {
+    const b = document.createElement('button');
+    const playing = st.mode === 'song' && st.playing === name;
+    b.className = 'song' + (name === st.next_song ? ' next' : '') + (playing ? ' playing' : '');
+    const tag = name === st.next_song ? (st.next_picked ? 'next (picked)' : 'next') : playing ? 'playing' : '';
+    b.innerHTML = '<span></span><span class="tag"></span>';
+    b.firstChild.textContent = name;
+    b.lastChild.textContent = tag;
+    b.onclick = () => send('/api/next', { song: name });
+    return b;
+  }));
+}
+
+async function poll() {
+  try {
+    st = await (await fetch('/api/state')).json();
+    render();
+  } catch (e) { $('mode').textContent = 'show script not reachable'; }
+}
+
+async function send(path, body) {
+  $('msg').textContent = '';
+  try {
+    const r = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+    const res = await r.json();
+    if (!res.ok) $('msg').textContent = res.message;
+  } catch (e) { $('msg').textContent = 'request failed'; }
+  poll();
+}
+
+$('play').onclick = () => send('/api/play-now');
+$('stop').onclick = () => { if (confirm('Stop ' + (st && st.playing || 'playing') + '?')) send('/api/stop'); };
+poll();
+setInterval(poll, 1000);
+</script>
+</body></html>
+"""
+
+
+def start_control_server(events, snapshot):
+    """Serve the control page. Commands go through `events` to the show loop; state is
+    read from snapshot["state"], which the loop refreshes."""
+
+    class Handler(BaseHTTPRequestHandler):
+        def _send(self, code, body, ctype="application/json"):
+            data = body.encode("utf-8")
+            self.send_response(code)
+            self.send_header("Content-Type", ctype)
+            self.send_header("Content-Length", str(len(data)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(data)
+
+        def do_GET(self):
+            if self.path in ("/", "/index.html"):
+                self._send(200, CONTROL_PAGE, "text/html; charset=utf-8")
+            elif self.path == "/api/state":
+                self._send(200, json.dumps(snapshot.get("state")))
+            else:
+                self._send(404, json.dumps({"ok": False, "message": "not found"}))
+
+        def do_POST(self):
+            try:
+                n = int(self.headers.get("Content-Length") or 0)
+                body = json.loads(self.rfile.read(n).decode("utf-8") or "{}") if n else {}
+            except (ValueError, UnicodeDecodeError):
+                body = {}
+            if self.path == "/api/play-now":
+                cmd = ("play_now", None)
+            elif self.path == "/api/stop":
+                cmd = ("stop", None)
+            elif self.path == "/api/next" and isinstance(body, dict):
+                cmd = ("set_next", body.get("song"))
+            else:
+                return self._send(404, json.dumps({"ok": False, "message": "not found"}))
+            reply = queue.Queue()
+            events.put(("cmd", (cmd, reply)))
+            try:
+                ok, message = reply.get(timeout=5)
+            except queue.Empty:
+                ok, message = False, "show loop did not answer"
+            self._send(200 if ok else 409, json.dumps({"ok": ok, "message": message}))
+
+        def log_message(self, fmt, *args):
+            pass  # keep the show log clean
+
+    server = ThreadingHTTPServer(("0.0.0.0", SHOW_UI_PORT), Handler)
+    server.daemon_threads = True
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    log(f"control page on port {SHOW_UI_PORT}")
+    return server
+
+
 def run_live():
     import paho.mqtt.client as mqtt
     events = queue.Queue()
@@ -299,6 +547,12 @@ def run_live():
 
     show = Show(LiveActions(client), time.monotonic(), start_with_song=True)
     log(f"show running: triggers {TRIGGER_LIST}, songs {SONG_ORDER}, phase {PHASE_SECONDS}s")
+    snapshot = {"state": show.state(time.monotonic())}
+    try:
+        server = start_control_server(events, snapshot)
+    except OSError as e:
+        server = None
+        log(f"control page not started: {e}")
     try:
         while True:
             try:
@@ -306,14 +560,23 @@ def run_live():
                 now = time.monotonic()
                 if kind == "status":
                     show.on_trigger_status(now, value)
-                else:
+                elif kind == "chip":
                     show.on_chip(now, value)
+                else:
+                    (name, arg), reply = value
+                    if name == "set_next":
+                        reply.put(show.set_next(arg))
+                    else:
+                        reply.put(getattr(show, name)(now))
             except queue.Empty:
                 pass
             show.tick(time.monotonic())
+            snapshot["state"] = show.state(time.monotonic())
     except KeyboardInterrupt:
         log("exiting")
     finally:
+        if server:
+            server.shutdown()
         client.loop_stop()
         client.disconnect()
 
@@ -351,10 +614,11 @@ def selftest():
             fails.append(name)
 
     def run_song(show, t, song, length=100):
-        """Simulate the trigger topic for a song we just started: playing, then {}."""
+        """Simulate the trigger topic for a song we just started: playing, then {}; then the pause after it."""
         show.on_trigger_status(t, song)
         show.on_trigger_status(t + length, None)
-        return t + length
+        show.tick(t + length + SONG_GAP_SECONDS)
+        return t + length + SONG_GAP_SECONDS
 
     # 1. no interaction: phase -> order song -> next trigger, songs in order
     fa = FakeActions(); s = Show(fa, 0)
@@ -395,11 +659,11 @@ def selftest():
     fa = FakeActions(); s = Show(fa, 0)
     s.on_chip(10, "A"); s.on_trigger_status(11, AGENT_SONG)
     s.on_chip(20, "B")
-    check("second chip cuts to agent_story", fa.last("song") == STORY_SONG and s.mode == "story")
+    check("second chip cuts to agent_story", fa.last("song") in STORY_SONGS and s.mode == "story")
     pair = pick_song("A", "B", SONG_ORDER)
-    s.on_trigger_status(21, STORY_SONG); s.on_trigger_status(80, None)
+    s.on_trigger_status(21, s.expect); s.on_trigger_status(80, None)
     check("pair song after agent_story", fa.last("song") == pair and s.mode == "song")
-    s.on_trigger_status(81, pair); s.on_trigger_status(300, None)
+    s.on_trigger_status(81, pair); s.on_trigger_status(300, None); s.tick(300 + SONG_GAP_SECONDS)
     check("next trigger after the pair song", s.mode == "trigger" and fa.last("trigger") == TRIGGER_LIST[1])
     check("pair song counts as last played", s.last_song == pair)
 
@@ -407,7 +671,12 @@ def selftest():
     fa = FakeActions(); s = Show(fa, 0)
     s.on_chip(10, "A"); s.on_trigger_status(11, AGENT_SONG); s.on_trigger_status(70, None)
     s.on_chip(75, "B")
-    check("second chip inside the grace plays agent_story", fa.last("song") == STORY_SONG)
+    check("second chip inside the grace plays agent_story", fa.last("song") in STORY_SONGS)
+    stories = set()
+    for _ in range(50):
+        fa = FakeActions(); s = Show(fa, 0); s.on_chip(10, "A"); s.on_chip(20, "B")
+        stories.add(fa.last("song"))
+    check("both agent_story songs get picked", stories == set(STORY_SONGS))
 
     # 6. chip A again does nothing until A is forgotten; then A starts over; chips ignored during songs
     fa = FakeActions(); s = Show(fa, 0)
@@ -427,7 +696,7 @@ def selftest():
     check("chips ignored while a song plays", fa.last("song") == "aladdin" and s.chip_a is None)
 
     # 7. failures: agent_story missing -> pair song directly; song never starts -> move on
-    fa = FakeActions(); fa.fail.add(STORY_SONG); s = Show(fa, 0)
+    fa = FakeActions(); fa.fail.update(STORY_SONGS); s = Show(fa, 0)
     s.on_chip(10, "A"); s.on_chip(20, "B")
     check("missing agent_story falls back to the pair song", fa.last("song") == pick_song("A", "B", SONG_ORDER) and s.mode == "song")
     fa = FakeActions(); s = Show(fa, 0); s.tick(PHASE_SECONDS)
@@ -444,11 +713,13 @@ def selftest():
     check("boxes stay rainbow during the wait", fa.last("boxes") == RAINBOW and s.mode == "trigger")
     s.on_chip(65, "B")
     check("boxes confetti during agent_story", fa.last("boxes") == CONFETTI)
-    s.on_trigger_status(66, STORY_SONG); s.on_trigger_status(120, None)
+    s.on_trigger_status(66, s.expect); s.on_trigger_status(120, None)
     check("boxes off during the pair song", fa.last("boxes")[0] == BOX_OFF)
     fa = FakeActions(); s = Show(fa, 0); s.tick(PHASE_SECONDS)
     check("boxes off during an order song", fa.last("boxes")[0] == BOX_OFF)
     s.on_trigger_status(PHASE_SECONDS + 1, "aladdin"); s.on_trigger_status(PHASE_SECONDS + 200, None)
+    check("boxes stay off in the pause after the song", fa.last("boxes")[0] == BOX_OFF)
+    s.tick(PHASE_SECONDS + 200 + SONG_GAP_SECONDS)
     check("boxes ready again in the next trigger's color", fa.last("boxes") == (BOX_COLOR, BOX_READY_COLORS[1]))
     fa = FakeActions(); s = Show(fa, 0)
     s.on_chip(10, "A"); s.on_trigger_status(11, AGENT_SONG); s.on_trigger_status(60, None); s.tick(70)
@@ -460,13 +731,91 @@ def selftest():
     check("boxes off during the opening song", fa.last("boxes")[0] == BOX_OFF)
     s.on_trigger_status(1, "aladdin"); s.tick(PHASE_SECONDS + 1)
     check("opening song is not cut by the phase clock", s.mode == "song")
-    s.on_trigger_status(PHASE_SECONDS + 2, None); t = PHASE_SECONDS + 2
+    s.on_trigger_status(PHASE_SECONDS + 2, None); t = PHASE_SECONDS + 2 + SONG_GAP_SECONDS; s.tick(t)
     check("first trigger after the opening song", fa.last("trigger") == TRIGGER_LIST[0] and s.mode == "trigger" and s.phase_left == PHASE_SECONDS)
     check("boxes ready in the first color after the opening song", fa.last("boxes") == (BOX_COLOR, BOX_READY_COLORS[0]))
     s.tick(t + PHASE_SECONDS)
     check("next order song after the opening one is buttons", fa.last("song") == "buttons")
 
-    # 10. pair hashing: order-independent, roughly even, adding a song moves few pairs
+    # 10. control page: play now between songs only, picked next song, order continues after it
+    fa = FakeActions(); s = Show(fa, 0)
+    check("state shows the next order song", s.state(10)["next_song"] == "aladdin" and s.state(10)["phase_left"] == PHASE_SECONDS - 10)
+    ok, _ = s.play_now(10)
+    check("play now cuts the trigger phase", ok and fa.last("song") == "aladdin" and s.mode == "song")
+    ok, _ = s.play_now(11)
+    check("play now refused while a song plays", not ok and fa.last("song") == "aladdin")
+    s.on_trigger_status(11, "aladdin"); t = run_song(s, 11, "aladdin")
+    check("next trigger with a full phase after play now", s.mode == "trigger" and s.phase_left == PHASE_SECONDS)
+    check("unknown song refused", not s.set_next("nope")[0])
+    ok, _ = s.set_next("inequal")
+    check("picked song shows as next", ok and s.state(t)["next_song"] == "inequal" and s.state(t)["next_picked"])
+    s.tick(t + PHASE_SECONDS)
+    check("picked song plays at the phase end", fa.last("song") == "inequal")
+    t = run_song(s, t + PHASE_SECONDS, "inequal")
+    check("order continues after the picked song", s.state(t)["next_song"] == SONG_ORDER[SONG_ORDER.index("inequal") + 1]
+          and not s.state(t)["next_picked"])
+    fa = FakeActions(); s = Show(fa, 0); s.set_next("loop")
+    s.on_chip(10, "A")
+    check("play now refused during agent", not s.play_now(20)[0])
+    s.on_chip(30, "B"); s.on_trigger_status(31, s.expect); s.on_trigger_status(80, None)
+    check("pick survives a pair song", s.next_pick == "loop")
+    fa = FakeActions(); s = Show(fa, 0); s.on_chip(10, "A"); s.on_trigger_status(11, AGENT_SONG); s.on_trigger_status(60, None)
+    s.set_next("buttons"); s.play_now(62)
+    check("play now during the chip wait forgets the chip", s.chip_a is None and fa.last("song") == "buttons")
+    fa = FakeActions(); s = Show(fa, 0); s.last_song = "aladdin"; s.set_next("aladdin"); s.play_now(5)
+    check("a picked song plays even if it just played", fa.last("song") == "aladdin")
+
+    # 11. stop: song -> next trigger with a full phase; agent/story -> back to the trigger with its time left
+    fa = FakeActions(); s = Show(fa, 0)
+    check("stop refused between songs", not s.stop(5)[0])
+    s.tick(PHASE_SECONDS); s.on_trigger_status(PHASE_SECONDS + 1, "aladdin")
+    ok, _ = s.stop(PHASE_SECONDS + 30)
+    check("stop during a song goes to the next trigger", ok and s.mode == "trigger" and fa.last("trigger") == TRIGGER_LIST[1]
+          and s.phase_left == PHASE_SECONDS and s.last_song == "aladdin" and fa.last("boxes") == (BOX_COLOR, BOX_READY_COLORS[1]))
+    s.on_trigger_status(PHASE_SECONDS + 31, None)  # the stopped song's end must not count as anything
+    check("stopped song's end is ignored", s.mode == "trigger" and s.state(PHASE_SECONDS + 31)["next_song"] == "buttons")
+    fa = FakeActions(); s = Show(fa, 0)
+    s.on_chip(100, "A"); s.on_trigger_status(101, AGENT_SONG)
+    s.stop(120)
+    check("stop during agent resumes the trigger with its time left", s.mode == "trigger" and s.chip_a is None
+          and fa.last("trigger") == TRIGGER_LIST[0] and abs(s.phase_left - (PHASE_SECONDS - 100)) < 1e-6)
+    fa = FakeActions(); s = Show(fa, 0)
+    s.on_chip(10, "A"); s.on_chip(20, "B"); s.on_trigger_status(21, s.expect)
+    s.stop(30)
+    check("stop during agent_story drops the pair song", s.mode == "trigger" and s.pair_song is None and fa.last("boxes") == READY)
+    s.on_trigger_status(31, None)
+    check("no pair song after a stopped agent_story", s.mode == "trigger" and fa.last("song") in STORY_SONGS)
+
+    # 12. the dark pause after a song: no trigger, chips ignored; stop skips it, play now plays from it
+    fa = FakeActions(); s = Show(fa, 0); s.tick(PHASE_SECONDS)
+    s.on_trigger_status(PHASE_SECONDS + 1, "aladdin"); end = PHASE_SECONDS + 100
+    n = len(fa.calls); s.on_trigger_status(end, None)
+    check("pause after the song: no trigger yet", s.mode == "gap" and ("trigger", TRIGGER_LIST[1]) not in fa.calls[n:])
+    s.on_chip(end + 1, "A")
+    check("chips ignored in the pause", s.chip_a is None and s.mode == "gap")
+    s.tick(end + SONG_GAP_SECONDS - 0.1)
+    check("pause lasts SONG_GAP_SECONDS", s.mode == "gap")
+    s.tick(end + SONG_GAP_SECONDS)
+    check("next trigger after the pause, full phase", s.mode == "trigger" and fa.last("trigger") == TRIGGER_LIST[1]
+          and s.phase_left == PHASE_SECONDS)
+    fa = FakeActions(); s = Show(fa, 0); s.tick(PHASE_SECONDS)
+    s.on_trigger_status(PHASE_SECONDS + 1, "aladdin"); s.on_trigger_status(PHASE_SECONDS + 50, None)
+    ok, _ = s.stop(PHASE_SECONDS + 51)
+    check("stop skips the pause", ok and s.mode == "trigger" and fa.last("trigger") == TRIGGER_LIST[1])
+    fa = FakeActions(); s = Show(fa, 0); s.tick(PHASE_SECONDS)
+    s.on_trigger_status(PHASE_SECONDS + 1, "aladdin"); s.on_trigger_status(PHASE_SECONDS + 50, None)
+    ok, _ = s.play_now(PHASE_SECONDS + 51)
+    check("play now from the pause plays the next song", ok and s.mode == "song" and fa.last("song") == "buttons")
+    run_song(s, PHASE_SECONDS + 52, "buttons")
+    check("rotation keeps its order after play now from the pause", fa.last("trigger") == TRIGGER_LIST[1])
+    fa = FakeActions(); s = Show(fa, 0); s.tick(PHASE_SECONDS); s.tick(PHASE_SECONDS + SONG_START_TIMEOUT + 1)
+    check("no pause after a song that never started", s.mode == "trigger")
+    fa = FakeActions(); s = Show(fa, 0); s.tick(PHASE_SECONDS)
+    s.on_trigger_status(PHASE_SECONDS + 1, "aladdin"); s.on_trigger_status(PHASE_SECONDS + 50, None)
+    st = s.state(PHASE_SECONDS + 51)
+    check("state in the pause", st["mode"] == "gap" and st["playing"] is None and st["trigger_next"] == TRIGGER_LIST[1])
+
+    # 13. pair hashing: order-independent, roughly even, adding a song moves few pairs
     check("pair song independent of tap order", pick_song("x1", "y2", SONG_ORDER) == pick_song("y2", "x1", SONG_ORDER))
     pairs = [(f"chip{i}", f"chip{i + 1000}") for i in range(5000)]
     counts = {s_: 0 for s_ in SONG_ORDER}
