@@ -588,84 +588,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_brightness": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -685,278 +620,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_saturation": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_decrease": {
-      "const_value": {
-       "value": 0.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_brightness": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_increase": {
-      "const_value": {
-       "value": 1.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_saturation": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -9916,84 +9592,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_brightness": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -10013,278 +9624,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_saturation": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_decrease": {
-      "const_value": {
-       "value": 0.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_brightness": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_increase": {
-      "const_value": {
-       "value": 1.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_saturation": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -18656,84 +18008,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_brightness": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -18753,278 +18040,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_saturation": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_decrease": {
-      "const_value": {
-       "value": 0.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_brightness": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_increase": {
-      "const_value": {
-       "value": 1.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_saturation": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -28870,84 +27898,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_brightness": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -28967,278 +27930,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_saturation": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_decrease": {
-      "const_value": {
-       "value": 0.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_brightness": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_increase": {
-      "const_value": {
-       "value": 1.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_saturation": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -35934,84 +34638,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_brightness": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -36031,278 +34670,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_saturation": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_decrease": {
-      "const_value": {
-       "value": 0.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_brightness": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_increase": {
-      "const_value": {
-       "value": 1.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_saturation": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -44059,84 +42439,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_brightness": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -44156,278 +42471,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_saturation": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_decrease": {
-      "const_value": {
-       "value": 0.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_brightness": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_increase": {
-      "const_value": {
-       "value": 1.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_saturation": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -50052,84 +48108,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_brightness": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -50149,278 +48140,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_saturation": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_decrease": {
-      "const_value": {
-       "value": 0.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_brightness": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_increase": {
-      "const_value": {
-       "value": 1.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_saturation": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -56142,84 +53874,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_brightness": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -56239,278 +53906,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_saturation": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_decrease": {
-      "const_value": {
-       "value": 0.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_brightness": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_increase": {
-      "const_value": {
-       "value": 1.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_saturation": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -62054,84 +59462,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_brightness": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -62151,278 +59494,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_saturation": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_decrease": {
-      "const_value": {
-       "value": 0.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_brightness": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_increase": {
-      "const_value": {
-       "value": 1.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_saturation": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -67652,84 +64736,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_brightness": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -67749,278 +64768,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_saturation": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_decrease": {
-      "const_value": {
-       "value": 0.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_brightness": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_increase": {
-      "const_value": {
-       "value": 1.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_saturation": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -75103,84 +71863,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_brightness": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -75200,278 +71895,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_saturation": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_decrease": {
-      "const_value": {
-       "value": 0.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_brightness": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_increase": {
-      "const_value": {
-       "value": 1.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_saturation": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -83306,84 +79742,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_brightness": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
@@ -83403,278 +79774,19 @@
     "effect_config": {
      "start_time": 32736,
      "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.0,
-     "repeat_end": 0.624969,
      "segments": "ind"
     },
     "snake_saturation": {
      "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.0625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.0625,
-           "end": 0.4374,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 3,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
+      "repeat": {
+       "numberOfTimes": 3.9990224828934506,
+       "funcToRepeat": {
+        "steps": {
+         "num_steps": 12,
+         "diff_per_step": 0.09090909090909091,
+         "first_step_value": 0.001
         }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.4374,
-           "end": 0.5625,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 4,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.3646
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.5625,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.7283
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_decrease": {
-      "const_value": {
-       "value": 0.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_brightness": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
-      }
-     },
-     "tail_length": {
-      "const_value": {
-       "value": 0.08
-      }
-     },
-     "cyclic": false,
-     "mult_factor_increase": {
-      "const_value": {
-       "value": 1.0
-      }
-     }
-    }
-   },
-   {
-    "effect_config": {
-     "start_time": 32736,
-     "end_time": 49100,
-     "repeat_num": 3.0,
-     "repeat_start": 0.624969,
-     "repeat_end": 1.0,
-     "segments": "ind"
-    },
-    "snake_saturation": {
-     "head": {
-      "comb2": {
-       "f1": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.0,
-           "end": 0.6875,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.8192
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.6875,
-           "end": 0.8125,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.9101
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount1": 1.0,
-       "f2": {
-        "comb2": {
-         "f1": {
-          "fixed_window": {
-           "start": 0.8125,
-           "end": 0.9375,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "const_value": {
-             "value": 0.001
-            }
-           }
-          }
-         },
-         "amount1": 1.0,
-         "f2": {
-          "fixed_window": {
-           "start": 0.9375,
-           "end": 1.0,
-           "cyclic": false,
-           "outside_value": 0.0,
-           "func": {
-            "steps": {
-             "num_steps": 2,
-             "diff_per_step": 0.0909,
-             "first_step_value": 0.0919
-            }
-           }
-          }
-         },
-         "amount2": 1.0
-        }
-       },
-       "amount2": 1.0
+       }
       }
      },
      "tail_length": {
