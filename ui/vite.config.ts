@@ -105,10 +105,13 @@ function galleryApi(): Plugin {
         })
       })
       // POST /api/background-picks?set=<n>, body: the options starred in the background gallery
-      // (ui/background-gallery.html?set=<n>), saved for src/background.ts (set 1) or src/background<n>.ts.
+      // (ui/background-gallery.html?set=<n>), saved for src/background.ts (set 1) or src/background<n>.ts; for a song's
+      // options (?set=<song>), to src/songs/<song>-picks.json.
       server.middlewares.use('/api/background-picks', (req, res) => {
         const set = new URL(req.url ?? '', 'http://localhost').searchParams.get('set') ?? '1'
-        const file = /^\d+$/.test(set) && set !== '1' ? `src/background${set}-picks.json` : 'src/background-picks.json'
+        const file = /^\d+$/.test(set)
+          ? (set === '1' ? 'src/background-picks.json' : `src/background${set}-picks.json`)
+          : /^[a-z0-9_]+$/.test(set) ? `src/songs/${set}-picks.json` : 'src/background-picks.json'
         let body = ''
         req.on('data', chunk => { body += chunk })
         req.on('end', () => {

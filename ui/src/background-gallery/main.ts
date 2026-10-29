@@ -1,15 +1,18 @@
 import { PIXELS_PER_RING, renderRing, type HSV, type Sequence } from '../player/render'
 
-// Background Gallery: every option of a background set looping on its own card, drawn the way the ring controllers
-// draw it. ?set=1 (the default) is src/background-options.ts (built into public/background-options.json), ?set=2
-// src/background2-options.ts (public/background2-options.json). Starred options are saved for Claude through the dev
-// server (POST /api/background-picks?set=, to src/background-picks.json or src/background2-picks.json).
+// Background Gallery: every option of a set looping on its own card, drawn the way the ring controllers draw it.
+// ?set=1 (the default) is src/background-options.ts (built into public/background-options.json), ?set=<n> the
+// background set src/background<n>-options.ts (public/background<n>-options.json), and ?set=<song> a song's options
+// (src/songs/<song>-options.ts, public/<song>-options.json), which come with the song's audio: then every card plays in
+// time with it. Starred options are saved for Claude through the dev server (POST /api/background-picks?set=, to
+// src/background-picks.json, src/background<n>-picks.json or src/songs/<song>-picks.json).
 
 const SET = new URLSearchParams(location.search).get('set') ?? '1'
-const OPTIONS_FILE = SET === '1' ? '/background-options.json' : `/background${SET}-options.json`
+const IS_SONG = !/^\d+$/.test(SET)
+const OPTIONS_FILE = SET === '1' ? '/background-options.json' : IS_SONG ? `/${SET}-options.json` : `/background${SET}-options.json`
 
 interface Option { name: string; category: string; tags?: string[]; desc: string; sequence: Sequence }
-interface Data { loopSeconds: number; options: Option[] }
+interface Data { loopSeconds: number; audio?: string; options: Option[] }
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T
 const grid = $('grid'), filters = $('filters'), picksEl = $('picks'), status = $('status'), clock = $('clock')
@@ -27,15 +30,27 @@ let picked = new Set<number>(load<number[]>('picked', []))
 let filter = load<string>('filter', 'All')
 let focused = -1
 
-// --- time: one clock for every card, looping ---------------------------------------------------------------------
+// --- time: one clock for every card, looping; the song's audio when the set has one ----------------------------
 
-let running = true, clockAt = 0, clockStart = performance.now()
-const nowMs = () => (running ? clockAt + performance.now() - clockStart : clockAt) % (data.loopSeconds * 1000)
+let running = !IS_SONG, clockAt = 0, clockStart = performance.now()
+const audio = new Audio()
+audio.loop = true
+const nowMs = () => data.audio
+  ? audio.currentTime * 1000
+  : (running ? clockAt + performance.now() - clockStart : clockAt) % (data.loopSeconds * 1000)
+const showPlay = () => { playBtn.textContent = running ? '❚❚ Pause' : '▶ Play' }
 function togglePlay() {
-  if (running) clockAt = nowMs(); else clockStart = performance.now()
-  running = !running
-  playBtn.textContent = running ? '❚❚ Pause' : '▶ Play'
+  if (data.audio) {
+    if (audio.paused) audio.play(); else audio.pause()
+    running = !audio.paused
+  } else {
+    if (running) clockAt = nowMs(); else clockStart = performance.now()
+    running = !running
+  }
+  showPlay()
 }
+audio.addEventListener('play', () => { running = true; showPlay() })
+audio.addEventListener('pause', () => { running = false; showPlay() })
 
 // --- drawing (the same geometry and colors as the Sequence Player) ---------------------------------------------
 
@@ -198,9 +213,15 @@ document.addEventListener('keydown', e => {
   if (e.key === ' ' && (e.target as HTMLElement).tagName !== 'SELECT') { e.preventDefault(); togglePlay() }
 })
 
-if (SET !== '1') { document.title = `Background ${SET} Gallery`; document.querySelector('h1')!.textContent = `Background ${SET} Gallery` }
+if (SET !== '1') {
+  const title = IS_SONG ? `${SET.replace(/_/g, ' ')} options` : `Background ${SET} Gallery`
+  document.title = title
+  document.querySelector('h1')!.textContent = title
+}
+showPlay()
 fetch(OPTIONS_FILE).then(r => r.json()).then((d: Data) => {
   data = d
+  if (d.audio) audio.src = `/${d.audio}`
   picked = new Set([...picked].filter(i => i < d.options.length))
   buildFilters()
   buildCards()

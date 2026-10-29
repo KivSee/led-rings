@@ -1,0 +1,11 @@
+{
+  "song": {
+    "name": "agent_story1",
+    "lengthSeconds": 23.59,
+    "bpm": 60,
+    "startOffsetMs": 0,
+    "runStartTimeSeconds": 0,
+    "animationType": "song",
+    "audioFilePath": "agent_story1.wav"
+  }
+}
