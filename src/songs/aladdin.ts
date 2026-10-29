@@ -2,7 +2,9 @@
 import { sendSequence } from "../services/sequence";
 import { startSong, trigger } from "../services/trigger";
 import { Animation } from "../animation/animation";
-import { beats, cycle, cycleBeats } from "../time/time";
+import { beats, cycle, cycleBeats, section } from "../time/time";
+import { optionEffects as bars5Effects } from "./aladdin-bars5-snakes";
+import { patternEffects as beats36Pattern } from "./aladdin-beats36-options";
 import { phase } from "../phase/phase";
 import { constColor, noColor } from "../effects/coloring";
 import { addEffect } from "../effects/effect";
@@ -50,9 +52,26 @@ import {
 } from "../effects/motion";
 import { hueShiftSin, hueShiftStartToEnd, staticHueShift } from "../effects/hue";
 
+// The gallery option used for bars 5-8: the coloring picked (aladdin-bars5-options.ts, card 89) with the snake picked
+// over it (aladdin-bars5-snakes.ts, card 16; its index in OPTIONS there, after the "as it is now" card).
+const BARS5_PICKED = 14;
+// The pattern used for beats 36-39 (its index in OPTIONS of aladdin-beats36-options.ts): 2 shadows spinning round
+// the small rings, the halves mirrored, a lap a beat.
+const BEATS36_PICKED = 0;
+
 const aladdin = async () => {
-  const anim = new Animation("aladdin", 64.725, 76.00, 575);
+  const anim = new Animation("aladdin", 64.725, 78.91, 575);
+  // Play once (the rings stay dark after it), the length of the audio, so the start does not come round again.
+  anim.playOnce();
   anim.sync(() => {
+    // The song's parts, in its episodes of 8 beats (aladdin-episode.txt), named by how the music builds: quiet
+    // intro, rising, louder still, the lights' busiest build, the loudest peak, coming down, the quiet ending. Markers
+    // only (for the Sequence Player): the effects below are placed by their own beats.
+    const SECTIONS: [string, number, number][] = [
+      ["intro", 0, 8], ["verse", 8, 24], ["rise", 24, 32], ["build", 32, 48], ["peak", 48, 72], ["come down", 72, 80], ["ending", 80, 82],
+    ];
+    SECTIONS.forEach(([name, start, end]) => section(name, { start, end }, () => {}));
+
     beats(0, 16, () => {
       elements(all, () => {
         segment(segment_all, () => {
@@ -69,104 +88,18 @@ const aladdin = async () => {
       });
     })
 
-    beats(16, 24, () => {
-      elements(left, () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
-        });
-      });
-    })
+    // Bars 5-8 (beats 16-30), picked in the gallery (ui/background-gallery.html?set=aladdin_bars5,
+    // src/songs/aladdin-bars5-options.ts): option 89, in desert colors. Part 1 (16-22): the mirror pairs from the top
+    // down, terracotta, in rings along rad; the stop (22-24): fading out; part 2 (24-30): the pairs from the bottom up,
+    // golden sand, the rings along rad turned once round the big ring. Over it, while the rings are lit (ui/background-gallery.html?set=
+    // aladdin_bars5_snake): a soft shadow spiralling on updown, mirrored left and right, a lap every 3 beats.
+    bars5Effects(BARS5_PICKED);
 
-    beats(16, 17, () => {
-      elements([10], () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
-        });
-      });
-    })
-
-    beats(16, 18, () => {
-      elements([9], () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
-        });
-      });
-    })
-
-    beats(16, 19, () => {
-      elements([8], () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
-        });
-      });
-    })
-
-    beats(16, 20, () => {
-      elements([7], () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
-        });
-      });
-    })
-
-    beats(16, 21, () => {
-      elements([6], () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
-        });
-      });
-    })
-
-    beats(24, 32, () => {
-      elements(right, () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
-        });
-      });
-    })
-
-    beats(24, 25, () => {
-      elements([1], () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
-        });
-      });
-    })
-
-    beats(24, 26, () => {
-      elements([2], () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
-        });
-      });
-    })
-
-    beats(24, 27, () => {
-      elements([3], () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
-        });
-      });
-    })
-
-    beats(24, 28, () => {
-      elements([4], () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
-        });
-      });
-    })
-
-    beats(24, 29, () => {
-      elements([5], () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
-        });
-      });
-    })
+    // Beats 31.5-35.5: a ring chasing round the big ring, clockwise from ring 12 (the first ring, at the top) to 11,
+    // then back from 11 to 12.
 
     beats(31.5, 32, () => {
-      elements([1], () => {
+      elements([12], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
         });
@@ -174,7 +107,7 @@ const aladdin = async () => {
     })
 
     beats(31.6, 32.1, () => {
-      elements([2], () => {
+      elements([1], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
         });
@@ -182,7 +115,7 @@ const aladdin = async () => {
     })
 
     beats(31.7, 32.3, () => {
-      elements([3], () => {
+      elements([2], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
         });
@@ -190,7 +123,7 @@ const aladdin = async () => {
     })
 
     beats(31.9, 32.4, () => {
-      elements([4], () => {
+      elements([3], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
         });
@@ -198,7 +131,7 @@ const aladdin = async () => {
     })
 
     beats(32, 32.5, () => {
-      elements([5], () => {
+      elements([4], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
         });
@@ -206,7 +139,7 @@ const aladdin = async () => {
     })
 
     beats(32.1, 32.6, () => {
-      elements([6], () => {
+      elements([5], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
         });
@@ -214,7 +147,7 @@ const aladdin = async () => {
     })
 
     beats(32.3, 32.7, () => {
-      elements([7], () => {
+      elements([6], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
         });
@@ -222,7 +155,7 @@ const aladdin = async () => {
     })
 
     beats(32.4, 32.9, () => {
-      elements([8], () => {
+      elements([7], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
         });
@@ -230,7 +163,7 @@ const aladdin = async () => {
     })
 
     beats(32.5, 33, () => {
-      elements([9], () => {
+      elements([8], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
         });
@@ -238,7 +171,7 @@ const aladdin = async () => {
     })
 
     beats(32.6, 33.1, () => {
-      elements([10], () => {
+      elements([9], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
         });
@@ -246,7 +179,7 @@ const aladdin = async () => {
     })
 
     beats(32.7, 33.3, () => {
-      elements([11], () => {
+      elements([10], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
         });
@@ -254,7 +187,7 @@ const aladdin = async () => {
     })
 
     beats(32.9, 33.4, () => {
-      elements([12], () => {
+      elements([11], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.6804, sat: 0.9020, val: 1.0000 })
         });
@@ -262,14 +195,6 @@ const aladdin = async () => {
     })
 
     beats(33.5, 34, () => {
-      elements([12], () => {
-        segment(segment_all, () => {
-          constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
-        });
-      });
-    })
-
-    beats(33.6, 34.1, () => {
       elements([11], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
@@ -277,7 +202,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(33.7, 34.3, () => {
+    beats(33.6, 34.1, () => {
       elements([10], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
@@ -285,7 +210,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(33.9, 34.4, () => {
+    beats(33.7, 34.3, () => {
       elements([9], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
@@ -293,7 +218,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(34, 34.5, () => {
+    beats(33.9, 34.4, () => {
       elements([8], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
@@ -301,7 +226,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(34.1, 34.6, () => {
+    beats(34, 34.5, () => {
       elements([7], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
@@ -309,7 +234,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(34.3, 34.7, () => {
+    beats(34.1, 34.6, () => {
       elements([6], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
@@ -317,7 +242,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(34.4, 34.9, () => {
+    beats(34.3, 34.7, () => {
       elements([5], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
@@ -325,7 +250,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(34.5, 35, () => {
+    beats(34.4, 34.9, () => {
       elements([4], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
@@ -333,7 +258,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(34.6, 35.1, () => {
+    beats(34.5, 35, () => {
       elements([3], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
@@ -341,7 +266,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(34.7, 35.3, () => {
+    beats(34.6, 35.1, () => {
       elements([2], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
@@ -349,8 +274,16 @@ const aladdin = async () => {
       });
     })
 
-    beats(34.9, 35.4, () => {
+    beats(34.7, 35.3, () => {
       elements([1], () => {
+        segment(segment_all, () => {
+          constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
+        });
+      });
+    })
+
+    beats(34.9, 35.4, () => {
+      elements([12], () => {
         segment(segment_all, () => {
           constColor({ hue: 0.0496, sat: 0.9490, val: 1.0000 })
         });
@@ -397,10 +330,12 @@ const aladdin = async () => {
       });
     })
 
+    // Beats 41.5-42.5: no dark moment before the next part: the b1 dots come back in while the b2 ones stay lit, so the
+    // scene is at full when the snake on updown starts at 42.5.
     beats(41.5, 42.5, () => {
       elements(all, () => {
         segment(segment_b1, () => {
-          constColor({ hue: 0.0000, sat: 0.0000, val: 0.0000 })
+          fadeIn()
         });
       });
     })
@@ -673,174 +608,6 @@ const aladdin = async () => {
       });
     })
 
-    beats(16, 18, () => {
-      elements([11], () => {
-        segment(segment_arc, () => {
-          hueShiftStartToEnd({ start: 0, end: 0.2 })
-        });
-      });
-    })
-
-    beats(18, 24, () => {
-      elements([11], () => {
-        segment(segment_all, () => {
-          staticHueShift({ value: 0.2 })
-        });
-      });
-    })
-
-    beats(17, 19, () => {
-      elements([10], () => {
-        segment(segment_arc, () => {
-          hueShiftStartToEnd({ start: 0.2, end: 0.4 })
-        });
-      });
-    })
-
-    beats(19, 24, () => {
-      elements([10], () => {
-        segment(segment_all, () => {
-          staticHueShift({ value: 0.4 })
-        });
-      });
-    })
-
-    beats(18, 20, () => {
-      elements([9], () => {
-        segment(segment_arc, () => {
-          hueShiftStartToEnd({ start: 0.4, end: 0.6 })
-        });
-      });
-    })
-
-    beats(20, 24, () => {
-      elements([9], () => {
-        segment(segment_all, () => {
-          staticHueShift({ value: 0.6 })
-        });
-      });
-    })
-
-    beats(19, 21, () => {
-      elements([8], () => {
-        segment(segment_arc, () => {
-          hueShiftStartToEnd({ start: 0.6, end: 0.8 })
-        });
-      });
-    })
-
-    beats(21, 24, () => {
-      elements([8], () => {
-        segment(segment_all, () => {
-          staticHueShift({ value: 0.8 })
-        });
-      });
-    })
-
-    beats(20, 22, () => {
-      elements([7], () => {
-        segment(segment_arc, () => {
-          hueShiftStartToEnd({ start: 0.8, end: 1 })
-        });
-      });
-    })
-
-    beats(22, 24, () => {
-      elements([7], () => {
-        segment(segment_all, () => {
-          staticHueShift({ value: 1 })
-        });
-      });
-    })
-
-    beats(21, 23, () => {
-      elements([6], () => {
-        segment(segment_arc, () => {
-          hueShiftStartToEnd({ start: 1, end: 1.2 })
-        });
-      });
-    })
-
-    beats(23, 24, () => {
-      elements([6], () => {
-        segment(segment_all, () => {
-          staticHueShift({ value: 1.2 })
-        });
-      });
-    })
-
-    beats(24, 26, () => {
-      elements([12], () => {
-        segment(segment_arc, () => {
-          hueShiftStartToEnd({ start: 0, end: 0.2 })
-        });
-      });
-    })
-
-    beats(26, 32, () => {
-      elements([12], () => {
-        segment(segment_all, () => {
-          staticHueShift({ value: 0.2 })
-        });
-      });
-    })
-
-    beats(25, 27, () => {
-      elements([1], () => {
-        segment(segment_arc, () => {
-          hueShiftStartToEnd({ start: 0.2, end: 0.4 })
-        });
-      });
-    })
-
-    beats(27, 32, () => {
-      elements([1], () => {
-        segment(segment_all, () => {
-          staticHueShift({ value: 0.4 })
-        });
-      });
-    })
-
-    beats(26, 28, () => {
-      elements([2], () => {
-        segment(segment_arc, () => {
-          hueShiftStartToEnd({ start: 0.4, end: 0.6 })
-        });
-      });
-    })
-
-    beats(28, 32, () => {
-      elements([2], () => {
-        segment(segment_all, () => {
-          staticHueShift({ value: 0.6 })
-        });
-      });
-    })
-
-    beats(27, 29, () => {
-      elements([3], () => {
-        segment(segment_arc, () => {
-          hueShiftStartToEnd({ start: 0.6, end: 0.8 })
-        });
-      });
-    })
-
-    beats(29, 32, () => {
-      elements([3], () => {
-        segment(segment_all, () => {
-          staticHueShift({ value: 0.8 })
-        });
-      });
-    })
-
-    beats(28, 30, () => {
-      elements([4], () => {
-        segment(segment_arc, () => {
-          hueShiftStartToEnd({ start: 0.8, end: 1 })
-        });
-      });
-    })
-
     beats(30, 32, () => {
       elements([4], () => {
         segment(segment_all, () => {
@@ -849,14 +616,6 @@ const aladdin = async () => {
       });
     })
 
-    beats(29, 31, () => {
-      elements([5], () => {
-        segment(segment_arc, () => {
-          hueShiftStartToEnd({ start: 1, end: 1.2 })
-        });
-      });
-    })
-
     beats(31, 32, () => {
       elements([5], () => {
         segment(segment_all, () => {
@@ -865,16 +624,9 @@ const aladdin = async () => {
       });
     })
 
-    beats(31, 32, () => {
-      elements(all, () => {
-        segment(segment_all, () => {
-          fadeOut()
-        });
-      });
-    })
 
     beats(31.5, 32, () => {
-      elements([1], () => {
+      elements([12], () => {
         segment(segment_all, () => {
           fadeInOut()
         });
@@ -882,7 +634,7 @@ const aladdin = async () => {
     })
 
     beats(31.6, 32.1, () => {
-      elements([2], () => {
+      elements([1], () => {
         segment(segment_all, () => {
           fadeInOut()
         });
@@ -890,7 +642,7 @@ const aladdin = async () => {
     })
 
     beats(31.7, 32.3, () => {
-      elements([3], () => {
+      elements([2], () => {
         segment(segment_all, () => {
           fadeInOut()
         });
@@ -898,7 +650,7 @@ const aladdin = async () => {
     })
 
     beats(31.9, 32.4, () => {
-      elements([4], () => {
+      elements([3], () => {
         segment(segment_all, () => {
           fadeInOut()
         });
@@ -906,7 +658,7 @@ const aladdin = async () => {
     })
 
     beats(32, 32.5, () => {
-      elements([5], () => {
+      elements([4], () => {
         segment(segment_all, () => {
           fadeInOut()
         });
@@ -914,7 +666,7 @@ const aladdin = async () => {
     })
 
     beats(32.1, 32.6, () => {
-      elements([6], () => {
+      elements([5], () => {
         segment(segment_all, () => {
           fadeInOut()
         });
@@ -922,7 +674,7 @@ const aladdin = async () => {
     })
 
     beats(32.3, 32.7, () => {
-      elements([7], () => {
+      elements([6], () => {
         segment(segment_all, () => {
           fadeInOut()
         });
@@ -930,7 +682,7 @@ const aladdin = async () => {
     })
 
     beats(32.4, 32.9, () => {
-      elements([8], () => {
+      elements([7], () => {
         segment(segment_all, () => {
           fadeInOut()
         });
@@ -938,7 +690,7 @@ const aladdin = async () => {
     })
 
     beats(32.5, 33, () => {
-      elements([9], () => {
+      elements([8], () => {
         segment(segment_all, () => {
           fadeInOut()
         });
@@ -946,7 +698,7 @@ const aladdin = async () => {
     })
 
     beats(32.6, 33.1, () => {
-      elements([10], () => {
+      elements([9], () => {
         segment(segment_all, () => {
           fadeInOut()
         });
@@ -954,7 +706,7 @@ const aladdin = async () => {
     })
 
     beats(32.7, 33.3, () => {
-      elements([11], () => {
+      elements([10], () => {
         segment(segment_all, () => {
           fadeInOut()
         });
@@ -962,7 +714,7 @@ const aladdin = async () => {
     })
 
     beats(32.9, 33.4, () => {
-      elements([12], () => {
+      elements([11], () => {
         segment(segment_all, () => {
           fadeInOut()
         });
@@ -970,14 +722,6 @@ const aladdin = async () => {
     })
 
     beats(33.5, 34, () => {
-      elements([12], () => {
-        segment(segment_all, () => {
-          fadeOut()
-        });
-      });
-    })
-
-    beats(33.6, 34.1, () => {
       elements([11], () => {
         segment(segment_all, () => {
           fadeOut()
@@ -985,7 +729,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(33.7, 34.3, () => {
+    beats(33.6, 34.1, () => {
       elements([10], () => {
         segment(segment_all, () => {
           fadeOut()
@@ -993,7 +737,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(33.9, 34.4, () => {
+    beats(33.7, 34.3, () => {
       elements([9], () => {
         segment(segment_all, () => {
           fadeOut()
@@ -1001,7 +745,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(34, 34.5, () => {
+    beats(33.9, 34.4, () => {
       elements([8], () => {
         segment(segment_all, () => {
           fadeOut()
@@ -1009,7 +753,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(34.1, 34.6, () => {
+    beats(34, 34.5, () => {
       elements([7], () => {
         segment(segment_all, () => {
           fadeOut()
@@ -1017,7 +761,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(34.3, 34.7, () => {
+    beats(34.1, 34.6, () => {
       elements([6], () => {
         segment(segment_all, () => {
           fadeOut()
@@ -1025,7 +769,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(34.4, 34.9, () => {
+    beats(34.3, 34.7, () => {
       elements([5], () => {
         segment(segment_all, () => {
           fadeOut()
@@ -1033,7 +777,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(34.5, 35, () => {
+    beats(34.4, 34.9, () => {
       elements([4], () => {
         segment(segment_all, () => {
           fadeOut()
@@ -1041,7 +785,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(34.6, 35.1, () => {
+    beats(34.5, 35, () => {
       elements([3], () => {
         segment(segment_all, () => {
           fadeOut()
@@ -1049,7 +793,7 @@ const aladdin = async () => {
       });
     })
 
-    beats(34.7, 35.3, () => {
+    beats(34.6, 35.1, () => {
       elements([2], () => {
         segment(segment_all, () => {
           fadeOut()
@@ -1057,8 +801,16 @@ const aladdin = async () => {
       });
     })
 
-    beats(34.9, 35.4, () => {
+    beats(34.7, 35.3, () => {
       elements([1], () => {
+        segment(segment_all, () => {
+          fadeOut()
+        });
+      });
+    })
+
+    beats(34.9, 35.4, () => {
+      elements([12], () => {
         segment(segment_all, () => {
           fadeOut()
         });
@@ -1121,15 +873,18 @@ const aladdin = async () => {
       });
     })
 
-    beats(41.5, 42.5, () => {
+
+    // "Fly" (beat 42.5): the hue slides over the first beat to the part's shift of 0.8 (the short way round, -0.2),
+    // instead of jumping to it.
+    beats(42.5, 43.5, () => {
       elements(all, () => {
-        segment(segment_b2, () => {
-          fadeOut()
+        segment(segment_all, () => {
+          addEffect({ timed_hue: { offset_factor: { linear: { start: 0, end: -0.2 } } } })
         });
       });
     })
 
-    beats(42.5, 48, () => {
+    beats(43.5, 48, () => {
       elements(all, () => {
         segment(segment_all, () => {
           staticHueShift({ value: 0.8 })
@@ -1137,13 +892,6 @@ const aladdin = async () => {
       });
     })
 
-    beats(42.5, 43, () => {
-      elements(all, () => {
-        segment(segment_all, () => {
-          fadeIn()
-        });
-      });
-    })
 
     beats(48.5, 50, () => {
       elements(all, () => {
@@ -1331,103 +1079,20 @@ const aladdin = async () => {
       });
     })
 
-    beats(16, 18, () => {
-      elements([11], () => {
-        segment(segment_arc, () => {
-          snakeFillGrow()
+    // The "fly" sweep: a ramp of light round every ring on updown, 4 times a beat. Over its first beat it deepens a
+    // quarter at a time (the ramp's dark end at 3/4, 1/2, 1/4, then 0 of the light), so it grows in rather than
+    // switching on.
+    for (const [k, low] of [0.75, 0.5, 0.25, 0].entries()) {
+      beats(42.5 + k / 4, 42.75 + k / 4, () => {
+        elements(all, () => {
+          segment(segment_updown, () => {
+            addEffect({ snake_brightness: { head: { linear: { start: 0, end: 1 } }, tail_length: { const_value: { value: 1 } }, cyclic: true, mult_factor_decrease: { linear: { start: low, end: 1 } } } })
+          });
         });
       });
-    })
+    }
 
-    beats(17, 19, () => {
-      elements([10], () => {
-        segment(segment_arc, () => {
-          snakeFillGrow()
-        });
-      });
-    })
-
-    beats(18, 20, () => {
-      elements([9], () => {
-        segment(segment_arc, () => {
-          snakeFillGrow()
-        });
-      });
-    })
-
-    beats(19, 21, () => {
-      elements([8], () => {
-        segment(segment_arc, () => {
-          snakeFillGrow()
-        });
-      });
-    })
-
-    beats(20, 22, () => {
-      elements([7], () => {
-        segment(segment_arc, () => {
-          snakeFillGrow()
-        });
-      });
-    })
-
-    beats(21, 23, () => {
-      elements([6], () => {
-        segment(segment_arc, () => {
-          snakeFillGrow()
-        });
-      });
-    })
-
-    beats(24, 26, () => {
-      elements([12], () => {
-        segment(segment_arc, () => {
-          snakeFillGrow()
-        });
-      });
-    })
-
-    beats(25, 27, () => {
-      elements([1], () => {
-        segment(segment_arc, () => {
-          snakeFillGrow()
-        });
-      });
-    })
-
-    beats(26, 28, () => {
-      elements([2], () => {
-        segment(segment_arc, () => {
-          snakeFillGrow()
-        });
-      });
-    })
-
-    beats(27, 29, () => {
-      elements([3], () => {
-        segment(segment_arc, () => {
-          snakeFillGrow()
-        });
-      });
-    })
-
-    beats(28, 30, () => {
-      elements([4], () => {
-        segment(segment_arc, () => {
-          snakeFillGrow()
-        });
-      });
-    })
-
-    beats(29, 31, () => {
-      elements([5], () => {
-        segment(segment_arc, () => {
-          snakeFillGrow()
-        });
-      });
-    })
-
-    beats(42.5, 48, () => {
+    beats(43.5, 48, () => {
       cycle(0.25, () => {
         elements(all, () => {
           segment(segment_updown, () => {
@@ -1469,18 +1134,26 @@ const aladdin = async () => {
       });
     })
 
+    // Beats 59-64: a snake swinging out and back round every small ring (arc, its head on a sin), lighting what it
+    // passes to full over the rest dimmed to ARC_LOW, rather than blacking out everything outside it.
+    const ARC_LOW = 0.35;
     beats(59, 64, () => {
       elements(all, () => {
         segment(segment_arc, () => {
-          snakeInOut()
+          addEffect({ timed_brightness: { mult_factor_decrease: { const_value: { value: ARC_LOW } } } })
+          addEffect({ snake_brightness: { head: { sin: { min: 0, max: 1, phase: 0, repeats: 1 } }, tail_length: { const_value: { value: 0.5 } }, cyclic: false, mult_factor_increase: { linear: { start: 0, end: 1 } } } })
         });
       });
     })
 
+    // Bar 16: a snake of light running round every ring, its head at full and the rest of the ring dimmed to
+    // BAR16_LOW behind it, rather than blacked out, so most of the ring stays lit.
+    const BAR16_LOW = 0.25;
+    const bar16Snake = () => addEffect({ snake_brightness: { head: { linear: { start: 0, end: 1 } }, tail_length: { const_value: { value: 1 } }, cyclic: true, mult_factor_decrease: { linear: { start: BAR16_LOW, end: 1 } } } });
     beats(60, 62, () => {
       elements(all, () => {
         segment(segment_all, () => {
-          snake({ tailLength: 0.4 })
+          bar16Snake()
         });
       });
     })
@@ -1489,7 +1162,7 @@ const aladdin = async () => {
       cycle(0.25, () => {
         elements(all, () => {
           segment(segment_all, () => {
-            snake({ tailLength: 0.3 })
+            bar16Snake()
           });
         });
       });
@@ -1536,6 +1209,11 @@ const aladdin = async () => {
         });
       });
     })
+
+    // Beats 36-39, over the colors (the even rings orange, the odd ones pale blue, then the red dots), last so it
+    // only changes them a little: the pattern picked in the gallery (ui/background-gallery.html?set=aladdin_beats36,
+    // src/songs/aladdin-beats36-options.ts). ALADDIN_BEATS36=none leaves it out (the gallery's base).
+    if (process.env.ALADDIN_BEATS36 !== "none") beats36Pattern(BEATS36_PICKED);
   });
 
   console.log("sending sequence");

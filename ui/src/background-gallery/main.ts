@@ -12,7 +12,8 @@ const IS_SONG = !/^\d+$/.test(SET)
 const OPTIONS_FILE = SET === '1' ? '/background-options.json' : IS_SONG ? `/${SET}-options.json` : `/background${SET}-options.json`
 
 interface Option { name: string; category: string; tags?: string[]; desc: string; sequence: Sequence }
-interface Data { loopSeconds: number; audio?: string; options: Option[] }
+// from / to (seconds): only that part of the song, looped (its options are in song time).
+interface Data { loopSeconds: number; audio?: string; from?: number; to?: number; options: Option[] }
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T
 const grid = $('grid'), filters = $('filters'), picksEl = $('picks'), status = $('status'), clock = $('clock')
@@ -192,6 +193,7 @@ function closeFocus() {
 }
 
 function frame() {
+  if (data.audio && data.to !== undefined && (audio.currentTime >= data.to || audio.currentTime < (data.from ?? 0) - 0.05)) audio.currentTime = data.from ?? 0
   const t = nowMs()
   clock.textContent = `${(t / 1000).toFixed(1)} / ${data.loopSeconds} s`
   if (focused >= 0) draw(focusCanvas, data.options[focused].sequence, t)
@@ -221,7 +223,10 @@ if (SET !== '1') {
 showPlay()
 fetch(OPTIONS_FILE).then(r => r.json()).then((d: Data) => {
   data = d
-  if (d.audio) audio.src = `/${d.audio}`
+  if (d.audio) {
+    audio.src = `/${d.audio}`
+    if (d.from !== undefined) audio.addEventListener('loadedmetadata', () => { audio.currentTime = d.from! }, { once: true })
+  }
   picked = new Set([...picked].filter(i => i < d.options.length))
   buildFilters()
   buildCards()
