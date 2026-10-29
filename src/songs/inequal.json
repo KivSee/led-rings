@@ -4,7 +4,7 @@
     "lengthSeconds": 312,
     "bpm": 100,
     "startOffsetMs": 0,
-    "runStartTimeSeconds": 0,
+    "runStartTimeSeconds": 235.2,
     "animationType": "song",
     "audioFilePath": "inequal.wav",
     "lilumRings": [
@@ -4097,242 +4097,145 @@
       "mapping": "all"
     },
     {
-      "id": "sapir-42",
+      "id": "finale",
       "startTime": 392,
-      "endTime": 504,
-      "label": "Finale Arc",
+      "endTime": 520,
+      "label": "finale",
       "color": "#ff00d6",
-      "rings": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
-      ],
-      "mapping": "arc",
-      "cycles": [
-        {
-          "type": "cycle",
-          "beatsInCycle": 4
-        }
-      ],
-      "effects": [
-        {
-          "id": "sapir-42-eff-0",
-          "effectKey": "position_hue",
-          "params": {
-            "offset_factor": {
-              "half": {
-                "f1": {
-                  "half": {
-                    "f1": {
-                      "half": {
-                        "f1": {
-                          "const_value": {
-                            "value": 0
-                          }
-                        },
-                        "f2": {
-                          "const_value": {
-                            "value": 0.63
-                          }
-                        }
-                      }
-                    },
-                    "f2": {
-                      "half": {
-                        "f1": {
-                          "const_value": {
-                            "value": 0.63
-                          }
-                        },
-                        "f2": {
-                          "const_value": {
-                            "value": 0
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "f2": {
-                  "half": {
-                    "f1": {
-                      "const_value": {
-                        "value": 0.63
-                      }
-                    },
-                    "f2": {
-                      "const_value": {
-                        "value": 0
-                      }
-                    }
-                  }
-                }
-              }
+      "labSection": {
+        "palette": "into-finale",
+        "mix": [],
+        "barsEach": 4,
+        "transition": "blend-2",
+        "shape": {
+          "buildUp": false,
+          "fadeOut": false,
+          "peak": false,
+          "peakOffset": 0,
+          "base": 0.85,
+          "pace": 0,
+          "overlays": [
+            {
+              "id": "ov-fin-tint-wash",
+              "from": 440,
+              "to": 472,
+              "tint": "1"
+            },
+            {
+              "id": "ov-glint",
+              "from": 472,
+              "to": 504
+            },
+            {
+              "id": "ov-glitter",
+              "to": 408
+            },
+            {
+              "id": "ov-fin-vocal",
+              "from": 408,
+              "to": 504
             }
-          }
-        },
-        {
-          "id": "sapir-42-eff-1",
-          "effectKey": "snakeInOut",
-          "params": {},
-          "phase": 0.5
-        }
-      ]
-    },
-    {
-      "id": "sapir-43",
-      "startTime": 504,
-      "endTime": 520,
-      "label": "Outro Arc",
-      "color": "#0029ff",
-      "rings": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
-      ],
-      "mapping": "arc",
-      "cycles": [
-        {
-          "type": "cycle",
-          "beatsInCycle": 4
-        }
-      ],
-      "effects": [
-        {
-          "id": "sapir-43-eff-0",
-          "effectKey": "position_hue",
-          "params": {
-            "offset_factor": {
-              "half": {
-                "f1": {
-                  "half": {
-                    "f1": {
-                      "half": {
-                        "f1": {
-                          "const_value": {
-                            "value": 0
-                          }
-                        },
-                        "f2": {
-                          "const_value": {
-                            "value": 0.85
-                          }
-                        }
-                      }
-                    },
-                    "f2": {
-                      "half": {
-                        "f1": {
-                          "const_value": {
-                            "value": 0.85
-                          }
-                        },
-                        "f2": {
-                          "const_value": {
-                            "value": 0
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "f2": {
-                  "half": {
-                    "f1": {
-                      "const_value": {
-                        "value": 0.85
-                      }
-                    },
-                    "f2": {
-                      "const_value": {
-                        "value": 0
-                      }
-                    }
-                  }
-                }
-              }
+          ],
+          "parts": [
+            {
+              "from": 392,
+              "to": 408,
+              "buildUp": false,
+              "fadeOut": false,
+              "peak": false,
+              "pace": 0,
+              "base": 0.85,
+              "fadeIn": true
+            },
+            {
+              "from": 408,
+              "to": 440,
+              "buildUp": true,
+              "fadeOut": false,
+              "peak": false,
+              "pace": 0,
+              "base": 0.85
+            },
+            {
+              "from": 440,
+              "to": 472,
+              "buildUp": false,
+              "fadeOut": false,
+              "peak": false,
+              "pace": 0,
+              "base": 1
+            },
+            {
+              "from": 472,
+              "to": 504,
+              "buildUp": false,
+              "fadeOut": false,
+              "peak": false,
+              "pace": 0,
+              "base": 1
+            },
+            {
+              "from": 504,
+              "to": 520,
+              "buildUp": false,
+              "fadeOut": true,
+              "peak": false,
+              "pace": 0,
+              "base": 0.85
             }
-          }
+          ]
         },
-        {
-          "id": "sapir-43-eff-1",
-          "effectKey": "snakeInOut",
-          "params": {},
-          "phase": 0.5
-        }
-      ]
-    },
-    {
-      "id": "sapir-44",
-      "startTime": 392,
-      "endTime": 504,
-      "label": "Finale Hue Sweep",
-      "color": "#808080",
-      "hasExplicitColor": false,
-      "rings": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12
-      ],
-      "mapping": "all",
-      "effects": [
-        {
-          "id": "sapir-44-eff-0",
-          "effectKey": "hueShiftStartToEnd",
-          "params": {
-            "start": 0,
-            "end": -0.8
-          }
-        },
-        {
-          "id": "sapir-44-eff-1",
-          "effectKey": "timed_saturation",
-          "params": {
-            "mult_factor_decrease": {
-              "steps": {
-                "first_step_value": 0.25,
-                "diff_per_step": 0.027777777777777776,
-                "num_steps": 28
-              }
+        "shuffleColors": true,
+        "blocks": [
+          {
+            "from": 392,
+            "to": 408,
+            "texture": "fin-orbit-tide",
+            "mapping": "rad × ind",
+            "transition": "flash"
+          },
+          {
+            "from": 408,
+            "to": 440,
+            "texture": "fin-kaleido",
+            "mapping": "centric × ind",
+            "palette": "finale-bloom",
+            "transition": "flash",
+            "timing": {
+              "hit": "none"
             }
+          },
+          {
+            "from": 440,
+            "to": 472,
+            "texture": "fin-supernova",
+            "mapping": "rad",
+            "transition": "rainbow",
+            "timing": {
+              "hit": "none"
+            }
+          },
+          {
+            "from": 472,
+            "to": 504,
+            "texture": "fin-weave-pulse",
+            "mapping": "centric",
+            "timing": {
+              "speed": "fast",
+              "hit": "none"
+            },
+            "palette": "finale-bloom"
+          },
+          {
+            "from": 504,
+            "to": 520,
+            "texture": "fin-cascade",
+            "mapping": "rad × centric",
+            "palette": "finale-bloom",
+            "transition": "streak-in"
           }
-        }
-      ]
-    },
-    {
-      "id": "sapir-45",
-      "startTime": 508,
-      "endTime": 520,
-      "label": "Outro Fade",
-      "color": "#808080",
-      "hasExplicitColor": false,
+        ]
+      },
       "rings": [
         1,
         2,
@@ -4347,14 +4250,7 @@
         11,
         12
       ],
-      "mapping": "all",
-      "effects": [
-        {
-          "id": "sapir-45-eff-0",
-          "effectKey": "fadeOut",
-          "params": {}
-        }
-      ]
+      "mapping": "all"
     },
     {
       "id": "1793175391181",
@@ -4433,7 +4329,7 @@
   },
   "spectrogramOpen": false,
   "view": {
-    "startBeat": 0,
+    "startBeat": 264,
     "beatsPerScreen": 256
   },
   "theme": "dark"

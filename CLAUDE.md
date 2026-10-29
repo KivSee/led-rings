@@ -32,9 +32,11 @@ Example: `http://localhost:5173/lab.html?song=inequal&name=chase&from=280&to=392
   missed broken CSS before.
 
 ## Ring limits
-- Rings decode the sequence recursively. Build 132 of esp32-animations (branch `fix/decode-stack`) has a 32 KB
-  decode stack; rings 1, 4, 7, 11, 12 still run the old 8 KB build and may crash on deep nesting.
-  `sendSequence` refuses nesting > 20 float functions. Memory isn't the limit (~1,300 effects fit in internal RAM).
+- Rings decode the sequence recursively, on a 32 KB stack (esp32-animations build 134, on all rings 1–13).
+  `sendSequence` refuses nesting > 20 float functions.
+- Ring diagnostics: `thing/<name>/status` (retained) has only alive + fw build. Memory, reset reason and the
+  previous boot's load record (`prev`) are on `thing/<name>/debug` every 5 s (not retained); read with
+  `mosquitto_sub` on the Pi. Memory isn't the limit (~1,300 effects fit in internal RAM).
 - Keep the effect count per ring reasonable: inequal is ~293 per ring (Chase 280–392 ≈ 101 of them).
 - The firmware lights LEDs at val² (0.07 brightness ≈ off). Never put `phase` on raw snake_brightness/saturation:
   it shifts the amounts (factors > 1 → purple on LEDs while the sim looks fine).
@@ -44,8 +46,13 @@ Example: `http://localhost:5173/lab.html?song=inequal&name=chase&from=280&to=392
   2026-10-28 counts at 150 BPM, ×1.5).
 - Section map: intro 0–48 · B1 48–96 · Rebuild 96–144 · Drift 149.33–183.33 · drum rotation from 181.33 ·
   Shimmer 183.33–216 · starry middle 216–280 (lab section) · Chase 280–392 (lab section: Night sky, 7 four-bar
-  blocks, build-up 280–312, fade-out 384–392) · Finale 392–504 · Outro 504–520.
-- Next: the Finale 392–504, section by section in the lab.
+  blocks, build-up 280–312, fade-out 384–392) · finale 392–520 (lab section, outro included).
+- finale (option set `finale`, lab `lab.html?song=inequal&name=finale`): inner sections breakdown 392–408 (no bass,
+  color bed), rise 408–440, drop 440–472 (bass back at 440), 472–504, outro 504–520 (last hit at 504, silent from
+  ~512; stepped fade 512–520). It replaced Sapir's Finale Arc, Finale Hue Sweep, Outro Arc and Outro Fade.
+  Finale options combine mappings (`'ind × centric'`: a snake per mapping) and zones (a window on one mapping cleared
+  so another pattern plays there alone; b1 = every third pixel, its own segment).
+- Lab links: `at=<beat>` opens at a beat (the cue: play, ⏮ and the loop start there); `spec=<JSON>` loads a recipe.
 - Audio `ui/public/inequal.wav` is gitignored; copy it over to hear the song in the editor, lab and player.
 - Merging main into inequal conflicts only in `ui/vite.config.ts` (plugins and page entries on both sides).
 
