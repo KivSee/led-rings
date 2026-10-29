@@ -51,7 +51,10 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 # --- show configuration -------------------------------------------------------
 
 TRIGGER_LIST = ["background", "background2", "background3"]
-SONG_ORDER = ["aladdin", "buttons", "loop", "shemesh", "inequal", "el_jaguar", "jamaican_bam_bam"]
+# No two songs by the same author back to back, the wrap-around included:
+# Sapir's (el_jaguar, alor, jamaican_bam_bam) and Oren's (loop, inequal, buttons).
+SONG_ORDER = ["el_jaguar", "loop", "aladdin", "alor", "inequal", "jamaican_bam_bam", "buttons", "shemesh"]
+SAME_AUTHOR = [{"el_jaguar", "alor", "jamaican_bam_bam"}, {"loop", "inequal", "buttons"}]
 PHASE_SECONDS = 3 * 60
 AGENT_SONG = "agent1"
 STORY_SONGS = ["agent_story1", "agent_story2"]   # one picked at random per second chip
@@ -604,6 +607,7 @@ class FakeActions:
 
 def selftest():
     global log
+    FIRST, SECOND = SONG_ORDER[0], SONG_ORDER[1]
     quiet = []
     log = quiet.append  # keep test output clean
     fails = []
@@ -625,16 +629,16 @@ def selftest():
     s.tick(PHASE_SECONDS - 1)
     check("no song before the phase ends", fa.last("song") is None)
     s.tick(PHASE_SECONDS)
-    check("first order song is aladdin", fa.last("song") == "aladdin" and s.mode == "song")
-    t = run_song(s, PHASE_SECONDS, "aladdin")
+    check("first order song is aladdin", fa.last("song") == FIRST and s.mode == "song")
+    t = run_song(s, PHASE_SECONDS, FIRST)
     check("next trigger after the song", fa.last("trigger") == TRIGGER_LIST[1] and s.mode == "trigger")
     s.tick(t + PHASE_SECONDS)
-    check("second order song is buttons", fa.last("song") == "buttons")
+    check("second order song is buttons", fa.last("song") == SECOND)
 
     # 2. order skips the song that just played (e.g. a pair song)
-    fa = FakeActions(); s = Show(fa, 0); s.last_song = "aladdin"
+    fa = FakeActions(); s = Show(fa, 0); s.last_song = FIRST
     s.tick(PHASE_SECONDS)
-    check("order skips the song that just played", fa.last("song") == "buttons")
+    check("order skips the song that just played", fa.last("song") == SECOND)
 
     # 3. single chip: agent, clock paused, resume with time left, chip forgotten after the grace
     fa = FakeActions(); s = Show(fa, 0)
@@ -691,9 +695,9 @@ def selftest():
     s.tick(80)                                                 # grace over: A forgotten
     s.on_chip(80.5, "A")                                       # immediately tapping A again starts a new agent
     check("chip A after being forgotten starts agent again", fa.last("song") == AGENT_SONG and s.mode == "agent" and s.chip_a == "A")
-    fa = FakeActions(); s = Show(fa, 0); s.tick(PHASE_SECONDS); s.on_trigger_status(PHASE_SECONDS + 1, "aladdin")
+    fa = FakeActions(); s = Show(fa, 0); s.tick(PHASE_SECONDS); s.on_trigger_status(PHASE_SECONDS + 1, FIRST)
     s.on_chip(PHASE_SECONDS + 5, "A")
-    check("chips ignored while a song plays", fa.last("song") == "aladdin" and s.chip_a is None)
+    check("chips ignored while a song plays", fa.last("song") == FIRST and s.chip_a is None)
 
     # 7. failures: agent_story missing -> pair song directly; song never starts -> move on
     fa = FakeActions(); fa.fail.update(STORY_SONGS); s = Show(fa, 0)
@@ -717,7 +721,7 @@ def selftest():
     check("boxes off during the pair song", fa.last("boxes")[0] == BOX_OFF)
     fa = FakeActions(); s = Show(fa, 0); s.tick(PHASE_SECONDS)
     check("boxes off during an order song", fa.last("boxes")[0] == BOX_OFF)
-    s.on_trigger_status(PHASE_SECONDS + 1, "aladdin"); s.on_trigger_status(PHASE_SECONDS + 200, None)
+    s.on_trigger_status(PHASE_SECONDS + 1, FIRST); s.on_trigger_status(PHASE_SECONDS + 200, None)
     check("boxes stay off in the pause after the song", fa.last("boxes")[0] == BOX_OFF)
     s.tick(PHASE_SECONDS + 200 + SONG_GAP_SECONDS)
     check("boxes ready again in the next trigger's color", fa.last("boxes") == (BOX_COLOR, BOX_READY_COLORS[1]))
@@ -727,24 +731,24 @@ def selftest():
 
     # 9. live start: first order song, then the first trigger with a full phase
     fa = FakeActions(); s = Show(fa, 0, start_with_song=True)
-    check("starts with the first order song", fa.last("song") == "aladdin" and s.mode == "song" and fa.last("trigger") is None)
+    check("starts with the first order song", fa.last("song") == FIRST and s.mode == "song" and fa.last("trigger") is None)
     check("boxes off during the opening song", fa.last("boxes")[0] == BOX_OFF)
-    s.on_trigger_status(1, "aladdin"); s.tick(PHASE_SECONDS + 1)
+    s.on_trigger_status(1, FIRST); s.tick(PHASE_SECONDS + 1)
     check("opening song is not cut by the phase clock", s.mode == "song")
     s.on_trigger_status(PHASE_SECONDS + 2, None); t = PHASE_SECONDS + 2 + SONG_GAP_SECONDS; s.tick(t)
     check("first trigger after the opening song", fa.last("trigger") == TRIGGER_LIST[0] and s.mode == "trigger" and s.phase_left == PHASE_SECONDS)
     check("boxes ready in the first color after the opening song", fa.last("boxes") == (BOX_COLOR, BOX_READY_COLORS[0]))
     s.tick(t + PHASE_SECONDS)
-    check("next order song after the opening one is buttons", fa.last("song") == "buttons")
+    check("next order song after the opening one is buttons", fa.last("song") == SECOND)
 
     # 10. control page: play now between songs only, picked next song, order continues after it
     fa = FakeActions(); s = Show(fa, 0)
-    check("state shows the next order song", s.state(10)["next_song"] == "aladdin" and s.state(10)["phase_left"] == PHASE_SECONDS - 10)
+    check("state shows the next order song", s.state(10)["next_song"] == FIRST and s.state(10)["phase_left"] == PHASE_SECONDS - 10)
     ok, _ = s.play_now(10)
-    check("play now cuts the trigger phase", ok and fa.last("song") == "aladdin" and s.mode == "song")
+    check("play now cuts the trigger phase", ok and fa.last("song") == FIRST and s.mode == "song")
     ok, _ = s.play_now(11)
-    check("play now refused while a song plays", not ok and fa.last("song") == "aladdin")
-    s.on_trigger_status(11, "aladdin"); t = run_song(s, 11, "aladdin")
+    check("play now refused while a song plays", not ok and fa.last("song") == FIRST)
+    s.on_trigger_status(11, FIRST); t = run_song(s, 11, FIRST)
     check("next trigger with a full phase after play now", s.mode == "trigger" and s.phase_left == PHASE_SECONDS)
     check("unknown song refused", not s.set_next("nope")[0])
     ok, _ = s.set_next("inequal")
@@ -752,7 +756,7 @@ def selftest():
     s.tick(t + PHASE_SECONDS)
     check("picked song plays at the phase end", fa.last("song") == "inequal")
     t = run_song(s, t + PHASE_SECONDS, "inequal")
-    check("order continues after the picked song", s.state(t)["next_song"] == SONG_ORDER[SONG_ORDER.index("inequal") + 1]
+    check("order continues after the picked song", s.state(t)["next_song"] == SONG_ORDER[(SONG_ORDER.index("inequal") + 1) % len(SONG_ORDER)]
           and not s.state(t)["next_picked"])
     fa = FakeActions(); s = Show(fa, 0); s.set_next("loop")
     s.on_chip(10, "A")
@@ -760,20 +764,20 @@ def selftest():
     s.on_chip(30, "B"); s.on_trigger_status(31, s.expect); s.on_trigger_status(80, None)
     check("pick survives a pair song", s.next_pick == "loop")
     fa = FakeActions(); s = Show(fa, 0); s.on_chip(10, "A"); s.on_trigger_status(11, AGENT_SONG); s.on_trigger_status(60, None)
-    s.set_next("buttons"); s.play_now(62)
-    check("play now during the chip wait forgets the chip", s.chip_a is None and fa.last("song") == "buttons")
-    fa = FakeActions(); s = Show(fa, 0); s.last_song = "aladdin"; s.set_next("aladdin"); s.play_now(5)
-    check("a picked song plays even if it just played", fa.last("song") == "aladdin")
+    s.set_next(SECOND); s.play_now(62)
+    check("play now during the chip wait forgets the chip", s.chip_a is None and fa.last("song") == SECOND)
+    fa = FakeActions(); s = Show(fa, 0); s.last_song = FIRST; s.set_next(FIRST); s.play_now(5)
+    check("a picked song plays even if it just played", fa.last("song") == FIRST)
 
     # 11. stop: song -> next trigger with a full phase; agent/story -> back to the trigger with its time left
     fa = FakeActions(); s = Show(fa, 0)
     check("stop refused between songs", not s.stop(5)[0])
-    s.tick(PHASE_SECONDS); s.on_trigger_status(PHASE_SECONDS + 1, "aladdin")
+    s.tick(PHASE_SECONDS); s.on_trigger_status(PHASE_SECONDS + 1, FIRST)
     ok, _ = s.stop(PHASE_SECONDS + 30)
     check("stop during a song goes to the next trigger", ok and s.mode == "trigger" and fa.last("trigger") == TRIGGER_LIST[1]
-          and s.phase_left == PHASE_SECONDS and s.last_song == "aladdin" and fa.last("boxes") == (BOX_COLOR, BOX_READY_COLORS[1]))
+          and s.phase_left == PHASE_SECONDS and s.last_song == FIRST and fa.last("boxes") == (BOX_COLOR, BOX_READY_COLORS[1]))
     s.on_trigger_status(PHASE_SECONDS + 31, None)  # the stopped song's end must not count as anything
-    check("stopped song's end is ignored", s.mode == "trigger" and s.state(PHASE_SECONDS + 31)["next_song"] == "buttons")
+    check("stopped song's end is ignored", s.mode == "trigger" and s.state(PHASE_SECONDS + 31)["next_song"] == SECOND)
     fa = FakeActions(); s = Show(fa, 0)
     s.on_chip(100, "A"); s.on_trigger_status(101, AGENT_SONG)
     s.stop(120)
@@ -788,7 +792,7 @@ def selftest():
 
     # 12. the dark pause after a song: no trigger, chips ignored; stop skips it, play now plays from it
     fa = FakeActions(); s = Show(fa, 0); s.tick(PHASE_SECONDS)
-    s.on_trigger_status(PHASE_SECONDS + 1, "aladdin"); end = PHASE_SECONDS + 100
+    s.on_trigger_status(PHASE_SECONDS + 1, FIRST); end = PHASE_SECONDS + 100
     n = len(fa.calls); s.on_trigger_status(end, None)
     check("pause after the song: no trigger yet", s.mode == "gap" and ("trigger", TRIGGER_LIST[1]) not in fa.calls[n:])
     s.on_chip(end + 1, "A")
@@ -799,23 +803,28 @@ def selftest():
     check("next trigger after the pause, full phase", s.mode == "trigger" and fa.last("trigger") == TRIGGER_LIST[1]
           and s.phase_left == PHASE_SECONDS)
     fa = FakeActions(); s = Show(fa, 0); s.tick(PHASE_SECONDS)
-    s.on_trigger_status(PHASE_SECONDS + 1, "aladdin"); s.on_trigger_status(PHASE_SECONDS + 50, None)
+    s.on_trigger_status(PHASE_SECONDS + 1, FIRST); s.on_trigger_status(PHASE_SECONDS + 50, None)
     ok, _ = s.stop(PHASE_SECONDS + 51)
     check("stop skips the pause", ok and s.mode == "trigger" and fa.last("trigger") == TRIGGER_LIST[1])
     fa = FakeActions(); s = Show(fa, 0); s.tick(PHASE_SECONDS)
-    s.on_trigger_status(PHASE_SECONDS + 1, "aladdin"); s.on_trigger_status(PHASE_SECONDS + 50, None)
+    s.on_trigger_status(PHASE_SECONDS + 1, FIRST); s.on_trigger_status(PHASE_SECONDS + 50, None)
     ok, _ = s.play_now(PHASE_SECONDS + 51)
-    check("play now from the pause plays the next song", ok and s.mode == "song" and fa.last("song") == "buttons")
-    run_song(s, PHASE_SECONDS + 52, "buttons")
+    check("play now from the pause plays the next song", ok and s.mode == "song" and fa.last("song") == SECOND)
+    run_song(s, PHASE_SECONDS + 52, SECOND)
     check("rotation keeps its order after play now from the pause", fa.last("trigger") == TRIGGER_LIST[1])
     fa = FakeActions(); s = Show(fa, 0); s.tick(PHASE_SECONDS); s.tick(PHASE_SECONDS + SONG_START_TIMEOUT + 1)
     check("no pause after a song that never started", s.mode == "trigger")
     fa = FakeActions(); s = Show(fa, 0); s.tick(PHASE_SECONDS)
-    s.on_trigger_status(PHASE_SECONDS + 1, "aladdin"); s.on_trigger_status(PHASE_SECONDS + 50, None)
+    s.on_trigger_status(PHASE_SECONDS + 1, FIRST); s.on_trigger_status(PHASE_SECONDS + 50, None)
     st = s.state(PHASE_SECONDS + 51)
     check("state in the pause", st["mode"] == "gap" and st["playing"] is None and st["trigger_next"] == TRIGGER_LIST[1])
 
-    # 13. pair hashing: order-independent, roughly even, adding a song moves few pairs
+    # 13. song order: no two songs by the same author back to back, the wrap-around included
+    pairs_in_order = list(zip(SONG_ORDER, SONG_ORDER[1:] + SONG_ORDER[:1]))
+    check("no same-author songs back to back", not any({a, b} <= g for a, b in pairs_in_order for g in SAME_AUTHOR))
+    check("every author's song is in the show", all(g <= set(SONG_ORDER) for g in SAME_AUTHOR))
+
+    # 14. pair hashing: order-independent, roughly even, adding a song moves few pairs
     check("pair song independent of tap order", pick_song("x1", "y2", SONG_ORDER) == pick_song("y2", "x1", SONG_ORDER))
     pairs = [(f"chip{i}", f"chip{i + 1000}") for i in range(5000)]
     counts = {s_: 0 for s_ in SONG_ORDER}
