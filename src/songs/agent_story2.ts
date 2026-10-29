@@ -14,6 +14,8 @@ const PICKED = 135;
 
 const agentStory2 = async () => {
   const anim = new Animation("agent_story2", 60, 24.08, 0);
+  // Play once (the rings stay dark after it), the length of the audio, so the start does not come round again.
+  anim.playOnce();
   anim.sync(() => {
     section("agent_story2", { start: 0, end: 25 }, () => {
       story2Effects(PICKED - 1);
