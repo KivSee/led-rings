@@ -25,8 +25,21 @@ function exportSequence(): Plugin {
   }
 }
 
+/** Saving a song (the editor's Save / Send to LEDs writes src/songs/<name>.json) must not reload the open pages. The
+ *  Sequence Player, Song Sync and the Section Lab import the song JSONs, and Vite answers a change to one with a full
+ *  reload of every open page, the editor included; those pages read the song when they load, so a reload of their
+ *  own picks the change up. */
+function quietSongSaves(): Plugin {
+  return {
+    name: 'quiet-song-saves',
+    handleHotUpdate({ file }) {
+      if (/[\\/]src[\\/]songs[\\/][^\\/]+\.json$/.test(file)) return []
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react(), exportSequence()],
+  plugins: [react(), exportSequence(), quietSongSaves()],
   server: {
     fs: {
       allow: ['..'],

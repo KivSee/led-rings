@@ -12,9 +12,12 @@
       * { box-sizing: border-box; }
       body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
       .wrap { max-width: 1500px; margin: 0 auto; padding: 16px; }
-      header { position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 10px 0 12px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+      header { padding: 0 0 12px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+      /* only the transport stays on screen while scrolling the cards; the settings scroll away */
+      .transport { position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 10px 0; margin-bottom: 4px; }
       .row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
       .row + .row { margin-top: 10px; }
+      .row[hidden] { display: none; }
       h1 { font-size: 18px; margin: 0 8px 0 0; }
       .section-name { color: var(--bar); font-weight: 600; }
       .muted { color: var(--muted); }
@@ -61,22 +64,44 @@
       .mix li button { padding: 0 6px; margin-left: 4px; font-size: 12px; }
       .family h2 { font-size: 15px; margin: 18px 0 8px; color: var(--muted); font-weight: 600; letter-spacing: 0.02em; }
       .card .add { padding: 2px 8px; }
+      .overlays { display: flex; flex-direction: column; gap: 3px; }
+      .ov-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 13px; }
+      .ov-name { min-width: 170px; color: var(--muted); }
+      .ov-name.on { color: inherit; font-weight: 600; }
+      .ov-sec { display: inline-flex; align-items: center; gap: 3px; }
+      #shapePartsReset { align-self: flex-start; padding: 1px 8px; font-size: 12px; }
+      .overlays select { padding: 1px 4px; font-size: 12px; }
+      .card .timing { display: flex; flex-wrap: wrap; gap: 4px; }
+      .card .timing select, .card .timing button { padding: 1px 4px; font-size: 12px; }
+      .card .timing .var { max-width: 150px; }
+      .use { font-size: 12px; }
+      .use button { padding: 0 7px; margin-left: 3px; font-size: 12px; }
+      .use button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+      .blocks li.now { color: var(--bar); font-weight: 600; }
+      .blocks select { padding: 1px 4px; font-size: 12px; margin-left: 6px; }
+      .vars { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 4; overflow: auto; }
+      .vars[hidden] { display: none; }
+      .vars-panel { max-width: 1500px; margin: 20px auto; padding: 16px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; }
+      .vars-panel h3 { margin: 0; flex: 1; }
+      details.other { margin-top: 22px; }
+      details.other > summary { cursor: pointer; color: var(--muted); font-weight: 600; }
     </style>
   </head>
   <body>
     <div class="wrap">
+      <div class="row transport">
+        <h1>Section Lab</h1>
+        <span><span id="songName"></span> · <span class="section-name" id="sectionName"></span> <span class="muted" id="sectionRange"></span></span>
+        <button class="play" id="play">▶ Play</button>
+        <button id="restart" title="Back to the section start">⏮ Start</button>
+        <span class="readout">bar <b id="bar">1</b><span class="muted" id="barOf"></span></span>
+        <span class="readout" title="the song's beat number (the section's beat / its beats)">beat <b id="songBeat">0</b><span class="muted" id="beatOf"></span></span>
+        <span class="beats" id="beats"><i></i><i></i><i></i><i></i></span>
+        <span class="muted hint" id="audioState"></span>
+      </div>
       <header>
         <div class="row">
-          <h1>Section Lab</h1>
-          <span><span id="songName"></span> · <span class="section-name" id="sectionName"></span> <span class="muted" id="sectionRange"></span></span>
-          <button class="play" id="play">▶ Play</button>
-          <button id="restart" title="Back to the section start">⏮ Start</button>
-          <span class="readout">bar <b id="bar">1</b><span class="muted" id="barOf"></span></span>
-          <span class="beats" id="beats"><i></i><i></i><i></i><i></i></span>
-          <span class="muted hint" id="audioState"></span>
-        </div>
-        <div class="row">
-          <span class="muted">Palette</span>
+          <span class="muted" title="Options without a palette of their own use this one; pick a palette on a card for that option only">Section palette</span>
           <div class="palettes" id="palettes"></div>
         </div>
         <div class="row hint muted" id="paletteSource"></div>
@@ -86,7 +111,24 @@
           <label class="muted"><input type="checkbox" id="shapeFadeOut" checked> fade-out (last 2 bars)</label>
           <label class="muted"><input type="checkbox" id="shapePeak" checked> peak accent</label>
           <label class="muted">rises peak on <select id="shapePeakOffset"></select></label>
-          <span class="muted hint">motion runs slow → fast into every peak</span>
+          <label class="muted"><input type="checkbox" id="shapePace" checked> slow → fast motion into every peak</label>
+          <label class="muted">base color <select id="shapeBase"><option value="0.45">dim (45%)</option><option value="0.7">medium (70%)</option><option value="1">full</option></select></label>
+        </div>
+        <div class="row" id="shapePartsRow" hidden>
+          <span class="muted">Shape per section</span>
+          <span class="overlays" id="shapeParts"></span>
+          <span class="muted hint">change a part of the section; the controls above set all parts</span>
+        </div>
+        <div class="row">
+          <span class="muted">Timing</span>
+          <label class="muted">speed <select id="speedAll"></select></label>
+          <label class="muted">hits <select id="hitAll"></select></label>
+          <span class="muted hint">for every card; a card's own speed / hits / variation (v1–v8, ▦ shows all 8) wins</span>
+        </div>
+        <div class="row">
+          <span class="muted">Overlays</span>
+          <span class="overlays" id="overlays"></span>
+          <span class="muted hint">laid over every option (cards and the mix), on in the sections ticked</span>
         </div>
       </header>
       <section class="mix">
@@ -97,12 +139,15 @@
         <div class="mix-side">
           <h3>Mix <span class="muted hint">(＋ a card to add it; they take turns through the section)</span></h3>
           <div class="row">
-            <label class="muted">each <select id="mixBars"><option value="1">1 bar</option><option value="2" selected>2 bars</option><option value="3">3 bars</option></select></label>
+            <label class="muted">each <select id="mixBars"><option value="1">1 bar</option><option value="2" selected>2 bars</option><option value="3">3 bars</option><option value="4">4 bars</option><option value="8">8 bars</option></select></label>
             <label class="muted">transition <select id="mixTransition"></select></label>
           </div>
           <p class="muted hint" id="mixTransitionHint"></p>
           <label class="muted"><input type="checkbox" id="mixShuffle" checked> swap ring colors at every switch</label>
           <ol id="mixList"></ol>
+          <h3>Blocks <span class="muted hint">("use for" on a card gives a block its own option instead of the mix)</span></h3>
+          <label class="muted">blocks <select id="blockLayout"><option value="marks">at the section's changes</option><option value="4">every 4 bars</option><option value="8">every 8 bars</option></select></label>
+          <ol id="blockList" class="blocks"></ol>
           <button id="mixClear">Clear mix</button>
           <button id="copySpec" title="Copy the section settings to paste to Claude, who places them on the song's section marker">Copy for song</button>
           <span class="muted hint" id="copiedSpec"></span>
@@ -116,6 +161,12 @@
       </div>
     </div>
     <div class="big" id="big" hidden><div class="cap" id="bigCap"></div><canvas id="bigCanvas"></canvas></div>
+    <div class="vars" id="vars" hidden>
+      <div class="vars-panel">
+        <div class="row"><h3 id="varsTitle"></h3><button id="varsClose">✕ Close</button></div>
+        <div class="grid" id="varsGrid"></div>
+      </div>
+    </div>
     <audio id="audio" preload="auto"></audio>
     <script type="module" src="/src/lab/main.ts"></script>
   </body>

@@ -203,42 +203,6 @@ const inequal = async () => {
       });
     })
 
-    beats(280, 328, () => {
-      elements(all, () => {
-        segment(segment_updown, () => {
-          constColor({ hue: 0.8601, sat: 1.0000, val: 1.0000 })
-        });
-      });
-    })
-
-    beats(280, 328, () => {
-      cycle(4, () => {
-        elements(all, () => {
-          segment(segment_b1, () => {
-            constColor({ hue: 0.1497, sat: 1.0000, val: 1.0000 })
-          });
-        });
-      });
-    })
-
-    beats(328, 392, () => {
-      elements(all, () => {
-        segment(segment_updown, () => {
-          constColor({ hue: 0.4902, sat: 1.0000, val: 1.0000 })
-        });
-      });
-    })
-
-    beats(328, 392, () => {
-      cycle(4, () => {
-        elements(all, () => {
-          segment(segment_b1, () => {
-            constColor({ hue: 0.9203, sat: 1.0000, val: 1.0000 })
-          });
-        });
-      });
-    })
-
     beats(392, 504, () => {
       cycle(4, () => {
         elements(all, () => {
@@ -1740,106 +1704,6 @@ const inequal = async () => {
       });
     })
 
-    beats(280, 328, () => {
-      elements(all, () => {
-        segment(segment_updown, () => {
-          addEffect({ position_hue: { offset_factor: { half: { f1: { const_value: { value: 0 } }, f2: { const_value: { value: 0.63 } } } } } })
-        });
-      });
-    })
-
-    beats(280, 328, () => {
-      cycle(3, () => {
-        elements(all, () => {
-          segment(segment_all, () => {
-            addEffect({ snake_brightness: { head: { linear: { start: 0, end: 1 } }, tail_length: { const_value: { value: 0.15 } }, cyclic: true, mult_factor_increase: { linear: { start: 0, end: 1 } } } })
-          });
-        });
-      });
-    })
-
-    beats(280, 328, () => {
-      cycle(4, () => {
-        elements(odd, () => {
-          segment(segment_all, () => {
-            addEffect({ timed_brightness: { mult_factor_increase: { linear: { start: 0.9, end: 0 } } } })
-          });
-        });
-      });
-    })
-
-    beats(282, 328, () => {
-      cycle(4, () => {
-        elements(even, () => {
-          segment(segment_all, () => {
-            addEffect({ timed_brightness: { mult_factor_increase: { linear: { start: 0.9, end: 0 } } } })
-          });
-        });
-      });
-    })
-
-    beats(328, 392, () => {
-      elements(all, () => {
-        segment(segment_updown, () => {
-          addEffect({ position_hue: { offset_factor: { half: { f1: { const_value: { value: 0 } }, f2: { const_value: { value: 0.15 } } } } } })
-        });
-      });
-    })
-
-    beats(328, 392, () => {
-      cycle(3, () => {
-        elements(all, () => {
-          segment(segment_all, () => {
-            addEffect({ snake_brightness: { head: { linear: { start: 1, end: 0 } }, tail_length: { const_value: { value: 0.15 } }, cyclic: true, mult_factor_increase: { linear: { start: 0, end: 1 } } } })
-          });
-        });
-      });
-    })
-
-    beats(328, 392, () => {
-      cycle(4, () => {
-        elements(odd, () => {
-          segment(segment_all, () => {
-            addEffect({ timed_brightness: { mult_factor_increase: { linear: { start: 0.9, end: 0 } } } })
-          });
-        });
-      });
-    })
-
-    beats(330, 392, () => {
-      cycle(4, () => {
-        elements(even, () => {
-          segment(segment_all, () => {
-            addEffect({ timed_brightness: { mult_factor_increase: { linear: { start: 0.9, end: 0 } } } })
-          });
-        });
-      });
-    })
-
-    beats(312, 328, () => {
-      elements(all, () => {
-        segment(segment_all, () => {
-          addEffect({ timed_saturation: { mult_factor_decrease: { steps: { num_steps: 4, diff_per_step: 0.0778, first_step_value: 0.3 } } } })
-        });
-      });
-    })
-
-    beats(328, 352, () => {
-      elements(all, () => {
-        segment(segment_all, () => {
-          addEffect({ timed_saturation: { mult_factor_decrease: { steps: { num_steps: 6, diff_per_step: 0.0778, first_step_value: 0.6111 } } } })
-        });
-      });
-    })
-
-    beats(352, 392, () => {
-      elements(all, () => {
-        segment(segment_all, () => {
-          addEffect({ timed_saturation: { mult_factor_decrease: { steps: { num_steps: 10, diff_per_step: -0.0778, first_step_value: 1 } } } })
-        });
-      });
-    })
-
     beats(392, 504, () => {
       cycle(4, () => {
         elements(all, () => {
@@ -2181,50 +2045,6 @@ const inequal = async () => {
       });
     })
 
-    beats(280, 328, () => {
-      cycle(12, () => {
-        elements(all, () => {
-          segment(segment_ind, () => {
-            snakeHeadSteps({ steps: 12, tailLength: 0.25 })
-          });
-        });
-      });
-    })
-
-    beats(280, 328, () => {
-      cycle(4, () => {
-        elements(all, () => {
-          segment(segment_b1, () => {
-            phase(1, () => {
-              snake({ tailLength: 0.15, cyclic: true, reverse: false })
-            });
-          });
-        });
-      });
-    })
-
-    beats(328, 392, () => {
-      cycle(12, () => {
-        elements(all, () => {
-          segment(segment_ind, () => {
-            snakeHeadSteps({ steps: 12, tailLength: 0.25 })
-          });
-        });
-      });
-    })
-
-    beats(328, 392, () => {
-      cycle(4, () => {
-        elements(all, () => {
-          segment(segment_b1, () => {
-            phase(1, () => {
-              snake({ tailLength: 0.15, cyclic: true, reverse: true })
-            });
-          });
-        });
-      });
-    })
-
     beats(392, 504, () => {
       cycle(4, () => {
         elements(all, () => {
@@ -2418,6 +2238,7 @@ const inequal = async () => {
     })
   });
 
+  labSection(anim, 280, 392, {"palette":"night","mix":[],"barsEach":8,"transition":"blend-bar","shape":{"buildUp":false,"fadeOut":false,"peak":false,"peakOffset":0,"base":1,"pace":0,"overlays":[{"id":"ov-glitter","from":344,"to":384},{"id":"ov-bar-wash","from":312,"to":344,"tint":"next"},{"id":"ov-glint","from":312,"to":344}],"parts":[{"from":280,"to":312,"buildUp":true,"fadeOut":false,"peak":false,"pace":0,"base":1},{"from":312,"to":344,"buildUp":false,"fadeOut":false,"peak":false,"pace":0,"base":1},{"from":344,"to":384,"buildUp":false,"fadeOut":false,"peak":false,"pace":0,"base":1},{"from":384,"to":392,"buildUp":false,"fadeOut":true,"peak":false,"pace":0,"base":1}]},"shuffleColors":true,"blocks":[{"from":280,"to":296,"texture":"chase-now","mapping":"updown","timing":{"variation":3},"transition":"strobe"},{"from":296,"to":312,"texture":"chase-now","mapping":"updown","timing":{"variation":7},"transition":"spin"},{"from":312,"to":328,"texture":"helix","mapping":"ind","timing":{"speed":"fast"},"transition":"rainbow"},{"from":328,"to":344,"texture":"ping-pong","mapping":"rad","timing":{"speed":"slow","hit":"twice","variation":6},"transition":"streak-in"},{"from":344,"to":360,"texture":"triangle-spin","mapping":"0–11","timing":{"speed":"fast","variation":6},"transition":"flash"},{"from":360,"to":376,"texture":"confetti","mapping":"rand","timing":{"speed":"fast"},"transition":"dip"},{"from":376,"to":392,"texture":"scanner","mapping":"updown"}]});
   labSection(anim, 216, 280, {"palette":"rebuild","mix":[{"texture":"stars-tinted","mapping":"rand"},{"texture":"stars-burst","mapping":"rand"},{"texture":"comet","mapping":"arc"},{"texture":"galaxy","mapping":"centric"},{"texture":"nebula","mapping":"rad"},{"texture":"horizon","mapping":"rad"},{"texture":"rad-stripes","mapping":"rad"},{"texture":"drip","mapping":"updown"}],"barsEach":2,"transition":"streak","shape":{"buildUp":true,"fadeOut":true,"peak":true,"peakOffset":2},"shuffleColors":true});
   anim.mirrorToLilum([1, 4, 5, 7, 10]);
   console.log("sending sequence");
