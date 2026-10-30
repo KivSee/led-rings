@@ -1401,6 +1401,15 @@
         { "index": 142, "relPos": 0.536715 },
         { "index": 143, "relPos": 0.568109 }
       ]
+    },
+    {
+      "name": "b1_sparse",
+      "pixels": [
+        {"index": 0, "relPos": 0},
+        {"index": 36, "relPos": 0},
+        {"index": 72, "relPos": 0},
+        {"index": 108, "relPos": 0}
+      ]
     }
   ]
 }
