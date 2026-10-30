@@ -1,6 +1,7 @@
 import { als } from "../async-local-storage";
 import { Effect, EffectConfig, Sequence } from "../effects/types";
 import { SequencePerThing } from "../services/sequence";
+import type { MidiNote } from "../../shared/midi-notes";
 
 /** Add a constant offset to a FloatFunction value. */
 function offsetFloatFunction(ff: any, offset: number): any {
@@ -73,6 +74,9 @@ export class Animation {
 
     /** The song's named sections, in the order they were declared with section(). */
     public sections: Section[] = [];
+
+    /** Melody transcription shown alongside the sequence in the player. */
+    public midiNotes: MidiNote[] = [];
 
     // Ring numbers that have a lilum pendant mirroring them. Each entry N makes
     // getSequence() emit a `lilum${N}` thing with an exact copy of ring N's

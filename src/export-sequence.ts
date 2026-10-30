@@ -8,6 +8,7 @@ import * as path from "path";
 import * as fs from "fs";
 import * as sequence from "./services/sequence";
 import { Animation, Section } from "./animation/animation";
+import type { MidiNote } from "../shared/midi-notes";
 
 const songPath = process.argv[2];
 if (!songPath) {
@@ -19,16 +20,18 @@ const outPath = process.argv[3] ?? path.join(__dirname, "../ui/public", `${songN
 
 // The song's named sections, taken from the animation when it builds its sequence.
 let sections: Section[] = [];
+let midiNotes: MidiNote[] = [];
 const getSequence = Animation.prototype.getSequence;
 Animation.prototype.getSequence = function (this: Animation) {
   sections = this.sections;
+  midiNotes = this.midiNotes;
   return getSequence.call(this);
 };
 
 // The song calls sendSequence() when it is done; write the sequence (and its sections) to a file instead.
 process.env.SEND_ONLY = "1";
 (sequence as { sendSequence: typeof sequence.sendSequence }).sendSequence = async (_trigger, seq) => {
-  fs.writeFileSync(outPath, JSON.stringify({ sections, sequence: seq }));
+  fs.writeFileSync(outPath, JSON.stringify({ sections, midiNotes, sequence: seq }));
   const counts = Object.entries(seq).map(([thing, s]) => `${thing}: ${s.effects.length}`).join(", ");
   console.log(`Saved ${outPath} (${counts}; sections: ${sections.map(s => s.name).join(", ") || "none"})`);
 };
