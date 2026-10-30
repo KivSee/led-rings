@@ -1,0 +1,12 @@
+{
+  "song": {
+    "name": "children",
+    "lengthSeconds": 243.647,
+    "bpm": 136,
+    "startOffsetMs": 0,
+    "runStartTimeSeconds": 0,
+    "animationType": "song",
+    "audioFilePath": "Robert_Miles_-_Children_(Official_Video).wav"
+  },
+  "timeframes": []
+}
