@@ -68,6 +68,7 @@ MQTT_BROKER = os.environ.get("MQTT_BROKER", "localhost")
 MQTT_TRIGGER_TOPIC = "trigger"
 MQTT_RFID_TOPIC = "sensors/rfid"
 NUM_BOXES = 5
+DEVICE_QUIET_SECONDS = 20  # rings report every 5 s; this long without a report shows them as quiet
 SHOW_UI_PORT = int(os.environ.get("SHOW_UI_PORT", "8090"))
 
 # Box LEDs (esp32-Kivsee-box/include/LED_control.h): master_state 0 = off, 1 = confetti
@@ -362,6 +363,50 @@ class LiveActions:
             self.mqtt.publish(f"{MQTT_RFID_TOPIC}/box{n}/leds", payload, retain=True)
 
 
+class Devices:
+    """Which devices are online, for the control page, from MQTT. Rings and lilums: retained
+    thing/<name>/status ({"alive", "fw"}, with a last will of alive false), and every 5 s
+    thing/<name>/debug, whose now.trig is the trigger the device plays. RFID boxes: retained
+    sensors/rfid/<box>/monitor ({"alive"}). Written by the MQTT thread, read by the show loop."""
+
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.things = {f"box{n}": {"kind": "box", "alive": None} for n in range(1, NUM_BOXES + 1)}
+
+    def on_message(self, topic, data, now):
+        parts = topic.split("/")
+        if not isinstance(data, dict):
+            return
+        with self.lock:
+            if len(parts) == 3 and parts[0] == "thing":
+                name = parts[1]
+                kind = "ring" if name.startswith("ring") else "lilum" if name.startswith("lilum") else "other"
+                d = self.things.setdefault(name, {"kind": kind, "alive": None})
+                if parts[2] == "status":
+                    d["alive"] = bool(data.get("alive"))
+                    d["fw"] = data.get("fw")
+                elif parts[2] == "debug":
+                    d["trig"] = (data.get("now") or {}).get("trig")
+                    d["seen"] = now
+            elif topic.startswith(MQTT_RFID_TOPIC + "/") and parts[-1] == "monitor":
+                self.things.setdefault(parts[-2], {"kind": "box"})["alive"] = bool(data.get("alive"))
+
+    def view(self, now):
+        """[{name, kind, state: on / off / quiet / unknown, fw, trig}], rings first, by number.
+        quiet: says it is alive but its 5 s debug report stopped (DEVICE_QUIET_SECONDS)."""
+        order = {"ring": 0, "lilum": 1, "box": 2}
+        num = lambda name: int("".join(c for c in name if c.isdigit()) or 0)
+        with self.lock:
+            out = []
+            for name, d in self.things.items():
+                state = {True: "on", False: "off", None: "unknown"}[d.get("alive")]
+                if state == "on" and "seen" in d and now - d["seen"] > DEVICE_QUIET_SECONDS:
+                    state = "quiet"
+                out.append({"name": name, "kind": d["kind"], "state": state, "fw": d.get("fw"),
+                            "trig": d.get("trig") if state == "on" else None})
+        return sorted(out, key=lambda x: (order.get(x["kind"], 3), num(x["name"]), x["name"]))
+
+
 # --- control page ---------------------------------------------------------------
 
 CONTROL_PAGE = """<!doctype html>
@@ -390,6 +435,15 @@ CONTROL_PAGE = """<!doctype html>
   .tag { font-size: 12px; color: #8af; }
   .song.playing .tag { color: #db6; }
   #msg { min-height: 20px; color: #f88; font-size: 14px; margin-top: 12px; }
+  .devices { margin-top: 18px; }
+  .group { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .dev { background: #1c1c1c; border-radius: 8px; padding: 6px 9px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .dev i { width: 9px; height: 9px; border-radius: 50%; background: #555; flex: none; }
+  .dev.on i { background: #3c6; }
+  .dev.off { color: #f88; } .dev.off i { background: #e44; }
+  .dev.quiet i, .dev.wrong i { background: #db6; }
+  .dev.unknown { color: #777; }
+  .dev small { color: #db6; }
 </style></head>
 <body><main>
 <h1>Rings Show</h1>
@@ -398,6 +452,7 @@ CONTROL_PAGE = """<!doctype html>
 <h2>Next song (tap to choose)</h2>
 <div class="songs" id="songs"></div>
 <div id="msg"></div>
+<div class="devices"><h2 id="devsum">Devices</h2><div id="devices"></div></div>
 </main>
 <script>
 const $ = id => document.getElementById(id);
@@ -434,6 +489,35 @@ function render() {
     b.onclick = () => send('/api/next', { song: name });
     return b;
   }));
+  renderDevices();
+}
+
+// What the rings should be playing: the song / agent, or the background between songs (nothing in the pause).
+const DEV_NOTE = { off: 'offline', quiet: 'no report for a while', unknown: 'never reported' };
+function renderDevices() {
+  const devs = st.devices || [];
+  const expected = st.mode === 'trigger' ? st.trigger : st.playing;
+  const kinds = [['ring', 'rings'], ['lilum', 'lilums'], ['box', 'boxes'], ['other', 'other']];
+  $('devsum').textContent = 'Devices: ' + kinds.map(([k, label]) => {
+    const all = devs.filter(d => d.kind === k);
+    return all.length ? all.filter(d => d.state === 'on').length + '/' + all.length + ' ' + label : '';
+  }).filter(Boolean).join(', ');
+  $('devices').replaceChildren(...kinds.map(([k]) => {
+    const g = document.createElement('div');
+    g.className = 'group';
+    g.append(...devs.filter(d => d.kind === k).map(d => {
+      const el = document.createElement('div');
+      // a ring playing something else than the show (it takes up to 5 s to report a switch)
+      const wrong = d.state === 'on' && d.trig && expected && d.trig !== expected;
+      el.className = 'dev ' + d.state + (wrong ? ' wrong' : '');
+      el.innerHTML = '<i></i><span></span>';
+      el.lastChild.textContent = d.name;
+      if (wrong) { const s = document.createElement('small'); s.textContent = d.trig; el.append(s); }
+      el.title = [DEV_NOTE[d.state], d.fw ? 'fw ' + d.fw : '', d.trig ? 'playing ' + d.trig : ''].filter(Boolean).join(', ');
+      return el;
+    }));
+    return g;
+  }).filter(g => g.childElementCount));
 }
 
 async function poll() {
@@ -519,11 +603,15 @@ def start_control_server(events, snapshot):
 def run_live():
     import paho.mqtt.client as mqtt
     events = queue.Queue()
+    devices = Devices()
 
     def on_connect(client, userdata, flags, reason_code, properties=None):
         log(f"connected to MQTT {MQTT_BROKER}")
         client.subscribe(MQTT_TRIGGER_TOPIC)
         client.subscribe(f"{MQTT_RFID_TOPIC}/+/chip")
+        client.subscribe(f"{MQTT_RFID_TOPIC}/+/monitor")
+        client.subscribe("thing/+/status")
+        client.subscribe("thing/+/debug")
 
     def on_message(client, userdata, msg):
         try:
@@ -534,6 +622,8 @@ def run_live():
             events.put(("status", data.get("trigger_name") if isinstance(data, dict) else None))
         elif msg.topic.endswith("/chip") and isinstance(data, dict) and data.get("UID"):
             events.put(("chip", data["UID"]))
+        else:
+            devices.on_message(msg.topic, data, time.monotonic())
 
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     client.on_connect = on_connect
@@ -550,7 +640,7 @@ def run_live():
 
     show = Show(LiveActions(client), time.monotonic(), start_with_song=True)
     log(f"show running: triggers {TRIGGER_LIST}, songs {SONG_ORDER}, phase {PHASE_SECONDS}s")
-    snapshot = {"state": show.state(time.monotonic())}
+    snapshot = {"state": dict(show.state(time.monotonic()), devices=devices.view(time.monotonic()))}
     try:
         server = start_control_server(events, snapshot)
     except OSError as e:
@@ -574,7 +664,8 @@ def run_live():
             except queue.Empty:
                 pass
             show.tick(time.monotonic())
-            snapshot["state"] = show.state(time.monotonic())
+            now = time.monotonic()
+            snapshot["state"] = dict(show.state(now), devices=devices.view(now))
     except KeyboardInterrupt:
         log("exiting")
     finally:
@@ -835,6 +926,21 @@ def selftest():
     more = SONG_ORDER + ["newsong"]
     moved = sum(pick_song(*p, SONG_ORDER) != pick_song(*p, more) for p in pairs) / len(pairs)
     check(f"adding a song moves only its share of pairs ({moved:.1%})", moved < 1.3 / len(more))
+
+    # 15. devices for the control page
+    dv = Devices()
+    dv.on_message("thing/ring10/status", {"thingName": "ring10", "alive": True, "fw": 134}, 0)
+    dv.on_message("thing/ring2/status", {"thingName": "ring2", "alive": True, "fw": 134}, 0)
+    dv.on_message("thing/ring2/debug", {"now": {"trig": "buttons"}}, 0)
+    dv.on_message("thing/lilum4/status", {"alive": False}, 0)
+    dv.on_message(f"{MQTT_RFID_TOPIC}/box1/monitor", {"alive": True}, 0)
+    v = {d["name"]: d for d in dv.view(5)}
+    check("devices: rings by number first, then lilums, then boxes",
+          [d["name"] for d in dv.view(5)][:4] == ["ring2", "ring10", "lilum4", "box1"])
+    check("devices: states and what a ring plays", v["ring2"]["state"] == "on" and v["ring2"]["trig"] == "buttons"
+          and v["lilum4"]["state"] == "off" and v["box1"]["state"] == "on" and v[f"box{NUM_BOXES}"]["state"] == "unknown")
+    v = {d["name"]: d for d in dv.view(DEVICE_QUIET_SECONDS + 1)}
+    check("devices: a ring whose reports stopped is quiet", v["ring2"]["state"] == "quiet" and v["ring10"]["state"] == "on")
 
     print(f"\n{len(fails)} failed" if fails else "\nall passed")
     return 1 if fails else 0
