@@ -24,6 +24,8 @@ Control page (http://<pi>:SHOW_UI_PORT/): shows what plays and the next song.
   Stop: a song stops and the next trigger starts (so does the pause after a song); agent / agent_story stop and the
     trigger we were on resumes (chip and pair song dropped).
   Next song: pick any song from SONG_ORDER to play next; the order continues after it.
+  On/Off per song: an off song is left out of the order and of the pair songs, until it is switched on
+    again (kept in DISABLED_FILE, across restarts). A song that is playing when switched off plays on.
 
 Pair -> song uses rendezvous hashing over the two chip UIDs (order-independent):
 a pair always gets the same song, pairs spread evenly over the songs, and adding a
@@ -53,7 +55,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 TRIGGER_LIST = ["background", "background2", "background3"]
 # No two songs by the same author back to back, the wrap-around included:
 # Sapir's (el_jaguar, alor, jamaican_bam_bam) and Oren's (loop, inequal, buttons).
-SONG_ORDER = ["el_jaguar", "loop", "aladdin", "alor", "inequal", "jamaican_bam_bam", "buttons", "shemesh"]
+SONG_ORDER = ["el_jaguar", "loop", "aladdin", "alor", "inequal", "jamaican_bam_bam", "buttons", "shemesh", "children"]
 SAME_AUTHOR = [{"el_jaguar", "alor", "jamaican_bam_bam"}, {"loop", "inequal", "buttons"}]
 PHASE_SECONDS = 3 * 60
 AGENT_SONG = "agent1"
@@ -70,6 +72,7 @@ MQTT_RFID_TOPIC = "sensors/rfid"
 NUM_BOXES = 5
 DEVICE_QUIET_SECONDS = 20  # rings report every 5 s; this long without a report shows them as quiet
 SHOW_UI_PORT = int(os.environ.get("SHOW_UI_PORT", "8090"))
+DISABLED_FILE = os.environ.get("SHOW_DISABLED_FILE", os.path.expanduser("~/rings_show_disabled.json"))
 
 # Box LEDs (esp32-Kivsee-box/include/LED_control.h): master_state 0 = off, 1 = confetti
 # (random warm sparkles), 2 = color: color 1-5 solid hue with a chasing glow, color > 127
@@ -95,11 +98,32 @@ def pick_song(chip_a, chip_b, songs):
     return max(songs, key=lambda s: hashlib.sha256(f"{pair}|{s}".encode()).digest())
 
 
+def load_disabled(path):
+    """Songs switched off on the control page; a missing or broken file means none. Stale names are dropped."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            names = json.load(f)
+    except (OSError, ValueError):
+        return set()
+    return set(names) & set(SONG_ORDER) if isinstance(names, list) else set()
+
+
+def save_disabled(path, disabled):
+    try:
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(sorted(disabled), f)
+        os.replace(tmp, path)
+    except OSError as e:
+        log(f"could not save the songs switched off: {e}")
+
+
 # --- the show state machine (no I/O: actions are injected, time is passed in) ---
 
 class Show:
-    def __init__(self, actions, now, start_with_song=False):
+    def __init__(self, actions, now, start_with_song=False, disabled=()):
         self.a = actions
+        self.disabled = set(disabled)    # songs switched off on the control page
         self.mode = "trigger"            # trigger | agent | story | song | gap (dark pause after a song)
         self.gap_until = None            # when the pause after a song ends
         self.trig_idx = 0
@@ -111,6 +135,7 @@ class Show:
         self.chip_a = None               # first chip, waiting for a second one
         self.window_until = None         # second-chip deadline once agent has ended
         self.pair_song = None            # song to play after agent_story
+        self.pair_chips = None           # the chips that picked it
         self.expect = None               # song we started and are watching
         self.expect_seen = False
         self.expect_since = 0.0
@@ -167,17 +192,21 @@ class Show:
         if not ok:
             self._song_ended(now, song)
 
+    def _enabled_songs(self):
+        return [s for s in SONG_ORDER if s not in self.disabled]
+
     def _peek_order_song(self):
         """(next song, order_idx after it), without advancing."""
         if self.next_pick is not None:
             return self.next_pick, SONG_ORDER.index(self.next_pick) + 1
         idx = self.order_idx
+        enabled = self._enabled_songs()
         for _ in range(len(SONG_ORDER)):
             song = SONG_ORDER[idx % len(SONG_ORDER)]
             idx += 1
-            if song != self.last_song or len(SONG_ORDER) == 1:
+            if song in enabled and (song != self.last_song or len(enabled) == 1):
                 return song, idx
-        return SONG_ORDER[0], self.order_idx
+        return enabled[0], self.order_idx
 
     def _next_order_song(self):
         song, self.order_idx = self._peek_order_song()
@@ -207,7 +236,8 @@ class Show:
             log(f"chip {uid} is the first chip again, waiting for a different one")
             return
         # second chip: agent_story, then the pair's song
-        self.pair_song = pick_song(self.chip_a, uid, SONG_ORDER)
+        self.pair_chips = (self.chip_a, uid)
+        self.pair_song = pick_song(*self.pair_chips, self._enabled_songs())
         log(f"second chip {uid}: pair ({self.chip_a}, {uid}) -> '{self.pair_song}'")
         self._forget_chip()
         if self.mode == "trigger":
@@ -288,9 +318,25 @@ class Show:
     def set_next(self, song):
         if song not in SONG_ORDER:
             return False, f"unknown song '{song}'"
+        if song in self.disabled:
+            return False, f"{song} is switched off"
         self.next_pick = song
         log(f"next song set to '{song}' (control page)")
         return True, f"next song: {song}"
+
+    def set_enabled(self, song, enabled):
+        """Switch a song on or off. A song waiting to play next (picked, or for a pair) gives way to another."""
+        if song not in SONG_ORDER:
+            return False, f"unknown song '{song}'"
+        if not enabled and self._enabled_songs() == [song]:
+            return False, "at least one song has to stay on"
+        (self.disabled.discard if enabled else self.disabled.add)(song)
+        if not enabled and self.next_pick == song:
+            self.next_pick = None
+        if not enabled and self.pair_song == song:
+            self.pair_song = pick_song(*self.pair_chips, self._enabled_songs())
+        log(f"song '{song}' switched {'on' if enabled else 'off'} (control page)")
+        return True, f"{song} is {'on' if enabled else 'off'}"
 
     def state(self, now):
         phase_left = None
@@ -308,6 +354,7 @@ class Show:
             "next_picked": self.next_pick is not None,
             "last_song": self.last_song,
             "songs": SONG_ORDER,
+            "disabled": sorted(self.disabled),
         }
 
     def tick(self, now):
@@ -429,7 +476,11 @@ CONTROL_PAGE = """<!doctype html>
   #play:disabled, #stop:disabled { background: #333; color: #777; cursor: default; }
   h2 { font-size: 14px; color: #888; font-weight: 500; margin: 0 0 8px; }
   .songs { display: grid; gap: 8px; }
-  .song { text-align: left; padding: 14px; background: #1c1c1c; display: flex; justify-content: space-between; }
+  .row { display: flex; gap: 8px; }
+  .song { flex: 1; min-width: 0; text-align: left; padding: 14px; background: #1c1c1c; display: flex; justify-content: space-between; }
+  .toggle { flex: none; width: 60px; background: #264; color: #bfc; font-size: 14px; font-weight: 600; }
+  .row.off .toggle { background: #333; color: #999; }
+  .row.off .song { color: #777; text-decoration: line-through; cursor: default; }
   .song.next { background: #234; outline: 2px solid #48f; }
   .song.playing { background: #2a2a1a; }
   .tag { font-size: 12px; color: #8af; }
@@ -449,7 +500,7 @@ CONTROL_PAGE = """<!doctype html>
 <h1>Rings Show</h1>
 <div class="status"><div class="mode" id="mode">connecting...</div><div class="now" id="now"></div><div class="sub" id="sub"></div></div>
 <div class="controls"><button id="play" disabled>Play now</button><button id="stop" disabled>Stop</button></div>
-<h2>Next song (tap to choose)</h2>
+<h2>Next song (tap to choose). Off songs stay out of the show.</h2>
 <div class="songs" id="songs"></div>
 <div id="msg"></div>
 <div class="devices"><h2 id="devsum">Devices</h2><div id="devices"></div></div>
@@ -481,13 +532,23 @@ function render() {
   $('songs').replaceChildren(...st.songs.map(name => {
     const b = document.createElement('button');
     const playing = st.mode === 'song' && st.playing === name;
+    const off = st.disabled.includes(name);
     b.className = 'song' + (name === st.next_song ? ' next' : '') + (playing ? ' playing' : '');
+    b.disabled = off;
     const tag = name === st.next_song ? (st.next_picked ? 'next (picked)' : 'next') : playing ? 'playing' : '';
     b.innerHTML = '<span></span><span class="tag"></span>';
     b.firstChild.textContent = name;
     b.lastChild.textContent = tag;
     b.onclick = () => send('/api/next', { song: name });
-    return b;
+    const t = document.createElement('button');
+    t.className = 'toggle';
+    t.textContent = off ? 'Off' : 'On';
+    t.setAttribute('aria-label', name + ' in the show: ' + t.textContent);
+    t.onclick = () => send('/api/song-enabled', { song: name, enabled: off });
+    const row = document.createElement('div');
+    row.className = 'row' + (off ? ' off' : '');
+    row.append(b, t);
+    return row;
   }));
   renderDevices();
 }
@@ -580,6 +641,8 @@ def start_control_server(events, snapshot):
                 cmd = ("stop", None)
             elif self.path == "/api/next" and isinstance(body, dict):
                 cmd = ("set_next", body.get("song"))
+            elif self.path == "/api/song-enabled" and isinstance(body, dict):
+                cmd = ("set_enabled", (body.get("song"), bool(body.get("enabled"))))
             else:
                 return self._send(404, json.dumps({"ok": False, "message": "not found"}))
             reply = queue.Queue()
@@ -638,7 +701,7 @@ def run_live():
     client.loop_start()
     time.sleep(1)  # let the retained trigger status arrive
 
-    show = Show(LiveActions(client), time.monotonic(), start_with_song=True)
+    show = Show(LiveActions(client), time.monotonic(), start_with_song=True, disabled=load_disabled(DISABLED_FILE))
     log(f"show running: triggers {TRIGGER_LIST}, songs {SONG_ORDER}, phase {PHASE_SECONDS}s")
     snapshot = {"state": dict(show.state(time.monotonic()), devices=devices.view(time.monotonic()))}
     try:
@@ -659,6 +722,9 @@ def run_live():
                     (name, arg), reply = value
                     if name == "set_next":
                         reply.put(show.set_next(arg))
+                    elif name == "set_enabled":
+                        reply.put(show.set_enabled(*arg))
+                        save_disabled(DISABLED_FILE, show.disabled)
                     else:
                         reply.put(getattr(show, name)(now))
             except queue.Empty:
@@ -941,6 +1007,45 @@ def selftest():
           and v["lilum4"]["state"] == "off" and v["box1"]["state"] == "on" and v[f"box{NUM_BOXES}"]["state"] == "unknown")
     v = {d["name"]: d for d in dv.view(DEVICE_QUIET_SECONDS + 1)}
     check("devices: a ring whose reports stopped is quiet", v["ring2"]["state"] == "quiet" and v["ring10"]["state"] == "on")
+
+    # 16. songs switched off: out of the order and the pair songs, kept across restarts
+    fa = FakeActions(); s = Show(fa, 0, disabled={FIRST})
+    check("an off song is skipped in the order", s.state(0)["next_song"] == SECOND and s.state(0)["disabled"] == [FIRST])
+    fa = FakeActions(); s = Show(fa, 0, start_with_song=True, disabled={FIRST})
+    check("the opening song skips an off song", fa.last("song") == SECOND)
+    fa = FakeActions(); s = Show(fa, 0); s.set_enabled(SECOND, False)
+    s.tick(PHASE_SECONDS); t = run_song(s, PHASE_SECONDS, FIRST)
+    check("the order goes past a song switched off", s.state(t)["next_song"] == SONG_ORDER[2])
+    s.set_enabled(SECOND, True); s.order_idx = 1
+    check("a song switched on again is back in the order", s.state(t)["next_song"] == SECOND)
+    fa = FakeActions(); s = Show(fa, 0); s.set_next(SECOND); s.set_enabled(SECOND, False)
+    check("switching off the picked song drops the pick", not s.state(0)["next_picked"] and s.state(0)["next_song"] == FIRST)
+    check("an off song can't be picked", not s.set_next(SECOND)[0])
+    check("unknown song can't be switched", not s.set_enabled("nope", False)[0])
+    pair = pick_song("A", "B", SONG_ORDER)
+    fa = FakeActions(); s = Show(fa, 0, disabled={pair}); s.on_chip(10, "A"); s.on_chip(20, "B")
+    check("pair songs leave out off songs", s.pair_song != pair and s.pair_song == pick_song("A", "B", s._enabled_songs()))
+    fa = FakeActions(); s = Show(fa, 0); s.on_chip(10, "A"); s.on_chip(20, "B"); s.set_enabled(pair, False)
+    check("a waiting pair song switched off gives way", s.pair_song not in (pair, None))
+    fa = FakeActions(); s = Show(fa, 0); s.tick(PHASE_SECONDS); s.on_trigger_status(PHASE_SECONDS + 1, FIRST)
+    s.set_enabled(FIRST, False)
+    check("a song switched off while playing plays on", s.mode == "song" and s.state(PHASE_SECONDS + 2)["playing"] == FIRST)
+    fa = FakeActions(); s = Show(fa, 0, disabled=[x for x in SONG_ORDER if x != FIRST])
+    check("the last song on can't be switched off", not s.set_enabled(FIRST, False)[0] and s.state(0)["next_song"] == FIRST)
+    s.last_song = FIRST
+    check("the only song on plays even if it just played", s.state(0)["next_song"] == FIRST)
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        path = os.path.join(tmp, "off.json")
+        check("no file: all songs on", load_disabled(path) == set())
+        save_disabled(path, {FIRST})
+        check("switched-off songs survive a restart", load_disabled(path) == {FIRST})
+        with open(path, "w") as f:
+            json.dump([SECOND, "gone"], f)
+        check("names no longer in the show are dropped", load_disabled(path) == {SECOND})
+        with open(path, "w") as f:
+            f.write("{broken")
+        check("a broken file means all songs on", load_disabled(path) == set())
 
     print(f"\n{len(fails)} failed" if fails else "\nall passed")
     return 1 if fails else 0
