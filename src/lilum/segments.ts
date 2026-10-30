@@ -159,6 +159,13 @@ const bucketSegment = (name: string, parity: number): Segment => {
     return { name, pixels };
 };
 
+// b1_sparse: white accents in children. On the ring object 4 of b1's pixels
+// (0, 36, 72, 108); here 4 of b1's pixels spread over the pendant, all relPos 0.
+const b1SparseSegment = (): Segment => ({
+    name: "b1_sparse",
+    pixels: [0, 6, 14, 20].map((index) => ({ index, relPos: 0 })),
+});
+
 // rand: deterministic shuffle of relPos values so the pattern is reproducible
 // across syncs. Mulberry32 PRNG seeded with a constant.
 const randSegment = (): Segment => {
@@ -188,6 +195,7 @@ const payload = {
         radSegment(),
         bucketSegment("b1", 0),
         bucketSegment("b2", 1),
+        b1SparseSegment(),
         randSegment(),
         ...Array.from({ length: SMALL_RINGS }, (_, s) => smallRingSegment(s)),
     ],
