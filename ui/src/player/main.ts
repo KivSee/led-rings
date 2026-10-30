@@ -1,4 +1,5 @@
 import { effectKind, effectRelTime, missingSegments, PIXELS_PER_RING, renderRing, type HSV, type Sequence } from './render'
+import type { MidiNote } from '../../../shared/midi-notes'
 
 interface Section { name: string; startBeat: number; endBeat: number; fadeInBeats?: number; fadeOutBeats?: number }
 
@@ -13,6 +14,7 @@ interface SongJson {
 const BEATS_PER_BAR = 4
 const CONTROL_SERVER_URL_STORAGE_KEY = 'kivsee-control-server-url'
 const STRIP_STEP_MS = 200
+const PEAK_STEP_MS = 20
 
 const songFiles = import.meta.glob<SongJson>(['../../../src/songs/*.json', '!../../../src/songs/*.layers.json'], { import: 'default' })
 const songNames = Object.keys(songFiles).map(p => p.replace(/^.*\/(.*)\.json$/, '$1')).sort()
@@ -25,13 +27,16 @@ const status = $('status')
 const sim = $<HTMLCanvasElement>('sim')
 const timeline = $<HTMLCanvasElement>('timeline')
 const zoom = $<HTMLCanvasElement>('zoom')
+const midiCanvas = $<HTMLCanvasElement>('midiNotes')
 const inspect = $('inspect')
 
 let songName = ''
 let durationMs = 0
 let beats: number[] = []
 let peaks: Float32Array = new Float32Array(0)
+let peakMax = 0
 let sequence: Sequence = {}
+let midiNotes: MidiNote[] = []
 // The song's named sections, from section() in its .ts.
 let sections: Section[] = []
 let selectedRing = 0
@@ -128,6 +133,7 @@ async function loadSequence(): Promise<boolean> {
   if (!r.ok || (r.headers.get('content-type') ?? '').includes('text/html')) {
     sequence = {}
     sections = []
+    setMidiNotes([])
     status.textContent = `no sequence yet for ${songName}: press "Rebuild from .ts"`
     return false
   }
@@ -135,6 +141,7 @@ async function loadSequence(): Promise<boolean> {
   // { sections, sequence }, or just the sequence from before sections were saved.
   sequence = data.sequence ?? data
   sections = data.sections ?? []
+  setMidiNotes(Array.isArray(data.midiNotes) ? data.midiNotes : [])
   // Effect indexes change with a new sequence.
   disabled.clear()
   const n = Object.values(sequence).reduce((s, t) => s + t.effects.length, 0)
@@ -143,6 +150,16 @@ async function loadSequence(): Promise<boolean> {
   if (missing.length) status.textContent += ` · ⚠ segments not in segments.json: ${missing.join(', ')} (their effects are not shown, and the rings would reject this sequence)`
   buildStrip()
   return true
+}
+
+function setMidiNotes(notes: MidiNote[]) {
+  midiNotes = notes.filter(n => Number.isFinite(n.startSeconds) && Number.isFinite(n.endSeconds)
+    && n.startSeconds >= 0 && n.endSeconds > n.startSeconds
+    && Number.isInteger(n.pitch) && n.pitch >= 0 && n.pitch <= 127)
+    .sort((a, b) => a.startSeconds - b.startSeconds)
+  $('midiNotesStatus').textContent = midiNotes.length
+    ? `Melody transcription · ${midiNotes.length} notes${midiNotes.some(n => n.buildRole) ? ' · piano: blue/cyan' : ''}${midiNotes.some(n => n.instrument === 'bass') ? ' · bass: purple' : ''}${midiNotes.some(n => n.accent === 'bar-low') ? ' · bar lows: magenta' : ''}${midiNotes.some(n => n.instrument === 'synth') ? ' · synth quads: violet' : ''}${midiNotes.some(n => n.instrument === 'pad') ? ' · background: gold' : ''} · follows Zoom · click to seek`
+    : 'No note transcription for this song'
 }
 
 async function rebuild() {
@@ -174,6 +191,7 @@ async function loadSong(name: string) {
     ? s.beatTimestampsMs
     : Array.from({ length: Math.ceil(durationMs / beatMs) + 1 }, (_, n) => (s.startOffsetMs ?? 0) + n * beatMs)
   peaks = new Float32Array(0)
+  peakMax = 0
   strip = null
   $('duration').textContent = fmt(durationMs, 0)
   if (!(await loadSequence())) await rebuild()
@@ -187,17 +205,24 @@ async function loadSong(name: string) {
   try {
     const decoded = await new AudioContext().decodeAudioData(await (await fetch(url)).arrayBuffer())
     peaks = computePeaks(decoded)
+    peakMax = peaks.reduce((max, peak) => Math.max(max, peak), 0)
   } catch { /* no waveform, still plays */ }
 }
 
 function computePeaks(buf: AudioBuffer): Float32Array {
-  const per = Math.max(1, Math.round(buf.sampleRate * 0.02))
-  const out = new Float32Array(Math.ceil(buf.length / per))
+  const per = Math.max(1, Math.round(buf.sampleRate * PEAK_STEP_MS / 1000))
+  const length = Math.min(buf.length, Math.ceil(durationMs * buf.sampleRate / 1000))
+  const out = new Float32Array(Math.ceil(length / per))
   for (let ch = 0; ch < buf.numberOfChannels; ch++) {
     const d = buf.getChannelData(ch)
-    for (let i = 0; i < d.length; i++) { const v = Math.abs(d[i]), k = (i / per) | 0; if (v > out[k]) out[k] = v }
+    for (let i = 0; i < length; i++) { const v = Math.abs(d[i]), k = (i / per) | 0; if (v > out[k]) out[k] = v }
   }
   return out
+}
+
+/** Scale to the preview's loudest point and expand quieter audio for readability. */
+function waveformHeight(peak: number, availableHeight: number): number {
+  return peakMax > 0 ? Math.sqrt(peak / peakMax) * availableHeight : 0
 }
 
 // --- colors --------------------------------------------------------------------------------------------------
@@ -323,8 +348,8 @@ function drawTimeline(t: number) {
   ctx.font = '600 11px system-ui, sans-serif'
   ctx.textBaseline = 'middle'
   sections.forEach((sec, k) => {
-    const x0 = x(timeOfBeat(sec.startBeat)), x1 = x(timeOfBeat(sec.endBeat))
-    const xIn = x(timeOfBeat(sec.startBeat - (sec.fadeInBeats ?? 0))), xOut = x(timeOfBeat(sec.endBeat + (sec.fadeOutBeats ?? 0)))
+    const x0 = x(timeAtBeat(sec.startBeat)), x1 = x(timeAtBeat(sec.endBeat))
+    const xIn = x(timeAtBeat(sec.startBeat - (sec.fadeInBeats ?? 0))), xOut = x(timeAtBeat(sec.endBeat + (sec.fadeOutBeats ?? 0)))
     ctx.fillStyle = SECTION_COLORS[k % SECTION_COLORS.length]
     ctx.fillRect(x0, 1, Math.max(1, x1 - x0 - 1), SECTION_H - 2)
     // Fades as ramps over the neighbouring sections, half transparent.
@@ -350,11 +375,12 @@ function drawTimeline(t: number) {
   // Waveform
   if (peaks.length) {
     ctx.fillStyle = '#3a4a66'
-    const per = peaks.length / w
+    // Use time, not file length: the audio may be much longer than this preview.
+    const per = durationMs / PEAK_STEP_MS / w
     for (let px = 0; px < w; px++) {
       let m = 0
-      for (let k = Math.floor(px * per); k < Math.floor((px + 1) * per); k++) m = Math.max(m, peaks[k] ?? 0)
-      const ph = m * (WAVE_H - 4)
+      for (let k = Math.floor(px * per); k < Math.ceil((px + 1) * per); k++) m = Math.max(m, peaks[k] ?? 0)
+      const ph = waveformHeight(m, WAVE_H - 4)
       ctx.fillRect(px, WAVE_H / 2 - ph / 2, 1, ph)
     }
   }
@@ -419,8 +445,8 @@ function drawZoom(t: number) {
     for (let px = 0; px < w; px++) {
       const ms0 = timeAtBeat(b0 + (px / w) * span), ms1 = timeAtBeat(b0 + ((px + 1) / w) * span)
       let m = 0
-      for (let k = Math.floor(ms0 / 20); k <= Math.floor(ms1 / 20); k++) m = Math.max(m, peaks[k] ?? 0)
-      const ph = m * (waveH - 6)
+      for (let k = Math.floor(ms0 / PEAK_STEP_MS); k <= Math.floor(ms1 / PEAK_STEP_MS); k++) m = Math.max(m, peaks[k] ?? 0)
+      const ph = waveformHeight(m, waveH - 6)
       ctx.fillRect(px, top + waveH / 2 - ph / 2, 1, ph)
     }
   }
@@ -449,6 +475,93 @@ function drawZoom(t: number) {
 
 zoom.addEventListener('click', ev => {
   const rect = zoom.getBoundingClientRect()
+  const span = Number($<HTMLSelectElement>('zoomBars').value) * BEATS_PER_BAR
+  const beat = zoomStartBeat(nowMs()) + ((ev.clientX - rect.left) / rect.width) * span
+  seek(ev.altKey ? timeAtBeat(beat) : timeOfBeat(beat))
+})
+
+// --- MIDI piano roll: the same time window and playhead as the zoomed waveform -------------------------------
+
+const pitchName = (pitch: number) => `${['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'][pitch % 12]}${Math.floor(pitch / 12) - 1}`
+
+function drawMidiNotes(t: number) {
+  const { ctx, w, h } = fitCanvas(midiCanvas)
+  ctx.clearRect(0, 0, w, h)
+  if (!midiNotes.length) {
+    ctx.fillStyle = '#8a92a3'
+    ctx.font = '13px system-ui, sans-serif'
+    ctx.textAlign = 'center'
+    ctx.fillText('Notes will appear here when the song includes a melody transcription.', w / 2, h / 2)
+    ctx.textAlign = 'left'
+    return
+  }
+
+  const span = Number($<HTMLSelectElement>('zoomBars').value) * BEATS_PER_BAR
+  const b0 = zoomStartBeat(t)
+  const x = (beat: number) => ((beat - b0) / span) * w
+  const low = Math.max(0, Math.min(...midiNotes.map(n => n.pitch)) - 1)
+  const high = Math.min(127, Math.max(...midiNotes.map(n => n.pitch)) + 1)
+  const top = 22, labelWidth = 44, rowH = (h - top) / (high - low + 1)
+  const y = (pitch: number) => top + (high - pitch) * rowH
+
+  // Semitone lanes and pitch labels, including the MIDI octave number.
+  ctx.font = '10px system-ui, sans-serif'
+  ctx.textBaseline = 'middle'
+  for (let pitch = low; pitch <= high; pitch++) {
+    ctx.fillStyle = [1, 3, 6, 8, 10].includes(pitch % 12) ? '#11151d' : '#1b212c'
+    ctx.fillRect(0, y(pitch), w, rowH)
+    ctx.fillStyle = '#2a303c'
+    ctx.fillRect(0, y(pitch) + rowH - 1, w, 1)
+  }
+
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(labelWidth, 0, Math.max(0, w - labelWidth), h)
+  ctx.clip()
+  for (let beat = Math.max(0, Math.ceil(b0)); beat <= b0 + span && beat < beats.length; beat++) {
+    const bx = Math.round(x(beat)) + 0.5
+    const bar = beat % BEATS_PER_BAR === 0
+    ctx.fillStyle = bar ? '#46516a' : '#282f3d'
+    ctx.fillRect(bx, top, 1, h - top)
+    if (bar) {
+      ctx.fillStyle = '#ffb020'
+      ctx.fillText(`bar ${beat / BEATS_PER_BAR + 1}`, bx + 4, top / 2)
+    }
+  }
+  for (const note of midiNotes) {
+    const start = x(beatAt(note.startSeconds * 1000))
+    const end = x(beatAt(note.endSeconds * 1000))
+    if (end < labelWidth || start > w) continue
+    const active = note.startSeconds * 1000 <= t && t < note.endSeconds * 1000
+    ctx.fillStyle = note.instrument === 'guitar' ? (active ? '#ffd09a' : '#ff963e')
+      : note.instrument === 'bass' ? (active ? '#ce91ff' : '#994bd1')
+      : note.instrument === 'pad' ? (active ? '#ffd12a' : '#c99412')
+      : note.instrument === 'synth' ? (active ? '#d990ff' : '#ae63ff')
+      : note.accent === 'bar-low' ? (active ? '#ff8fd8' : '#ed43b8')
+      : note.buildRole === 'low' ? (active ? '#76acff' : '#2f82ff')
+      : note.buildRole === 'high' ? (active ? '#00f0ff' : '#00c8ed')
+      : (active ? '#8affd5' : '#628fff')
+    ctx.fillRect(start, y(note.pitch) + 2, Math.max(2, end - start - 1), Math.max(2, rowH - 4))
+    if (end - start > 30 && rowH >= 12) {
+      ctx.fillStyle = '#101a2f'
+      ctx.fillText(pitchName(note.pitch), start + 4, y(note.pitch) + rowH / 2)
+    }
+  }
+  ctx.fillStyle = '#ff4d6d'
+  ctx.fillRect(x(beatAt(t)) - 1, 0, 2, h)
+  ctx.restore()
+
+  // Labels overlay the first few pixels; the time scale still matches the waveform exactly.
+  ctx.fillStyle = '#161a22'
+  ctx.fillRect(0, 0, labelWidth, h)
+  ctx.fillStyle = '#8a92a3'
+  for (let pitch = low; pitch <= high; pitch++) ctx.fillText(pitchName(pitch), 8, y(pitch) + rowH / 2)
+  ctx.textBaseline = 'alphabetic'
+}
+
+midiCanvas.addEventListener('click', ev => {
+  if (!midiNotes.length || ev.clientX - midiCanvas.getBoundingClientRect().left < 44) return
+  const rect = midiCanvas.getBoundingClientRect()
   const span = Number($<HTMLSelectElement>('zoomBars').value) * BEATS_PER_BAR
   const beat = zoomStartBeat(nowMs()) + ((ev.clientX - rect.left) / rect.width) * span
   seek(ev.altKey ? timeAtBeat(beat) : timeOfBeat(beat))
@@ -533,23 +646,37 @@ function frame() {
   drawSim(t)
   drawTimeline(t)
   drawZoom(t)
+  drawMidiNotes(t)
   drawReadout(t)
   drawInspect(t)
   requestAnimationFrame(frame)
 }
 
-function seekFromTimeline(ev: MouseEvent) {
+function seekFromTimeline(ev: PointerEvent) {
   const rect = timeline.getBoundingClientRect()
-  let ms = ((ev.clientX - rect.left) / rect.width) * durationMs
-  if (!ev.altKey) ms = timeOfBeat(beatAt(ms))
+  let ms = ((ev.clientX - rect.left - timeline.clientLeft) / timeline.clientWidth) * durationMs
+  if (ev.shiftKey) ms = timeOfBeat(beatAt(ms))
   seek(ms)
   const y = ev.clientY - rect.top - ROWS_Y
   if (y >= 0 && y < 12 * ROW_H) selectedRing = Math.floor(y / ROW_H) + 1
 }
-let scrubbing = false
-timeline.addEventListener('mousedown', ev => { scrubbing = true; seekFromTimeline(ev) })
-window.addEventListener('mousemove', ev => { if (scrubbing) seekFromTimeline(ev) })
-window.addEventListener('mouseup', () => { scrubbing = false })
+timeline.addEventListener('pointerdown', ev => {
+  if (ev.button !== 0 || !ev.isPrimary) return
+  ev.preventDefault()
+  timeline.setPointerCapture(ev.pointerId)
+  seekFromTimeline(ev)
+})
+timeline.addEventListener('pointermove', ev => {
+  if (timeline.hasPointerCapture(ev.pointerId)) seekFromTimeline(ev)
+})
+timeline.addEventListener('pointerup', ev => {
+  if (!timeline.hasPointerCapture(ev.pointerId)) return
+  seekFromTimeline(ev)
+  timeline.releasePointerCapture(ev.pointerId)
+})
+timeline.addEventListener('pointercancel', ev => {
+  if (timeline.hasPointerCapture(ev.pointerId)) timeline.releasePointerCapture(ev.pointerId)
+})
 
 sim.addEventListener('click', ev => {
   const rect = sim.getBoundingClientRect()
